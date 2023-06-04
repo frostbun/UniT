@@ -14,6 +14,11 @@ namespace UniT.Extensions
             }
         }
 
+        public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> enumerable)
+        {
+            return enumerable.OrderBy(_ => Guid.NewGuid());
+        }
+
         public static IEnumerable<T> Cycle<T>(this IEnumerable<T> enumerable, int count = -1)
         {
             if (count == 0) yield break;

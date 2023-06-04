@@ -15,10 +15,24 @@ namespace UniT.Extensions
                             .SelectMany(asm => asm.GetTypes())
                             .Where(type => type.IsClass && !type.IsAbstract && baseType.IsAssignableFrom(type));
         }
-        
+
         public static bool IsDeriveFrom(this Type type, Type baseType)
         {
             return baseType.IsAssignableFrom(type);
+        }
+
+        public static void CopyTo(this object from, object to)
+        {
+            var fromFieldInfos = from.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+            var toFieldInfos   = to.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+            foreach (var fromField in fromFieldInfos)
+            {
+                var toField = toFieldInfos.FirstOrDefault(toField => toField.Name == fromField.Name && toField.FieldType.IsAssignableFrom(fromField.FieldType));
+                if (toField != null)
+                {
+                    toField.SetValue(to, fromField.GetValue(from));
+                }
+            }
         }
     }
 }
