@@ -1,0 +1,16 @@
+{
+  "name": "com.frostbun.unit",
+  "displayName": "UniT",
+  "version": "1.0.0",
+  "unity": "2022.3",
+  "description": "",
+  "author": "frostbun",
+  "license": "MIT",
+  "dependencies": {
+    "com.unity.addressables": "1.21.12"
+  },
+  "gitDependencies": {
+    "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
+    "com.svermeulen.extenject": "https://github.com/modesttree/Zenject.git?path=UnityProject/Assets/Plugins/Zenject"
+  }
+}

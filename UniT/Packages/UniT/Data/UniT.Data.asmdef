@@ -1,0 +1,11 @@
+{
+  "name": "UniT.Data",
+  "references": [
+    "UniTask",
+    "UniTask.Addressables",
+    "Zenject",
+    "Unity.Addressables",
+    "Unity.ResourceManager",
+    "UniT.Extensions"
+  ]
+}

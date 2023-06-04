@@ -1,0 +1,6 @@
+{
+  "name": "UniT.Extensions",
+  "references": [
+    "Zenject"
+  ]
+}
