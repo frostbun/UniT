@@ -5,7 +5,7 @@ namespace UniT.Data.Base
     using UniT.Extensions;
     using Zenject;
 
-    public class DataInstaller : Installer<DataInstaller>
+    public class DataInstaller : MonoInstaller<DataInstaller>
     {
         public override void InstallBindings()
         {

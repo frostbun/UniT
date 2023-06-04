@@ -6,6 +6,7 @@
     "Zenject",
     "Unity.Addressables",
     "Unity.ResourceManager",
+    "UniT.Logging",
     "UniT.Extensions"
   ]
 }
