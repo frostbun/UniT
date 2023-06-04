@@ -4,7 +4,11 @@
   "version": "1.0.0",
   "unity": "2022.3",
   "description": "",
-  "author": "frostbun",
+  "author": {
+    "name": "frostbun",
+    "email": "manhnb1911@gmail.com",
+    "url": "https://github.com/frostbun"
+  },
   "license": "MIT",
   "dependencies": {
     "com.unity.addressables": "1.21.12"
