@@ -32,15 +32,10 @@ namespace UniT.Core.ObjectPool
         public void Recycle(GameObject instance)
         {
             if (!this.spawnedObjects.Contains(instance)) throw new InvalidOperationException($"{instance.name} does not spawn from {this.gameObject.name}");
-            this.spawnedObjects.Remove(instance);
             instance.gameObject.SetActive(false);
             instance.transform.SetParent(this.transform);
+            this.spawnedObjects.Remove(instance);
             this.pooledObjects.Enqueue(instance);
-        }
-
-        private void OnDestroy()
-        {
-            this.pooledObjects.ForEach(Destroy);
         }
     }
 }

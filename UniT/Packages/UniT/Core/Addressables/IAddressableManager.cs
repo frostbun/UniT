@@ -1,6 +1,5 @@
 namespace UniT.Core.Addressables
 {
-    using System;
     using Cysharp.Threading.Tasks;
 
     public interface IAddressableManager
@@ -8,7 +7,5 @@ namespace UniT.Core.Addressables
         public void Release(string key);
 
         public UniTask<T> Load<T>(string key, bool cache = false);
-
-        public UniTask<T> Load<T>(Type type, bool cache = false);
     }
 }

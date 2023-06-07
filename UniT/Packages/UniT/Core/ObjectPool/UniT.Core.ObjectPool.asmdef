@@ -1,6 +1,9 @@
 {
   "name": "UniT.Core.ObjectPool",
   "references": [
+    "UniTask",
+    "UniT.Core.Addressables",
+    "UniT.Core.Logging",
     "UniT.Core.Extensions"
   ]
 }
