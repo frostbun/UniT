@@ -1,0 +1,11 @@
+{
+  "name": "UniT.DI.Installers",
+  "references": [
+    "Zenject",
+    "UniT.Core.Logging",
+    "UniT.Core.Addressables",
+    "UniT.Core.ObjectPool",
+    "UniT.Core.Data",
+    "UniT.Core.Extensions"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "name": "UniT.Core.Data",
+  "references": [
+    "UniTask",
+    "UniT.Core.Addressables",
+    "UniT.Core.Logging",
+    "UniT.Core.Extensions"
+  ]
+}

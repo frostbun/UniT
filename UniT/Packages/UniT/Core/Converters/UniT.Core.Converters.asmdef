@@ -1,0 +1,6 @@
+{
+  "name": "UniT.Core.Converters",
+  "references": [
+    "UniT.Core.Extensions"
+  ]
+}

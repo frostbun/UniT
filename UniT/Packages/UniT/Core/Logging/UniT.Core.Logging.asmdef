@@ -1,0 +1,6 @@
+{
+  "name": "UniT.Core.Logging",
+  "references": [
+    "UniT.Core.Extensions"
+  ]
+}

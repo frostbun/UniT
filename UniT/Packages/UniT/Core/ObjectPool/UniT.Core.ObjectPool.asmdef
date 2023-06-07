@@ -1,0 +1,6 @@
+{
+  "name": "UniT.Core.ObjectPool",
+  "references": [
+    "UniT.Core.Extensions"
+  ]
+}
