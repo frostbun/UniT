@@ -4,13 +4,14 @@ namespace UniT.Logging
     using UniT.Extensions;
     using UnityEngine;
 
-    public class Logger
+    public class Logger : ILogger
     {
         private readonly LogConfig config;
 
         public Logger(LogConfig config)
         {
             this.config = config;
+            this.Log($"{this.GetType().Name} instantiated with config: {config.ToJson()}", Color.green);
         }
 
         public void Log(string message, Color? color = null)

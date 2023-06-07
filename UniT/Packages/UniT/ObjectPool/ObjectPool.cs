@@ -1,36 +1,41 @@
 namespace UniT.ObjectPool
 {
+    using System;
     using System.Collections.Generic;
-    using FrostBurn.ObjectPool;
     using UniT.Extensions;
     using UnityEngine;
 
-    public class ObjectPool<T> : MonoBehaviour, IObjectPool where T : Component, IRecyclable
+    public class ObjectPool : MonoBehaviour
     {
-        private T        prefab;
-        private Queue<T> pooledObjects;
+        [SerializeField] private GameObject          prefab;
+        private                  Queue<GameObject>   pooledObjects  = new();
+        private                  HashSet<GameObject> spawnedObjects = new();
 
-        public void Initialize(T prefab, int initialCount)
+        public static ObjectPool Instantiate(GameObject prefab, int initialCount)
         {
-            this.prefab          = prefab;
-            this.pooledObjects   = IterTools.Repeat(() => Instantiate(this.prefab), initialCount).ToQueue();
-            this.gameObject.name = $"{this.prefab.name} Pool";
+            var pool = new GameObject($"{prefab.name} Pool").AddComponent<ObjectPool>();
+            pool.prefab         = prefab;
+            pool.pooledObjects  = IterTools.Repeat(() => Instantiate(pool.prefab), initialCount).ToQueue();
+            pool.spawnedObjects = new();
+            return pool;
         }
 
-        public T Spawn()
+        public GameObject Spawn()
         {
-            var obj = this.pooledObjects.DequeueOrDefault(() => Instantiate(this.prefab));
+            var instance = this.pooledObjects.DequeueOrDefault(() => Instantiate(this.prefab));
+            this.spawnedObjects.Add(instance);
             this.transform.SetParent(null);
-            obj.gameObject.SetActive(true);
-            return obj;
+            instance.gameObject.SetActive(true);
+            return instance;
         }
 
-        public void Recycle(T obj)
+        public void Recycle(GameObject instance)
         {
-            obj.gameObject.SetActive(false);
-            obj.transform.SetParent(this.transform);
-            obj.Recycle();
-            this.pooledObjects.Enqueue(obj);
+            if (!this.spawnedObjects.Contains(instance)) throw new InvalidOperationException($"{instance.name} does not spawn from {this.gameObject.name}");
+            this.spawnedObjects.Remove(instance);
+            instance.gameObject.SetActive(false);
+            instance.transform.SetParent(this.transform);
+            this.pooledObjects.Enqueue(instance);
         }
 
         private void OnDestroy()

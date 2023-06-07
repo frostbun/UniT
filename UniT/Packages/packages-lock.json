@@ -18,7 +18,8 @@
       "depth": 0,
       "source": "embedded",
       "dependencies": {
-        "com.unity.addressables": "1.21.12"
+        "com.unity.addressables": "1.21.12",
+        "com.unity.nuget.newtonsoft-json": "3.2.1"
       }
     },
     "com.svermeulen.extenject": {
@@ -96,6 +97,13 @@
     },
     "com.unity.ide.vscode": {
       "version": "1.2.5",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.nuget.newtonsoft-json": {
+      "version": "3.2.1",
       "depth": 1,
       "source": "registry",
       "dependencies": {},

@@ -1,4 +1,11 @@
 {
   "name": "UniT",
-  "references": []
+  "references": [
+    "Zenject",
+    "UniT.Logging",
+    "UniT.Addressables",
+    "UniT.ObjectPool",
+    "UniT.Data",
+    "UniT.Extensions"
+  ]
 }

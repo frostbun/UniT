@@ -3,7 +3,7 @@ namespace UniT.Data.Base
     using System;
     using Cysharp.Threading.Tasks;
     using UniT.Extensions;
-    using Unity.Plastic.Newtonsoft.Json;
+    using Newtonsoft.Json;
 
     public abstract class BaseJsonDataHandler : IDataHandler
     {

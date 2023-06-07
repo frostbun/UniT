@@ -1,0 +1,11 @@
+{
+  "name": "UniT.Addressables",
+  "references": [
+    "Unity.Addressables",
+    "Unity.ResourceManager",
+    "UniTask",
+    "UniTask.Addressables",
+    "UniT.Logging",
+    "UniT.Extensions"
+  ]
+}

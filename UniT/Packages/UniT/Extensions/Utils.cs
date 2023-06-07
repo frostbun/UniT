@@ -1,6 +1,6 @@
 namespace UniT.Extensions
 {
-    using Unity.Plastic.Newtonsoft.Json;
+    using Newtonsoft.Json;
     using UnityEngine;
 
     public static class Utils

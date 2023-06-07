@@ -2,7 +2,7 @@ namespace UniT.Converters.Implement
 {
     using System;
     using UniT.Converters.Base;
-    using Unity.Plastic.Newtonsoft.Json;
+    using Newtonsoft.Json;
 
     public class DefaultConverter : BaseConverter
     {

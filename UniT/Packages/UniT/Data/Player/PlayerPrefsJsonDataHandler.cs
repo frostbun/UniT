@@ -4,7 +4,7 @@ namespace UniT.Data.Player
     using Cysharp.Threading.Tasks;
     using UnityEngine;
 
-    public class LocalPlayerJsonDataHandler : PlayerJsonDataHandler
+    public class PlayerPrefsJsonDataHandler : PlayerJsonDataHandler
     {
         public override UniTask Flush()
         {
@@ -17,7 +17,7 @@ namespace UniT.Data.Player
             return UniTask.FromResult(PlayerPrefs.GetString(type.Name));
         }
 
-        protected override UniTask         SaveJson(string json, Type type)
+        protected override UniTask SaveJson(string json, Type type)
         {
             PlayerPrefs.SetString(type.Name, json);
             return UniTask.CompletedTask;

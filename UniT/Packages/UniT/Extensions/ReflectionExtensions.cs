@@ -7,6 +7,16 @@ namespace UniT.Extensions
 
     public static class ReflectionExtensions
     {
+        public static string GetKeyAttribute(this Type type)
+        {
+            return type.GetCustomAttribute<KeyAttribute>()?.key ?? type.Name;
+        }
+
+        public static string[] GetKeyAttributes(this Type type)
+        {
+            return type.GetCustomAttributes<KeyAttribute>().Select(attr => attr.key).ToArray();
+        }
+
         public static IEnumerable<Type> GetDerivedTypes(this Type baseType, bool sameAssembly = false)
         {
             var baseAsm = Assembly.GetAssembly(baseType);
@@ -14,11 +24,6 @@ namespace UniT.Extensions
                             .Where(asm => !asm.IsDynamic && (!sameAssembly || asm == baseAsm))
                             .SelectMany(asm => asm.GetTypes())
                             .Where(type => type.IsClass && !type.IsAbstract && baseType.IsAssignableFrom(type));
-        }
-
-        public static bool IsDeriveFrom(this Type type, Type baseType)
-        {
-            return baseType.IsAssignableFrom(type);
         }
 
         public static void CopyTo(this object from, object to)

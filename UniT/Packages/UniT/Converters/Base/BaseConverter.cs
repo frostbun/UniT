@@ -21,7 +21,7 @@ namespace UniT.Converters.Base
             }
             catch (Exception e)
             {
-                throw new ArgumentException($"Cannot convert '{str}' to '{type.Name}' with '{this.GetType().Name}'", e);
+                throw new InvalidOperationException($"Cannot convert '{str}' to '{type.Name}' with '{this.GetType().Name}'", e);
             }
         }
 
@@ -33,7 +33,7 @@ namespace UniT.Converters.Base
             }
             catch (Exception e)
             {
-                throw new ArgumentException($"Cannot convert '{type.Name}' '{obj}' to string with '{this.GetType().Name}'", e);
+                throw new InvalidOperationException($"Cannot convert '{type.Name}' '{obj}' to string with '{this.GetType().Name}'", e);
             }
         }
     }
