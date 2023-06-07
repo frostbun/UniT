@@ -6,6 +6,7 @@ namespace UniT.Core.Addressables
     using UnityEngine;
     using UnityEngine.AddressableAssets;
     using UnityEngine.ResourceManagement.AsyncOperations;
+    using UnityEngine.ResourceManagement.ResourceProviders;
     using ILogger = UniT.Core.Logging.ILogger;
 
     public class AddressableManager : IAddressableManager
@@ -38,6 +39,26 @@ namespace UniT.Core.Addressables
                            if (!cache) this.Release(key);
                            return asset;
                        });
+        }
+
+        public UniTask<SceneInstance> LoadScene(string key, bool activateOnLoad = true, int priority = 100)
+        {
+            var handle = Addressables.LoadSceneAsync(key, activateOnLoad: activateOnLoad, priority: priority);
+            return handle.ToUniTask()
+                         .ContinueWith(scene =>
+                         {
+                             if (activateOnLoad)
+                             {
+                                 Addressables.Release(handle);
+                                 this.logger.Log($"Scene {key} loaded");
+                             }
+                             else
+                             {
+                                 this.logger.Warning($"Scene {key} loaded & must be released manually");
+                             }
+
+                             return scene;
+                         });
         }
     }
 }
