@@ -1,6 +1,5 @@
 namespace UniT.Data.Player
 {
-    using System;
     using Cysharp.Threading.Tasks;
     using UnityEngine;
 
@@ -12,14 +11,14 @@ namespace UniT.Data.Player
             return UniTask.CompletedTask;
         }
 
-        protected override UniTask<string> GetJson(Type type)
+        protected override UniTask<string> GetJson(string key)
         {
-            return UniTask.FromResult(PlayerPrefs.GetString(type.Name));
+            return UniTask.FromResult(PlayerPrefs.GetString(key));
         }
 
-        protected override UniTask SaveJson(string json, Type type)
+        protected override UniTask SaveJson(string key, string json)
         {
-            PlayerPrefs.SetString(type.Name, json);
+            PlayerPrefs.SetString(key, json);
             return UniTask.CompletedTask;
         }
     }

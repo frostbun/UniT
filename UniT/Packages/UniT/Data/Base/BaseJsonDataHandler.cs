@@ -2,14 +2,14 @@ namespace UniT.Data.Base
 {
     using System;
     using Cysharp.Threading.Tasks;
-    using UniT.Extensions;
     using Newtonsoft.Json;
+    using UniT.Extensions;
 
     public abstract class BaseJsonDataHandler : IDataHandler
     {
         public UniTask Populate(IData data)
         {
-            return this.GetJson(data.GetType())
+            return this.GetJson(data.GetType().GetKeyAttribute())
                        .ContinueWith(json =>
                        {
                            if (json.IsNullOrWhitespace()) return;
@@ -19,13 +19,13 @@ namespace UniT.Data.Base
 
         public UniTask Save(IData data)
         {
-            return this.SaveJson(JsonConvert.SerializeObject(data), data.GetType());
+            return this.SaveJson(data.GetType().GetKeyAttribute(), JsonConvert.SerializeObject(data));
         }
 
         public abstract UniTask Flush();
         public abstract bool    CanHandle(Type type);
 
-        protected abstract UniTask<string> GetJson(Type type);
-        protected abstract UniTask         SaveJson(string json, Type type);
+        protected abstract UniTask<string> GetJson(string key);
+        protected abstract UniTask         SaveJson(string key, string json);
     }
 }

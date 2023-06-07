@@ -1,25 +1,24 @@
 namespace UniT.Data.Blueprint
 {
-    using System;
     using Cysharp.Threading.Tasks;
     using UniT.Addressables;
     using UnityEngine;
 
     public class AddressableBlueprintJsonDataHandler : BlueprintJsonDataHandler
     {
-        private readonly AddressableManager addressableManager;
+        private readonly IAddressableManager addressableManager;
 
-        public AddressableBlueprintJsonDataHandler(AddressableManager addressableManager)
+        public AddressableBlueprintJsonDataHandler(IAddressableManager addressableManager)
         {
             this.addressableManager = addressableManager;
         }
 
-        protected override UniTask<string> GetJson(Type type)
+        protected override UniTask<string> GetJson(string key)
         {
-            return this.addressableManager.Load<TextAsset>(type).ContinueWith(blueprint => blueprint.text);
+            return this.addressableManager.Load<TextAsset>(key).ContinueWith(blueprint => blueprint.text);
         }
 
-        protected override UniTask SaveJson(string json, Type type)
+        protected override UniTask SaveJson(string key, string json)
         {
             return UniTask.CompletedTask;
         }
