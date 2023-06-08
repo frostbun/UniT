@@ -36,10 +36,19 @@ namespace UniT.Core.ObjectPool
             });
         }
 
-        private ObjectPool GetPool(GameObject prefab)
+        public void CreatePool<T>(T component, int initialCount = 1) where T : Component
         {
-            this.CreatePool(prefab);
-            return this.prefabToPool[prefab];
+            this.CreatePool(component.gameObject, initialCount);
+        }
+
+        public UniTask CreatePool(string key, int initialCount = 1)
+        {
+            return this.addressableManager.Load<GameObject>(key, cache: true).ContinueWith(prefab => this.CreatePool(prefab, initialCount));
+        }
+
+        public UniTask CreatePool<T>(int initialCount = 1) where T : Component
+        {
+            return this.CreatePool(typeof(T).GetKeyAttribute(), initialCount);
         }
 
         public GameObject Spawn(GameObject prefab)
@@ -58,12 +67,17 @@ namespace UniT.Core.ObjectPool
 
         public UniTask<GameObject> Spawn(string key)
         {
-            return this.addressableManager.Load<GameObject>(key).ContinueWith(this.Spawn);
+            return this.addressableManager.Load<GameObject>(key, cache: true).ContinueWith(this.Spawn);
         }
 
         public UniTask<T> Spawn<T>(string key) where T : Component
         {
             return this.Spawn(key).ContinueWith(instance => instance.GetComponent<T>());
+        }
+
+        public UniTask<T> Spawn<T>() where T : Component
+        {
+            return this.Spawn<T>(typeof(T).GetKeyAttribute());
         }
 
         public void Recycle(GameObject instance)
@@ -76,6 +90,12 @@ namespace UniT.Core.ObjectPool
         public void Recycle<T>(T component) where T : Component
         {
             this.Recycle(component.gameObject);
+        }
+
+        private ObjectPool GetPool(GameObject prefab)
+        {
+            this.CreatePool(prefab);
+            return this.prefabToPool[prefab];
         }
     }
 }

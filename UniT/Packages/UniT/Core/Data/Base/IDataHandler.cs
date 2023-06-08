@@ -6,8 +6,11 @@ namespace UniT.Core.Data.Base
     public interface IDataHandler
     {
         public UniTask Populate(IData data);
+
         public UniTask Save(IData data);
+
         public UniTask Flush();
-        public bool    CanHandle(Type type);
+
+        public bool CanHandle(Type type);
     }
 }

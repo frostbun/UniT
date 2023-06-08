@@ -23,7 +23,12 @@ namespace UniT.Core.Addressables
 
         public void Release(string key)
         {
-            this.handleCache.Remove(key, out var handle);
+            if (!this.handleCache.Remove(key, out var handle))
+            {
+                this.logger.Warning("Trying to release an addressable that was not cached");
+                return;
+            }
+
             Addressables.Release(handle);
             this.logger.Log($"Released addressable {key}");
         }
@@ -35,8 +40,14 @@ namespace UniT.Core.Addressables
                        .ToUniTask()
                        .ContinueWith(asset =>
                        {
+                           if (cache)
+                           {
+                               this.logger.Log($"Loaded & cached addressable {key}");
+                               return asset;
+                           }
+
                            this.logger.Log($"Loaded addressable {key}");
-                           if (!cache) this.Release(key);
+                           this.Release(key);
                            return asset;
                        });
         }
@@ -47,16 +58,14 @@ namespace UniT.Core.Addressables
             return handle.ToUniTask()
                          .ContinueWith(scene =>
                          {
-                             if (activateOnLoad)
-                             {
-                                 Addressables.Release(handle);
-                                 this.logger.Log($"Scene {key} loaded");
-                             }
-                             else
+                             if (!activateOnLoad)
                              {
                                  this.logger.Warning($"Scene {key} loaded & must be released manually");
+                                 return scene;
                              }
 
+                             this.logger.Log($"Scene {key} loaded");
+                             Addressables.Release(handle);
                              return scene;
                          });
         }
