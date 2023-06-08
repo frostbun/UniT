@@ -1,0 +1,7 @@
+{
+	"name": "com.modesttree.zenject",
+	"displayName": "Zenject",
+	"version": "9.2.0",
+	"description": "Dependency Injection Framework for Unity3D",
+	"dependencies": {}
+}

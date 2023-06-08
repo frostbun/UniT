@@ -22,8 +22,8 @@
         "com.unity.nuget.newtonsoft-json": "3.2.1"
       }
     },
-    "com.svermeulen.extenject": {
-      "version": "file:.com.svermeulen.extenject@0.0.1",
+    "com.modesttree.zenject": {
+      "version": "file:.com.modesttree.zenject@9.2.0",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}
