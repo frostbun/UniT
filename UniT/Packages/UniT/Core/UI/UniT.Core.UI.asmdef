@@ -1,5 +1,9 @@
 {
   "name": "UniT.Core.UI",
   "references": [
+    "UniTask",
+    "UniT.Core.Addressables",
+    "UniT.Core.Logging",
+    "UniT.Core.Extensions"
   ]
 }

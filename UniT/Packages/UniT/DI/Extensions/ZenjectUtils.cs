@@ -3,7 +3,7 @@ namespace UniT.DI.Extensions
     using UnityEngine;
     using Zenject;
 
-    public static class ZenjectTools
+    public static class ZenjectUtils
     {
         private static SceneContext currentSceneContext;
 

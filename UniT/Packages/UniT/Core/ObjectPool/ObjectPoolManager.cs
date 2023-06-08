@@ -43,7 +43,7 @@ namespace UniT.Core.ObjectPool
 
         public UniTask CreatePool(string key, int initialCount = 1)
         {
-            return this.addressableManager.Load<GameObject>(key, cache: true).ContinueWith(prefab => this.CreatePool(prefab, initialCount));
+            return this.addressableManager.Load<GameObject>(key).ContinueWith(prefab => this.CreatePool(prefab, initialCount));
         }
 
         public UniTask CreatePool<T>(int initialCount = 1) where T : Component
@@ -67,7 +67,7 @@ namespace UniT.Core.ObjectPool
 
         public UniTask<GameObject> Spawn(string key)
         {
-            return this.addressableManager.Load<GameObject>(key, cache: true).ContinueWith(this.Spawn);
+            return this.addressableManager.Load<GameObject>(key).ContinueWith(this.Spawn);
         }
 
         public UniTask<T> Spawn<T>(string key) where T : Component

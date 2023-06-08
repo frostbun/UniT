@@ -15,7 +15,7 @@ namespace UniT.Core.Data.Blueprint
 
         protected override UniTask<string> GetJson(string key)
         {
-            return this.addressableManager.Load<TextAsset>(key).ContinueWith(blueprint => blueprint.text);
+            return this.addressableManager.LoadOnce<TextAsset>(key).ContinueWith(blueprint => blueprint.text);
         }
 
         protected override UniTask SaveJson(string key, string json)

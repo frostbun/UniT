@@ -1,6 +1,8 @@
 namespace UniT.Core.Addressables
 {
+    using System;
     using System.Collections.Generic;
+    using System.Threading;
     using Cysharp.Threading.Tasks;
     using UniT.Core.Extensions;
     using UnityEngine;
@@ -21,6 +23,51 @@ namespace UniT.Core.Addressables
             this.logger.Log($"{this.GetType().Name} instantiated", Color.green);
         }
 
+        public UniTask<T> Load<T>(string key, IProgress<float> progress = null, CancellationToken cancellationToken = default)
+        {
+            return this.handleCache.GetOrDefault(key, () => Addressables.LoadAssetAsync<T>(key))
+                       .Convert<T>()
+                       .ToUniTask(progress: progress, cancellationToken: cancellationToken)
+                       .ContinueWith(asset =>
+                       {
+                           this.logger.Log($"Loaded & cached addressable {key}");
+                           progress?.Report(1);
+                           return asset;
+                       });
+        }
+
+        public UniTask<T> LoadOnce<T>(string key, IProgress<float> progress = null, CancellationToken cancellationToken = default)
+        {
+            return Addressables.LoadAssetAsync<T>(key)
+                               .ToUniTask(progress: progress, cancellationToken: cancellationToken)
+                               .ContinueWith(asset =>
+                               {
+                                   this.logger.Log($"Loaded addressable {key}");
+                                   Addressables.Release(asset);
+                                   progress?.Report(1);
+                                   return asset;
+                               });
+        }
+
+        public UniTask<SceneInstance> LoadScene(string key, bool activateOnLoad = true, int priority = 100, IProgress<float> progress = null, CancellationToken cancellationToken = default)
+        {
+            return Addressables.LoadSceneAsync(key, activateOnLoad: activateOnLoad, priority: priority)
+                               .ToUniTask(progress: progress, cancellationToken: cancellationToken)
+                               .ContinueWith(scene =>
+                               {
+                                   if (!activateOnLoad)
+                                   {
+                                       this.logger.Warning($"Scene {key} loaded & must be released manually");
+                                       return scene;
+                                   }
+
+                                   this.logger.Log($"Scene {key} loaded");
+                                   Addressables.Release(scene);
+                                   progress?.Report(1);
+                                   return scene;
+                               });
+        }
+
         public void Release(string key)
         {
             if (!this.handleCache.Remove(key, out var handle))
@@ -31,43 +78,6 @@ namespace UniT.Core.Addressables
 
             Addressables.Release(handle);
             this.logger.Log($"Released addressable {key}");
-        }
-
-        public UniTask<T> Load<T>(string key, bool cache = false)
-        {
-            return this.handleCache.GetOrAdd(key, () => Addressables.LoadAssetAsync<T>(key))
-                       .Convert<T>()
-                       .ToUniTask()
-                       .ContinueWith(asset =>
-                       {
-                           if (cache)
-                           {
-                               this.logger.Log($"Loaded & cached addressable {key}");
-                               return asset;
-                           }
-
-                           this.logger.Log($"Loaded addressable {key}");
-                           this.Release(key);
-                           return asset;
-                       });
-        }
-
-        public UniTask<SceneInstance> LoadScene(string key, bool activateOnLoad = true, int priority = 100)
-        {
-            var handle = Addressables.LoadSceneAsync(key, activateOnLoad: activateOnLoad, priority: priority);
-            return handle.ToUniTask()
-                         .ContinueWith(scene =>
-                         {
-                             if (!activateOnLoad)
-                             {
-                                 this.logger.Warning($"Scene {key} loaded & must be released manually");
-                                 return scene;
-                             }
-
-                             this.logger.Log($"Scene {key} loaded");
-                             Addressables.Release(handle);
-                             return scene;
-                         });
         }
     }
 }
