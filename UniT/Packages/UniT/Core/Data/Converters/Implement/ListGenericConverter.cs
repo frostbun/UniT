@@ -10,7 +10,7 @@ namespace UniT.Core.Converters.Implement
     {
         private readonly string separator;
 
-        public ListGenericConverter(string separator = ";") : base()
+        public ListGenericConverter(string separator = ";")
         {
             this.separator = separator;
         }
@@ -21,7 +21,7 @@ namespace UniT.Core.Converters.Implement
         {
             var itemType      = type.GetGenericArguments()[0];
             var itemConverter = ConverterManager.Instance.GetConverter(itemType);
-            var list         = (IList)Activator.CreateInstance(type);
+            var list          = (IList)Activator.CreateInstance(type);
             foreach (var item in str.Split(this.separator))
             {
                 list.Add(itemConverter.ConvertFromString(item, itemType));

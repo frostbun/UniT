@@ -7,12 +7,14 @@ namespace UniT.Core.Data.Base
     {
         public UniTask Populate(IData data)
         {
-            throw new NotImplementedException();
+            // TODO: Implement
+            return UniTask.CompletedTask;
         }
 
         public UniTask Save(IData data)
         {
-            throw new NotImplementedException();
+            // TODO: Implement
+            return UniTask.CompletedTask;
         }
 
         public abstract UniTask Flush();
