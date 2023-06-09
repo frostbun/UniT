@@ -15,5 +15,10 @@ namespace UniT.DI.Extensions
                 return currentSceneContext ? currentSceneContext.Container : ProjectContext.Instance.Container;
             }
         }
+
+        public static void Inject(this object obj)
+        {
+            CurrentContainer.Inject(obj);
+        }
     }
 }
