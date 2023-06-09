@@ -1,7 +1,7 @@
-namespace UniT.Core.Converters.Implement
+namespace UniT.Core.Data.Converters.Implements
 {
     using System;
-    using UniT.Core.Converters.Base;
+    using UniT.Core.Data.Converters.Base;
     using UniT.Core.Extensions;
 
     public class DoubleConverter : BaseConverter

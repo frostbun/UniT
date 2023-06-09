@@ -1,9 +1,9 @@
-namespace UniT.Core.Converters.Implement
+namespace UniT.Core.Data.Converters.Implements
 {
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using UniT.Core.Converters.Base;
+    using UniT.Core.Data.Converters.Base;
 
     public class ReadonlyCollectionGenericConverter : BaseGenericConverter
     {

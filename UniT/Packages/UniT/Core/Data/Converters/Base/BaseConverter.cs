@@ -1,4 +1,4 @@
-namespace UniT.Core.Converters.Base
+namespace UniT.Core.Data.Converters.Base
 {
     using System;
 

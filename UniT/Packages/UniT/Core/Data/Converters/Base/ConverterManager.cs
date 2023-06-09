@@ -1,9 +1,9 @@
-namespace UniT.Core.Converters.Base
+namespace UniT.Core.Data.Converters.Base
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using UniT.Core.Converters.Implement;
+    using UniT.Core.Data.Converters.Implements;
 
     public class ConverterManager
     {

@@ -1,8 +1,8 @@
-namespace UniT.Core.Converters.Implement
+namespace UniT.Core.Data.Converters.Implements
 {
     using System;
     using Newtonsoft.Json;
-    using UniT.Core.Converters.Base;
+    using UniT.Core.Data.Converters.Base;
 
     public class DefaultConverter : BaseConverter
     {

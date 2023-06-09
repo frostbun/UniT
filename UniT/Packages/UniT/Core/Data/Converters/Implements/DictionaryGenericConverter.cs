@@ -1,10 +1,10 @@
-namespace UniT.Core.Converters.Implement
+namespace UniT.Core.Data.Converters.Implements
 {
     using System;
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
-    using UniT.Core.Converters.Base;
+    using UniT.Core.Data.Converters.Base;
 
     public class DictionaryGenericConverter : BaseGenericConverter
     {
