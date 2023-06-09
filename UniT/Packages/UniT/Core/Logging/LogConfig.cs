@@ -5,7 +5,7 @@ namespace UniT.Core.Logging
     public class LogConfig
     {
         public readonly LogLevel logLevel;
-        
+
         public LogConfig(LogLevel logLevel = LogLevel.All)
         {
             this.logLevel = logLevel;
@@ -15,10 +15,13 @@ namespace UniT.Core.Logging
     [Flags]
     public enum LogLevel
     {
-        Log       = 1 << 0,
-        Warning   = 1 << 1,
-        Error     = 1 << 2,
-        Exception = 1 << 3,
+        None      = 0,
+        Debug     = 1 << 0,
+        Info      = 1 << 1,
+        Warning   = 1 << 2,
+        Error     = 1 << 3,
+        Critical  = 1 << 4,
+        Exception = 1 << 5,
         All       = -1,
     }
 }

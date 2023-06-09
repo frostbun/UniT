@@ -11,7 +11,9 @@ namespace UniT.Core.Addressables
 
         public UniTask<T> LoadOnce<T>(string key, IProgress<float> progress = null, CancellationToken cancellationToken = default);
 
-        public UniTask<SceneInstance> LoadScene(string key, bool activateOnLoad = true, int priority = 100, IProgress<float> progress = null, CancellationToken cancellationToken = default);
+        public UniTask<SceneInstance> LoadScene(string key, int priority = 100, IProgress<float> progress = null, CancellationToken cancellationToken = default);
+
+        public UniTask ActivateScene(string key, int priority = 100, IProgress<float> progress = null, CancellationToken cancellationToken = default);
 
         public void Release(string key);
     }
