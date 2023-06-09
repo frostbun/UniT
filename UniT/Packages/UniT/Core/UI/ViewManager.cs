@@ -58,7 +58,7 @@ namespace UniT.Core.UI
 
         public UniTask<IViewManager.IViewInstance> GetView<T>() where T : IView
         {
-            return this.addressableManager.LoadOnce<GameObject>(typeof(T).GetKeyAttribute()).ContinueWith(go =>
+            return this.addressableManager.Load<GameObject>(typeof(T).GetKeyAttribute()).ContinueWith(go =>
             {
                 var view = Object.Instantiate(go).GetComponent<T>();
                 return (IViewManager.IViewInstance)new ViewInstance(this, view);
