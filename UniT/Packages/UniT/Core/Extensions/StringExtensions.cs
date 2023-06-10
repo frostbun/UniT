@@ -22,7 +22,7 @@ namespace UniT.Core.Extensions
 
         public static string Wrap(this string str, string prefix, string suffix)
         {
-            return prefix + str + suffix;
+            return $"{prefix}{str}{suffix}";
         }
 
         public static string WithColor(this string str, Color? color)

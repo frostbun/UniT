@@ -11,7 +11,7 @@ namespace UniT.Core.Logging
         public Logger(LogConfig config)
         {
             this.config = config;
-            this.Info($"{this.GetType().Name} instantiated with config: {config.ToJson()}", Color.green);
+            this.Info($"{nameof(Logger)} instantiated with config: {config.ToJson()}", Color.green);
         }
 
         public void Debug(string message, Color? color = null)

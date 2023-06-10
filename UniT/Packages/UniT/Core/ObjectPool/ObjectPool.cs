@@ -17,6 +17,7 @@ namespace UniT.Core.ObjectPool
             pool.prefab         = prefab;
             pool.pooledObjects  = IterTools.Repeat(() => Instantiate(pool.prefab), initialCount).ToQueue();
             pool.spawnedObjects = new();
+            DontDestroyOnLoad(pool);
             return pool;
         }
 

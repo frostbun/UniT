@@ -9,7 +9,7 @@ namespace UniT.Core.Extensions
     {
         public static TValue GetOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<TValue> defaultValueFactory = null)
         {
-            return dictionary.ContainsKey(key) ? dictionary[key] : (defaultValueFactory ?? (() => default))();
+            return dictionary.TryGetValue(key, out var value) ? value : (defaultValueFactory ?? (() => default))();
         }
 
         public static TValue GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<TValue> valueFactory = null)
@@ -19,7 +19,7 @@ namespace UniT.Core.Extensions
 
         public static UniTask<TValue> GetOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<UniTask<TValue>> defaultValueFactory = null)
         {
-            return dictionary.ContainsKey(key) ? UniTask.FromResult(dictionary[key]) : defaultValueFactory?.Invoke() ?? UniTask.FromResult(default(TValue));
+            return dictionary.TryGetValue(key, out var value) ? UniTask.FromResult(value) : defaultValueFactory?.Invoke() ?? UniTask.FromResult(default(TValue));
         }
 
         public static UniTask<TValue> GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<UniTask<TValue>> valueFactory = null)
@@ -27,11 +27,29 @@ namespace UniT.Core.Extensions
             return dictionary.GetOrDefault(key, valueFactory).ContinueWith(value => dictionary[key] = value);
         }
 
+        public static int RemoveAll<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, Func<TKey, TValue, bool> predicate)
+        {
+            var count = 0;
+            foreach (var (key, value) in dictionary.Clone())
+            {
+                if (!predicate(key, value)) continue;
+                dictionary.Remove(key);
+                count++;
+            }
+
+            return count;
+        }
+
         public static bool TryAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<TValue> valueFactory)
         {
             if (dictionary.ContainsKey(key)) return false;
             dictionary[key] = valueFactory();
             return true;
+        }
+
+        public static Dictionary<TKey, TValue> Clone<TKey, TValue>(this IDictionary<TKey, TValue> dictionary)
+        {
+            return dictionary.ToDictionaryOneToOne(kv => kv.Key, kv => kv.Value);
         }
 
         public static ReadOnlyDictionary<TKey, TValue> AsReadOnly<TKey, TValue>(this IDictionary<TKey, TValue> dictionary)

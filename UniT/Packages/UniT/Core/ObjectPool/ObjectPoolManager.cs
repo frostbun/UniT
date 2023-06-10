@@ -14,7 +14,7 @@ namespace UniT.Core.ObjectPool
         private readonly Dictionary<GameObject, ObjectPool> prefabToPool;
         private readonly Dictionary<GameObject, ObjectPool> instanceToPool;
 
-        public ObjectPoolManager(IAddressableManager addressableManager, ILogger logger)
+        public ObjectPoolManager(IAddressableManager addressableManager, ILogger logger = null)
         {
             this.addressableManager = addressableManager;
             this.logger             = logger;
@@ -23,7 +23,7 @@ namespace UniT.Core.ObjectPool
             var spawnedObjectsFieldInfo = typeof(ObjectPool).GetField("spawnedObjects");
             this.prefabToPool   = pools.ToDictionaryOneToOne(pool => (GameObject)prefabFieldInfo.GetValue(pool), pool => pool);
             this.instanceToPool = pools.ToDictionaryManyToOne(pool => (HashSet<GameObject>)spawnedObjectsFieldInfo.GetValue(pool), pool => pool);
-            this.logger.Info($"{this.GetType().Name} instantiated with {this.prefabToPool.Count} pre-created pool", Color.green);
+            this.logger?.Info($"{nameof(ObjectPoolManager)} instantiated with {this.prefabToPool.Count} pre-created pool", Color.green);
         }
 
         public void CreatePool(GameObject prefab, int initialCount = 1)
@@ -31,7 +31,7 @@ namespace UniT.Core.ObjectPool
             this.prefabToPool.TryAdd(prefab, () =>
             {
                 var pool = ObjectPool.Instantiate(prefab, initialCount);
-                this.logger.Info($"Created {pool.gameObject.name}");
+                this.logger?.Debug($"Created {pool.gameObject.name}");
                 return pool;
             });
         }
@@ -56,7 +56,7 @@ namespace UniT.Core.ObjectPool
             var pool     = this.GetPool(prefab);
             var instance = pool.Spawn();
             this.instanceToPool[instance] = pool;
-            this.logger.Info($"Spawned {prefab.name}");
+            this.logger?.Debug($"Spawned {prefab.name}");
             return instance;
         }
 
@@ -84,7 +84,7 @@ namespace UniT.Core.ObjectPool
         {
             this.instanceToPool.Remove(instance, out var pool);
             pool.Recycle(instance);
-            this.logger.Info($"Recycled {instance.name}");
+            this.logger?.Debug($"Recycled {instance.name}");
         }
 
         public void Recycle<T>(T component) where T : Component
