@@ -1,0 +1,10 @@
+{
+  "name": "UniT.Data",
+  "rootNamespace": "UniT",
+  "references": [
+    "UniTask",
+    "UniT.Addressables",
+    "UniT.Logging",
+    "UniT.Extensions"
+  ]
+}

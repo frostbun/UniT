@@ -1,15 +1,17 @@
 namespace View
 {
-    using UniT.Core.Addressables;
-    using UniT.Core.Data.Base;
-    using UniT.Core.Data.Blueprint;
-    using UniT.Core.Data.Player;
-    using UniT.Core.Logging;
-    using UniT.Core.ObjectPool;
-    using UniT.Core.Utils;
+    using BlueprintData;
+    using UniT.Addressables;
+    using UniT.Data.Base;
+    using UniT.Data.Csv.Blueprint;
+    using UniT.Data.Json.Blueprint;
+    using UniT.Data.Json.Player;
+    using UniT.Logging;
+    using UniT.ObjectPool;
+    using UniT.Utils;
     using UnityEngine;
-    using ILogger = UniT.Core.Logging.ILogger;
-    using Logger = UniT.Core.Logging.Logger;
+    using ILogger = UniT.Logging.ILogger;
+    using Logger = UniT.Logging.Logger;
 
     public class LoadingView : MonoBehaviour
     {
@@ -26,10 +28,11 @@ namespace View
                 )
             );
 
-            ServiceProvider<IData>.Add();
+            ServiceProvider<LevelBlueprint>.Add(new LevelBlueprint());
+            ServiceProvider<IData>.Add(ServiceProvider<LevelBlueprint>.Get());
             ServiceProvider<IDataHandler>.Add(
                 new PlayerPrefsJsonDataHandler(),
-                new AddressableBlueprintJsonDataHandler(ServiceProvider<IAddressableManager>.Get())
+                new AddressableBlueprintCsvDataHandler(ServiceProvider<IAddressableManager>.Get())
             );
             ServiceProvider<IDataManager>.Add(
                 new DataManager(
@@ -38,6 +41,12 @@ namespace View
                     ServiceProvider<ILogger>.Get()
                 )
             );
+        }
+
+        private async void Start()
+        {
+            await ServiceProvider<IDataManager>.Get().PopulateAllData();
+            var levelBlueprint = ServiceProvider<LevelBlueprint>.Get();
         }
     }
 }
