@@ -15,7 +15,6 @@
     "com.unity.nuget.newtonsoft-json": "3.2.1"
   },
   "gitDependencies": {
-    "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
-    "com.modesttree.zenject": "https://github.com/frostbun/Zenject.git?path=UnityProject/Assets/Plugins/Zenject"
+    "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask"
   }
 }

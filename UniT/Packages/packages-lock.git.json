@@ -4,11 +4,6 @@
             "name": "com.cysharp.unitask",
             "hash": "f2773f585e762480c835ac718b82b87cb111e500",
             "url": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask"
-        },
-        {
-            "name": "com.modesttree.zenject",
-            "hash": "517cc1fca446b141e2e6f149767052ccd1dcaf87",
-            "url": "https://github.com/frostbun/Zenject.git?path=UnityProject/Assets/Plugins/Zenject"
         }
     ]
 }
