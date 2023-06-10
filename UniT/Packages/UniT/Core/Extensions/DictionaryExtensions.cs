@@ -3,6 +3,7 @@ namespace UniT.Core.Extensions
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using Cysharp.Threading.Tasks;
 
     public static class DictionaryExtensions
     {
@@ -14,6 +15,16 @@ namespace UniT.Core.Extensions
         public static TValue GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<TValue> valueFactory = null)
         {
             return dictionary[key] = dictionary.GetOrDefault(key, valueFactory);
+        }
+
+        public static UniTask<TValue> GetOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<UniTask<TValue>> defaultValueFactory = null)
+        {
+            return dictionary.ContainsKey(key) ? UniTask.FromResult(dictionary[key]) : defaultValueFactory?.Invoke() ?? UniTask.FromResult(default(TValue));
+        }
+
+        public static UniTask<TValue> GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<UniTask<TValue>> valueFactory = null)
+        {
+            return dictionary.GetOrDefault(key, valueFactory).ContinueWith(value => dictionary[key] = value);
         }
 
         public static bool TryAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<TValue> valueFactory)

@@ -2,6 +2,7 @@ namespace UniT.Core.Addressables
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using Cysharp.Threading.Tasks;
     using UniT.Core.Extensions;
@@ -14,9 +15,9 @@ namespace UniT.Core.Addressables
 
     public class AddressableManager : IAddressableManager
     {
-        private readonly ILogger                                  logger;
-        private readonly Dictionary<string, AsyncOperationHandle> handleCache;
-        private readonly Dictionary<string, SceneInstance>        loadedScenes;
+        private readonly ILogger                                                 logger;
+        private readonly Dictionary<string, AsyncOperationHandle>                handleCache;
+        private readonly Dictionary<string, AsyncOperationHandle<SceneInstance>> loadedScenes;
 
         public AddressableManager(ILogger logger)
         {
@@ -58,20 +59,22 @@ namespace UniT.Core.Addressables
                 throw new InvalidOperationException("Key already exists in loaded scenes");
             }
 
-            return Addressables.LoadSceneAsync(sceneName, loadMode: loadMode, priority: priority)
-                               .ToUniTask(progress: progress, cancellationToken: cancellationToken)
-                               .ContinueWith(scene =>
-                               {
-                                   if (loadMode is LoadSceneMode.Single)
-                                   {
-                                       this.loadedScenes.Values.ForEach(Addressables.Release);
-                                       this.loadedScenes.Clear();
-                                   }
+            return (this.loadedScenes[key] = Addressables.LoadSceneAsync(sceneName, loadMode: loadMode, priority: priority))
+                   .ToUniTask(progress: progress, cancellationToken: cancellationToken)
+                   .ContinueWith(scene =>
+                   {
+                       if (loadMode is LoadSceneMode.Single)
+                       {
+                            this.loadedScenes.Keys.Where(oldKey => oldKey != key).ToList().ForEach(oldKey =>
+                            {
+                                this.loadedScenes.Remove(oldKey, out var oldScene);
+                                Addressables.UnloadSceneAsync(oldScene);
+                            });
+                       }
 
-                                   this.loadedScenes.Add(key, scene);
-                                   this.logger.Info($"Loaded scene {key}");
-                                   progress?.Report(1);
-                               });
+                       this.logger.Info($"Loaded scene {key}");
+                       progress?.Report(1);
+                   });
         }
 
         public UniTask UnloadScene(string key, IProgress<float> progress = null, CancellationToken cancellationToken = default)

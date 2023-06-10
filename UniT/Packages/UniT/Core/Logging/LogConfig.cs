@@ -1,6 +1,8 @@
 namespace UniT.Core.Logging
 {
     using System;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Converters;
 
     public class LogConfig
     {
@@ -13,6 +15,7 @@ namespace UniT.Core.Logging
     }
 
     [Flags]
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum LogLevel
     {
         None      = 0,
