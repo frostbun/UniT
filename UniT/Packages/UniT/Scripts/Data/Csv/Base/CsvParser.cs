@@ -9,69 +9,51 @@ namespace UniT.Data.Csv.Base
 
     public class CsvParser
     {
-        private readonly ICsvData                      data;
-        private readonly CsvDataReader                 reader;
-        private readonly Type                          rowType;
-        private readonly MemberInfo[]                  members;
-        private readonly Dictionary<string, CsvParser> nestedParsers;
+        private readonly ICsvData                         data;
+        private readonly CsvDataReader                    reader;
+        private readonly Type                             rowType;
+        private readonly FieldInfo                        keyField;
+        private readonly FieldInfo[]                      fields;
+        private readonly Dictionary<FieldInfo, CsvParser> nestedParsers;
 
         public CsvParser(ICsvData data, CsvDataReader reader)
         {
             this.data          = data;
             this.reader        = reader;
             this.rowType       = data.GetRowType();
-            this.members       = this.rowType.GetAllFieldsOrProperties();
+            this.keyField      = this.rowType.GetCsvKeyField();
+            this.fields        = this.rowType.GetAllFields();
             this.nestedParsers = new();
         }
 
         public void Parse()
         {
             var row = Activator.CreateInstance(this.rowType);
-            foreach (var member in this.members)
+            foreach (var field in this.fields)
             {
-                var type = member switch
+                if (typeof(ICsvData).IsAssignableFrom(field.FieldType))
                 {
-                    FieldInfo field       => field.FieldType,
-                    PropertyInfo property => property.PropertyType,
-                    _                     => null,
-                };
-                if (typeof(ICsvData).IsAssignableFrom(type))
-                {
-                    this.nestedParsers.GetOrAdd(member.Name, () =>
+                    this.nestedParsers.GetOrAdd(field, () =>
                     {
-                        var nestedData   = Activator.CreateInstance(type);
+                        var nestedData   = Activator.CreateInstance(field.FieldType);
                         var nestedParser = new CsvParser((ICsvData)nestedData, this.reader);
-                        switch (member)
-                        {
-                            case FieldInfo field:
-                                field.SetValue(row, nestedData);
-                                return nestedParser;
-                            case PropertyInfo property:
-                                property.SetValue(row, nestedData);
-                                return nestedParser;
-                            default:
-                                return nestedParser;
-                        }
+                        field.SetValue(row, nestedData);
+                        return nestedParser;
                     }).Parse();
                     continue;
                 }
 
-                var ordinal   = this.reader.GetOrdinal(member.Name);
+                var ordinal   = this.reader.GetOrdinal(field.Name.ToPropertyName());
                 var str       = this.reader.GetString(ordinal);
-                var converter = ConverterManager.Instance.GetConverter(type);
-                var value     = converter.ConvertFromString(str, type);
-                switch (member)
-                {
-                    case FieldInfo field:
-                        field.SetValue(row, value);
-                        break;
-                    case PropertyInfo property:
-                        property.SetValue(row, value);
-                        break;
-                }
+                var converter = ConverterManager.Instance.GetConverter(field.FieldType);
+                var value     = converter.ConvertFromString(str, field.FieldType);
+                field.SetValue(row, value);
             }
 
-            if (this.data.Add(row)) this.nestedParsers.Clear();
+            var keyValue = this.keyField.GetValue(row);
+            if (keyValue is null) return;
+            this.data.Add(keyValue, row);
+            this.nestedParsers.Clear();
         }
     }
 }

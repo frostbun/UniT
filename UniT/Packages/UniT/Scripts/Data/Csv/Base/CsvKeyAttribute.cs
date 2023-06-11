@@ -17,9 +17,14 @@ namespace UniT.Data.Csv.Base
 
     public static class CsvKeyAttributeExtensions
     {
-        public static string GetCsvKeyAttribute(this Type type)
+        public static FieldInfo GetCsvKeyField(this Type type)
         {
-            return type.GetCustomAttribute<CsvKeyAttribute>()?.key ?? type.GetAllFieldsOrProperties()[0].Name;
+            var csvKey = type.GetCustomAttribute<CsvKeyAttribute>()?.key;
+            return csvKey is null
+                ? type.GetAllFields()[0]
+                : type.GetField(csvKey)
+                  ?? type.GetField($"<{csvKey}>k__BackingField")
+                  ?? throw new InvalidOperationException($"Cannot find csv key {csvKey} in {type.Name}");
         }
     }
 }

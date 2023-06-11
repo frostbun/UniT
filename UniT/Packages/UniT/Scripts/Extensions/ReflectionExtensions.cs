@@ -12,19 +12,24 @@ namespace UniT.Extensions
             return type.GetFields(bindingFlags);
         }
 
-        public static PropertyInfo[] GetAllProperties(this Type type, BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
+        public static bool IsBackingField(this FieldInfo fieldInfo)
         {
-            return type.GetProperties(bindingFlags);
+            return fieldInfo.Name.IsBackingFieldName();
         }
 
-        public static MemberInfo[] GetAllMembers(this Type type, BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
+        public static bool IsBackingFieldName(this string str)
         {
-            return type.GetMembers(bindingFlags);
+            return str.StartsWith("<") && str.EndsWith(">k__BackingField");
         }
 
-        public static MemberInfo[] GetAllFieldsOrProperties(this Type type, BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
+        public static string ToBackingFieldName(this string str)
         {
-            return type.GetMembers(bindingFlags).Where(member => member.MemberType is MemberTypes.Field or MemberTypes.Property && !member.Name.EndsWith("k__BackingField")).ToArray();
+            return str.IsBackingFieldName() ? str : $"<{str}>k__BackingField";
+        }
+
+        public static string ToPropertyName(this string str)
+        {
+            return str.IsBackingFieldName() ? str[1..^16] : str;
         }
 
         public static bool DeriveFromGenericType(this Type type, Type genericType)
@@ -43,8 +48,8 @@ namespace UniT.Extensions
 
         public static void CopyTo(this object from, object to)
         {
-            var fromFieldInfos = from.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-            var toFieldInfos   = to.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+            var fromFieldInfos = from.GetType().GetAllFields();
+            var toFieldInfos   = to.GetType().GetAllFields();
             foreach (var fromField in fromFieldInfos)
             {
                 var toField = toFieldInfos.FirstOrDefault(toField => toField.Name == fromField.Name && toField.FieldType.IsAssignableFrom(fromField.FieldType));
