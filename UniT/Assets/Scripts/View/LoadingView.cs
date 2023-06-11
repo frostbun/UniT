@@ -4,7 +4,6 @@ namespace View
     using UniT.Addressables;
     using UniT.Data.Base;
     using UniT.Data.Csv.Blueprint;
-    using UniT.Data.Json.Blueprint;
     using UniT.Data.Json.Player;
     using UniT.Logging;
     using UniT.ObjectPool;
@@ -32,7 +31,7 @@ namespace View
             ServiceProvider<IData>.Add(ServiceProvider<LevelBlueprint>.Get());
             ServiceProvider<IDataHandler>.Add(
                 new PlayerPrefsJsonDataHandler(),
-                new AddressableBlueprintCsvDataHandler(ServiceProvider<IAddressableManager>.Get())
+                new BlueprintAddressableCsvDataHandler(ServiceProvider<IAddressableManager>.Get())
             );
             ServiceProvider<IDataManager>.Add(
                 new DataManager(

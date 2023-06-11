@@ -14,12 +14,9 @@ namespace UniT.Data.Csv.Base
 
         protected override void PopulateData_Internal(string rawData, IData data)
         {
-            var       parser    = new CsvParser((ICsvData)data);
-            using var csvReader = CsvDataReader.Create(new StringReader(rawData), new() { Delimiter = ',' });
-            while (csvReader.Read())
-            {
-                parser.ParseRow(csvReader);
-            }
+            using var reader = CsvDataReader.Create(new StringReader(rawData), new() { Delimiter = ',' });
+            var       parser = new CsvParser((ICsvData)data, reader);
+            while (reader.Read()) parser.Parse();
         }
 
         protected override string SerializeData_Internal(IData data)

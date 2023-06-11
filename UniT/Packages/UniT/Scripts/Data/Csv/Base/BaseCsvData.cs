@@ -16,7 +16,7 @@ namespace UniT.Data.Csv.Base
             this.keyMember = typeof(T).GetAllFieldsOrProperties().First(field => field.Name == key);
         }
 
-        bool ICsvData.AddRow(object row)
+        bool ICsvData.Add(object row)
         {
             var keyValue = this.keyMember switch
             {
@@ -45,7 +45,7 @@ namespace UniT.Data.Csv.Base
             this.keyMember = typeof(TValue).GetAllFieldsOrProperties().First(field => field.Name == key);
         }
 
-        bool ICsvData.AddRow(object row)
+        bool ICsvData.Add(object row)
         {
             var keyValue = this.keyMember switch
             {

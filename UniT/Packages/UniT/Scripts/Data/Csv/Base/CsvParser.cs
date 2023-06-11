@@ -4,25 +4,29 @@ namespace UniT.Data.Csv.Base
     using System.Collections.Generic;
     using System.Reflection;
     using Sylvan.Data.Csv;
-    using UniT.Data.Csv.Converters.Base;
+    using UniT.Data.Converters.Base;
     using UniT.Extensions;
 
     public class CsvParser
     {
         private readonly ICsvData                      data;
+        private readonly CsvDataReader                 reader;
+        private readonly Type                          rowType;
         private readonly MemberInfo[]                  members;
         private readonly Dictionary<string, CsvParser> nestedParsers;
 
-        public CsvParser(ICsvData data)
+        public CsvParser(ICsvData data, CsvDataReader reader)
         {
             this.data          = data;
-            this.members       = data.GetRowType().GetAllFieldsOrProperties();
+            this.reader        = reader;
+            this.rowType       = data.GetRowType();
+            this.members       = this.rowType.GetAllFieldsOrProperties();
             this.nestedParsers = new();
         }
 
-        public void ParseRow(CsvDataReader reader)
+        public void Parse()
         {
-            var row = Activator.CreateInstance(this.data.GetRowType());
+            var row = Activator.CreateInstance(this.rowType);
             foreach (var member in this.members)
             {
                 var type = member switch
@@ -35,8 +39,8 @@ namespace UniT.Data.Csv.Base
                 {
                     this.nestedParsers.GetOrAdd(member.Name, () =>
                     {
-                        var nestedData   = (ICsvData)Activator.CreateInstance(type);
-                        var nestedParser = new CsvParser(nestedData);
+                        var nestedData   = Activator.CreateInstance(type);
+                        var nestedParser = new CsvParser((ICsvData)nestedData, this.reader);
                         switch (member)
                         {
                             case FieldInfo field:
@@ -48,12 +52,12 @@ namespace UniT.Data.Csv.Base
                             default:
                                 return nestedParser;
                         }
-                    }).ParseRow(reader);
+                    }).Parse();
                     continue;
                 }
 
-                var ordinal   = reader.GetOrdinal(member.Name);
-                var str       = reader.GetString(ordinal);
+                var ordinal   = this.reader.GetOrdinal(member.Name);
+                var str       = this.reader.GetString(ordinal);
                 var converter = ConverterManager.Instance.GetConverter(type);
                 var value     = converter.ConvertFromString(str, type);
                 switch (member)
@@ -67,7 +71,7 @@ namespace UniT.Data.Csv.Base
                 }
             }
 
-            if (this.data.AddRow(row)) this.nestedParsers.Clear();
+            if (this.data.Add(row)) this.nestedParsers.Clear();
         }
     }
 }
