@@ -14,8 +14,13 @@ namespace UniT.ObjectPool
         public static ObjectPool Instantiate(GameObject prefab, int initialCount)
         {
             var pool = new GameObject($"{prefab.name} Pool").AddComponent<ObjectPool>();
-            pool.prefab         = prefab;
-            pool.pooledObjects  = IterTools.Repeat(() => Instantiate(pool.prefab), initialCount).ToQueue();
+            pool.prefab = prefab;
+            pool.pooledObjects = IterTools.Repeat(() =>
+            {
+                var instance = Instantiate(pool.prefab, pool.transform);
+                instance.gameObject.SetActive(false);
+                return instance;
+            }, initialCount).ToQueue();
             pool.spawnedObjects = new();
             DontDestroyOnLoad(pool);
             return pool;

@@ -51,16 +51,21 @@ namespace UniT.Addressables
             this.logger?.Debug($"Released addressable {key}");
         }
 
-        public UniTask LoadScene(string sceneName, string key = null, LoadSceneMode loadMode = LoadSceneMode.Single, int priority = 100, IProgress<float> progress = null, CancellationToken cancellationToken = default)
+        public UniTask<SceneInstance> LoadScene(string sceneName, string key = null, LoadSceneMode loadMode = LoadSceneMode.Single, bool activateOnLoad = true, int priority = 100, IProgress<float> progress = null, CancellationToken cancellationToken = default)
         {
             if (this.loadedScenes.ContainsKey(key ??= sceneName))
             {
                 throw new InvalidOperationException("Key already exists in loaded scenes");
             }
 
-            return (this.loadedScenes[key] = Addressables.LoadSceneAsync(sceneName, loadMode: loadMode, priority: priority))
+            if (!activateOnLoad)
+            {
+                this.logger?.Warning("Set `activateOnLoad` to false will block all other `AsyncOperationHandle` until the scene is activated");
+            }
+
+            return (this.loadedScenes[key] = Addressables.LoadSceneAsync(sceneName, loadMode, activateOnLoad, priority))
                    .ToUniTask(progress: progress, cancellationToken: cancellationToken)
-                   .ContinueWith(_ =>
+                   .ContinueWith(scene =>
                    {
                        if (loadMode is LoadSceneMode.Single)
                        {
@@ -69,6 +74,7 @@ namespace UniT.Addressables
 
                        this.logger?.Debug($"Loaded scene {key}");
                        progress?.Report(1);
+                       return scene;
                    });
         }
 
