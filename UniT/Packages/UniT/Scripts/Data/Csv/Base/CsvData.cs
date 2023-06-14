@@ -2,8 +2,22 @@ namespace UniT.Data.Csv.Base
 {
     using System;
     using System.Collections.Generic;
+    using UniT.Extensions;
 
-    public abstract class BaseCsvData<T> : List<T>, ICsvData
+    public class CsvData : ICsvData
+    {
+        void ICsvData.Add(object key, object value)
+        {
+            value.CopyTo(this);
+        }
+
+        Type ICsvData.GetRowType()
+        {
+            return this.GetType();
+        }
+    }
+
+    public class CsvData<T> : List<T>, ICsvData
     {
         void ICsvData.Add(object key, object value)
         {
@@ -16,7 +30,7 @@ namespace UniT.Data.Csv.Base
         }
     }
 
-    public abstract class BaseCsvData<TKey, TValue> : Dictionary<TKey, TValue>, ICsvData
+    public class CsvData<TKey, TValue> : Dictionary<TKey, TValue>, ICsvData
     {
         void ICsvData.Add(object key, object value)
         {

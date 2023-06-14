@@ -18,7 +18,7 @@ namespace UniT.Data.Csv.Blueprint
 
         public override bool CanHandle(Type type)
         {
-            return typeof(IBlueprintData).IsAssignableFrom(type) && base.CanHandle(type);
+            return base.CanHandle(type) && typeof(IBlueprintData).IsAssignableFrom(type);
         }
 
         protected override UniTask<string> GetRawData_Internal(string key)
