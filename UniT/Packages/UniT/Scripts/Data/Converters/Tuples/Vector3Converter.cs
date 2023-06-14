@@ -1,19 +1,20 @@
 namespace UniT.Data.Converters.Tuples
 {
     using System;
+    using System.Runtime.CompilerServices;
     using UniT.Data.Converters.Base;
     using UnityEngine;
 
-    public class UnityVector3Converter : BaseConverter
+    public class Vector3Converter : BaseConverter
     {
-        protected override Type ConvertibleType => typeof(Vector2);
+        protected override Type ConvertibleType => typeof(Vector3);
 
         protected override object ConvertFromString_Internal(string str, Type type)
         {
             var tupleType      = typeof(ValueTuple<float, float, float>);
             var tupleConverter = ConverterManager.Instance.GetConverter(tupleType);
-            var tuple          = (ValueTuple<float, float, float>)tupleConverter.ConvertFromString(str, tupleType);
-            return new Vector3(tuple.Item1, tuple.Item2, tuple.Item3);
+            var tuple          = (ITuple)tupleConverter.ConvertFromString(str, tupleType);
+            return new Vector3((float)tuple[0], (float)tuple[1], (float)tuple[2]);
         }
 
         protected override string ConvertToString_Internal(object obj, Type type)

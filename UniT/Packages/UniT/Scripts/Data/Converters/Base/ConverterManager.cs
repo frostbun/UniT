@@ -42,9 +42,9 @@ namespace UniT.Data.Converters.Base
             #region Tuples
 
             this.AddConverter(new TupleConverter());
-            this.AddConverter(new UnityVector2Converter()); // Depend on TupleConverter
-            this.AddConverter(new UnityVector3Converter()); // Depend on TupleConverter
-            this.AddConverter(new UnityVector4Converter()); // Depend on TupleConverter
+            this.AddConverter(new Vector2Converter()); // Depend on TupleConverter
+            this.AddConverter(new Vector3Converter()); // Depend on TupleConverter
+            this.AddConverter(new Vector4Converter()); // Depend on TupleConverter
 
             #endregion
 

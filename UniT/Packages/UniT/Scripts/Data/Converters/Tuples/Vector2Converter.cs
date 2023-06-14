@@ -1,10 +1,11 @@
 namespace UniT.Data.Converters.Tuples
 {
     using System;
+    using System.Runtime.CompilerServices;
     using UniT.Data.Converters.Base;
     using UnityEngine;
 
-    public class UnityVector2Converter : BaseConverter
+    public class Vector2Converter : BaseConverter
     {
         protected override Type ConvertibleType => typeof(Vector2);
 
@@ -12,8 +13,8 @@ namespace UniT.Data.Converters.Tuples
         {
             var tupleType      = typeof(ValueTuple<float, float>);
             var tupleConverter = ConverterManager.Instance.GetConverter(tupleType);
-            var tuple          = (ValueTuple<float, float>)tupleConverter.ConvertFromString(str, tupleType);
-            return new Vector2(tuple.Item1, tuple.Item2);
+            var tuple          = (ITuple)tupleConverter.ConvertFromString(str, tupleType);
+            return new Vector2((float)tuple[0], (float)tuple[1]);
         }
 
         protected override string ConvertToString_Internal(object obj, Type type)
