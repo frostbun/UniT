@@ -7,11 +7,11 @@ namespace UniT.Extensions
     [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
     public class KeyAttribute : Attribute
     {
-        public readonly string key;
+        public readonly string Key;
 
         public KeyAttribute(string key)
         {
-            this.key = key;
+            this.Key = key;
         }
     }
 
@@ -19,12 +19,12 @@ namespace UniT.Extensions
     {
         public static string GetKeyAttribute(this Type type)
         {
-            return type.GetCustomAttribute<KeyAttribute>()?.key ?? type.Name;
+            return type.GetCustomAttribute<KeyAttribute>()?.Key ?? type.Name;
         }
 
         public static string[] GetKeyAttributes(this Type type)
         {
-            return type.GetCustomAttributes<KeyAttribute>().Select(attr => attr.key).ToArray();
+            return type.GetCustomAttributes<KeyAttribute>().Select(attr => attr.Key).ToArray();
         }
     }
 }

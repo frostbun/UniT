@@ -34,7 +34,7 @@ namespace UniT.Data.Csv.Base
 
             foreach (var field in this.normalFields)
             {
-                var ordinal = this.reader.GetOrdinal(field.Name.ToPropertyName());
+                var ordinal = this.reader.GetOrdinal(field.GetCsvFieldName());
                 var str     = this.reader.GetString(ordinal);
                 if (str.IsNullOrWhitespace()) continue;
                 var converter = ConverterManager.Instance.GetConverter(field.FieldType);

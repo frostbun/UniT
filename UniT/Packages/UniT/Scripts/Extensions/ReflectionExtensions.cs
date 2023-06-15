@@ -12,6 +12,11 @@ namespace UniT.Extensions
             return type.GetFields(bindingFlags);
         }
 
+        public static PropertyInfo ToPropertyInfo(this FieldInfo fieldInfo)
+        {
+            return fieldInfo.DeclaringType?.GetProperty(fieldInfo.Name.ToPropertyName());
+        }
+
         public static bool IsBackingField(this FieldInfo fieldInfo)
         {
             return fieldInfo.Name.IsBackingFieldName();

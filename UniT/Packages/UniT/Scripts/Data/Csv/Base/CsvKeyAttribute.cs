@@ -7,11 +7,11 @@ namespace UniT.Data.Csv.Base
     [AttributeUsage(AttributeTargets.Class)]
     public class CsvKeyAttribute : Attribute
     {
-        public readonly string key;
+        public readonly string Key;
 
         public CsvKeyAttribute(string key)
         {
-            this.key = key;
+            this.Key = key;
         }
     }
 
@@ -19,12 +19,12 @@ namespace UniT.Data.Csv.Base
     {
         public static FieldInfo GetCsvKeyField(this Type type)
         {
-            var csvKey = type.GetCustomAttribute<CsvKeyAttribute>()?.key;
+            var csvKey = type.GetCustomAttribute<CsvKeyAttribute>()?.Key;
             return csvKey is null
                 ? type.GetAllFields()[0]
                 : type.GetField(csvKey)
-                  ?? type.GetField($"<{csvKey}>k__BackingField")
-                  ?? throw new InvalidOperationException($"Cannot find csv key {csvKey} in {type.Name}");
+                  ?? type.GetField(csvKey.ToBackingFieldName())
+                  ?? throw new InvalidOperationException($"Cannot find csv key field {csvKey} in {type.Name}");
         }
     }
 }
