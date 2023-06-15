@@ -16,7 +16,7 @@ namespace View
     {
         private void Awake()
         {
-            ServiceProvider<ILogger>.Add(new Logger(new LogConfig()));
+            ServiceProvider<ILogger>.Add(new Logger(new LogConfig(LogLevel.Debug)));
 
             ServiceProvider<IAddressableManager>.Add(new AddressableManager(ServiceProvider<ILogger>.Get()));
 
