@@ -16,11 +16,11 @@ namespace UniT.Logging
     [JsonConverter(typeof(StringEnumConverter))]
     public enum LogLevel
     {
-        Exception,
-        Critical,
-        Error,
-        Warning,
-        Info,
         Debug,
+        Info,
+        Warning,
+        Error,
+        Critical,
+        Exception,
     }
 }
