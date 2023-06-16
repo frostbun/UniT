@@ -2,6 +2,7 @@ namespace UniT.Data.Csv.Base
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Reflection;
     using Sylvan.Data.Csv;
     using UniT.Data.Converters.Base;
@@ -23,7 +24,7 @@ namespace UniT.Data.Csv.Base
             this.reader                         = reader;
             this.rowType                        = data.GetRowType();
             this.keyField                       = this.rowType.GetCsvKeyField();
-            (this.csvFields, this.normalFields) = this.rowType.GetAllFields().Split(field => typeof(ICsvData).IsAssignableFrom(field.FieldType));
+            (this.csvFields, this.normalFields) = this.rowType.GetAllFields().Where(field => !field.IsCsvIgnored()).Split(field => typeof(ICsvData).IsAssignableFrom(field.FieldType));
             this.nestedParsers                  = new();
         }
 

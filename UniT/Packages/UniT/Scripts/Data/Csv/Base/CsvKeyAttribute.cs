@@ -1,6 +1,7 @@
 namespace UniT.Data.Csv.Base
 {
     using System;
+    using System.Linq;
     using System.Reflection;
     using UniT.Extensions;
 
@@ -21,7 +22,7 @@ namespace UniT.Data.Csv.Base
         {
             var csvKey = type.GetCustomAttribute<CsvKeyAttribute>()?.Key;
             return csvKey is null
-                ? type.GetAllFields()[0]
+                ? type.GetAllFields().First(field => !field.IsCsvIgnored())
                 : type.GetField(csvKey)
                   ?? type.GetField(csvKey.ToBackingFieldName())
                   ?? throw new InvalidOperationException($"Cannot find csv key field {csvKey} in {type.Name}");
