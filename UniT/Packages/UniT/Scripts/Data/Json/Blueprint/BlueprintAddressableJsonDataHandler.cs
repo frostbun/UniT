@@ -11,14 +11,14 @@ namespace UniT.Data.Json.Blueprint
     {
         private readonly IAddressableManager addressableManager;
 
-        public BlueprintAddressableJsonDataHandler(IAddressableManager addressableManager)
+        public BlueprintAddressableJsonDataHandler(IAddressableManager addressableManager) : base()
         {
             this.addressableManager = addressableManager;
         }
 
         public override bool CanHandle(Type type)
         {
-            return typeof(IBlueprintData).IsAssignableFrom(type);
+            return base.CanHandle(type) && typeof(IBlueprintData).IsAssignableFrom(type);
         }
 
         protected override UniTask<string> GetRawData_Internal(string key)
@@ -26,7 +26,7 @@ namespace UniT.Data.Json.Blueprint
             return this.addressableManager.Load<TextAsset>(key).ContinueWith(blueprint =>
             {
                 var text = blueprint.text;
-                this.addressableManager.Release(key);
+                this.addressableManager.Unload(key);
                 return text;
             });
         }

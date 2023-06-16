@@ -10,7 +10,7 @@ namespace UniT.Addressables
     {
         public UniTask<T> Load<T>(string key, IProgress<float> progress = null, CancellationToken cancellationToken = default);
 
-        public void Release(string key);
+        public void Unload(string key);
 
         public UniTask<SceneInstance> LoadScene(string sceneName, string key = null, LoadSceneMode loadMode = LoadSceneMode.Single, bool activateOnLoad = true, int priority = 100, IProgress<float> progress = null, CancellationToken cancellationToken = default);
 

@@ -11,7 +11,7 @@ namespace UniT.Data.Csv.Blueprint
     {
         private readonly IAddressableManager addressableManager;
 
-        public BlueprintAddressableCsvDataHandler(IAddressableManager addressableManager)
+        public BlueprintAddressableCsvDataHandler(IAddressableManager addressableManager) : base()
         {
             this.addressableManager = addressableManager;
         }
@@ -26,7 +26,7 @@ namespace UniT.Data.Csv.Blueprint
             return this.addressableManager.Load<TextAsset>(key).ContinueWith(blueprint =>
             {
                 var text = blueprint.text;
-                this.addressableManager.Release(key);
+                this.addressableManager.Unload(key);
                 return text;
             });
         }

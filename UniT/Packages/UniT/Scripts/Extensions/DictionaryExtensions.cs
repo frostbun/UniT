@@ -17,6 +17,13 @@ namespace UniT.Extensions
             return dictionary[key] = dictionary.GetOrDefault(key, valueFactory);
         }
 
+        public static bool TryAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<TValue> valueFactory)
+        {
+            if (dictionary.ContainsKey(key)) return false;
+            dictionary[key] = valueFactory();
+            return true;
+        }
+
         public static UniTask<TValue> GetOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<UniTask<TValue>> defaultValueFactory = null)
         {
             return dictionary.TryGetValue(key, out var value) ? UniTask.FromResult(value) : defaultValueFactory?.Invoke() ?? UniTask.FromResult(default(TValue));
@@ -25,6 +32,16 @@ namespace UniT.Extensions
         public static UniTask<TValue> GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<UniTask<TValue>> valueFactory = null)
         {
             return dictionary.GetOrDefault(key, valueFactory).ContinueWith(value => dictionary[key] = value);
+        }
+
+        public static UniTask<bool> TryAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<UniTask<TValue>> valueFactory)
+        {
+            if (dictionary.ContainsKey(key)) return UniTask.FromResult(false);
+            return valueFactory().ContinueWith(value =>
+            {
+                dictionary[key] = value;
+                return true;
+            });
         }
 
         public static IEnumerable<KeyValuePair<TKey, TValue>> Where<TKey, TValue, TResult>(this IDictionary<TKey, TValue> dictionary, Func<TKey, TValue, bool> predicate)
@@ -55,13 +72,6 @@ namespace UniT.Extensions
             }
 
             return count;
-        }
-
-        public static bool TryAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<TValue> valueFactory)
-        {
-            if (dictionary.ContainsKey(key)) return false;
-            dictionary[key] = valueFactory();
-            return true;
         }
 
         public static Dictionary<TKey, TValue> Clone<TKey, TValue>(this IDictionary<TKey, TValue> dictionary)

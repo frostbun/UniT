@@ -39,16 +39,16 @@ namespace UniT.Addressables
                        });
         }
 
-        public void Release(string key)
+        public void Unload(string key)
         {
             if (!this.loadedAssets.Remove(key, out var handle))
             {
-                this.logger?.Warning($"Trying to release addressable {key} that was not loaded");
+                this.logger?.Warning($"Trying to unload addressable {key} that was not loaded");
                 return;
             }
 
             Addressables.Release(handle);
-            this.logger?.Debug($"Released addressable {key}");
+            this.logger?.Debug($"Unloaded addressable {key}");
         }
 
         public UniTask<SceneInstance> LoadScene(string sceneName, string key = null, LoadSceneMode loadMode = LoadSceneMode.Single, bool activateOnLoad = true, int priority = 100, IProgress<float> progress = null, CancellationToken cancellationToken = default)
@@ -82,7 +82,7 @@ namespace UniT.Addressables
         {
             if (!this.loadedScenes.Remove(key, out var scene))
             {
-                this.logger?.Warning("Trying to unload a scene that was not loaded");
+                this.logger?.Warning("Trying to unload scene {key} that was not loaded");
                 return UniTask.CompletedTask;
             }
 

@@ -1,6 +1,7 @@
 namespace UniT.ObjectPool
 {
     using System.Collections.Generic;
+    using System.Linq;
     using Cysharp.Threading.Tasks;
     using UniT.Addressables;
     using UniT.Extensions;
@@ -12,90 +13,101 @@ namespace UniT.ObjectPool
         private readonly IAddressableManager                addressableManager;
         private readonly ILogger                            logger;
         private readonly Dictionary<GameObject, ObjectPool> prefabToPool;
-        private readonly Dictionary<GameObject, ObjectPool> instanceToPool;
+        private readonly Dictionary<string, ObjectPool>     keyToPool;
 
         public ObjectPoolManager(IAddressableManager addressableManager, ILogger logger = null)
         {
             this.addressableManager = addressableManager;
             this.logger             = logger;
-            var pools                   = Object.FindObjectsOfType<ObjectPool>(true);
-            var prefabFieldInfo         = typeof(ObjectPool).GetField("prefab");
-            var spawnedObjectsFieldInfo = typeof(ObjectPool).GetField("spawnedObjects");
-            this.prefabToPool   = pools.ToDictionaryOneToOne(pool => (GameObject)prefabFieldInfo.GetValue(pool), pool => pool);
-            this.instanceToPool = pools.ToDictionaryManyToOne(pool => (HashSet<GameObject>)spawnedObjectsFieldInfo.GetValue(pool), pool => pool);
+            this.prefabToPool       = Object.FindObjectsOfType<ObjectPool>().ToDictionary(pool => (GameObject)typeof(ObjectPool).GetField("prefab").GetValue(pool), pool => pool);
+            this.keyToPool          = new();
             this.logger?.Info($"{nameof(ObjectPoolManager)} instantiated with {this.prefabToPool.Count} pre-created pool", Color.green);
         }
 
-        public void CreatePool(GameObject prefab, int initialCount = 1)
+        private ObjectPool InstantiatePool_Internal(GameObject prefab, int initialCount = 1)
         {
-            this.prefabToPool.TryAdd(prefab, () =>
-            {
-                var pool = ObjectPool.Instantiate(prefab, initialCount);
-                this.logger?.Debug($"Created {pool.gameObject.name}");
-                return pool;
-            });
+            var pool = ObjectPool.Instantiate(prefab, initialCount);
+            this.logger?.Debug($"Instantiated {pool.gameObject.name}");
+            return pool;
         }
 
-        public void CreatePool<T>(T component, int initialCount = 1) where T : Component
+        public void InstantiatePool(GameObject prefab, int initialCount = 1)
         {
-            this.CreatePool(component.gameObject, initialCount);
+            this.prefabToPool.TryAdd(prefab, () => this.InstantiatePool_Internal(prefab, initialCount));
         }
 
-        public UniTask CreatePool(string key, int initialCount = 1)
+        public void InstantiatePool<T>(T component, int initialCount = 1) where T : Component
         {
-            return this.addressableManager.Load<GameObject>(key).ContinueWith(prefab => this.CreatePool(prefab, initialCount));
+            this.InstantiatePool(component.gameObject, initialCount);
         }
 
-        public UniTask CreatePool<T>(int initialCount = 1) where T : Component
+        public UniTask InstantiatePool(string key, int initialCount = 1)
         {
-            return this.CreatePool(typeof(T).GetKeyAttribute(), initialCount);
+            return this.keyToPool.TryAdd(key, () => this.addressableManager.Load<GameObject>(key).ContinueWith(prefab => this.InstantiatePool_Internal(prefab, initialCount)));
         }
 
-        public GameObject Spawn(GameObject prefab)
+        public UniTask InstantiatePool<T>(int initialCount = 1) where T : Component
         {
-            var pool     = this.GetPool(prefab);
-            var instance = pool.Spawn();
-            this.instanceToPool[instance] = pool;
-            this.logger?.Debug($"Spawned {prefab.name}");
-            return instance;
+            return this.InstantiatePool(typeof(T).GetKeyAttribute(), initialCount);
         }
 
-        public T Spawn<T>(T component) where T : Component
+        public ObjectPool GetPool(GameObject prefab)
         {
-            return this.Spawn(component.gameObject).GetComponent<T>();
-        }
-
-        public UniTask<GameObject> Spawn(string key)
-        {
-            return this.addressableManager.Load<GameObject>(key).ContinueWith(this.Spawn);
-        }
-
-        public UniTask<T> Spawn<T>(string key) where T : Component
-        {
-            return this.Spawn(key).ContinueWith(instance => instance.GetComponent<T>());
-        }
-
-        public UniTask<T> Spawn<T>() where T : Component
-        {
-            return this.Spawn<T>(typeof(T).GetKeyAttribute());
-        }
-
-        public void Recycle(GameObject instance)
-        {
-            this.instanceToPool.Remove(instance, out var pool);
-            pool.Recycle(instance);
-            this.logger?.Debug($"Recycled {instance.name}");
-        }
-
-        public void Recycle<T>(T component) where T : Component
-        {
-            this.Recycle(component.gameObject);
-        }
-
-        private ObjectPool GetPool(GameObject prefab)
-        {
-            this.CreatePool(prefab);
+            this.InstantiatePool(prefab);
             return this.prefabToPool[prefab];
+        }
+
+        public ObjectPool GetPool<T>(T component) where T : Component
+        {
+            return this.GetPool(component.gameObject);
+        }
+
+        public UniTask<ObjectPool> GetPool(string key)
+        {
+            return this.InstantiatePool(key).ContinueWith(() => this.keyToPool[key]);
+        }
+
+        public UniTask<ObjectPool> GetPool<T>() where T : Component
+        {
+            return this.GetPool(typeof(T).GetKeyAttribute());
+        }
+
+        private void DestroyPool_Internal(ObjectPool pool)
+        {
+            Object.Destroy(pool.gameObject);
+            this.logger?.Debug($"Destroyed {pool.gameObject.name}");
+        }
+
+        public void DestroyPool(GameObject prefab)
+        {
+            if (!this.prefabToPool.Remove(prefab, out var pool))
+            {
+                this.logger?.Warning($"Trying to destroy pool for prefab {prefab.name} that was not instantiated");
+                return;
+            }
+
+            this.DestroyPool_Internal(pool);
+        }
+
+        public void DestroyPool<T>(T component) where T : Component
+        {
+            this.DestroyPool(component.gameObject);
+        }
+
+        public void DestroyPool(string key)
+        {
+            if (!this.keyToPool.Remove(key, out var pool))
+            {
+                this.logger?.Warning($"Trying to destroy pool for key {key} that was not instantiated");
+                return;
+            }
+
+            this.DestroyPool_Internal(pool);
+        }
+
+        public void DestroyPool<T>() where T : Component
+        {
+            this.DestroyPool(typeof(T).GetKeyAttribute());
         }
     }
 }

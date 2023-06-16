@@ -35,6 +35,72 @@ namespace UniT.ObjectPool
             return instance;
         }
 
+        public GameObject Spawn(Vector3 position, Quaternion rotation, Transform parent)
+        {
+            var instance = this.Spawn();
+            instance.transform.SetPositionAndRotation(position, rotation);
+            instance.transform.SetParent(parent);
+            return instance;
+        }
+
+        public GameObject Spawn(Vector3 position, Quaternion rotation)
+        {
+            var instance = this.Spawn();
+            instance.transform.SetPositionAndRotation(position, rotation);
+            return instance;
+        }
+
+        public GameObject Spawn(Vector3 position)
+        {
+            var instance = this.Spawn();
+            instance.transform.position = position;
+            return instance;
+        }
+
+        public GameObject Spawn(Quaternion rotation)
+        {
+            var instance = this.Spawn();
+            instance.transform.rotation = rotation;
+            return instance;
+        }
+
+        public GameObject Spawn(Transform parent)
+        {
+            var instance = this.Spawn();
+            instance.transform.SetParent(parent);
+            return instance;
+        }
+
+        public T Spawn<T>() where T : Component
+        {
+            return this.Spawn().GetComponent<T>();
+        }
+
+        public T Spawn<T>(Vector3 position, Quaternion rotation, Transform parent) where T : Component
+        {
+            return this.Spawn(position, rotation, parent).GetComponent<T>();
+        }
+
+        public T Spawn<T>(Vector3 position, Quaternion rotation) where T : Component
+        {
+            return this.Spawn(position, rotation).GetComponent<T>();
+        }
+
+        public T Spawn<T>(Vector3 position) where T : Component
+        {
+            return this.Spawn(position).GetComponent<T>();
+        }
+
+        public T Spawn<T>(Quaternion rotation) where T : Component
+        {
+            return this.Spawn(rotation).GetComponent<T>();
+        }
+
+        public T Spawn<T>(Transform parent) where T : Component
+        {
+            return this.Spawn(parent).GetComponent<T>();
+        }
+
         public void Recycle(GameObject instance)
         {
             if (!this.spawnedObjects.Contains(instance)) throw new InvalidOperationException($"{instance.name} does not spawn from {this.gameObject.name}");
@@ -42,6 +108,11 @@ namespace UniT.ObjectPool
             instance.transform.SetParent(this.transform);
             this.spawnedObjects.Remove(instance);
             this.pooledObjects.Enqueue(instance);
+        }
+
+        public void Recycle<T>(T component) where T : Component
+        {
+            this.Recycle(component.gameObject);
         }
     }
 }

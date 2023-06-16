@@ -9,7 +9,7 @@ namespace UniT.Data.Csv.Base
     {
         public override bool CanHandle(Type type)
         {
-            return typeof(ICsvData).IsAssignableFrom(type);
+            return base.CanHandle(type) && typeof(ICsvData).IsAssignableFrom(type);
         }
 
         protected override void PopulateData_Internal(string rawData, IData data)

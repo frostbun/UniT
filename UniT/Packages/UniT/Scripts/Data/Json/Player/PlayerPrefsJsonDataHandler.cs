@@ -10,7 +10,7 @@ namespace UniT.Data.Json.Player
     {
         public override bool CanHandle(Type type)
         {
-            return typeof(IPlayerData).IsAssignableFrom(type);
+            return base.CanHandle(type) && typeof(IPlayerData).IsAssignableFrom(type);
         }
 
         public override UniTask Flush()
