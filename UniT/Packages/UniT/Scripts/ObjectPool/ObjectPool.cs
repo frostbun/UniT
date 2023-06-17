@@ -21,7 +21,6 @@ namespace UniT.ObjectPool
                 instance.gameObject.SetActive(false);
                 return instance;
             }, initialCount).ToQueue();
-            pool.spawnedObjects = new();
             DontDestroyOnLoad(pool);
             return pool;
         }
@@ -30,7 +29,7 @@ namespace UniT.ObjectPool
         {
             var instance = this.pooledObjects.DequeueOrDefault(() => Instantiate(this.prefab));
             this.spawnedObjects.Add(instance);
-            this.transform.SetParent(null);
+            instance.transform.SetParent(null);
             instance.gameObject.SetActive(true);
             return instance;
         }
@@ -103,9 +102,8 @@ namespace UniT.ObjectPool
 
         public void Recycle(GameObject instance)
         {
-            if (!this.spawnedObjects.Contains(instance)) throw new InvalidOperationException($"{instance.name} does not spawn from {this.gameObject.name}");
+            if (!this.spawnedObjects.Remove(instance)) throw new InvalidOperationException($"{instance.name} does not spawn from {this.gameObject.name}");
             this.Recycle_Internal(instance);
-            this.spawnedObjects.Remove(instance);
         }
 
         public void Recycle<T>(T component) where T : Component
