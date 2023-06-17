@@ -7,12 +7,12 @@ namespace UniT.Extensions
 
     public static class DictionaryExtensions
     {
-        public static TValue GetOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<TValue> defaultValueFactory = null)
+        public static TValue GetOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<TValue> valueFactory = null)
         {
-            return dictionary.TryGetValue(key, out var value) ? value : (defaultValueFactory ?? (() => default))();
+            return dictionary.TryGetValue(key, out var value) ? value : (valueFactory ?? (() => default))();
         }
 
-        public static TValue GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<TValue> valueFactory = null)
+        public static TValue GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<TValue> valueFactory)
         {
             return dictionary[key] = dictionary.GetOrDefault(key, valueFactory);
         }
@@ -24,12 +24,12 @@ namespace UniT.Extensions
             return true;
         }
 
-        public static UniTask<TValue> GetOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<UniTask<TValue>> defaultValueFactory = null)
+        public static UniTask<TValue> GetOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<UniTask<TValue>> valueFactory)
         {
-            return dictionary.TryGetValue(key, out var value) ? UniTask.FromResult(value) : defaultValueFactory?.Invoke() ?? UniTask.FromResult(default(TValue));
+            return dictionary.TryGetValue(key, out var value) ? UniTask.FromResult(value) : valueFactory();
         }
 
-        public static UniTask<TValue> GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<UniTask<TValue>> valueFactory = null)
+        public static UniTask<TValue> GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<UniTask<TValue>> valueFactory)
         {
             return dictionary.GetOrDefault(key, valueFactory).ContinueWith(value => dictionary[key] = value);
         }
