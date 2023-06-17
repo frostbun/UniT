@@ -104,15 +104,26 @@ namespace UniT.ObjectPool
         public void Recycle(GameObject instance)
         {
             if (!this.spawnedObjects.Contains(instance)) throw new InvalidOperationException($"{instance.name} does not spawn from {this.gameObject.name}");
-            instance.gameObject.SetActive(false);
-            instance.transform.SetParent(this.transform);
+            this.Recycle_Internal(instance);
             this.spawnedObjects.Remove(instance);
-            this.pooledObjects.Enqueue(instance);
         }
 
         public void Recycle<T>(T component) where T : Component
         {
             this.Recycle(component.gameObject);
+        }
+
+        public void RecycleAll()
+        {
+            this.spawnedObjects.ForEach(this.Recycle_Internal);
+            this.spawnedObjects.Clear();
+        }
+
+        private void Recycle_Internal(GameObject instance)
+        {
+            instance.gameObject.SetActive(false);
+            instance.transform.SetParent(this.transform);
+            this.pooledObjects.Enqueue(instance);
         }
     }
 }
