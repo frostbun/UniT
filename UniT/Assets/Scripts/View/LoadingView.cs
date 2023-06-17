@@ -14,9 +14,14 @@ namespace View
 
     public class LoadingView : MonoBehaviour
     {
+        private IDataManager        dataManager;
+        private IAddressableManager addressableManager;
+
         private void Awake()
         {
-            ServiceProvider<ILogger>.Add(new Logger(new LogConfig(LogLevel.Debug)));
+            #region ServiceProvider
+
+            ServiceProvider<ILogger>.Add(new Logger(new LogConfig(LogLevel.Info)));
 
             ServiceProvider<IAddressableManager>.Add(new AddressableManager(ServiceProvider<ILogger>.Get()));
 
@@ -40,12 +45,17 @@ namespace View
                     ServiceProvider<ILogger>.Get()
                 )
             );
+
+            #endregion
+
+            this.dataManager        = ServiceProvider<IDataManager>.Get();
+            this.addressableManager = ServiceProvider<IAddressableManager>.Get();
         }
 
         private async void Start()
         {
-            await ServiceProvider<IDataManager>.Get().PopulateAllData();
-            var levelBlueprint = ServiceProvider<LevelBlueprint>.Get();
+            await this.dataManager.PopulateAllData();
+            await this.addressableManager.LoadScene("MainScene");
         }
     }
 }
