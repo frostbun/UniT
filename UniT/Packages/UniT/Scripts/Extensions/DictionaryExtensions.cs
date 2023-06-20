@@ -44,7 +44,7 @@ namespace UniT.Extensions
             });
         }
 
-        public static IEnumerable<KeyValuePair<TKey, TValue>> Where<TKey, TValue, TResult>(this IDictionary<TKey, TValue> dictionary, Func<TKey, TValue, bool> predicate)
+        public static IEnumerable<KeyValuePair<TKey, TValue>> Where<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, Func<TKey, TValue, bool> predicate)
         {
             foreach (var kv in dictionary)
             {
@@ -58,6 +58,14 @@ namespace UniT.Extensions
             foreach (var (key, value) in dictionary)
             {
                 yield return selector(key, value);
+            }
+        }
+
+        public static void ForEach<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, Action<TKey, TValue> action)
+        {
+            foreach (var (key, value) in dictionary)
+            {
+                action(key, value);
             }
         }
 

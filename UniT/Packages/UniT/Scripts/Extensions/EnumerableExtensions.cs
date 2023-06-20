@@ -14,7 +14,7 @@ namespace UniT.Extensions
             }
         }
 
-        public static (List<T>, List<T>) Split<T>(this IEnumerable<T> enumerable, Predicate<T> predicate)
+        public static (List<T>, List<T>) Split<T>(this IEnumerable<T> enumerable, Func<T, bool> predicate)
         {
             return enumerable.Aggregate((new List<T>(), new List<T>()), (lists, item) =>
             {
@@ -68,9 +68,9 @@ namespace UniT.Extensions
             });
         }
 
-        public static T PopOrDefault<T>(this Stack<T> stack, Func<T> defaultValueFactory = null)
+        public static T PopOrDefault<T>(this Stack<T> stack, Func<T> valueFactory = null)
         {
-            return stack.Count > 0 ? stack.Pop() : (defaultValueFactory ?? (() => default))();
+            return stack.Count > 0 ? stack.Pop() : (valueFactory ?? (() => default))();
         }
 
         public static Queue<T> ToQueue<T>(this IEnumerable<T> enumerable)
@@ -82,9 +82,9 @@ namespace UniT.Extensions
             });
         }
 
-        public static T DequeueOrDefault<T>(this Queue<T> queue, Func<T> defaultValueFactory = null)
+        public static T DequeueOrDefault<T>(this Queue<T> queue, Func<T> valueFactory = null)
         {
-            return queue.Count > 0 ? queue.Dequeue() : (defaultValueFactory ?? (() => default))();
+            return queue.Count > 0 ? queue.Dequeue() : (valueFactory ?? (() => default))();
         }
 
         public static T[,] To2DArray<T>(this T[][] source)

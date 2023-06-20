@@ -22,7 +22,7 @@ namespace UniT.Data.Base
             this.dataCache     = dataCache.ToDictionary(data => data.GetType(), data => data).AsReadOnly();
             this.handlerCache  = handlerCache.ToDictionary(handler => handler.GetType(), handler => handler).AsReadOnly();
             this.dataToHandler = dataCache.ToDictionary(data => data, data => handlerCache.Last(handler => handler.CanHandle(data.GetType()))).AsReadOnly();
-            this.dataToHandler.ForEach(kv => this.logger?.Info($"Found {kv.Key.GetType().Name} - {kv.Value.GetType().Name}", Color.green));
+            this.dataToHandler.ForEach((data, handler) => this.logger?.Info($"Found {data.GetType().Name} - {handler.GetType().Name}", Color.green));
             this.logger?.Info($"{nameof(DataManager)} instantiated with {this.dataCache.Count} data and {this.handlerCache.Count} handlers", Color.green);
         }
 

@@ -31,7 +31,7 @@ namespace UniT.Extensions
         {
             var enumerators = enumerables.GetEnumerators();
             var hasNexts    = enumerators.MoveNexts();
-            while (hasNexts.All(IsTrue))
+            while (hasNexts.All(Item.IsTrue))
             {
                 yield return enumerators.GetCurrents();
                 hasNexts = enumerators.MoveNexts();
@@ -75,9 +75,9 @@ namespace UniT.Extensions
         {
             var enumerators = enumerables.GetEnumerators();
             var hasNexts    = enumerators.MoveNexts();
-            while (hasNexts.Any(IsTrue))
+            while (hasNexts.Any(Item.IsTrue))
             {
-                yield return Enumerable.Zip(enumerators, hasNexts, GetCurrentOrDefault).ToArray();
+                yield return Zip(enumerators, hasNexts, GetCurrentOrDefault).ToArray();
                 hasNexts = enumerators.MoveNexts();
             }
 
@@ -89,7 +89,7 @@ namespace UniT.Extensions
             var pool        = enumerables.Select(enumerable => enumerable.ToList()).ToArray();
             var length      = pool.Length;
             var enumerators = pool.GetEnumerators();
-            if (!enumerators.MoveNexts().All(IsTrue))
+            if (!enumerators.MoveNexts().All(Item.IsTrue))
             {
                 enumerators.Dispose();
                 yield break;
@@ -116,12 +116,17 @@ namespace UniT.Extensions
 
         public static IEnumerable<T[]> Product<T>(IEnumerable<T> enumerable, int repeat)
         {
-            return Product(Enumerable.Repeat(enumerable, repeat).ToArray());
+            return Product(Repeat(enumerable, repeat).ToArray());
+        }
+
+        public static IEnumerable<T> Repeat<T>(T value, int count)
+        {
+            while (count-- != 0) yield return value;
         }
 
         public static IEnumerable<T> Repeat<T>(Func<T> valueFactory, int count)
         {
-            return Enumerable.Repeat(valueFactory, count).Select(factory => factory());
+            while (count-- != 0) yield return valueFactory();
         }
 
         private static IEnumerator<T>[] GetEnumerators<T>(this IEnumerable<IEnumerable<T>> enumerables) => enumerables.Select(e => e.GetEnumerator()).ToArray();
@@ -129,8 +134,5 @@ namespace UniT.Extensions
         private static T[]              GetCurrents<T>(this IEnumerable<IEnumerator<T>> enumerators)    => enumerators.Select(e => e.Current).ToArray();
         private static void             Dispose<T>(this IEnumerable<IEnumerator<T>> enumerators)        => enumerators.ForEach(enumerator => enumerator.Dispose());
         private static T                GetCurrentOrDefault<T>(IEnumerator<T> enumerator, bool hasNext) => hasNext ? enumerator.Current : default;
-        private static T                Item<T>(T item)                                                 => item;
-        private static bool             IsTrue(bool b)                                                  => b;
-        private static bool             IsFalse(bool b)                                                 => !b;
     }
 }
