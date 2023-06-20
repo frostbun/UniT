@@ -1,4 +1,4 @@
-namespace View
+namespace Scenes
 {
     using BlueprintData;
     using UniT.Addressables;
@@ -7,21 +7,26 @@ namespace View
     using UniT.Data.Json.Player;
     using UniT.Logging;
     using UniT.ObjectPool;
+    using UniT.UI;
     using UniT.Utils;
     using UnityEngine;
+    using Views;
     using ILogger = UniT.Logging.ILogger;
     using Logger = UniT.Logging.Logger;
 
-    public class LoadingView : MonoBehaviour
+    public class LoadingScene : MonoBehaviour
     {
-        private IDataManager        dataManager;
-        private IAddressableManager addressableManager;
+        [SerializeField]
+        private ViewManager viewManager;
+
+        [SerializeField]
+        private LoadingView loadingView;
 
         private void Awake()
         {
             #region ServiceProvider
 
-            ServiceProvider<ILogger>.Add(new Logger(new LogConfig(LogLevel.Info)));
+            ServiceProvider<ILogger>.Add(new Logger(new LogConfig(LogLevel.Debug)));
 
             ServiceProvider<IAddressableManager>.Add(new AddressableManager(ServiceProvider<ILogger>.Get()));
 
@@ -46,16 +51,16 @@ namespace View
                 )
             );
 
-            #endregion
+            DontDestroyOnLoad(this.viewManager);
+            this.viewManager.Inject(ServiceProvider<IAddressableManager>.Get(), ServiceProvider<ILogger>.Get());
+            ServiceProvider<IViewManager>.Add(this.viewManager);
 
-            this.dataManager        = ServiceProvider<IDataManager>.Get();
-            this.addressableManager = ServiceProvider<IAddressableManager>.Get();
+            #endregion
         }
 
-        private async void Start()
+        private void Start()
         {
-            await this.dataManager.PopulateAllData();
-            await this.addressableManager.LoadScene("MainScene");
+            this.viewManager.GetView<LoadingView, LoadingPresenter>(this.loadingView).Stack();
         }
     }
 }

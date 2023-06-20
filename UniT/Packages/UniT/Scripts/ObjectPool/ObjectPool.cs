@@ -7,21 +7,23 @@ namespace UniT.ObjectPool
 
     public class ObjectPool : MonoBehaviour
     {
-        [SerializeField] private GameObject          prefab;
-        private                  Queue<GameObject>   pooledObjects  = new();
-        private                  HashSet<GameObject> spawnedObjects = new();
+        [SerializeField]
+        private GameObject prefab;
+
+        private readonly Queue<GameObject>   pooledObjects  = new();
+        private readonly HashSet<GameObject> spawnedObjects = new();
 
         public static ObjectPool Instantiate(GameObject prefab, int initialCount)
         {
             var pool = new GameObject($"{prefab.name} Pool").AddComponent<ObjectPool>();
+            DontDestroyOnLoad(pool);
             pool.prefab = prefab;
-            pool.pooledObjects = IterTools.Repeat(() =>
+            IterTools.Repeat(() =>
             {
                 var instance = Instantiate(pool.prefab, pool.transform);
                 instance.gameObject.SetActive(false);
                 return instance;
-            }, initialCount).ToQueue();
-            DontDestroyOnLoad(pool);
+            }, initialCount).ForEach(pool.pooledObjects.Enqueue);
             return pool;
         }
 

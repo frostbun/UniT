@@ -1,19 +1,16 @@
 namespace UniT.UI
 {
+    using System;
+    using Cysharp.Threading.Tasks;
+    using UnityEngine;
+
     public interface IViewManager
     {
         public interface IViewInstance
         {
-            public enum Status
-            {
-                Closed,
-                Hidden,
-                Stacking,
-                Floating,
-                Detached,
-            }
+            public ViewStatus CurrentStatus { get; }
 
-            public Status CurrentStatus { get; }
+            public IViewInstance BindModel(object model);
 
             public void Stack();
 
@@ -25,5 +22,40 @@ namespace UniT.UI
 
             public void Close();
         }
+
+        public IViewInstance CurrentView { get; }
+
+        public IViewInstance GetView<TView, TPresenter>(TView view)
+            where TView : Component, IView
+            where TPresenter : IPresenter, new();
+
+        public UniTask<IViewInstance> GetView<TView, TPresenter>(string key)
+            where TView : Component, IView
+            where TPresenter : IPresenter, new();
+
+        public UniTask<IViewInstance> GetView<TView, TPresenter>()
+            where TView : Component, IView
+            where TPresenter : IPresenter, new();
+
+        public IViewInstance GetView<TView, TPresenter>(TView view, Func<TPresenter> presenterFactory)
+            where TView : Component, IView
+            where TPresenter : IPresenter;
+
+        public UniTask<IViewInstance> GetView<TView, TPresenter>(string key, Func<TPresenter> presenterFactory)
+            where TView : Component, IView
+            where TPresenter : IPresenter;
+
+        public UniTask<IViewInstance> GetView<TView, TPresenter>(Func<TPresenter> presenterFactory)
+            where TView : Component, IView
+            where TPresenter : IPresenter;
+    }
+
+    public enum ViewStatus
+    {
+        Closed,
+        Hidden,
+        Stacking,
+        Floating,
+        Detached,
     }
 }
