@@ -33,7 +33,7 @@ namespace UniT.Data.Json.Blueprint
 
         protected override UniTask SaveRawData_Internal(string key, string rawData)
         {
-            throw new NotImplementedException();
+            return UniTask.CompletedTask;
         }
 
         public override UniTask Flush()

@@ -20,7 +20,7 @@ namespace UniT.Data.Converters.Tuples
         {
             var items     = str.Split(this.separator);
             var itemTypes = type.GetGenericArguments();
-            if (items.Length != itemTypes.Length) throw new ArgumentException($"TupleConverter: Invalid number of items in string. Expected {itemTypes.Length}, got {items.Length}.");
+            if (items.Length != itemTypes.Length) throw new ArgumentException($"TupleConverter: Invalid number of items in string. Expected {itemTypes.Length}, got {items.Length}");
             if (items.Length == 0) return ValueTuple.Create();
             var item1 = ConverterManager.Instance.GetConverter(itemTypes[0]).ConvertFromString(items[0], itemTypes[0]);
             if (items.Length == 1) return ValueTuple.Create(item1);
@@ -38,7 +38,7 @@ namespace UniT.Data.Converters.Tuples
             if (items.Length == 7) return ValueTuple.Create(item1, item2, item3, item4, item5, item6, item7);
             var item8 = ConverterManager.Instance.GetConverter(itemTypes[7]).ConvertFromString(items[7], itemTypes[7]);
             if (items.Length == 8) return ValueTuple.Create(item1, item2, item3, item4, item5, item6, item7, item8);
-            throw new NotSupportedException("Tuples with more than 8 items are not supported.");
+            throw new NotSupportedException("Tuples with more than 8 items are not supported");
         }
 
         protected override string ConvertToString_Internal(object obj, Type type)

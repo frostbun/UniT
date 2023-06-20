@@ -21,7 +21,8 @@ namespace UniT.Data.Csv.Base
 
         protected override string SerializeData_Internal(IData data)
         {
-            throw new NotImplementedException();
+            // TODO: Implement this
+            return "";
         }
     }
 }
