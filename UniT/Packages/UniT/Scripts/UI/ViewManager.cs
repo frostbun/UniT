@@ -22,25 +22,6 @@ namespace UniT.UI
                 get => this._currentStatus;
                 private set
                 {
-                    switch (value)
-                    {
-                        case ViewStatus.Disposed:
-                            if (this._currentStatus is not ViewStatus.Hidden) this.view.OnHide();
-                            if (this.view is IDisposable disposableView) disposableView.Dispose();
-                            if (this.presenter is IDisposable disposablePresenter) disposablePresenter.Dispose();
-                            break;
-                        case ViewStatus.Hidden:
-                            if (this._currentStatus is ViewStatus.Hidden) break;
-                            this.view.gameObject.SetActive(false);
-                            this.view.OnHide();
-                            break;
-                        case ViewStatus.Stacking or ViewStatus.Floating or ViewStatus.Detached:
-                            if (this._currentStatus is ViewStatus.Stacking or ViewStatus.Floating or ViewStatus.Detached) break;
-                            this.view.OnShow();
-                            this.view.gameObject.SetActive(true);
-                            break;
-                    }
-
                     this._currentStatus = value;
                     this.manager.logger?.Debug($"{this.view.GetType().Name} status: {value}");
                 }
@@ -75,42 +56,65 @@ namespace UniT.UI
 
             public void Stack()
             {
-                this.EnsureViewIsNotDisposed();
-                this.CurrentStatus = ViewStatus.Stacking;
-                this.manager.instances.Values.Where(instance => !ReferenceEquals(instance, this) && instance.CurrentStatus is not ViewStatus.Detached).ForEach(instance =>
+                this.Show();
+                this.manager.instances.Values.Where(instance => !ReferenceEquals(instance, this) && instance.CurrentStatus is ViewStatus.Stacking or ViewStatus.Floating).ForEach(instance =>
                 {
                     instance.Hide();
                 });
+                this.CurrentStatus = ViewStatus.Stacking;
             }
 
             public void Float()
             {
-                this.EnsureViewIsNotDisposed();
+                this.Show();
                 this.CurrentStatus = ViewStatus.Floating;
             }
 
             public void Detach()
             {
-                this.EnsureViewIsNotDisposed();
+                this.Show();
                 this.CurrentStatus = ViewStatus.Detached;
+            }
+
+            private void Show()
+            {
+                this.EnsureViewIsNotDisposed();
+                this.EnsureViewIsHidden();
+                this.view.OnShow();
+                this.view.gameObject.SetActive(true);
             }
 
             public void Hide()
             {
                 this.EnsureViewIsNotDisposed();
+                if (this._currentStatus is ViewStatus.Hidden) return;
+                this.view.gameObject.SetActive(false);
+                this.view.OnHide();
                 this.CurrentStatus = ViewStatus.Hidden;
             }
 
             public void Dispose()
             {
                 this.EnsureViewIsNotDisposed();
-                this.CurrentStatus = ViewStatus.Disposed;
+                this.EnsureViewIsHidden();
+
+                if (this.view is IDisposable disposableView) disposableView.Dispose();
+                if (this.presenter is IDisposable disposablePresenter) disposablePresenter.Dispose();
+
                 this.manager.instances.Remove(this.view.GetType());
                 Destroy(this.view.gameObject);
+
                 if (this.manager.instanceToKey.Remove(this.view.GetType(), out var key))
                 {
                     this.manager.addressableManager.Unload(key);
                 }
+
+                this.CurrentStatus = ViewStatus.Disposed;
+            }
+
+            private void EnsureViewIsHidden()
+            {
+                if (this._currentStatus is not ViewStatus.Hidden) this.Hide();
             }
 
             private void EnsureViewIsNotDisposed()
