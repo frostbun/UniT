@@ -26,8 +26,9 @@ namespace UniT.Addressables
             this.logger?.Info($"{nameof(AddressableManager)} instantiated", Color.green);
         }
 
-        public UniTask<T> Load<T>(string key, IProgress<float> progress = null, CancellationToken cancellationToken = default)
+        public UniTask<T> Load<T>(string key = null, IProgress<float> progress = null, CancellationToken cancellationToken = default)
         {
+            key ??= typeof(T).GetKeyAttribute();
             return this.loadedAssets.GetOrAdd(key, () => Addressables.LoadAssetAsync<T>(key))
                        .Convert<T>()
                        .ToUniTask(progress: progress, cancellationToken: cancellationToken)
@@ -36,6 +37,17 @@ namespace UniT.Addressables
                            this.logger?.Debug($"Loaded addressable {key}");
                            progress?.Report(1);
                            return asset;
+                       });
+        }
+
+        public UniTask<T> LoadComponent<T>(string key = null, IProgress<float> progress = null, CancellationToken cancellationToken = default) where T : Component
+        {
+            return this.Load<GameObject>(key, progress, cancellationToken)
+                       .ContinueWith(gameObject =>
+                       {
+                           var component = gameObject.GetComponent<T>();
+                           if (!component) throw new InvalidOperationException($"Component {typeof(T).Name} not found in GameObject {gameObject.name}");
+                           return component;
                        });
         }
 
@@ -49,6 +61,11 @@ namespace UniT.Addressables
 
             Addressables.Release(handle);
             this.logger?.Debug($"Unloaded addressable {key}");
+        }
+
+        public void Unload<T>()
+        {
+            this.Unload(typeof(T).GetKeyAttribute());
         }
 
         public UniTask<SceneInstance> LoadScene(string sceneName, string key = null, LoadSceneMode loadMode = LoadSceneMode.Single, bool activateOnLoad = true, int priority = 100, IProgress<float> progress = null, CancellationToken cancellationToken = default)

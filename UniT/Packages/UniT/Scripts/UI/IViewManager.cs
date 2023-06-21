@@ -6,7 +6,7 @@ namespace UniT.UI
 
     public interface IViewManager
     {
-        public interface IViewInstance
+        public interface IViewInstance : IDisposable
         {
             public ViewStatus CurrentStatus { get; }
 
@@ -19,23 +19,9 @@ namespace UniT.UI
             public void Detach();
 
             public void Hide();
-
-            public void Close();
         }
 
         public IViewInstance CurrentView { get; }
-
-        public IViewInstance GetView<TView, TPresenter>(TView view)
-            where TView : Component, IView
-            where TPresenter : IPresenter, new();
-
-        public UniTask<IViewInstance> GetView<TView, TPresenter>(string key)
-            where TView : Component, IView
-            where TPresenter : IPresenter, new();
-
-        public UniTask<IViewInstance> GetView<TView, TPresenter>()
-            where TView : Component, IView
-            where TPresenter : IPresenter, new();
 
         public IViewInstance GetView<TView, TPresenter>(TView view, Func<TPresenter> presenterFactory)
             where TView : Component, IView
@@ -48,11 +34,23 @@ namespace UniT.UI
         public UniTask<IViewInstance> GetView<TView, TPresenter>(Func<TPresenter> presenterFactory)
             where TView : Component, IView
             where TPresenter : IPresenter;
+
+        public IViewInstance GetView<TView, TPresenter>(TView view)
+            where TView : Component, IView
+            where TPresenter : IPresenter, new();
+
+        public UniTask<IViewInstance> GetView<TView, TPresenter>(string key)
+            where TView : Component, IView
+            where TPresenter : IPresenter, new();
+
+        public UniTask<IViewInstance> GetView<TView, TPresenter>()
+            where TView : Component, IView
+            where TPresenter : IPresenter, new();
     }
 
     public enum ViewStatus
     {
-        Closed,
+        Disposed,
         Hidden,
         Stacking,
         Floating,

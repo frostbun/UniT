@@ -11,20 +11,8 @@ namespace UniT.UI
 
         protected TPresenter Presenter { get; private set; }
 
-        public virtual void OnInitialize()
-        {
-        }
+        public abstract void OnShow();
 
-        public virtual void OnShow()
-        {
-        }
-
-        public virtual void OnHide()
-        {
-        }
-
-        public virtual void OnClose()
-        {
-        }
+        public abstract void OnHide();
     }
 }

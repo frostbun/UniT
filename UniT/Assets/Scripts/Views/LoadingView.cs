@@ -1,8 +1,7 @@
 namespace Views
 {
-    using Cysharp.Threading.Tasks;
-    using UniT.Addressables;
     using UniT.Data.Base;
+    using UniT.Extensions;
     using UniT.UI;
     using UniT.Utils;
 
@@ -12,24 +11,27 @@ namespace Views
         {
             this.Presenter.StartLoading();
         }
+
+        public override void OnHide()
+        {
+        }
     }
 
-    public class LoadingPresenter : BasePresenter<LoadingView>
+    public class LoadingPresenter : BasePresenter<LoadingView>, IInitializable
     {
-        private IDataManager        dataManager;
-        private IAddressableManager addressableManager;
+        private IViewManager viewManager;
+        private IDataManager dataManager;
 
-        public override void OnInitialize()
+        public void Initialize()
         {
-            this.dataManager        = ServiceProvider<IDataManager>.Get();
-            this.addressableManager = ServiceProvider<IAddressableManager>.Get();
+            this.viewManager = ServiceProvider<IViewManager>.Get();
+            this.dataManager = ServiceProvider<IDataManager>.Get();
         }
 
         public async void StartLoading()
         {
             await this.dataManager.PopulateAllData();
-            await UniTask.Delay(5000);
-            await this.addressableManager.LoadScene("MainScene");
+            (await this.viewManager.GetView<HomeView, HomePresenter>()).Stack();
         }
     }
 }

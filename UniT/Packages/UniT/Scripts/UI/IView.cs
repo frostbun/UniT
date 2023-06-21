@@ -10,12 +10,8 @@ namespace UniT.UI
 
         public IPresenter Presenter { set; }
 
-        public void OnInitialize();
-
         public void OnShow();
 
         public void OnHide();
-
-        public void OnClose();
     }
 }

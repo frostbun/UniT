@@ -15,11 +15,16 @@ MonoBehaviour:
   m_GroupName: Views
   m_Data:
     m_SerializedData: []
-  m_GUID: ab46615a8cebcf446b1a3b2f7321028c
-  m_SerializeEntries: []
+  m_GUID: 58ee725269f8676499fe9259ffdc404e
+  m_SerializeEntries:
+  - m_GUID: e13d07e13919fd84f868de3865a1520a
+    m_Address: HomeView
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 15fc01fe3735b284686dbf4e3d63c602, type: 2}
   m_SchemaSet:
     m_Schemas:
-    - {fileID: 11400000, guid: 93cc6eee417c142458e181f37131e351, type: 2}
-    - {fileID: 11400000, guid: d2e948418f3a787498d88da5ac01165a, type: 2}
+    - {fileID: 11400000, guid: 02eb95511bee5984cb8bb98847b78bf9, type: 2}
+    - {fileID: 11400000, guid: 2ee4909eb6be3e448a5f189e4789a151, type: 2}

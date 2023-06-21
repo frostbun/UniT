@@ -19,21 +19,5 @@ namespace UniT.UI
         protected TView View { get; private set; }
 
         protected TModel Model { get; private set; }
-
-        public virtual void OnInitialize()
-        {
-        }
-
-        public virtual void OnShow()
-        {
-        }
-
-        public virtual void OnHide()
-        {
-        }
-
-        public virtual void OnClose()
-        {
-        }
     }
 }

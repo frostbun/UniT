@@ -24,25 +24,19 @@ namespace UniT.UI
                 {
                     switch (value)
                     {
-                        case ViewStatus.Closed:
-                            if (this._currentStatus is not ViewStatus.Hidden)
-                            {
-                                this.view.OnHide();
-                                this.presenter.OnHide();
-                            }
-                            this.view.OnClose();
-                            this.presenter.OnClose();
+                        case ViewStatus.Disposed:
+                            if (this._currentStatus is not ViewStatus.Hidden) this.view.OnHide();
+                            if (this.view is IDisposable disposableView) disposableView.Dispose();
+                            if (this.presenter is IDisposable disposablePresenter) disposablePresenter.Dispose();
                             break;
                         case ViewStatus.Hidden:
                             if (this._currentStatus is ViewStatus.Hidden) break;
                             this.view.gameObject.SetActive(false);
                             this.view.OnHide();
-                            this.presenter.OnHide();
                             break;
                         case ViewStatus.Stacking or ViewStatus.Floating or ViewStatus.Detached:
                             if (this._currentStatus is ViewStatus.Stacking or ViewStatus.Floating or ViewStatus.Detached) break;
                             this.view.OnShow();
-                            this.presenter.OnShow();
                             this.view.gameObject.SetActive(true);
                             break;
                     }
@@ -65,8 +59,8 @@ namespace UniT.UI
                 this.view.Presenter = this.presenter;
                 this.presenter.View = this.view;
 
-                this.view.OnInitialize();
-                this.presenter.OnInitialize();
+                if (this.view is IInitializable initializableView) initializableView.Initialize();
+                if (this.presenter is IInitializable initializablePresenter) initializablePresenter.Initialize();
 
                 this.view.transform.SetParent(this.manager.canvas);
                 this.manager.logger?.Debug($"Instantiated {this.view.GetType().Name}");
@@ -74,14 +68,14 @@ namespace UniT.UI
 
             public IViewManager.IViewInstance BindModel(object model)
             {
-                this.EnsureViewIsNotClosed();
+                this.EnsureViewIsNotDisposed();
                 this.presenter.Model = model;
                 return this;
             }
 
             public void Stack()
             {
-                this.EnsureViewIsNotClosed();
+                this.EnsureViewIsNotDisposed();
                 this.CurrentStatus = ViewStatus.Stacking;
                 this.manager.instances.Values.Where(instance => !ReferenceEquals(instance, this) && instance.CurrentStatus is not ViewStatus.Detached).ForEach(instance =>
                 {
@@ -91,26 +85,26 @@ namespace UniT.UI
 
             public void Float()
             {
-                this.EnsureViewIsNotClosed();
+                this.EnsureViewIsNotDisposed();
                 this.CurrentStatus = ViewStatus.Floating;
             }
 
             public void Detach()
             {
-                this.EnsureViewIsNotClosed();
+                this.EnsureViewIsNotDisposed();
                 this.CurrentStatus = ViewStatus.Detached;
             }
 
             public void Hide()
             {
-                this.EnsureViewIsNotClosed();
+                this.EnsureViewIsNotDisposed();
                 this.CurrentStatus = ViewStatus.Hidden;
             }
 
-            public void Close()
+            public void Dispose()
             {
-                this.EnsureViewIsNotClosed();
-                this.CurrentStatus = ViewStatus.Closed;
+                this.EnsureViewIsNotDisposed();
+                this.CurrentStatus = ViewStatus.Disposed;
                 this.manager.instances.Remove(this.view.GetType());
                 Destroy(this.view.gameObject);
                 if (this.manager.instanceToKey.Remove(this.view.GetType(), out var key))
@@ -119,10 +113,10 @@ namespace UniT.UI
                 }
             }
 
-            private void EnsureViewIsNotClosed()
+            private void EnsureViewIsNotDisposed()
             {
-                if (this.CurrentStatus is ViewStatus.Closed)
-                    throw new InvalidOperationException($"{this.view.GetType().Name} is already closed");
+                if (this.CurrentStatus is ViewStatus.Disposed)
+                    throw new ObjectDisposedException(this.view.GetType().Name);
             }
         }
 
@@ -167,54 +161,18 @@ namespace UniT.UI
             return manager;
         }
 
-        private IAddressableManager                          addressableManager;
-        private ILogger                                      logger;
-        private Dictionary<Type, IViewManager.IViewInstance> instances;
-        private Dictionary<Type, string>                     instanceToKey;
+        private          IAddressableManager                          addressableManager;
+        private          ILogger                                      logger;
+        private readonly Dictionary<Type, IViewManager.IViewInstance> instances     = new();
+        private readonly Dictionary<Type, string>                     instanceToKey = new();
 
         public void Inject(IAddressableManager addressableManager, ILogger logger = null)
         {
             this.addressableManager = addressableManager;
             this.logger             = logger;
-            this.instances          = new();
         }
 
         public IViewManager.IViewInstance CurrentView => this.instances.Values.FirstOrDefault(instance => instance.CurrentStatus is ViewStatus.Stacking);
-
-        public IViewManager.IViewInstance GetView<TView, TPresenter>(TView view)
-            where TView : Component, IView
-            where TPresenter : IPresenter, new()
-        {
-            return this.instances.GetOrAdd(typeof(TView), () => new ViewInstance(view, new TPresenter(), this));
-        }
-
-        public UniTask<IViewManager.IViewInstance> GetView<TView, TPresenter>(string key)
-            where TView : Component, IView
-            where TPresenter : IPresenter, new()
-        {
-            return this.instances.GetOrAdd(
-                typeof(TView),
-                () => this.addressableManager.Load<GameObject>(key)
-                          .ContinueWith(
-                              go =>
-                              {
-                                  var instance = (IViewManager.IViewInstance)new ViewInstance(
-                                      Instantiate(go).GetComponent<TView>(),
-                                      new TPresenter(),
-                                      this
-                                  );
-                                  this.instanceToKey.Add(typeof(TView), key);
-                                  return instance;
-                              })
-            );
-        }
-
-        public UniTask<IViewManager.IViewInstance> GetView<TView, TPresenter>()
-            where TView : Component, IView
-            where TPresenter : IPresenter, new()
-        {
-            return this.GetView<TView, TPresenter>(typeof(TView).GetKeyAttribute());
-        }
 
         public IViewManager.IViewInstance GetView<TView, TPresenter>(TView view, Func<TPresenter> presenterFactory)
             where TView : Component, IView
@@ -229,12 +187,12 @@ namespace UniT.UI
         {
             return this.instances.GetOrAdd(
                 typeof(TView),
-                () => this.addressableManager.Load<GameObject>(key)
+                () => this.addressableManager.LoadComponent<TView>(key)
                           .ContinueWith(
-                              go =>
+                              view =>
                               {
                                   var instance = (IViewManager.IViewInstance)new ViewInstance(
-                                      Instantiate(go).GetComponent<TView>(),
+                                      Instantiate(view),
                                       presenterFactory(),
                                       this
                                   );
@@ -249,6 +207,27 @@ namespace UniT.UI
             where TPresenter : IPresenter
         {
             return this.GetView<TView, TPresenter>(typeof(TView).GetKeyAttribute(), presenterFactory);
+        }
+
+        public IViewManager.IViewInstance GetView<TView, TPresenter>(TView view)
+            where TView : Component, IView
+            where TPresenter : IPresenter, new()
+        {
+            return this.GetView<TView, TPresenter>(view, () => new());
+        }
+
+        public UniTask<IViewManager.IViewInstance> GetView<TView, TPresenter>(string key)
+            where TView : Component, IView
+            where TPresenter : IPresenter, new()
+        {
+            return this.GetView<TView, TPresenter>(key, () => new());
+        }
+
+        public UniTask<IViewManager.IViewInstance> GetView<TView, TPresenter>()
+            where TView : Component, IView
+            where TPresenter : IPresenter, new()
+        {
+            return this.GetView<TView, TPresenter>(typeof(TView).GetKeyAttribute());
         }
     }
 }
