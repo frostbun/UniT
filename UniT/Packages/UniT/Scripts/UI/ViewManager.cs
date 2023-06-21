@@ -62,7 +62,7 @@ namespace UniT.UI
                 if (this.view is IInitializable initializableView) initializableView.Initialize();
                 if (this.presenter is IInitializable initializablePresenter) initializablePresenter.Initialize();
 
-                this.view.transform.SetParent(this.manager.canvas);
+                this.view.transform.SetParent(this.manager.canvas, false);
                 this.manager.logger?.Debug($"Instantiated {this.view.GetType().Name}");
             }
 
