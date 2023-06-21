@@ -1,5 +1,6 @@
 namespace UniT.Utils
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
 
@@ -14,7 +15,7 @@ namespace UniT.Utils
 
         public static T Get()
         {
-            return _instances.Count > 0 ? _instances[0] : null;
+            return _instances.Count > 0 ? _instances[0] : throw new InvalidOperationException($"No instance of {typeof(T).Name} found");
         }
 
         public static List<T> GetAll()
