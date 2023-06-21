@@ -12,6 +12,10 @@ namespace UniT.UI
 
         protected internal IViewManager.IViewInstance Instance { set; }
 
+        protected internal void Initialize();
+
+        protected internal void Dispose();
+
         protected internal void OnShow();
 
         protected internal void OnHide();

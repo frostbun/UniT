@@ -12,6 +12,10 @@ namespace UniT.UI
 
         IViewManager.IViewInstance IView.Instance { set => this.Instance = value; }
 
+        void IView.Initialize() => this.Initialize();
+
+        void IView.Dispose() => this.Dispose();
+
         void IView.OnShow() => this.OnShow();
 
         void IView.OnHide() => this.OnHide();
@@ -20,8 +24,20 @@ namespace UniT.UI
 
         public IViewManager.IViewInstance Instance { get; private set; }
 
-        protected abstract void OnShow();
+        protected virtual void Initialize()
+        {
+        }
 
-        protected abstract void OnHide();
+        protected virtual void Dispose()
+        {
+        }
+
+        protected virtual void OnShow()
+        {
+        }
+
+        protected virtual void OnHide()
+        {
+        }
     }
 }

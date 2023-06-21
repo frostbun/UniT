@@ -12,17 +12,14 @@ namespace Views
             this.Presenter.StartLoading();
         }
 
-        protected override void OnHide()
-        {
-        }
     }
 
-    public class LoadingPresenter : BasePresenter<LoadingView>, IInitializable
+    public class LoadingPresenter : BasePresenter<LoadingView>
     {
         private IViewManager viewManager;
         private IDataManager dataManager;
 
-        public void Initialize()
+        protected override void Initialize()
         {
             this.viewManager = ServiceProvider<IViewManager>.Get();
             this.dataManager = ServiceProvider<IDataManager>.Get();

@@ -11,18 +11,14 @@ namespace Views
         {
             this.Presenter.StartGame();
         }
-
-        protected override void OnHide()
-        {
-        }
     }
 
-    public class HomePresenter : BasePresenter<HomeView>, IInitializable
+    public class HomePresenter : BasePresenter<HomeView>
     {
         private IViewManager   viewManager;
         private GameController gameController;
 
-        public void Initialize()
+        protected override void Initialize()
         {
             this.viewManager    = ServiceProvider<IViewManager>.Get();
             this.gameController = ServiceProvider<GameController>.Get();

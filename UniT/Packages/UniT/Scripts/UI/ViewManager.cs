@@ -41,8 +41,8 @@ namespace UniT.UI
                 this.view.Presenter = this.presenter;
                 this.presenter.View = this.view;
 
-                if (this.view is IInitializable initializableView) initializableView.Initialize();
-                if (this.presenter is IInitializable initializablePresenter) initializablePresenter.Initialize();
+                this.view.Initialize();
+                this.presenter.Initialize();
 
                 this.view.transform.SetParent(this.manager.canvas, false);
                 this.manager.logger?.Debug($"Instantiated {this.view.GetType().Name}");
@@ -99,8 +99,8 @@ namespace UniT.UI
                 this.EnsureViewIsNotDisposed();
                 this.EnsureViewIsHidden();
 
-                if (this.view is IDisposable disposableView) disposableView.Dispose();
-                if (this.presenter is IDisposable disposablePresenter) disposablePresenter.Dispose();
+                this.view.Dispose();
+                this.presenter.Dispose();
 
                 this.manager.instances.Remove(this.view.GetType());
                 Destroy(this.view.gameObject);

@@ -10,8 +10,20 @@ namespace UniT.UI
 
         object IPresenter.Model { set => this.Model = (TModel)value; }
 
+        void IPresenter.Initialize() => this.Initialize();
+
+        void IPresenter.Dispose() => this.Dispose();
+
         protected TView View { get; private set; }
 
         protected TModel Model { get; private set; }
+
+        protected virtual void Initialize()
+        {
+        }
+
+        protected virtual void Dispose()
+        {
+        }
     }
 }
