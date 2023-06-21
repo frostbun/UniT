@@ -1,7 +1,6 @@
 namespace UniT.Data.Base
 {
     using System;
-    using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
     using Cysharp.Threading.Tasks;
@@ -16,7 +15,7 @@ namespace UniT.Data.Base
         private readonly ReadOnlyDictionary<Type, IDataHandler>  handlerCache;
         private readonly ReadOnlyDictionary<IData, IDataHandler> dataToHandler;
 
-        public DataManager(List<IData> dataCache, List<IDataHandler> handlerCache, ILogger logger = null)
+        public DataManager(IData[] dataCache, IDataHandler[] handlerCache, ILogger logger = null)
         {
             this.logger        = logger;
             this.dataCache     = dataCache.ToDictionary(data => data.GetType(), data => data).AsReadOnly();
