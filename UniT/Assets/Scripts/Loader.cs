@@ -10,7 +10,6 @@ using UniT.UI;
 using UniT.Utils;
 using UnityEngine;
 using Views;
-using ILogger = UniT.Logging.ILogger;
 using Logger = UniT.Logging.Logger;
 
 public class Loader : MonoBehaviour
@@ -28,35 +27,31 @@ public class Loader : MonoBehaviour
     {
         #region ServiceProvider
 
-        ServiceProvider<ILogger>.Add(new Logger(new LogConfig(LogLevel.Debug)));
+        var addressableManager = new AddressableManager(new Logger(new(LogLevel.Info)));
+        ServiceProvider<IAddressableManager>.Add(addressableManager);
 
-        ServiceProvider<IAddressableManager>.Add(new AddressableManager(ServiceProvider<ILogger>.Get()));
+        var objectPoolManager = new ObjectPoolManager(addressableManager, new Logger(new(LogLevel.Info)));
+        ServiceProvider<IObjectPoolManager>.Add(objectPoolManager);
 
-        ServiceProvider<IObjectPoolManager>.Add(
-            new ObjectPoolManager(
-                ServiceProvider<IAddressableManager>.Get(),
-                ServiceProvider<ILogger>.Get()
-            )
+        var levelBlueprint = new LevelBlueprint();
+        ServiceProvider<LevelBlueprint>.Add(levelBlueprint);
+        
+        var dataManager = new DataManager(
+            new IData[] { levelBlueprint },
+            new IDataHandler[]
+            {
+                new PlayerPrefsJsonDataHandler(),
+                new BlueprintAddressableCsvDataHandler(addressableManager),
+            },
+            new Logger(new(LogLevel.Info))
         );
-
-        ServiceProvider<LevelBlueprint>.Add(new LevelBlueprint());
-        ServiceProvider<IData>.Add(ServiceProvider<LevelBlueprint>.Get());
-        ServiceProvider<IDataHandler>.Add(
-            new PlayerPrefsJsonDataHandler(),
-            new BlueprintAddressableCsvDataHandler(ServiceProvider<IAddressableManager>.Get())
-        );
-        ServiceProvider<IDataManager>.Add(
-            new DataManager(
-                ServiceProvider<IData>.GetAll(),
-                ServiceProvider<IDataHandler>.GetAll(),
-                ServiceProvider<ILogger>.Get()
-            )
-        );
+        ServiceProvider<IDataManager>.Add(dataManager);
 
         DontDestroyOnLoad(this.viewManager);
-        this.viewManager.Inject(ServiceProvider<IAddressableManager>.Get(), ServiceProvider<ILogger>.Get());
+        this.viewManager.Inject(addressableManager, new Logger(new(LogLevel.Debug)));
         ServiceProvider<IViewManager>.Add(this.viewManager);
 
+        DontDestroyOnLoad(this.gameController);
         ServiceProvider<GameController>.Add(this.gameController);
 
         #endregion

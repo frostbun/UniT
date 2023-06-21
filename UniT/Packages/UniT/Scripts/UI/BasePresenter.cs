@@ -6,15 +6,9 @@ namespace UniT.UI
 
     public abstract class BasePresenter<TView, TModel> : IPresenter where TView : IView
     {
-        IView IPresenter.View
-        {
-            set => this.View = (TView)value;
-        }
+        IView IPresenter.View { set => this.View = (TView)value; }
 
-        object IPresenter.Model
-        {
-            set => this.Model = (TModel)value;
-        }
+        object IPresenter.Model { set => this.Model = (TModel)value; }
 
         protected TView View { get; private set; }
 

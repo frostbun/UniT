@@ -8,12 +8,12 @@ namespace UniT.Data.Json.Player
 
     public class PlayerPrefsJsonDataHandler : BaseJsonDataHandler
     {
-        public override bool CanHandle(Type type)
+        protected override bool CanHandle(Type type)
         {
             return base.CanHandle(type) && typeof(IPlayerData).IsAssignableFrom(type);
         }
 
-        public override UniTask Flush()
+        protected override UniTask Flush()
         {
             PlayerPrefs.Save();
             return UniTask.CompletedTask;

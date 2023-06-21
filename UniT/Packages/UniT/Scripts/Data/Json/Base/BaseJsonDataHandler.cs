@@ -6,7 +6,7 @@ namespace UniT.Data.Json.Base
 
     public abstract class BaseJsonDataHandler : BaseDataHandler
     {
-        public override bool CanHandle(Type type)
+        protected override bool CanHandle(Type type)
         {
             return base.CanHandle(type) && typeof(IJsonData).IsAssignableFrom(type);
         }

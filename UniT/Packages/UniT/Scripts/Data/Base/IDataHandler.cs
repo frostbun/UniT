@@ -5,12 +5,12 @@ namespace UniT.Data.Base
 
     public interface IDataHandler
     {
-        public bool CanHandle(Type type);
+        protected internal bool CanHandle(Type type);
 
-        public UniTask Populate(IData data);
+        protected internal UniTask Populate(IData data);
 
-        public UniTask Save(IData data);
+        protected internal UniTask Save(IData data);
 
-        public UniTask Flush();
+        protected internal UniTask Flush();
     }
 }

@@ -7,12 +7,12 @@ namespace Views
 
     public class HomeView : BaseView<HomePresenter>
     {
-        public override void OnShow()
+        protected override void OnShow()
         {
             this.Presenter.StartGame();
         }
 
-        public override void OnHide()
+        protected override void OnHide()
         {
         }
     }

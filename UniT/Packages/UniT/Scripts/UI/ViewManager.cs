@@ -37,6 +37,7 @@ namespace UniT.UI
                 this.presenter = presenter;
                 this.manager   = manager;
 
+                this.view.Instance  = this;
                 this.view.Presenter = this.presenter;
                 this.presenter.View = this.view;
 

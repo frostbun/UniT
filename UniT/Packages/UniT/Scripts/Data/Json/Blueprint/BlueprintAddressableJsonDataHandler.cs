@@ -16,7 +16,7 @@ namespace UniT.Data.Json.Blueprint
             this.addressableManager = addressableManager;
         }
 
-        public override bool CanHandle(Type type)
+        protected override bool CanHandle(Type type)
         {
             return base.CanHandle(type) && typeof(IBlueprintData).IsAssignableFrom(type);
         }
@@ -36,7 +36,7 @@ namespace UniT.Data.Json.Blueprint
             return UniTask.CompletedTask;
         }
 
-        public override UniTask Flush()
+        protected override UniTask Flush()
         {
             return UniTask.CompletedTask;
         }

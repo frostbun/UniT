@@ -2,8 +2,8 @@ namespace UniT.UI
 {
     public interface IPresenter
     {
-        public IView View { set; }
+        protected internal IView View { set; }
 
-        public object Model { set; }
+        protected internal object Model { set; }
     }
 }

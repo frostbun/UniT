@@ -6,12 +6,20 @@ namespace UniT.Data.Base
 
     public abstract class BaseDataHandler : IDataHandler
     {
-        public virtual bool CanHandle(Type type)
+        bool IDataHandler.CanHandle(Type type) => this.CanHandle(type);
+
+        UniTask IDataHandler.Populate(IData data) => this.Populate(data);
+
+        UniTask IDataHandler.Save(IData data) => this.Save(data);
+
+        UniTask IDataHandler.Flush() => this.Flush();
+
+        protected virtual bool CanHandle(Type type)
         {
             return typeof(IData).IsAssignableFrom(type);
         }
 
-        public UniTask Populate(IData data)
+        private UniTask Populate(IData data)
         {
             return this.GetRawData_Internal(data.GetType().GetKeyAttribute())
                        .ContinueWith(rawData =>
@@ -21,12 +29,12 @@ namespace UniT.Data.Base
                        });
         }
 
-        public UniTask Save(IData data)
+        private UniTask Save(IData data)
         {
             return this.SaveRawData_Internal(data.GetType().GetKeyAttribute(), this.SerializeData_Internal(data));
         }
 
-        public abstract UniTask Flush();
+        protected abstract UniTask Flush();
 
         protected abstract UniTask<string> GetRawData_Internal(string key);
         protected abstract UniTask         SaveRawData_Internal(string key, string rawData);

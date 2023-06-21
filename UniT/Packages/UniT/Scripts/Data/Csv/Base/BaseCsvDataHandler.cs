@@ -7,7 +7,7 @@ namespace UniT.Data.Csv.Base
 
     public abstract class BaseCsvDataHandler : BaseDataHandler
     {
-        public override bool CanHandle(Type type)
+        protected override bool CanHandle(Type type)
         {
             return base.CanHandle(type) && typeof(ICsvData).IsAssignableFrom(type);
         }

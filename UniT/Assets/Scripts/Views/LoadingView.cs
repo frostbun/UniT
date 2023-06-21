@@ -7,12 +7,12 @@ namespace Views
 
     public class LoadingView : BaseView<LoadingPresenter>
     {
-        public override void OnShow()
+        protected override void OnShow()
         {
             this.Presenter.StartLoading();
         }
 
-        public override void OnHide()
+        protected override void OnHide()
         {
         }
     }

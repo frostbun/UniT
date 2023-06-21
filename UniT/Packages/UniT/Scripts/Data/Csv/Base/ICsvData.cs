@@ -5,8 +5,8 @@ namespace UniT.Data.Csv.Base
 
     public interface ICsvData : IData
     {
-        public Type GetRowType();
+        protected internal Type GetRowType();
 
-        public void Add(object key, object value);
+        protected internal void Add(object key, object value);
     }
 }

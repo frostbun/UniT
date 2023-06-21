@@ -4,14 +4,16 @@ namespace UniT.UI
 
     public interface IView
     {
-        public GameObject gameObject { get; }
+        protected internal GameObject gameObject { get; }
 
-        public Transform transform { get; }
+        protected internal Transform transform { get; }
 
-        public IPresenter Presenter { set; }
+        protected internal IPresenter Presenter { set; }
 
-        public void OnShow();
+        protected internal IViewManager.IViewInstance Instance { set; }
 
-        public void OnHide();
+        protected internal void OnShow();
+
+        protected internal void OnHide();
     }
 }
