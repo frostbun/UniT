@@ -24,16 +24,6 @@ namespace UniT.Utils
                 this.property.subscribers.Remove(this);
                 this.isDisposed = true;
             }
-
-            public override bool Equals(object obj)
-            {
-                return obj is Subscriber other && this.callback.Equals(other.callback);
-            }
-
-            public override int GetHashCode()
-            {
-                return this.callback.GetHashCode();
-            }
         }
 
         private          T                value;
@@ -63,7 +53,7 @@ namespace UniT.Utils
 
         public void Unsubscribe(Action<T> callback)
         {
-            this.subscribers.Find(subscriber => subscriber.callback.Equals(callback))?.Dispose();
+            this.subscribers.Find(subscriber => subscriber.callback == callback)?.Dispose();
         }
     }
 }

@@ -37,15 +37,7 @@ namespace UniT.ObjectPool
 
         public UniTask InstantiatePool(string key, int initialCount = 1)
         {
-            if (this.keyToPool.TryAdd(key, null))
-            {
-                return this.addressableManager.Load<GameObject>(key).ContinueWith(prefab =>
-                {
-                    this.keyToPool[key] = this.InstantiatePool_Internal(prefab, initialCount);
-                });
-            }
-
-            return UniTask.WaitUntil(() => this.keyToPool[key]);
+            return this.keyToPool.TryAdd(key, () => this.addressableManager.Load<GameObject>(key).ContinueWith(prefab => this.InstantiatePool_Internal(prefab, initialCount)));
         }
 
         public UniTask InstantiatePool<T>(int initialCount = 1) where T : Component

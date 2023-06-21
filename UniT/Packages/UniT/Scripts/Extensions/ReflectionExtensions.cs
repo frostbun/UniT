@@ -53,15 +53,12 @@ namespace UniT.Extensions
 
         public static void CopyTo(this object from, object to)
         {
-            var fromFieldInfos = from.GetType().GetAllFields();
-            var toFieldInfos   = to.GetType().GetAllFields();
-            foreach (var fromField in fromFieldInfos)
+            foreach (var fromField in from.GetType().GetAllFields())
             {
-                var toField = toFieldInfos.FirstOrDefault(toField => toField.Name == fromField.Name && toField.FieldType.IsAssignableFrom(fromField.FieldType));
-                if (toField != null)
-                {
-                    toField.SetValue(to, fromField.GetValue(from));
-                }
+                var toField = to.GetType().GetField(fromField.Name, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                if (toField == null) return;
+                if (!toField.FieldType.IsAssignableFrom(fromField.FieldType)) return;
+                toField.SetValue(to, fromField.GetValue(from));
             }
         }
     }

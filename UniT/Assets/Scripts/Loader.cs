@@ -35,7 +35,7 @@ public class Loader : MonoBehaviour
 
         var levelBlueprint = new LevelBlueprint();
         ServiceProvider<LevelBlueprint>.Add(levelBlueprint);
-        
+
         var dataManager = new DataManager(
             new IData[] { levelBlueprint },
             new IDataHandler[]

@@ -14,7 +14,8 @@ namespace UniT.Extensions
 
         public static TValue GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<TValue> valueFactory)
         {
-            return dictionary[key] = dictionary.GetOrDefault(key, valueFactory);
+            dictionary.TryAdd(key, valueFactory);
+            return dictionary[key];
         }
 
         public static bool TryAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<TValue> valueFactory)
@@ -29,19 +30,20 @@ namespace UniT.Extensions
             return dictionary.TryGetValue(key, out var value) ? UniTask.FromResult(value) : valueFactory();
         }
 
-        public static UniTask<TValue> GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<UniTask<TValue>> valueFactory)
+        public static UniTask<TValue> GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<UniTask<TValue>> valueFactory) where TValue : class
         {
-            return dictionary.GetOrDefault(key, valueFactory).ContinueWith(value => dictionary[key] = value);
+            return dictionary.TryAdd(key, valueFactory).ContinueWith(_ => dictionary[key]);
         }
 
-        public static UniTask<bool> TryAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<UniTask<TValue>> valueFactory)
+        public static UniTask<bool> TryAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<UniTask<TValue>> valueFactory) where TValue : class
         {
-            if (dictionary.ContainsKey(key)) return UniTask.FromResult(false);
-            return valueFactory().ContinueWith(value =>
-            {
-                dictionary[key] = value;
-                return true;
-            });
+            return dictionary.TryAdd(key, (TValue)null)
+                ? valueFactory().ContinueWith(value =>
+                {
+                    dictionary[key] = value;
+                    return true;
+                })
+                : UniTask.WaitUntil(() => dictionary[key] != null).ContinueWith(() => false);
         }
 
         public static IEnumerable<KeyValuePair<TKey, TValue>> Where<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, Func<TKey, TValue, bool> predicate)
