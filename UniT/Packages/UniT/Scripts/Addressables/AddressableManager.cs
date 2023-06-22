@@ -42,7 +42,7 @@ namespace UniT.Addressables
 
         public UniTask<T> LoadComponent<T>(string key = null, IProgress<float> progress = null, CancellationToken cancellationToken = default) where T : Component
         {
-            return this.Load<GameObject>(key, progress, cancellationToken)
+            return this.Load<GameObject>(key ?? typeof(T).GetKeyAttribute(), progress, cancellationToken)
                        .ContinueWith(gameObject =>
                        {
                            var component = gameObject.GetComponent<T>();
