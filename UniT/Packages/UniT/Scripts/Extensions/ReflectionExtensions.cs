@@ -56,7 +56,7 @@ namespace UniT.Extensions
             foreach (var fromField in from.GetType().GetAllFields())
             {
                 var toField = to.GetType().GetField(fromField.Name, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-                if (toField == null) return;
+                if (toField is null) return;
                 if (!toField.FieldType.IsAssignableFrom(fromField.FieldType)) return;
                 toField.SetValue(to, fromField.GetValue(from));
             }

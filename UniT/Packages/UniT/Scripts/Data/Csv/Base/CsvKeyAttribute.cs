@@ -21,7 +21,7 @@ namespace UniT.Data.Csv.Base
         public static FieldInfo GetCsvKeyField(this Type type)
         {
             var csvKey = type.GetCustomAttribute<CsvKeyAttribute>()?.Key;
-            return csvKey == null
+            return csvKey is null
                 ? type.GetAllFields().First(field => !field.IsCsvIgnored())
                 : type.GetField(csvKey)
                   ?? type.GetField(csvKey.ToBackingFieldName())

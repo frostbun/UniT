@@ -13,8 +13,8 @@ namespace UniT.Data.Csv.Base
     {
         public static bool IsCsvIgnored(this FieldInfo fieldInfo)
         {
-            return fieldInfo.GetCustomAttribute<CsvIgnoreAttribute>() != null
-                   || fieldInfo.ToPropertyInfo()?.GetCustomAttribute<CsvIgnoreAttribute>() != null;
+            return fieldInfo.GetCustomAttribute<CsvIgnoreAttribute>() is not null
+                   || fieldInfo.ToPropertyInfo()?.GetCustomAttribute<CsvIgnoreAttribute>() is not null;
         }
     }
 }

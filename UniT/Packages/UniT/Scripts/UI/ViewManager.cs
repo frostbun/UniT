@@ -125,7 +125,7 @@ namespace UniT.UI
             private void RemoveFromStack()
             {
                 this.manager.instanceStack.Remove(this);
-                if (this.manager.CurrentView != null || this.manager.instanceStack.Count < 1) return;
+                if (this.manager.CurrentView is not null || this.manager.instanceStack.Count < 1) return;
                 this.manager.instanceStack[^1].Stack();
             }
 
