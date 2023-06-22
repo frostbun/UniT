@@ -27,9 +27,10 @@ namespace UniT.Extensions.UniTask
             tasks.Add(taskKey);
             return valueFactory().ContinueWith(value =>
             {
-                dictionary[key] = value;
                 tasks.Remove(taskKey);
-            }).ContinueWith(() => true);
+                dictionary[key] = value;
+                return true;
+            });
         }
     }
 }

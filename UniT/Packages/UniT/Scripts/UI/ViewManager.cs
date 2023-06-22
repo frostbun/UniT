@@ -7,7 +7,6 @@ namespace UniT.UI
     using UniT.Addressables;
     using UniT.Extensions;
     using UniT.Extensions.UniTask;
-    using UniT.Utils;
     using UnityEngine;
     using ILogger = UniT.Logging.ILogger;
 
@@ -63,7 +62,8 @@ namespace UniT.UI
                     .Where(instance => instance.CurrentStatus is ViewStatus.Floating or ViewStatus.Stacking)
                     .ForEach(instance => instance.Hide_Internal());
 
-                this.manager.instanceStack.Push(this);
+                this.manager.instanceStack.Remove(this);
+                this.manager.instanceStack.Add(this);
                 this.CurrentStatus = ViewStatus.Stacking;
             }
 
@@ -125,8 +125,8 @@ namespace UniT.UI
             private void RemoveFromStack()
             {
                 this.manager.instanceStack.Remove(this);
-                if (this.manager.CurrentView != null || this.manager.instanceStack.IsEmpty) return;
-                this.manager.instanceStack.Peek().Stack();
+                if (this.manager.CurrentView != null || this.manager.instanceStack.Count < 1) return;
+                this.manager.instanceStack[^1].Stack();
             }
 
             private void EnsureViewIsHidden()
@@ -148,7 +148,7 @@ namespace UniT.UI
         private          ILogger                        logger;
         private readonly Dictionary<Type, ViewInstance> instances     = new();
         private readonly Dictionary<Type, string>       keys          = new();
-        private readonly SetStack<ViewInstance>         instanceStack = new();
+        private readonly List<ViewInstance>             instanceStack = new();
 
         public void Inject(IAddressableManager addressableManager, ILogger logger = null)
         {
