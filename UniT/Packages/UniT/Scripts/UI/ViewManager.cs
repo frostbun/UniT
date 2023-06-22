@@ -7,7 +7,6 @@ namespace UniT.UI
     using UniT.Addressables;
     using UniT.Extensions;
     using UniT.Extensions.UniTask;
-    using UniT.Logging;
     using UnityEngine;
     using ILogger = UniT.Logging.ILogger;
 
@@ -151,10 +150,10 @@ namespace UniT.UI
         private readonly Dictionary<Type, string>       keys          = new();
         private readonly List<ViewInstance>             instanceStack = new();
 
-        public void Inject(IAddressableManager addressableManager)
+        public void Inject(IAddressableManager addressableManager, ILogger logger)
         {
             this.addressableManager = addressableManager;
-            this.logger             = LoggerManager.Instance.Get<IViewManager>();
+            this.logger             = logger;
             this.logger.Info($"{nameof(ViewManager)} instantiated", Color.green);
         }
 

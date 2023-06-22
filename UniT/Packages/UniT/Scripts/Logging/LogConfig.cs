@@ -17,5 +17,6 @@ namespace UniT.Logging
         Error,
         Critical,
         Exception,
+        None,
     }
 }

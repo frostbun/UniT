@@ -5,7 +5,6 @@ namespace UniT.Addressables
     using System.Threading;
     using Cysharp.Threading.Tasks;
     using UniT.Extensions;
-    using UniT.Logging;
     using UnityEngine;
     using UnityEngine.AddressableAssets;
     using UnityEngine.ResourceManagement.AsyncOperations;
@@ -19,11 +18,11 @@ namespace UniT.Addressables
         private readonly Dictionary<string, AsyncOperationHandle>                loadedAssets;
         private readonly Dictionary<string, AsyncOperationHandle<SceneInstance>> loadedScenes;
 
-        public AddressableManager()
+        public AddressableManager(ILogger logger)
         {
             this.loadedAssets = new();
             this.loadedScenes = new();
-            this.logger       = LoggerManager.Instance.Get<IAddressableManager>();
+            this.logger       = logger;
             this.logger.Info($"{nameof(AddressableManager)} instantiated", Color.green);
         }
 

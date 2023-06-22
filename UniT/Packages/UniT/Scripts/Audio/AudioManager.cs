@@ -2,7 +2,6 @@ namespace UniT.Audio
 {
     using System;
     using UniT.Addressables;
-    using UniT.Logging;
     using UniT.ObjectPool;
     using UnityEngine;
     using ILogger = UniT.Logging.ILogger;
@@ -13,11 +12,11 @@ namespace UniT.Audio
         private readonly IObjectPoolManager  objectPoolManager;
         private readonly ILogger             logger;
 
-        public AudioManager(IAddressableManager addressableManager, IObjectPoolManager objectPoolManager)
+        public AudioManager(IAddressableManager addressableManager, IObjectPoolManager objectPoolManager, ILogger logger)
         {
             this.addressableManager = addressableManager;
             this.objectPoolManager  = objectPoolManager;
-            this.logger             = LoggerManager.Instance.Get<IAudioManager>();
+            this.logger             = logger;
             this.logger.Info($"{nameof(AudioManager)} instantiated", Color.green);
         }
 
