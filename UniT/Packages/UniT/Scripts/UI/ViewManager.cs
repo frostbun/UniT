@@ -82,8 +82,7 @@ namespace UniT.UI
             public void Hide()
             {
                 this.Hide_Internal();
-                if (this.manager.CurrentView != null || this.manager.instanceStack.IsEmpty) return;
-                this.manager.instanceStack.Peek().Stack();
+                this.RemoveFromStack();
             }
 
             public void Dispose()
@@ -95,7 +94,7 @@ namespace UniT.UI
                 this.presenter.Dispose();
 
                 this.manager.instances.Remove(this.view.GetType());
-                this.manager.instanceStack.Remove(this);
+                this.RemoveFromStack();
 
                 Destroy(this.view.gameObject);
 
@@ -121,6 +120,13 @@ namespace UniT.UI
                 this.view.gameObject.SetActive(false);
                 this.view.OnHide();
                 this.CurrentStatus = ViewStatus.Hidden;
+            }
+
+            private void RemoveFromStack()
+            {
+                this.manager.instanceStack.Remove(this);
+                if (this.manager.CurrentView != null || this.manager.instanceStack.IsEmpty) return;
+                this.manager.instanceStack.Peek().Stack();
             }
 
             private void EnsureViewIsHidden()
