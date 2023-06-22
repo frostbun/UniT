@@ -3,7 +3,6 @@ namespace UniT.Extensions
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using Cysharp.Threading.Tasks;
 
     public static class DictionaryExtensions
     {
@@ -23,27 +22,6 @@ namespace UniT.Extensions
             if (dictionary.ContainsKey(key)) return false;
             dictionary[key] = valueFactory();
             return true;
-        }
-
-        public static UniTask<TValue> GetOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<UniTask<TValue>> valueFactory)
-        {
-            return dictionary.TryGetValue(key, out var value) ? UniTask.FromResult(value) : valueFactory();
-        }
-
-        public static UniTask<TValue> GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<UniTask<TValue>> valueFactory) where TValue : class
-        {
-            return dictionary.TryAdd(key, valueFactory).ContinueWith(_ => dictionary[key]);
-        }
-
-        public static UniTask<bool> TryAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<UniTask<TValue>> valueFactory) where TValue : class
-        {
-            return dictionary.TryAdd(key, (TValue)null)
-                ? valueFactory().ContinueWith(value =>
-                {
-                    dictionary[key] = value;
-                    return true;
-                })
-                : UniTask.WaitUntil(() => dictionary[key] != null).ContinueWith(() => false);
         }
 
         public static IEnumerable<KeyValuePair<TKey, TValue>> Where<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, Func<TKey, TValue, bool> predicate)

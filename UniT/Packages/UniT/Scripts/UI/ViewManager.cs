@@ -6,6 +6,8 @@ namespace UniT.UI
     using Cysharp.Threading.Tasks;
     using UniT.Addressables;
     using UniT.Extensions;
+    using UniT.Extensions.UniTask;
+    using UniT.Utils;
     using UnityEngine;
     using ILogger = UniT.Logging.ILogger;
 
@@ -42,6 +44,7 @@ namespace UniT.UI
                 this.view.Initialize();
                 this.presenter.Initialize();
 
+                this.view.transform.SetParent(this.manager.canvas, false);
                 this.manager.logger?.Debug($"Instantiated {this.view.GetType().Name}");
             }
 
@@ -54,54 +57,33 @@ namespace UniT.UI
 
             public void Stack()
             {
-                this.EnsureViewIsHidden();
+                this.Show_Internal();
 
                 this.manager.instances.Values
-                    .Where(instance => instance.CurrentStatus is ViewStatus.Floating)
-                    .ForEach(instance => instance.Hide());
+                    .Where(instance => instance.CurrentStatus is ViewStatus.Floating or ViewStatus.Stacking)
+                    .ForEach(instance => instance.Hide_Internal());
 
-                if (this.manager.CurrentView is ViewInstance currentInstance)
-                {
-                    currentInstance.view.OnHide();
-                    currentInstance.CurrentStatus = ViewStatus.Hidden;
-                }
-
-                this.view.OnShow();
-                this.view.transform.SetParent(this.manager.stackingViewsContainer, false);
-                this.view.transform.SetAsLastSibling();
+                this.manager.instanceStack.Push(this);
                 this.CurrentStatus = ViewStatus.Stacking;
             }
 
             public void Float()
             {
-                this.EnsureViewIsHidden();
-                this.view.OnShow();
-                this.view.transform.SetParent(this.manager.floatingViewsContainer, false);
-                this.view.transform.SetAsLastSibling();
+                this.Show_Internal();
                 this.CurrentStatus = ViewStatus.Floating;
             }
 
             public void Detach()
             {
-                this.EnsureViewIsHidden();
-                this.view.OnShow();
-                this.view.transform.SetParent(this.manager.detachedViewsContainer, false);
-                this.view.transform.SetAsLastSibling();
+                this.Show_Internal();
                 this.CurrentStatus = ViewStatus.Detached;
             }
 
             public void Hide()
             {
-                this.EnsureViewIsNotDisposed();
-                if (this._currentStatus is ViewStatus.Hidden) return;
-                this.view.transform.SetParent(this.manager.hiddenViewsContainer, false);
-                this.view.OnHide();
-                this.CurrentStatus = ViewStatus.Hidden;
-
-                if (this.manager.CurrentView != null || this.manager.stackingViewsContainer.childCount <= 0) return;
-                var nextView     = this.manager.stackingViewsContainer.GetChild(this.manager.stackingViewsContainer.childCount - 1);
-                var nextInstance = this.manager.instances[nextView.GetType()];
-                nextInstance.Stack();
+                this.Hide_Internal();
+                if (this.manager.CurrentView != null || this.manager.instanceStack.IsEmpty) return;
+                this.manager.instanceStack.Peek().Stack();
             }
 
             public void Dispose()
@@ -113,6 +95,8 @@ namespace UniT.UI
                 this.presenter.Dispose();
 
                 this.manager.instances.Remove(this.view.GetType());
+                this.manager.instanceStack.Remove(this);
+
                 Destroy(this.view.gameObject);
 
                 if (this.manager.keys.Remove(this.view.GetType(), out var key))
@@ -123,10 +107,26 @@ namespace UniT.UI
                 this.CurrentStatus = ViewStatus.Disposed;
             }
 
+            private void Show_Internal()
+            {
+                this.EnsureViewIsHidden();
+                this.view.OnShow();
+                this.view.gameObject.SetActive(true);
+            }
+
+            private void Hide_Internal()
+            {
+                this.EnsureViewIsNotDisposed();
+                if (this._currentStatus is ViewStatus.Hidden) return;
+                this.view.gameObject.SetActive(false);
+                this.view.OnHide();
+                this.CurrentStatus = ViewStatus.Hidden;
+            }
+
             private void EnsureViewIsHidden()
             {
                 this.EnsureViewIsNotDisposed();
-                if (this._currentStatus is not ViewStatus.Hidden) this.Hide();
+                if (this._currentStatus is not ViewStatus.Hidden) this.Hide_Internal();
             }
 
             private void EnsureViewIsNotDisposed()
@@ -136,21 +136,13 @@ namespace UniT.UI
         }
 
         [SerializeField]
-        private RectTransform stackingViewsContainer;
-
-        [SerializeField]
-        private RectTransform floatingViewsContainer;
-
-        [SerializeField]
-        private RectTransform detachedViewsContainer;
-
-        [SerializeField]
-        private RectTransform hiddenViewsContainer;
+        private RectTransform canvas;
 
         private          IAddressableManager            addressableManager;
         private          ILogger                        logger;
-        private readonly Dictionary<Type, ViewInstance> instances = new();
-        private readonly Dictionary<Type, string>       keys      = new();
+        private readonly Dictionary<Type, ViewInstance> instances     = new();
+        private readonly Dictionary<Type, string>       keys          = new();
+        private readonly SetStack<ViewInstance>         instanceStack = new();
 
         public void Inject(IAddressableManager addressableManager, ILogger logger = null)
         {
@@ -158,7 +150,7 @@ namespace UniT.UI
             this.logger             = logger;
         }
 
-        public IViewManager.IViewInstance CurrentView => this.instances.Values.FirstOrDefault(instance => instance.CurrentStatus is ViewStatus.Stacking);
+        public IViewManager.IViewInstance CurrentView => this.instances.Values.SingleOrDefault(instance => instance.CurrentStatus is ViewStatus.Stacking);
 
         public IViewManager.IViewInstance GetView<TView, TPresenter>(TView view, Func<TPresenter> presenterFactory)
             where TView : Component, IView
@@ -183,7 +175,7 @@ namespace UniT.UI
                                   this
                               );
                           })
-            ).ContinueWith(instance => (IViewManager.IViewInstance)instance);
+            ).Cast<ViewInstance, IViewManager.IViewInstance>();
         }
 
         public UniTask<IViewManager.IViewInstance> GetView<TView, TPresenter>(Func<TPresenter> presenterFactory)

@@ -4,6 +4,7 @@ namespace UniT.ObjectPool
     using Cysharp.Threading.Tasks;
     using UniT.Addressables;
     using UniT.Extensions;
+    using UniT.Extensions.UniTask;
     using UnityEngine;
     using ILogger = UniT.Logging.ILogger;
 
