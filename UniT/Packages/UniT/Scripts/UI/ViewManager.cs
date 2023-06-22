@@ -23,7 +23,7 @@ namespace UniT.UI
                 private set
                 {
                     this._currentStatus = value;
-                    this.manager.logger?.Debug($"{this.view.GetType().Name} status: {value}");
+                    this.manager.logger.Debug($"{this.view.GetType().Name} status: {value}");
                 }
             }
 
@@ -45,7 +45,7 @@ namespace UniT.UI
                 this.presenter.Initialize();
 
                 this.view.transform.SetParent(this.manager.canvas, false);
-                this.manager.logger?.Debug($"Instantiated {this.view.GetType().Name}");
+                this.manager.logger.Debug($"Instantiated {this.view.GetType().Name}");
             }
 
             public IViewManager.IViewInstance BindModel(object model)
@@ -155,7 +155,7 @@ namespace UniT.UI
         {
             this.addressableManager = addressableManager;
             this.logger             = LoggerManager.Instance.Get<IViewManager>();
-            this.logger?.Info($"{nameof(ViewManager)} instantiated", Color.green);
+            this.logger.Info($"{nameof(ViewManager)} instantiated", Color.green);
         }
 
         public IViewManager.IViewInstance CurrentView => this.instances.Values.SingleOrDefault(instance => instance.CurrentStatus is ViewStatus.Stacking);

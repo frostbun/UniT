@@ -22,8 +22,8 @@ namespace UniT.Data.Base
             this.handlerCache  = handlerCache.ToDictionary(handler => handler.GetType(), handler => handler).AsReadOnly();
             this.dataToHandler = dataCache.ToDictionary(data => data, data => handlerCache.Last(handler => handler.CanHandle(data.GetType()))).AsReadOnly();
             this.logger        = LoggerManager.Instance.Get<IDataManager>();
-            this.dataToHandler.ForEach((data, handler) => this.logger?.Info($"Found {data.GetType().Name} - {handler.GetType().Name}", Color.green));
-            this.logger?.Info($"{nameof(DataManager)} instantiated with {this.dataCache.Count} data and {this.handlerCache.Count} handlers", Color.green);
+            this.dataToHandler.ForEach((data, handler) => this.logger.Info($"Found {data.GetType().Name} - {handler.GetType().Name}", Color.green));
+            this.logger.Info($"{nameof(DataManager)} instantiated with {this.dataCache.Count} data and {this.handlerCache.Count} handlers", Color.green);
         }
 
         public UniTask PopulateData(Type type)
@@ -31,7 +31,7 @@ namespace UniT.Data.Base
             var data    = this.dataCache[type];
             var handler = this.dataToHandler[data];
             return handler.Populate(data)
-                          .ContinueWith(() => this.logger?.Debug($"Loaded {type.Name}"));
+                          .ContinueWith(() => this.logger.Debug($"Loaded {type.Name}"));
         }
 
         public UniTask SaveData(Type type)
@@ -39,13 +39,13 @@ namespace UniT.Data.Base
             var data    = this.dataCache[type];
             var handler = this.dataToHandler[data];
             return handler.Save(data)
-                          .ContinueWith(() => this.logger?.Debug($"Saved {type.Name}"));
+                          .ContinueWith(() => this.logger.Debug($"Saved {type.Name}"));
         }
 
         public UniTask FlushHandler(Type type)
         {
             return this.handlerCache[type].Flush()
-                       .ContinueWith(() => this.logger?.Debug($"Flushed {type.Name}"));
+                       .ContinueWith(() => this.logger.Debug($"Flushed {type.Name}"));
         }
 
         public UniTask PopulateData<TData>() where TData : IData

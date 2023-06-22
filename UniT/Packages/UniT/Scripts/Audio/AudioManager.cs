@@ -18,7 +18,7 @@ namespace UniT.Audio
             this.addressableManager = addressableManager;
             this.objectPoolManager  = objectPoolManager;
             this.logger             = LoggerManager.Instance.Get<IAudioManager>();
-            this.logger?.Info($"{nameof(AudioManager)} instantiated", Color.green);
+            this.logger.Info($"{nameof(AudioManager)} instantiated", Color.green);
         }
 
         #region Sound
