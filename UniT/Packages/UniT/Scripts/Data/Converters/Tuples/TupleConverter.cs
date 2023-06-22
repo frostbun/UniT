@@ -16,7 +16,7 @@ namespace UniT.Data.Converters.Tuples
 
         protected override Type ConvertibleType => typeof(ITuple);
 
-        protected override object ConvertFromString_Internal(string str, Type type)
+        protected override object ConvertFromString(string str, Type type)
         {
             var items     = str.Split(this.separator);
             var itemTypes = type.GetGenericArguments();
@@ -41,7 +41,7 @@ namespace UniT.Data.Converters.Tuples
             throw new NotSupportedException("Tuples with more than 8 items are not supported");
         }
 
-        protected override string ConvertToString_Internal(object obj, Type type)
+        protected override string ConvertToString(object obj, Type type)
         {
             var tuple     = (ITuple)obj;
             var itemTypes = type.GetGenericArguments();

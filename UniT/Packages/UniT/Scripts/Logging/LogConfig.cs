@@ -5,12 +5,7 @@ namespace UniT.Logging
 
     public class LogConfig
     {
-        public readonly LogLevel logLevel;
-
-        public LogConfig(LogLevel logLevel)
-        {
-            this.logLevel = logLevel;
-        }
+        public LogLevel Level { get; set; } = LogLevel.Info;
     }
 
     [JsonConverter(typeof(StringEnumConverter))]

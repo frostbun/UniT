@@ -15,7 +15,7 @@ namespace UniT.Data.Converters.Collections
 
         protected override Type ConvertibleType => typeof(Array);
 
-        protected override object ConvertFromString_Internal(string str, Type type)
+        protected override object ConvertFromString(string str, Type type)
         {
             var elementType      = type.GetElementType();
             var elementConverter = ConverterManager.Instance.GetConverter(elementType);
@@ -29,7 +29,7 @@ namespace UniT.Data.Converters.Collections
             return array;
         }
 
-        protected override string ConvertToString_Internal(object obj, Type type)
+        protected override string ConvertToString(object obj, Type type)
         {
             var elementType      = type.GetElementType();
             var elementConverter = ConverterManager.Instance.GetConverter(elementType);

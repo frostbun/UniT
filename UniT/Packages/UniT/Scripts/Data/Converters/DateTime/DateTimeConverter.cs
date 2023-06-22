@@ -17,12 +17,12 @@ namespace UniT.Data.Converters.DateTime
 
         protected override Type ConvertibleType => typeof(DateTime);
 
-        protected override object ConvertFromString_Internal(string str, Type type)
+        protected override object ConvertFromString(string str, Type type)
         {
             return DateTime.ParseExact(str, this.format, this.cultureInfo);
         }
 
-        protected override string ConvertToString_Internal(object obj, Type type)
+        protected override string ConvertToString(object obj, Type type)
         {
             return ((DateTime)obj).ToString(this.format, this.cultureInfo);
         }

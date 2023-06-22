@@ -19,12 +19,12 @@ namespace UniT.Data.Json.Player
             return UniTask.CompletedTask;
         }
 
-        protected override UniTask<string> GetRawData_Internal(string key)
+        protected override UniTask<string> GetRawData(string key)
         {
             return UniTask.FromResult(PlayerPrefs.GetString(key));
         }
 
-        protected override UniTask SaveRawData_Internal(string key, string json)
+        protected override UniTask SaveRawData(string key, string json)
         {
             PlayerPrefs.SetString(key, json);
             return UniTask.CompletedTask;

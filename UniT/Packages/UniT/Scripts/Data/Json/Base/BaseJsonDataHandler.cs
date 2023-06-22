@@ -11,12 +11,12 @@ namespace UniT.Data.Json.Base
             return base.CanHandle(type) && typeof(IJsonData).IsAssignableFrom(type);
         }
 
-        protected override void PopulateData_Internal(string rawData, IData data)
+        protected override void PopulateData(string rawData, IData data)
         {
             JsonConvert.PopulateObject(rawData, data);
         }
 
-        protected override string SerializeData_Internal(IData data)
+        protected override string SerializeData(IData data)
         {
             return JsonConvert.SerializeObject(data);
         }

@@ -5,7 +5,7 @@ namespace UniT.Data.Converters.Base
 
     public abstract class BaseGenericConverter : BaseConverter
     {
-        public override bool CanConvert(Type type)
+        protected override bool CanConvert(Type type)
         {
             return type.DeriveFromGenericType(this.ConvertibleType);
         }

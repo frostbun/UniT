@@ -7,12 +7,12 @@ namespace UniT.Data.Converters.Base
     {
         protected override Type ConvertibleType => typeof(object);
 
-        protected override object ConvertFromString_Internal(string str, Type type)
+        protected override object ConvertFromString(string str, Type type)
         {
             return JsonConvert.DeserializeObject(str, type);
         }
 
-        protected override string ConvertToString_Internal(object obj, Type type)
+        protected override string ConvertToString(object obj, Type type)
         {
             return JsonConvert.SerializeObject(obj);
         }

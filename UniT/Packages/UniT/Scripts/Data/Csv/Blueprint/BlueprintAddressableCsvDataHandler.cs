@@ -21,7 +21,7 @@ namespace UniT.Data.Csv.Blueprint
             return base.CanHandle(type) && typeof(IBlueprintData).IsAssignableFrom(type);
         }
 
-        protected override UniTask<string> GetRawData_Internal(string key)
+        protected override UniTask<string> GetRawData(string key)
         {
             return this.addressableManager.Load<TextAsset>(key).ContinueWith(blueprint =>
             {
@@ -31,7 +31,7 @@ namespace UniT.Data.Csv.Blueprint
             });
         }
 
-        protected override UniTask SaveRawData_Internal(string key, string rawData)
+        protected override UniTask SaveRawData(string key, string rawData)
         {
             return UniTask.CompletedTask;
         }

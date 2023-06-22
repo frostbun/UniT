@@ -4,16 +4,13 @@ namespace UniT.Data.Converters.Base
 
     public abstract class BaseConverter : IConverter
     {
-        public virtual bool CanConvert(Type type)
-        {
-            return this.ConvertibleType.IsAssignableFrom(type);
-        }
+        bool IConverter.CanConvert(Type type) => this.CanConvert(type);
 
-        public object ConvertFromString(string str, Type type)
+        object IConverter.ConvertFromString(string str, Type type)
         {
             try
             {
-                return this.ConvertFromString_Internal(str, type);
+                return this.ConvertFromString(str, type);
             }
             catch (Exception e)
             {
@@ -21,11 +18,11 @@ namespace UniT.Data.Converters.Base
             }
         }
 
-        public string ConvertToString(object obj, Type type)
+        string IConverter.ConvertToString(object obj, Type type)
         {
             try
             {
-                return this.ConvertToString_Internal(obj, type);
+                return this.ConvertToString(obj, type);
             }
             catch (Exception e)
             {
@@ -33,8 +30,12 @@ namespace UniT.Data.Converters.Base
             }
         }
 
-        protected abstract Type   ConvertibleType { get; }
-        protected abstract object ConvertFromString_Internal(string str, Type type);
-        protected abstract string ConvertToString_Internal(object obj, Type type);
+        protected virtual bool CanConvert(Type type) => this.ConvertibleType.IsAssignableFrom(type);
+
+        protected abstract Type ConvertibleType { get; }
+
+        protected abstract object ConvertFromString(string str, Type type);
+
+        protected abstract string ConvertToString(object obj, Type type);
     }
 }

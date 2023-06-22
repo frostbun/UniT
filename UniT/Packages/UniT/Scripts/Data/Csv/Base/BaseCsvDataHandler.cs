@@ -12,14 +12,14 @@ namespace UniT.Data.Csv.Base
             return base.CanHandle(type) && typeof(ICsvData).IsAssignableFrom(type);
         }
 
-        protected override void PopulateData_Internal(string rawData, IData data)
+        protected override void PopulateData(string rawData, IData data)
         {
             using var reader = CsvDataReader.Create(new StringReader(rawData), new() { Delimiter = ',' });
             var       parser = new CsvParser((ICsvData)data, reader);
             while (reader.Read()) parser.Parse();
         }
 
-        protected override string SerializeData_Internal(IData data)
+        protected override string SerializeData(IData data)
         {
             // TODO: Implement this
             return "";

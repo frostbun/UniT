@@ -7,12 +7,12 @@ namespace UniT.Data.Converters.Primitives
     {
         protected override Type ConvertibleType => typeof(ulong);
 
-        protected override object ConvertFromString_Internal(string str, Type type)
+        protected override object ConvertFromString(string str, Type type)
         {
             return ulong.Parse(str);
         }
 
-        protected override string ConvertToString_Internal(object obj, Type type)
+        protected override string ConvertToString(object obj, Type type)
         {
             return obj.ToString();
         }

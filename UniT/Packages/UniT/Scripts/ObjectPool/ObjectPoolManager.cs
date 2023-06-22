@@ -5,6 +5,7 @@ namespace UniT.ObjectPool
     using UniT.Addressables;
     using UniT.Extensions;
     using UniT.Extensions.UniTask;
+    using UniT.Logging;
     using UnityEngine;
     using ILogger = UniT.Logging.ILogger;
 
@@ -16,13 +17,13 @@ namespace UniT.ObjectPool
         private readonly Dictionary<string, ObjectPool>     keyToPool;
         private readonly Dictionary<GameObject, ObjectPool> instanceToPool;
 
-        public ObjectPoolManager(IAddressableManager addressableManager, ILogger logger = null)
+        public ObjectPoolManager(IAddressableManager addressableManager)
         {
             this.addressableManager = addressableManager;
-            this.logger             = logger;
             this.prefabToPool       = new();
             this.keyToPool          = new();
             this.instanceToPool     = new();
+            this.logger             = LoggerManager.Instance.Get<IObjectPoolManager>();
             this.logger?.Info($"{nameof(ObjectPoolManager)} instantiated", Color.green);
         }
 

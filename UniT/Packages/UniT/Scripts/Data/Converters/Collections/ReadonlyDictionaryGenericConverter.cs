@@ -9,14 +9,14 @@ namespace UniT.Data.Converters.Collections
     {
         protected override Type ConvertibleType => typeof(ReadOnlyDictionary<,>);
 
-        protected override object ConvertFromString_Internal(string str, Type type)
+        protected override object ConvertFromString(string str, Type type)
         {
             var dictionaryType      = typeof(Dictionary<,>).MakeGenericType(type.GetGenericArguments());
             var dictionaryConverter = ConverterManager.Instance.GetConverter(dictionaryType);
             return Activator.CreateInstance(type, dictionaryConverter.ConvertFromString(str, dictionaryType));
         }
 
-        protected override string ConvertToString_Internal(object obj, Type type)
+        protected override string ConvertToString(object obj, Type type)
         {
             var dictionaryType      = typeof(Dictionary<,>).MakeGenericType(type.GetGenericArguments());
             var dictionaryConverter = ConverterManager.Instance.GetConverter(dictionaryType);

@@ -11,9 +11,7 @@ namespace UniT.Data.Converters.Base
 
     public class ConverterManager
     {
-        private static ConverterManager _instance;
-        public static  ConverterManager Instance  => _instance ??= new();
-        public static  void             Dispose() => _instance = null;
+        public static readonly ConverterManager Instance = new();
 
         private readonly List<IConverter> converters = new();
 

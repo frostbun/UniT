@@ -5,6 +5,8 @@ namespace UniT.Logging
 
     public interface ILogger
     {
+        public LogConfig Config { get; }
+
         public void Debug(string message, Color? color = null);
 
         public void Info(string message, Color? color = null);

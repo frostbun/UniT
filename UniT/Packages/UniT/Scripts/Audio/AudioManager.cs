@@ -4,6 +4,8 @@ namespace UniT.Audio
     using UniT.Addressables;
     using UniT.Logging;
     using UniT.ObjectPool;
+    using UnityEngine;
+    using ILogger = UniT.Logging.ILogger;
 
     public class AudioManager : IAudioManager
     {
@@ -11,11 +13,12 @@ namespace UniT.Audio
         private readonly IObjectPoolManager  objectPoolManager;
         private readonly ILogger             logger;
 
-        public AudioManager(IAddressableManager addressableManager, IObjectPoolManager objectPoolManager, ILogger logger)
+        public AudioManager(IAddressableManager addressableManager, IObjectPoolManager objectPoolManager)
         {
             this.addressableManager = addressableManager;
             this.objectPoolManager  = objectPoolManager;
-            this.logger             = logger;
+            this.logger             = LoggerManager.Instance.Get<IAudioManager>();
+            this.logger?.Info($"{nameof(AudioManager)} instantiated", Color.green);
         }
 
         #region Sound
