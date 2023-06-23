@@ -25,10 +25,11 @@ namespace UniT.Extensions.UniTask
             var taskKey = ((IDictionary)dictionary, key);
             if (tasks.Contains(taskKey)) return UniTask.WaitUntil(() => !tasks.Contains(taskKey)).ContinueWith(() => false);
             tasks.Add(taskKey);
-            return valueFactory().ContinueWith(value =>
+            return valueFactory().SuppressCancellationThrow().ContinueWith(task =>
             {
                 tasks.Remove(taskKey);
-                dictionary[key] = value;
+                if (task.IsCanceled) throw new OperationCanceledException();
+                dictionary[key] = task.Result;
                 return true;
             });
         }
