@@ -4,7 +4,6 @@ using UniT.Addressables;
 using UniT.Data.Base;
 using UniT.Data.Csv.Blueprint;
 using UniT.Data.Json.Player;
-using UniT.Logging;
 using UniT.ObjectPool;
 using UniT.UI;
 using UniT.Utils;
@@ -48,7 +47,7 @@ public class Loader : MonoBehaviour
         ServiceProvider<IDataManager>.Add(dataManager);
 
         DontDestroyOnLoad(this.viewManager);
-        this.viewManager.Inject(addressableManager, new Logger());
+        this.viewManager.Inject(new PresenterFactory(), addressableManager, new Logger());
         ServiceProvider<IViewManager>.Add(this.viewManager);
 
         DontDestroyOnLoad(this.gameController);

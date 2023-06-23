@@ -1,6 +1,7 @@
 namespace UniT.UI
 {
     using System;
+    using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
     using UnityEngine;
 
@@ -8,6 +9,8 @@ namespace UniT.UI
     {
         public interface IViewInstance : IDisposable
         {
+            public IViewManager Manager { get; }
+
             public ViewStatus CurrentStatus { get; }
 
             public IViewInstance BindModel(object model);
@@ -21,31 +24,23 @@ namespace UniT.UI
             public void Hide();
         }
 
-        public IViewInstance CurrentView { get; }
+        public IViewInstance StackingView { get; }
 
-        public IViewInstance GetView<TView, TPresenter>(TView view, Func<TPresenter> presenterFactory)
-            where TView : Component, IView
-            where TPresenter : IPresenter;
+        public IEnumerable<IViewInstance> FloatingViews { get; }
 
-        public UniTask<IViewInstance> GetView<TView, TPresenter>(string key, Func<TPresenter> presenterFactory)
-            where TView : Component, IView
-            where TPresenter : IPresenter;
-
-        public UniTask<IViewInstance> GetView<TView, TPresenter>(Func<TPresenter> presenterFactory)
-            where TView : Component, IView
-            where TPresenter : IPresenter;
+        public IEnumerable<IViewInstance> DetachedViews { get; }
 
         public IViewInstance GetView<TView, TPresenter>(TView view)
             where TView : Component, IView
-            where TPresenter : IPresenter, new();
+            where TPresenter : IPresenter;
 
         public UniTask<IViewInstance> GetView<TView, TPresenter>(string key)
             where TView : Component, IView
-            where TPresenter : IPresenter, new();
+            where TPresenter : IPresenter;
 
         public UniTask<IViewInstance> GetView<TView, TPresenter>()
             where TView : Component, IView
-            where TPresenter : IPresenter, new();
+            where TPresenter : IPresenter;
     }
 
     public enum ViewStatus

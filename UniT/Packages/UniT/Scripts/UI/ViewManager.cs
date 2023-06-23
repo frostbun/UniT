@@ -14,6 +14,8 @@ namespace UniT.UI
     {
         private class ViewInstance : IViewManager.IViewInstance
         {
+            public IViewManager Manager => this.manager;
+
             private ViewStatus _currentStatus = ViewStatus.Hidden;
 
             public ViewStatus CurrentStatus
@@ -29,12 +31,14 @@ namespace UniT.UI
             private readonly IView       view;
             private readonly IPresenter  presenter;
             private readonly ViewManager manager;
+            public readonly  Transform   transform;
 
             public ViewInstance(IView view, IPresenter presenter, ViewManager manager)
             {
                 this.view      = view;
                 this.presenter = presenter;
                 this.manager   = manager;
+                this.transform = view.transform;
 
                 this.view.Instance  = this;
                 this.view.Presenter = this.presenter;
@@ -43,7 +47,6 @@ namespace UniT.UI
                 this.view.Initialize();
                 this.presenter.Initialize();
 
-                this.view.transform.SetParent(this.manager.canvas, false);
                 this.manager.logger.Debug($"Instantiated {this.view.GetType().Name}");
             }
 
@@ -56,12 +59,13 @@ namespace UniT.UI
 
             public void Stack()
             {
-                this.Show_Internal();
-
+                this.EnsureViewIsHidden();
+                this.view.OnShow();
+                this.transform.SetParent(this.manager.stackingViewsContainer, false);
+                this.transform.SetAsLastSibling();
                 this.manager.instances.Values
                     .Where(instance => instance.CurrentStatus is ViewStatus.Floating or ViewStatus.Stacking)
                     .ForEach(instance => instance.Hide_Internal());
-
                 this.manager.instanceStack.Remove(this);
                 this.manager.instanceStack.Add(this);
                 this.CurrentStatus = ViewStatus.Stacking;
@@ -69,13 +73,19 @@ namespace UniT.UI
 
             public void Float()
             {
-                this.Show_Internal();
+                this.EnsureViewIsHidden();
+                this.view.OnShow();
+                this.transform.SetParent(this.manager.floatingViewsContainer, false);
+                this.transform.SetAsLastSibling();
                 this.CurrentStatus = ViewStatus.Floating;
             }
 
             public void Detach()
             {
-                this.Show_Internal();
+                this.EnsureViewIsHidden();
+                this.view.OnShow();
+                this.transform.SetParent(this.manager.detachedViewsContainer, false);
+                this.transform.SetAsLastSibling();
                 this.CurrentStatus = ViewStatus.Detached;
             }
 
@@ -106,18 +116,11 @@ namespace UniT.UI
                 this.CurrentStatus = ViewStatus.Disposed;
             }
 
-            private void Show_Internal()
-            {
-                this.EnsureViewIsHidden();
-                this.view.OnShow();
-                this.view.gameObject.SetActive(true);
-            }
-
             private void Hide_Internal()
             {
                 this.EnsureViewIsNotDisposed();
                 if (this._currentStatus is ViewStatus.Hidden) return;
-                this.view.gameObject.SetActive(false);
+                this.transform.SetParent(this.manager.hiddenViewsContainer, false);
                 this.view.OnHide();
                 this.CurrentStatus = ViewStatus.Hidden;
             }
@@ -125,7 +128,7 @@ namespace UniT.UI
             private void RemoveFromStack()
             {
                 this.manager.instanceStack.Remove(this);
-                if (this.manager.CurrentView is not null || this.manager.instanceStack.Count < 1) return;
+                if (this.manager.StackingView is not null || this.manager.instanceStack.Count < 1) return;
                 this.manager.instanceStack[^1].Stack();
             }
 
@@ -142,31 +145,53 @@ namespace UniT.UI
         }
 
         [SerializeField]
-        private RectTransform canvas;
+        private RectTransform hiddenViewsContainer;
 
+        [SerializeField]
+        private RectTransform stackingViewsContainer;
+
+        [SerializeField]
+        private RectTransform floatingViewsContainer;
+
+        [SerializeField]
+        private RectTransform detachedViewsContainer;
+
+        private          IPresenterFactory              presenterFactory;
         private          IAddressableManager            addressableManager;
         private          ILogger                        logger;
         private readonly Dictionary<Type, ViewInstance> instances     = new();
         private readonly Dictionary<Type, string>       keys          = new();
         private readonly List<ViewInstance>             instanceStack = new();
 
-        public void Inject(IAddressableManager addressableManager, ILogger logger)
+        public void Inject(IPresenterFactory presenterFactory, IAddressableManager addressableManager, ILogger logger)
         {
+            this.presenterFactory   = presenterFactory;
             this.addressableManager = addressableManager;
             this.logger             = logger;
             this.logger.Info($"{nameof(ViewManager)} instantiated", Color.green);
         }
 
-        public IViewManager.IViewInstance CurrentView => this.instances.Values.SingleOrDefault(instance => instance.CurrentStatus is ViewStatus.Stacking);
+        public IViewManager.IViewInstance StackingView => this.instances.Values.SingleOrDefault(instance => instance.CurrentStatus is ViewStatus.Stacking);
 
-        public IViewManager.IViewInstance GetView<TView, TPresenter>(TView view, Func<TPresenter> presenterFactory)
+        public IEnumerable<IViewManager.IViewInstance> FloatingViews => this.instances.Values.Where(instance => instance.CurrentStatus is ViewStatus.Floating).OrderByDescending(instance => instance.transform.GetSiblingIndex());
+
+        public IEnumerable<IViewManager.IViewInstance> DetachedViews => this.instances.Values.Where(instance => instance.CurrentStatus is ViewStatus.Stacking).OrderByDescending(instance => instance.transform.GetSiblingIndex());
+
+        public IViewManager.IViewInstance GetView<TView, TPresenter>(TView view)
             where TView : Component, IView
             where TPresenter : IPresenter
         {
-            return this.instances.GetOrAdd(typeof(TView), () => new(view, presenterFactory(), this));
+            return this.instances.GetOrAdd(
+                typeof(TView),
+                () => new(
+                    view,
+                    this.presenterFactory.Create(typeof(TPresenter)),
+                    this
+                )
+            );
         }
 
-        public UniTask<IViewManager.IViewInstance> GetView<TView, TPresenter>(string key, Func<TPresenter> presenterFactory)
+        public UniTask<IViewManager.IViewInstance> GetView<TView, TPresenter>(string key)
             where TView : Component, IView
             where TPresenter : IPresenter
         {
@@ -178,37 +203,16 @@ namespace UniT.UI
                               this.keys.Add(typeof(TView), key);
                               return new ViewInstance(
                                   Instantiate(view),
-                                  presenterFactory(),
+                                  this.presenterFactory.Create(typeof(TPresenter)),
                                   this
                               );
                           })
             ).Cast<ViewInstance, IViewManager.IViewInstance>();
         }
 
-        public UniTask<IViewManager.IViewInstance> GetView<TView, TPresenter>(Func<TPresenter> presenterFactory)
-            where TView : Component, IView
-            where TPresenter : IPresenter
-        {
-            return this.GetView<TView, TPresenter>(typeof(TView).GetKeyAttribute(), presenterFactory);
-        }
-
-        public IViewManager.IViewInstance GetView<TView, TPresenter>(TView view)
-            where TView : Component, IView
-            where TPresenter : IPresenter, new()
-        {
-            return this.GetView<TView, TPresenter>(view, () => new());
-        }
-
-        public UniTask<IViewManager.IViewInstance> GetView<TView, TPresenter>(string key)
-            where TView : Component, IView
-            where TPresenter : IPresenter, new()
-        {
-            return this.GetView<TView, TPresenter>(key, () => new());
-        }
-
         public UniTask<IViewManager.IViewInstance> GetView<TView, TPresenter>()
             where TView : Component, IView
-            where TPresenter : IPresenter, new()
+            where TPresenter : IPresenter
         {
             return this.GetView<TView, TPresenter>(typeof(TView).GetKeyAttribute());
         }
