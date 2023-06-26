@@ -7,6 +7,7 @@ namespace UniT.UI
     using UniT.Addressables;
     using UniT.Extensions;
     using UniT.Extensions.UniTask;
+    using UniT.Utils;
     using UnityEngine;
     using ILogger = UniT.Logging.ILogger;
 
@@ -44,8 +45,8 @@ namespace UniT.UI
                 this.view.Presenter = this.presenter;
                 this.presenter.View = this.view;
 
-                this.view.Initialize();
-                this.presenter.Initialize();
+                if (this.view is IInitializable initializableView) initializableView.Initialize();
+                if (this.presenter is IInitializable initializablePresenter) initializablePresenter.Initialize();
 
                 this.manager.Logger.Debug($"Instantiated {this.view.GetType().Name}");
             }
@@ -100,8 +101,8 @@ namespace UniT.UI
                 this.EnsureViewIsNotDisposed();
                 this.EnsureViewIsHidden();
 
-                this.view.Dispose();
-                this.presenter.Dispose();
+                if (this.view is IDisposable disposableView) disposableView.Dispose();
+                if (this.presenter is IDisposable disposablePresenter) disposablePresenter.Dispose();
 
                 this.manager.instances.Remove(this.view.GetType());
                 this.RemoveFromStack();

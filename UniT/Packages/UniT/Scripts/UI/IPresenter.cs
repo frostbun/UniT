@@ -1,9 +1,6 @@
 namespace UniT.UI
 {
-    using System;
-    using UniT.Utils;
-
-    public interface IPresenter : IInitializable, IDisposable
+    public interface IPresenter
     {
         protected internal IView View { set; }
 

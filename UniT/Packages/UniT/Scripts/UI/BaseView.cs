@@ -4,7 +4,8 @@ namespace UniT.UI
     using UniT.Utils;
     using UnityEngine;
 
-    public abstract class BaseView<TPresenter> : MonoBehaviour, IView where TPresenter : IPresenter
+    public abstract class BaseView<TPresenter> : MonoBehaviour, IView, IInitializable, IDisposable
+        where TPresenter : IPresenter
     {
         GameObject IView.gameObject => this.gameObject;
 

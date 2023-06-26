@@ -75,6 +75,7 @@ namespace UniT.Audio
             this.addressableManager.Load<AudioClip>(name).ContinueWith(audioClip =>
             {
                 if (!force && this.CurrentMusic == name) return;
+                this.CurrentMusic     = name;
                 this.musicSource.clip = audioClip;
                 this.musicSource.Play();
             }).Forget();
