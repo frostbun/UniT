@@ -4,14 +4,17 @@ namespace UniT.Audio
     using Cysharp.Threading.Tasks;
     using UniT.Addressables;
     using UniT.Extensions;
+    using UniT.Utils;
     using UnityEngine;
     using ILogger = UniT.Logging.ILogger;
 
     // TODO: auto release audio clips after a while
-    public class AudioManager : IAudioManager
+    public class AudioManager : IAudioManager, IInitializable
     {
         public ILogger     Logger { get; }
         public AudioConfig Config { get; }
+
+        public string CurrentMusic { get; private set; }
 
         private readonly IAddressableManager             addressableManager;
         private readonly GameObject                      audioSourceContainer;
@@ -21,9 +24,7 @@ namespace UniT.Audio
 
         public AudioManager(AudioConfig config, IAddressableManager addressableManager, ILogger logger)
         {
-            this.Config = config;
-            this.ObserveConfig();
-
+            this.Config             = config;
             this.addressableManager = addressableManager;
 
             this.audioSourceContainer = new(nameof(AudioManager));
@@ -38,7 +39,7 @@ namespace UniT.Audio
             this.Logger.Info($"{nameof(AudioManager)} instantiated", Color.green);
         }
 
-        private void ObserveConfig()
+        public void Initialize()
         {
             this.Config.SoundVolume.Subscribe(_ => this.ConfigureAllSoundSources());
             this.Config.MuteSound.Subscribe(_ => this.ConfigureAllSoundSources());
@@ -54,23 +55,26 @@ namespace UniT.Audio
                 this.ConfigureAllSoundSources();
                 this.ConfigureMusicSource();
             });
+            this.ConfigureAllSoundSources();
+            this.ConfigureMusicSource();
         }
 
-        public void PlaySound(string name, bool allowDuplicates = true)
+        public void PlaySound(string name, bool force = true)
         {
             this.addressableManager.Load<AudioClip>(name).ContinueWith(audioClip =>
             {
                 var soundSource = this.GetSoundSource(name);
-                if (!allowDuplicates && soundSource.isPlaying) return;
+                if (!force && soundSource.isPlaying) return;
                 soundSource.PlayOneShot(audioClip);
             }).Forget();
         }
 
 
-        public void PlayMusic(string name)
+        public void PlayMusic(string name, bool force = false)
         {
             this.addressableManager.Load<AudioClip>(name).ContinueWith(audioClip =>
             {
+                if (!force && this.CurrentMusic == name) return;
                 this.musicSource.clip = audioClip;
                 this.musicSource.Play();
             }).Forget();

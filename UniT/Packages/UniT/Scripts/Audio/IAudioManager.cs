@@ -8,9 +8,11 @@ namespace UniT.Audio
 
         public AudioConfig Config { get; }
 
-        public void PlaySound(string name, bool allowDuplicates = true);
+        public string CurrentMusic { get; }
 
-        public void PlayMusic(string name);
+        public void PlaySound(string name, bool force = true);
+
+        public void PlayMusic(string name, bool force = false);
 
         public void PauseMusic();
 

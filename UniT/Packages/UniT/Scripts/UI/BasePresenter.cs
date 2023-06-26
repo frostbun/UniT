@@ -1,5 +1,8 @@
 namespace UniT.UI
 {
+    using System;
+    using UniT.Utils;
+
     public abstract class BasePresenter<TView> : BasePresenter<TView, object> where TView : IView
     {
     }
@@ -10,9 +13,9 @@ namespace UniT.UI
 
         object IPresenter.Model { set => this.Model = (TModel)value; }
 
-        void IPresenter.Initialize() => this.Initialize();
+        void IInitializable.Initialize() => this.Initialize();
 
-        void IPresenter.Dispose() => this.Dispose();
+        void IDisposable.Dispose() => this.Dispose();
 
         protected TView View { get; private set; }
 

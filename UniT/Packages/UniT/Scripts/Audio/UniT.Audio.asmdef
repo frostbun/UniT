@@ -4,7 +4,6 @@
   "references": [
     "UniTask",
     "UniT.Addressables",
-    "UniT.ObjectPool",
     "UniT.Logging",
     "UniT.Extensions",
     "UniT.Utils"

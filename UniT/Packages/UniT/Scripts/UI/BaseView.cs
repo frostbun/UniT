@@ -1,5 +1,7 @@
 namespace UniT.UI
 {
+    using System;
+    using UniT.Utils;
     using UnityEngine;
 
     public abstract class BaseView<TPresenter> : MonoBehaviour, IView where TPresenter : IPresenter
@@ -12,9 +14,9 @@ namespace UniT.UI
 
         IViewManager.IViewInstance IView.Instance { set => this.Instance = value; }
 
-        void IView.Initialize() => this.Initialize();
+        void IInitializable.Initialize() => this.Initialize();
 
-        void IView.Dispose() => this.Dispose();
+        void IDisposable.Dispose() => this.Dispose();
 
         void IView.OnShow() => this.OnShow();
 

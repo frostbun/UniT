@@ -1,8 +1,10 @@
 namespace UniT.UI
 {
+    using System;
+    using UniT.Utils;
     using UnityEngine;
 
-    public interface IView
+    public interface IView : IInitializable, IDisposable
     {
         protected internal GameObject gameObject { get; }
 
@@ -11,10 +13,6 @@ namespace UniT.UI
         protected internal IPresenter Presenter { set; }
 
         protected internal IViewManager.IViewInstance Instance { set; }
-
-        protected internal void Initialize();
-
-        protected internal void Dispose();
 
         protected internal void OnShow();
 
