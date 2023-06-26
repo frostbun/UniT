@@ -2,8 +2,11 @@
   "name": "UniT.Audio",
   "rootNamespace": "UniT",
   "references": [
+    "UniTask",
     "UniT.Addressables",
     "UniT.ObjectPool",
-    "UniT.Logging"
+    "UniT.Logging",
+    "UniT.Extensions",
+    "UniT.Utils"
   ]
 }

@@ -10,8 +10,9 @@ namespace UniT.ObjectPool
 
     public class ObjectPoolManager : IObjectPoolManager
     {
+        public ILogger Logger { get; }
+
         private readonly IAddressableManager                addressableManager;
-        private readonly ILogger                            logger;
         private readonly Dictionary<GameObject, ObjectPool> prefabToPool;
         private readonly Dictionary<string, ObjectPool>     keyToPool;
         private readonly Dictionary<GameObject, ObjectPool> instanceToPool;
@@ -22,8 +23,8 @@ namespace UniT.ObjectPool
             this.prefabToPool       = new();
             this.keyToPool          = new();
             this.instanceToPool     = new();
-            this.logger             = logger;
-            this.logger.Info($"{nameof(ObjectPoolManager)} instantiated", Color.green);
+            this.Logger             = logger;
+            this.Logger.Info($"{nameof(ObjectPoolManager)} instantiated", Color.green);
         }
 
         public void InstantiatePool(GameObject prefab, int initialCount = 1)
@@ -50,7 +51,7 @@ namespace UniT.ObjectPool
         {
             if (!this.prefabToPool.Remove(prefab, out var pool))
             {
-                this.logger.Warning($"Trying to destroy pool for prefab {prefab.name} that was not instantiated");
+                this.Logger.Warning($"Trying to destroy pool for prefab {prefab.name} that was not instantiated");
                 return;
             }
 
@@ -66,7 +67,7 @@ namespace UniT.ObjectPool
         {
             if (!this.keyToPool.Remove(key, out var pool))
             {
-                this.logger.Warning($"Trying to destroy pool for key {key} that was not instantiated");
+                this.Logger.Warning($"Trying to destroy pool for key {key} that was not instantiated");
                 return;
             }
 
@@ -232,12 +233,12 @@ namespace UniT.ObjectPool
         {
             if (!this.instanceToPool.Remove(instance, out var pool))
             {
-                this.logger.Warning($"Trying to recycle {instance.name} that was not spawned from {nameof(ObjectPoolManager)}");
+                this.Logger.Warning($"Trying to recycle {instance.name} that was not spawned from {nameof(ObjectPoolManager)}");
                 return;
             }
 
             pool.Recycle(instance);
-            this.logger.Debug($"Recycled {instance.name}");
+            this.Logger.Debug($"Recycled {instance.name}");
         }
 
         public void Recycle<T>(T component) where T : Component
@@ -279,7 +280,7 @@ namespace UniT.ObjectPool
         private ObjectPool InstantiatePool_Internal(GameObject prefab, int initialCount = 1)
         {
             var pool = ObjectPool.Instantiate(prefab, initialCount);
-            this.logger.Debug($"Instantiated {pool.gameObject.name}");
+            this.Logger.Debug($"Instantiated {pool.gameObject.name}");
             return pool;
         }
 
@@ -287,14 +288,14 @@ namespace UniT.ObjectPool
         {
             this.RecycleAll_Internal(pool);
             Object.Destroy(pool.gameObject);
-            this.logger.Debug($"Destroyed {pool.gameObject.name}");
+            this.Logger.Debug($"Destroyed {pool.gameObject.name}");
         }
 
         private GameObject Spawn_Internal(ObjectPool pool)
         {
             var instance = pool.Spawn();
             this.instanceToPool.Add(instance, pool);
-            this.logger.Debug($"Spawned {instance.name}");
+            this.Logger.Debug($"Spawned {instance.name}");
             return instance;
         }
 
@@ -302,7 +303,7 @@ namespace UniT.ObjectPool
         {
             var instance = pool.Spawn(position, rotation, parent);
             this.instanceToPool.Add(instance, pool);
-            this.logger.Debug($"Spawned {instance.name}");
+            this.Logger.Debug($"Spawned {instance.name}");
             return instance;
         }
 
@@ -310,7 +311,7 @@ namespace UniT.ObjectPool
         {
             var instance = pool.Spawn(position, rotation);
             this.instanceToPool.Add(instance, pool);
-            this.logger.Debug($"Spawned {instance.name}");
+            this.Logger.Debug($"Spawned {instance.name}");
             return instance;
         }
 
@@ -318,7 +319,7 @@ namespace UniT.ObjectPool
         {
             var instance = pool.Spawn(position);
             this.instanceToPool.Add(instance, pool);
-            this.logger.Debug($"Spawned {instance.name}");
+            this.Logger.Debug($"Spawned {instance.name}");
             return instance;
         }
 
@@ -326,7 +327,7 @@ namespace UniT.ObjectPool
         {
             var instance = pool.Spawn(rotation);
             this.instanceToPool.Add(instance, pool);
-            this.logger.Debug($"Spawned {instance.name}");
+            this.Logger.Debug($"Spawned {instance.name}");
             return instance;
         }
 
@@ -334,7 +335,7 @@ namespace UniT.ObjectPool
         {
             var instance = pool.Spawn(parent);
             this.instanceToPool.Add(instance, pool);
-            this.logger.Debug($"Spawned {instance.name}");
+            this.Logger.Debug($"Spawned {instance.name}");
             return instance;
         }
 
@@ -342,7 +343,7 @@ namespace UniT.ObjectPool
         {
             pool.RecycleAll();
             this.instanceToPool.RemoveAll((_, otherPool) => otherPool == pool);
-            this.logger.Debug($"Recycled all {pool.gameObject.name}");
+            this.Logger.Debug($"Recycled all {pool.gameObject.name}");
         }
     }
 }

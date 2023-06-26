@@ -2,9 +2,12 @@ namespace UniT.Data.Base
 {
     using System;
     using Cysharp.Threading.Tasks;
+    using UniT.Logging;
 
     public interface IDataManager
     {
+        public ILogger Logger { get; }
+        
         public UniTask PopulateData(Type type);
 
         public UniTask SaveData(Type type);

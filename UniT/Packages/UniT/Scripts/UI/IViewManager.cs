@@ -4,6 +4,7 @@ namespace UniT.UI
     using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
     using UnityEngine;
+    using ILogger = UniT.Logging.ILogger;
 
     public interface IViewManager
     {
@@ -23,6 +24,8 @@ namespace UniT.UI
 
             public void Hide();
         }
+
+        public ILogger Logger { get; }
 
         public IViewInstance StackingView { get; }
 

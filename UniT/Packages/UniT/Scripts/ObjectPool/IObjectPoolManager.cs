@@ -2,9 +2,12 @@ namespace UniT.ObjectPool
 {
     using Cysharp.Threading.Tasks;
     using UnityEngine;
+    using ILogger = UniT.Logging.ILogger;
 
     public interface IObjectPoolManager
     {
+        public ILogger Logger { get; }
+        
         public void InstantiatePool(GameObject prefab, int initialCount = 1);
 
         public void InstantiatePool<T>(T component, int initialCount = 1) where T : Component;

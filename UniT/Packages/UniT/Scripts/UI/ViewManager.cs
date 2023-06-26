@@ -24,7 +24,7 @@ namespace UniT.UI
                 private set
                 {
                     this._currentStatus = value;
-                    this.manager.logger.Debug($"{this.view.GetType().Name} status: {value}");
+                    this.manager.Logger.Debug($"{this.view.GetType().Name} status: {value}");
                 }
             }
 
@@ -47,7 +47,7 @@ namespace UniT.UI
                 this.view.Initialize();
                 this.presenter.Initialize();
 
-                this.manager.logger.Debug($"Instantiated {this.view.GetType().Name}");
+                this.manager.Logger.Debug($"Instantiated {this.view.GetType().Name}");
             }
 
             public IViewManager.IViewInstance BindModel(object model)
@@ -156,9 +156,10 @@ namespace UniT.UI
         [SerializeField]
         private RectTransform detachedViewsContainer;
 
+        public ILogger Logger { get; private set; }
+
         private          IPresenterFactory              presenterFactory;
         private          IAddressableManager            addressableManager;
-        private          ILogger                        logger;
         private readonly Dictionary<Type, ViewInstance> instances     = new();
         private readonly Dictionary<Type, string>       keys          = new();
         private readonly List<ViewInstance>             instanceStack = new();
@@ -167,8 +168,8 @@ namespace UniT.UI
         {
             this.presenterFactory   = presenterFactory;
             this.addressableManager = addressableManager;
-            this.logger             = logger;
-            this.logger.Info($"{nameof(ViewManager)} instantiated", Color.green);
+            this.Logger             = logger;
+            this.Logger.Info($"{nameof(ViewManager)} instantiated", Color.green);
         }
 
         public IViewManager.IViewInstance StackingView => this.instances.Values.SingleOrDefault(instance => instance.CurrentStatus is ViewStatus.Stacking);

@@ -1,105 +1,118 @@
 namespace UniT.Audio
 {
-    using System;
+    using System.Collections.Generic;
+    using Cysharp.Threading.Tasks;
     using UniT.Addressables;
-    using UniT.ObjectPool;
+    using UniT.Extensions;
     using UnityEngine;
     using ILogger = UniT.Logging.ILogger;
 
+    // TODO: auto release audio clips after a while
     public class AudioManager : IAudioManager
     {
-        private readonly IAddressableManager addressableManager;
-        private readonly IObjectPoolManager  objectPoolManager;
-        private readonly ILogger             logger;
+        public ILogger     Logger { get; }
+        public AudioConfig Config { get; }
 
-        public AudioManager(IAddressableManager addressableManager, IObjectPoolManager objectPoolManager, ILogger logger)
+        private readonly IAddressableManager             addressableManager;
+        private readonly GameObject                      audioSourceContainer;
+        private readonly AudioSource                     musicSource;
+        private readonly Queue<AudioSource>              pooledSoundSource;
+        private readonly Dictionary<string, AudioSource> spawnedSoundSource;
+
+        public AudioManager(AudioConfig config, IAddressableManager addressableManager, ILogger logger)
         {
+            this.Config = config;
+            this.ObserveConfig();
+
             this.addressableManager = addressableManager;
-            this.objectPoolManager  = objectPoolManager;
-            this.logger             = logger;
-            this.logger.Info($"{nameof(AudioManager)} instantiated", Color.green);
+
+            this.audioSourceContainer = new(nameof(AudioManager));
+            this.musicSource          = this.audioSourceContainer.AddComponent<AudioSource>();
+            this.musicSource.loop     = true;
+            Object.DontDestroyOnLoad(this.audioSourceContainer);
+
+            this.pooledSoundSource  = new();
+            this.spawnedSoundSource = new();
+
+            this.Logger = logger;
+            this.Logger.Info($"{nameof(AudioManager)} instantiated", Color.green);
         }
 
-        #region Sound
-
-        public void PlaySound(string name)
+        private void ObserveConfig()
         {
-            throw new NotImplementedException();
+            this.Config.SoundVolume.Subscribe(_ => this.ConfigureAllSoundSources());
+            this.Config.MuteSound.Subscribe(_ => this.ConfigureAllSoundSources());
+            this.Config.MusicVolume.Subscribe(_ => this.ConfigureMusicSource());
+            this.Config.MuteMusic.Subscribe(_ => this.ConfigureMusicSource());
+            this.Config.MasterVolume.Subscribe(_ =>
+            {
+                this.ConfigureAllSoundSources();
+                this.ConfigureMusicSource();
+            });
+            this.Config.MuteMaster.Subscribe(_ =>
+            {
+                this.ConfigureAllSoundSources();
+                this.ConfigureMusicSource();
+            });
         }
 
-        public void SetSoundVolume(float volume)
+        public void PlaySound(string name, bool allowDuplicates = true)
         {
-            throw new NotImplementedException();
+            this.addressableManager.Load<AudioClip>(name).ContinueWith(audioClip =>
+            {
+                var soundSource = this.GetSoundSource(name);
+                if (!allowDuplicates && soundSource.isPlaying) return;
+                soundSource.PlayOneShot(audioClip);
+            }).Forget();
         }
 
-        public void MuteSound()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void UnmuteSound()
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion
-
-        #region Music
 
         public void PlayMusic(string name)
         {
-            throw new NotImplementedException();
-        }
-
-        public void SetMusicVolume(float volume)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void MuteMusic()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void UnmuteMusic()
-        {
-            throw new NotImplementedException();
+            this.addressableManager.Load<AudioClip>(name).ContinueWith(audioClip =>
+            {
+                this.musicSource.clip = audioClip;
+                this.musicSource.Play();
+            }).Forget();
         }
 
         public void PauseMusic()
         {
-            throw new NotImplementedException();
+            this.musicSource.Pause();
         }
 
         public void ResumeMusic()
         {
-            throw new NotImplementedException();
+            this.musicSource.UnPause();
         }
 
         public void StopMusic()
         {
-            throw new NotImplementedException();
+            this.musicSource.Stop();
         }
 
-        #endregion
-
-        #region Master
-
-        public void SetMasterVolume(float volume)
+        private AudioSource GetSoundSource(string name)
         {
-            throw new NotImplementedException();
+            var soundSource = this.spawnedSoundSource.GetOrAdd(name, () => this.pooledSoundSource.DequeueOrDefault(() => this.audioSourceContainer.AddComponent<AudioSource>()));
+            this.ConfigureSoundSource(soundSource);
+            return soundSource;
         }
 
-        public void MuteMaster()
+        private void ConfigureAllSoundSources()
         {
-            throw new NotImplementedException();
+            this.spawnedSoundSource.Values.ForEach(this.ConfigureSoundSource);
         }
 
-        public void UnmuteMaster()
+        private void ConfigureSoundSource(AudioSource soundSource)
         {
-            throw new NotImplementedException();
+            soundSource.volume = this.Config.SoundVolume.Value * this.Config.MasterVolume.Value;
+            soundSource.mute   = this.Config.MuteSound.Value || this.Config.MuteMaster.Value;
         }
 
-        #endregion
+        private void ConfigureMusicSource()
+        {
+            this.musicSource.volume = this.Config.MusicVolume.Value * this.Config.MasterVolume.Value;
+            this.musicSource.mute   = this.Config.MuteMusic.Value || this.Config.MuteMaster.Value;
+        }
     }
 }
