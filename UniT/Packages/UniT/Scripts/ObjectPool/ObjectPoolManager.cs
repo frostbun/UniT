@@ -24,7 +24,7 @@ namespace UniT.ObjectPool
             this.keyToPool          = new();
             this.instanceToPool     = new();
             this.Logger             = logger;
-            this.Logger.Info($"{nameof(ObjectPoolManager)} instantiated", Color.green);
+            this.Logger.Info($"{this.GetType().Name} instantiated", Color.green);
         }
 
         public void InstantiatePool(GameObject prefab, int initialCount = 1)
@@ -233,7 +233,7 @@ namespace UniT.ObjectPool
         {
             if (!this.instanceToPool.Remove(instance, out var pool))
             {
-                this.Logger.Warning($"Trying to recycle {instance.name} that was not spawned from {nameof(ObjectPoolManager)}");
+                this.Logger.Warning($"Trying to recycle {instance.name} that was not spawned from {this.GetType().Name}");
                 return;
             }
 

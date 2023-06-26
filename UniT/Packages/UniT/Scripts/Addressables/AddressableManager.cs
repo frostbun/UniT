@@ -23,7 +23,7 @@ namespace UniT.Addressables
             this.loadedAssets = new();
             this.loadedScenes = new();
             this.logger       = logger;
-            this.logger.Info($"{nameof(AddressableManager)} instantiated", Color.green);
+            this.logger.Info($"{this.GetType().Name} instantiated", Color.green);
         }
 
         public UniTask<T> Load<T>(string key = null, IProgress<float> progress = null, CancellationToken cancellationToken = default)

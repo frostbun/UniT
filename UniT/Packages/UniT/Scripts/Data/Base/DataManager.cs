@@ -24,7 +24,7 @@ namespace UniT.Data.Base
 
             this.Logger = logger;
             this.dataToHandler.ForEach((data, handler) => this.Logger.Info($"Found {data.GetType().Name} - {handler.GetType().Name}", Color.green));
-            this.Logger.Info($"{nameof(DataManager)} instantiated with {this.dataCache.Count} data and {this.handlerCache.Count} handlers", Color.green);
+            this.Logger.Info($"{this.GetType().Name} instantiated with {this.dataCache.Count} data and {this.handlerCache.Count} handlers", Color.green);
         }
 
         public UniTask PopulateData(Type type)

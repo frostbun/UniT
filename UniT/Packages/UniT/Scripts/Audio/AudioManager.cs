@@ -2,6 +2,7 @@ namespace UniT.Audio
 {
     using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
+    using Newtonsoft.Json;
     using UniT.Addressables;
     using UniT.Extensions;
     using UniT.Utils;
@@ -27,7 +28,7 @@ namespace UniT.Audio
             this.Config             = config;
             this.addressableManager = addressableManager;
 
-            this.audioSourceContainer = new(nameof(AudioManager));
+            this.audioSourceContainer = new(this.GetType().Name);
             this.musicSource          = this.audioSourceContainer.AddComponent<AudioSource>();
             this.musicSource.loop     = true;
             Object.DontDestroyOnLoad(this.audioSourceContainer);
@@ -36,27 +37,46 @@ namespace UniT.Audio
             this.spawnedSoundSource = new();
 
             this.Logger = logger;
-            this.Logger.Info($"{nameof(AudioManager)} instantiated", Color.green);
+            this.Logger.Info($"{this.GetType().Name} instantiated", Color.green);
         }
 
         public void Initialize()
         {
-            this.Config.SoundVolume.Subscribe(_ => this.ConfigureAllSoundSources());
-            this.Config.MuteSound.Subscribe(_ => this.ConfigureAllSoundSources());
-            this.Config.MusicVolume.Subscribe(_ => this.ConfigureMusicSource());
-            this.Config.MuteMusic.Subscribe(_ => this.ConfigureMusicSource());
-            this.Config.MasterVolume.Subscribe(_ =>
+            this.Config.SoundVolume.Subscribe(value =>
             {
                 this.ConfigureAllSoundSources();
-                this.ConfigureMusicSource();
+                this.Logger.Debug($"Sound volume set to {value}");
             });
-            this.Config.MuteMaster.Subscribe(_ =>
+            this.Config.MuteSound.Subscribe(value =>
+            {
+                this.ConfigureAllSoundSources();
+                this.Logger.Debug(value ? "Sound volume muted" : "Sound volume unmuted");
+            });
+            this.Config.MusicVolume.Subscribe(value =>
+            {
+                this.ConfigureMusicSource();
+                this.Logger.Debug($"Music volume set to {value}");
+            });
+            this.Config.MuteMusic.Subscribe(value =>
+            {
+                this.ConfigureMusicSource();
+                this.Logger.Debug(value ? "Music volume muted" : "Music volume unmuted");
+            });
+            this.Config.MasterVolume.Subscribe(value =>
             {
                 this.ConfigureAllSoundSources();
                 this.ConfigureMusicSource();
+                this.Logger.Debug($"Master volume set to {value}");
+            });
+            this.Config.MuteMaster.Subscribe(value =>
+            {
+                this.ConfigureAllSoundSources();
+                this.ConfigureMusicSource();
+                this.Logger.Debug(value ? "Master volume muted" : "Master volume unmuted");
             });
             this.ConfigureAllSoundSources();
             this.ConfigureMusicSource();
+            this.Logger.Info($"Audio config: {JsonConvert.SerializeObject(this.Config)}", Color.green);
         }
 
         public void PlaySound(string name, bool force = true)
@@ -66,6 +86,7 @@ namespace UniT.Audio
                 var soundSource = this.GetSoundSource(name);
                 if (!force && soundSource.isPlaying) return;
                 soundSource.PlayOneShot(audioClip);
+                this.Logger.Debug($"Playing sound {name}");
             }).Forget();
         }
 
@@ -78,6 +99,7 @@ namespace UniT.Audio
                 this.CurrentMusic     = name;
                 this.musicSource.clip = audioClip;
                 this.musicSource.Play();
+                this.Logger.Debug($"Playing music {name}");
             }).Forget();
         }
 

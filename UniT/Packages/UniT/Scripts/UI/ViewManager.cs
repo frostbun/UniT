@@ -170,7 +170,7 @@ namespace UniT.UI
             this.presenterFactory   = presenterFactory;
             this.addressableManager = addressableManager;
             this.Logger             = logger;
-            this.Logger.Info($"{nameof(ViewManager)} instantiated", Color.green);
+            this.Logger.Info($"{this.GetType().Name} instantiated", Color.green);
         }
 
         public IViewManager.IViewInstance StackingView => this.instances.Values.SingleOrDefault(instance => instance.CurrentStatus is ViewStatus.Stacking);
