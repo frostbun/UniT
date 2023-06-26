@@ -2,9 +2,9 @@ namespace UniT.Audio
 {
     using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
-    using Newtonsoft.Json;
     using UniT.Addressables;
     using UniT.Extensions;
+    using UniT.Extensions.UniTask;
     using UniT.Utils;
     using UnityEngine;
     using ILogger = UniT.Logging.ILogger;
@@ -76,27 +76,34 @@ namespace UniT.Audio
             });
             this.ConfigureAllSoundSources();
             this.ConfigureMusicSource();
-            this.Logger.Info($"Audio config: {JsonConvert.SerializeObject(this.Config)}", Color.green);
+            this.Logger.Debug($"Audio config: {this.Config.ToJson()}");
         }
 
-        public void PlaySound(string name, bool force = true)
+        public void PlaySoundOneShot(string name)
         {
-            this.addressableManager.Load<AudioClip>(name).ContinueWith(audioClip =>
+            this.GetSoundSource(name).ContinueWith(soundSource =>
             {
-                var soundSource = this.GetSoundSource(name);
+                soundSource.PlayOneShot(soundSource.clip);
+                this.Logger.Debug($"Playing sound one shot {name}");
+            }).Forget();
+        }
+
+        public void PlaySound(string name, bool force = false)
+        {
+            this.GetSoundSource(name).ContinueWith(soundSource =>
+            {
                 if (!force && soundSource.isPlaying) return;
-                soundSource.PlayOneShot(audioClip);
+                soundSource.Play();
                 this.Logger.Debug($"Playing sound {name}");
             }).Forget();
         }
 
-
         public void PlayMusic(string name, bool force = false)
         {
+            if (!force && this.CurrentMusic == name) return;
+            this.CurrentMusic = name;
             this.addressableManager.Load<AudioClip>(name).ContinueWith(audioClip =>
             {
-                if (!force && this.CurrentMusic == name) return;
-                this.CurrentMusic     = name;
                 this.musicSource.clip = audioClip;
                 this.musicSource.Play();
                 this.Logger.Debug($"Playing music {name}");
@@ -118,11 +125,18 @@ namespace UniT.Audio
             this.musicSource.Stop();
         }
 
-        private AudioSource GetSoundSource(string name)
+        private UniTask<AudioSource> GetSoundSource(string name)
         {
-            var soundSource = this.spawnedSoundSource.GetOrAdd(name, () => this.pooledSoundSource.DequeueOrDefault(() => this.audioSourceContainer.AddComponent<AudioSource>()));
-            this.ConfigureSoundSource(soundSource);
-            return soundSource;
+            return this.spawnedSoundSource.GetOrAdd(name, () =>
+            {
+                return this.addressableManager.Load<AudioClip>(name).ContinueWith(audioClip =>
+                {
+                    var soundSource = this.pooledSoundSource.DequeueOrDefault(() => this.audioSourceContainer.AddComponent<AudioSource>());
+                    this.ConfigureSoundSource(soundSource);
+                    soundSource.clip = audioClip;
+                    return soundSource;
+                });
+            });
         }
 
         private void ConfigureAllSoundSources()

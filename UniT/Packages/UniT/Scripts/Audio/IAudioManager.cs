@@ -10,7 +10,9 @@ namespace UniT.Audio
 
         public string CurrentMusic { get; }
 
-        public void PlaySound(string name, bool force = true);
+        public void PlaySoundOneShot(string name);
+
+        public void PlaySound(string name, bool force = false);
 
         public void PlayMusic(string name, bool force = false);
 
