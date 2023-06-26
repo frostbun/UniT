@@ -12,71 +12,78 @@ namespace UniT.Data.Base
     {
         public ILogger Logger { get; }
 
-        private readonly ReadOnlyDictionary<Type, IData>         dataCache;
-        private readonly ReadOnlyDictionary<Type, IDataHandler>  handlerCache;
-        private readonly ReadOnlyDictionary<IData, IDataHandler> dataToHandler;
+        private readonly ReadOnlyDictionary<Type, IData>        dataCache;
+        private readonly ReadOnlyDictionary<Type, IDataHandler> handlerCache;
+        private readonly ReadOnlyDictionary<Type, Type>         dataTypeToHandlerType;
 
         public DataManager(IData[] dataCache, IDataHandler[] handlerCache, ILogger logger)
         {
-            this.dataCache     = dataCache.ToDictionary(data => data.GetType(), data => data).AsReadOnly();
-            this.handlerCache  = handlerCache.ToDictionary(handler => handler.GetType(), handler => handler).AsReadOnly();
-            this.dataToHandler = dataCache.ToDictionary(data => data, data => handlerCache.Last(handler => handler.CanHandle(data.GetType()))).AsReadOnly();
+            this.dataCache    = dataCache.ToDictionary(data => data.GetType(), data => data).AsReadOnly();
+            this.handlerCache = handlerCache.ToDictionary(handler => handler.GetType(), handler => handler).AsReadOnly();
+            this.dataTypeToHandlerType = dataCache.ToDictionary(
+                data => data.GetType(),
+                data => handlerCache.LastOrDefault(handler => handler.CanHandle(data.GetType()))?.GetType()
+                        ?? throw new($"No handler found for type {data.GetType().Name}")
+            ).AsReadOnly();
 
             this.Logger = logger;
-            this.dataToHandler.ForEach((data, handler) => this.Logger.Info($"Found {data.GetType().Name} - {handler.GetType().Name}", Color.green));
+            this.dataTypeToHandlerType.ForEach((dataType, handlerType) => this.Logger.Info($"Found {dataType.Name} - {handlerType.Name}", Color.green));
             this.Logger.Info($"{this.GetType().Name} instantiated with {this.dataCache.Count} data and {this.handlerCache.Count} handlers", Color.green);
         }
 
-        public UniTask PopulateData(Type type)
+        public UniTask PopulateData(params Type[] dataTypes)
         {
-            var data    = this.dataCache[type];
-            var handler = this.dataToHandler[data];
-            return handler.Populate(data)
-                          .ContinueWith(() => this.Logger.Debug($"Loaded {type.Name}"));
+            return UniTask.WhenAll(dataTypes.Select(this.PopulateData_Internal));
         }
 
-        public UniTask SaveData(Type type)
+        public UniTask SaveData(params Type[] dataTypes)
         {
-            var data    = this.dataCache[type];
-            var handler = this.dataToHandler[data];
-            return handler.Save(data)
-                          .ContinueWith(() => this.Logger.Debug($"Saved {type.Name}"));
+            return UniTask.WhenAll(dataTypes.Select(this.SaveData_Internal));
         }
 
-        public UniTask FlushHandler(Type type)
+        public UniTask FlushData(params Type[] dataTypes)
         {
-            return this.handlerCache[type].Flush()
-                       .ContinueWith(() => this.Logger.Debug($"Flushed {type.Name}"));
-        }
-
-        public UniTask PopulateData<TData>() where TData : IData
-        {
-            return this.PopulateData(typeof(TData));
-        }
-
-        public UniTask SaveData<TData>() where TData : IData
-        {
-            return this.SaveData(typeof(TData));
-        }
-
-        public UniTask FlushHandler<THandler>() where THandler : IDataHandler
-        {
-            return this.FlushHandler(typeof(THandler));
+            return UniTask.WhenAll(
+                dataTypes.Select(dataType => this.dataTypeToHandlerType[dataType])
+                         .Distinct()
+                         .Select(this.FlushHandler_Internal)
+            );
         }
 
         public UniTask PopulateAllData()
         {
-            return UniTask.WhenAll(this.dataCache.Keys.Select(this.PopulateData));
+            return this.PopulateData(this.dataCache.Keys.ToArray());
         }
 
         public UniTask SaveAllData()
         {
-            return UniTask.WhenAll(this.dataCache.Keys.Select(this.SaveData));
+            return this.SaveData(this.dataCache.Keys.ToArray());
         }
 
-        public UniTask FlushAllHandlers()
+        public UniTask FlushAllData()
         {
-            return UniTask.WhenAll(this.handlerCache.Keys.Select(this.FlushHandler));
+            return this.FlushData(this.dataCache.Keys.ToArray());
+        }
+
+        private UniTask PopulateData_Internal(Type dataType)
+        {
+            return this.handlerCache[this.dataTypeToHandlerType[dataType]]
+                       .Populate(this.dataCache[dataType])
+                       .ContinueWith(() => this.Logger.Debug($"Loaded {dataType.Name}"));
+        }
+
+        private UniTask SaveData_Internal(Type dataType)
+        {
+            return this.handlerCache[this.dataTypeToHandlerType[dataType]]
+                       .Save(this.dataCache[dataType])
+                       .ContinueWith(() => this.Logger.Debug($"Saved {dataType.Name}"));
+        }
+
+        private UniTask FlushHandler_Internal(Type handlerType)
+        {
+            return this.handlerCache[handlerType]
+                       .Flush()
+                       .ContinueWith(() => this.Logger.Debug($"Flushed {handlerType.Name}"));
         }
     }
 }

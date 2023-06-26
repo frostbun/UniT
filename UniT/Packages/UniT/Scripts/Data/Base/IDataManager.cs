@@ -7,23 +7,17 @@ namespace UniT.Data.Base
     public interface IDataManager
     {
         public ILogger Logger { get; }
-        
-        public UniTask PopulateData(Type type);
 
-        public UniTask SaveData(Type type);
+        public UniTask PopulateData(params Type[] dataTypes);
 
-        public UniTask FlushHandler(Type type);
+        public UniTask SaveData(params Type[] dataTypes);
 
-        public UniTask PopulateData<T>() where T : IData;
-
-        public UniTask SaveData<T>() where T : IData;
-
-        public UniTask FlushHandler<T>() where T : IDataHandler;
+        public UniTask FlushData(params Type[] dataTypes);
 
         public UniTask PopulateAllData();
 
         public UniTask SaveAllData();
 
-        public UniTask FlushAllHandlers();
+        public UniTask FlushAllData();
     }
 }

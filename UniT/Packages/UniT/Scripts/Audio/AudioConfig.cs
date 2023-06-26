@@ -1,8 +1,9 @@
 namespace UniT.Audio
 {
+    using UniT.Data.Json.Player;
     using UniT.Utils;
 
-    public class AudioConfig
+    public class AudioConfig : IPlayerJsonData
     {
         public ReactiveProperty<float> SoundVolume { get; } = new(1f);
 

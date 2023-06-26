@@ -72,6 +72,7 @@ namespace UniT.ObjectPool
             }
 
             this.DestroyPool_Internal(pool);
+            this.addressableManager.Unload(key);
         }
 
         public void DestroyPool<T>() where T : Component
