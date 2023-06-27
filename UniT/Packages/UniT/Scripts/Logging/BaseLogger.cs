@@ -17,37 +17,37 @@ namespace UniT.Logging
         void ILogger.Debug(string message)
         {
             if (this.Config.Level > LogLevel.Debug) return;
-            this.Debug($"[Debug][{this.Name}]{message}");
+            this.Debug($"[Debug][{this.Name}] {message}");
         }
 
         void ILogger.Info(string message)
         {
             if (this.Config.Level > LogLevel.Info) return;
-            this.Info($"[Info][{this.Name}]{message}");
+            this.Info($"[Info][{this.Name}] {message}");
         }
 
         void ILogger.Warning(string message)
         {
             if (this.Config.Level > LogLevel.Warning) return;
-            this.Warning($"[Warning][{this.Name}]{message}");
+            this.Warning($"[Warning][{this.Name}] {message}");
         }
 
         void ILogger.Error(string message)
         {
             if (this.Config.Level > LogLevel.Error) return;
-            this.Error($"[Error][{this.Name}]{message}");
+            this.Error($"[Error][{this.Name}] {message}");
         }
 
         void ILogger.Critical(string message)
         {
             if (this.Config.Level > LogLevel.Critical) return;
-            this.Critical($"[Critical][{this.Name}]{message}");
+            this.Critical($"[Critical][{this.Name}] {message}");
         }
 
         void ILogger.Exception(string message, Exception exception)
         {
             if (this.Config.Level > LogLevel.Exception) return;
-            this.Exception($"[Exception][{this.Name}]{message}", exception);
+            this.Exception($"[Exception][{this.Name}] {message}", exception);
         }
 
         protected abstract void Debug(string message);
