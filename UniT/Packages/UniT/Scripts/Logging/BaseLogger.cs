@@ -1,58 +1,65 @@
 namespace UniT.Logging
 {
     using System;
-    using UnityEngine;
 
     public abstract class BaseLogger : ILogger
     {
-        public LogConfig Config { get; } = new();
+        public string Name { get; }
 
-        void ILogger.Debug(string message, Color? color)
+        public LogConfig Config { get; }
+
+        protected BaseLogger(string name, LogConfig config = null)
+        {
+            this.Name   = name;
+            this.Config = config ?? new();
+        }
+
+        void ILogger.Debug(string message)
         {
             if (this.Config.Level > LogLevel.Debug) return;
-            this.Debug(message, color);
+            this.Debug($"[Debug][{this.Name}]{message}");
         }
 
-        void ILogger.Info(string message, Color? color)
+        void ILogger.Info(string message)
         {
             if (this.Config.Level > LogLevel.Info) return;
-            this.Info(message, color);
+            this.Info($"[Info][{this.Name}]{message}");
         }
 
-        void ILogger.Warning(string message, Color? color)
+        void ILogger.Warning(string message)
         {
             if (this.Config.Level > LogLevel.Warning) return;
-            this.Warning(message, color);
+            this.Warning($"[Warning][{this.Name}]{message}");
         }
 
-        void ILogger.Error(string message, Color? color)
+        void ILogger.Error(string message)
         {
             if (this.Config.Level > LogLevel.Error) return;
-            this.Error(message, color);
+            this.Error($"[Error][{this.Name}]{message}");
         }
 
-        void ILogger.Critical(string message, Color? color)
+        void ILogger.Critical(string message)
         {
             if (this.Config.Level > LogLevel.Critical) return;
-            this.Critical(message, color);
+            this.Critical($"[Critical][{this.Name}]{message}");
         }
 
-        void ILogger.Exception(Exception exception)
+        void ILogger.Exception(string message, Exception exception)
         {
             if (this.Config.Level > LogLevel.Exception) return;
-            this.Exception(exception);
+            this.Exception($"[Exception][{this.Name}]{message}", exception);
         }
 
-        protected abstract void Debug(string message, Color? color = null);
+        protected abstract void Debug(string message);
 
-        protected abstract void Info(string message, Color? color = null);
+        protected abstract void Info(string message);
 
-        protected abstract void Warning(string message, Color? color = null);
+        protected abstract void Warning(string message);
 
-        protected abstract void Error(string message, Color? color = null);
+        protected abstract void Error(string message);
 
-        protected abstract void Critical(string message, Color? color = null);
+        protected abstract void Critical(string message);
 
-        protected abstract void Exception(Exception exception);
+        protected abstract void Exception(string message, Exception exception);
     }
 }

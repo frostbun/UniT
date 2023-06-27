@@ -5,8 +5,7 @@ namespace UniT.Data.Base
     using System.Linq;
     using Cysharp.Threading.Tasks;
     using UniT.Extensions;
-    using UnityEngine;
-    using ILogger = UniT.Logging.ILogger;
+    using UniT.Logging;
 
     public class DataManager : IDataManager
     {
@@ -27,8 +26,8 @@ namespace UniT.Data.Base
             ).AsReadOnly();
 
             this.Logger = logger;
-            this.dataTypeToHandlerType.ForEach((dataType, handlerType) => this.Logger.Info($"Found {dataType.Name} - {handlerType.Name}", Color.green));
-            this.Logger.Info($"{this.GetType().Name} instantiated with {this.dataCache.Count} data and {this.handlerCache.Count} handlers", Color.green);
+            this.dataTypeToHandlerType.ForEach((dataType, handlerType) => this.Logger.Info($"Found {dataType.Name} - {handlerType.Name}"));
+            this.Logger.Info($"{this.GetType().Name} instantiated with {this.dataCache.Count} data and {this.handlerCache.Count} handlers");
         }
 
         public UniTask PopulateData(params Type[] dataTypes)

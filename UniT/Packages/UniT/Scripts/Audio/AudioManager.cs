@@ -37,7 +37,7 @@ namespace UniT.Audio
             this.spawnedSoundSource = new();
 
             this.Logger = logger;
-            this.Logger.Info($"{this.GetType().Name} instantiated", Color.green);
+            this.Logger.Info($"{this.GetType().Name} instantiated");
         }
 
         public void Initialize()

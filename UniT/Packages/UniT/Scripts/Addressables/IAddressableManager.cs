@@ -6,9 +6,12 @@ namespace UniT.Addressables
     using UnityEngine;
     using UnityEngine.ResourceManagement.ResourceProviders;
     using UnityEngine.SceneManagement;
+    using ILogger = UniT.Logging.ILogger;
 
     public interface IAddressableManager
     {
+        public ILogger Logger { get; }
+
         public UniTask<T> Load<T>(string key = null, IProgress<float> progress = null, CancellationToken cancellationToken = default);
 
         public UniTask<T> LoadComponent<T>(string key = null, IProgress<float> progress = null, CancellationToken cancellationToken = default) where T : Component;

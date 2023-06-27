@@ -14,7 +14,8 @@ namespace UniT.Addressables
 
     public class AddressableManager : IAddressableManager
     {
-        private readonly ILogger                                                 logger;
+        public ILogger Logger { get; }
+
         private readonly Dictionary<string, AsyncOperationHandle>                loadedAssets;
         private readonly Dictionary<string, AsyncOperationHandle<SceneInstance>> loadedScenes;
 
@@ -22,8 +23,8 @@ namespace UniT.Addressables
         {
             this.loadedAssets = new();
             this.loadedScenes = new();
-            this.logger       = logger;
-            this.logger.Info($"{this.GetType().Name} instantiated", Color.green);
+            this.Logger       = logger;
+            this.Logger.Info($"{this.GetType().Name} instantiated");
         }
 
         public UniTask<T> Load<T>(string key = null, IProgress<float> progress = null, CancellationToken cancellationToken = default)
@@ -34,7 +35,7 @@ namespace UniT.Addressables
                        .ToUniTask(progress: progress, cancellationToken: cancellationToken)
                        .ContinueWith(asset =>
                        {
-                           this.logger.Debug($"Loaded addressable {key}");
+                           this.Logger.Debug($"Loaded addressable {key}");
                            progress?.Report(1);
                            return asset;
                        });
@@ -55,12 +56,12 @@ namespace UniT.Addressables
         {
             if (!this.loadedAssets.Remove(key, out var handle))
             {
-                this.logger.Warning($"Trying to unload addressable {key} that was not loaded");
+                this.Logger.Warning($"Trying to unload addressable {key} that was not loaded");
                 return;
             }
 
             Addressables.Release(handle);
-            this.logger.Debug($"Unloaded addressable {key}");
+            this.Logger.Debug($"Unloaded addressable {key}");
         }
 
         public void Unload<T>()
@@ -77,7 +78,7 @@ namespace UniT.Addressables
 
             if (!activateOnLoad)
             {
-                this.logger.Warning("Set `activateOnLoad` to false will block all other `AsyncOperationHandle` until the scene is activated");
+                this.Logger.Warning("Set `activateOnLoad` to false will block all other `AsyncOperationHandle` until the scene is activated");
             }
 
             return (this.loadedScenes[key] = Addressables.LoadSceneAsync(sceneName, loadMode, activateOnLoad, priority))
@@ -89,7 +90,7 @@ namespace UniT.Addressables
                            this.loadedScenes.RemoveAll((oldKey, _) => oldKey != key);
                        }
 
-                       this.logger.Debug($"Loaded scene {key}");
+                       this.Logger.Debug($"Loaded scene {key}");
                        progress?.Report(1);
                        return scene;
                    });
@@ -99,7 +100,7 @@ namespace UniT.Addressables
         {
             if (!this.loadedScenes.Remove(key, out var scene))
             {
-                this.logger.Warning("Trying to unload scene {key} that was not loaded");
+                this.Logger.Warning("Trying to unload scene {key} that was not loaded");
                 return UniTask.CompletedTask;
             }
 
@@ -107,7 +108,7 @@ namespace UniT.Addressables
                                .ToUniTask(progress: progress, cancellationToken: cancellationToken)
                                .ContinueWith(_ =>
                                {
-                                   this.logger.Debug($"Unloaded scene {key}");
+                                   this.Logger.Debug($"Unloaded scene {key}");
                                    progress?.Report(1);
                                });
         }

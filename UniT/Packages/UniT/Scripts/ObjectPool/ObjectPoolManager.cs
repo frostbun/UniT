@@ -24,7 +24,7 @@ namespace UniT.ObjectPool
             this.keyToPool          = new();
             this.instanceToPool     = new();
             this.Logger             = logger;
-            this.Logger.Info($"{this.GetType().Name} instantiated", Color.green);
+            this.Logger.Info($"{this.GetType().Name} instantiated");
         }
 
         public void InstantiatePool(GameObject prefab, int initialCount = 1)

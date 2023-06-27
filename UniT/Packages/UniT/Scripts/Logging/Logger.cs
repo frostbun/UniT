@@ -1,38 +1,41 @@
 namespace UniT.Logging
 {
     using System;
-    using UniT.Extensions;
-    using UnityEngine;
 
     public class Logger : BaseLogger
     {
-        protected override void Debug(string message, Color? color = null)
+        public Logger(string name, LogConfig config = null) : base(name, config)
         {
-            UnityEngine.Debug.Log(message.WithColor(color));
         }
 
-        protected override void Info(string message, Color? color = null)
+        protected override void Debug(string message)
         {
-            UnityEngine.Debug.Log(message.WithColor(color));
+            UnityEngine.Debug.Log(message);
         }
 
-        protected override void Warning(string message, Color? color = null)
+        protected override void Info(string message)
         {
-            UnityEngine.Debug.LogWarning(message.WithColor(color));
+            UnityEngine.Debug.Log(message);
         }
 
-        protected override void Error(string message, Color? color = null)
+        protected override void Warning(string message)
         {
-            UnityEngine.Debug.LogError(message.WithColor(color));
+            UnityEngine.Debug.LogWarning(message);
         }
 
-        protected override void Critical(string message, Color? color = null)
+        protected override void Error(string message)
         {
-            UnityEngine.Debug.LogError(message.WithColor(color));
+            UnityEngine.Debug.LogError(message);
         }
 
-        protected override void Exception(Exception exception)
+        protected override void Critical(string message)
         {
+            UnityEngine.Debug.LogError(message);
+        }
+
+        protected override void Exception(string message, Exception exception)
+        {
+            UnityEngine.Debug.LogError(message);
             UnityEngine.Debug.LogException(exception);
         }
     }

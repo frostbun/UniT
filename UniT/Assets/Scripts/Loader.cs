@@ -26,10 +26,10 @@ public class Loader : MonoBehaviour
     {
         #region ServiceProvider
 
-        var addressableManager = new AddressableManager(new Logger());
+        var addressableManager = new AddressableManager(new Logger(nameof(AddressableManager)));
         ServiceProvider<IAddressableManager>.Add(addressableManager);
 
-        var objectPoolManager = new ObjectPoolManager(addressableManager, new Logger());
+        var objectPoolManager = new ObjectPoolManager(addressableManager, new Logger(nameof(ObjectPoolManager)));
         ServiceProvider<IObjectPoolManager>.Add(objectPoolManager);
 
         var levelBlueprint = new LevelBlueprint();
@@ -42,12 +42,12 @@ public class Loader : MonoBehaviour
                 new PlayerPrefsJsonDataHandler(),
                 new BlueprintAddressableCsvDataHandler(addressableManager),
             },
-            new Logger()
+            new Logger(nameof(DataManager))
         );
         ServiceProvider<IDataManager>.Add(dataManager);
 
         DontDestroyOnLoad(this.viewManager);
-        this.viewManager.Inject(new PresenterFactory(), addressableManager, new Logger());
+        this.viewManager.Inject(new PresenterFactory(), addressableManager, new Logger(nameof(ViewManager)));
         ServiceProvider<IViewManager>.Add(this.viewManager);
 
         DontDestroyOnLoad(this.gameController);
