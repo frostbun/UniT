@@ -9,7 +9,6 @@ namespace UniT.Audio
     using UnityEngine;
     using ILogger = UniT.Logging.ILogger;
 
-    // TODO: auto release audio clips after a while
     public class AudioManager : IAudioManager, IInitializable
     {
         public ILogger     Logger { get; }
@@ -79,6 +78,16 @@ namespace UniT.Audio
             this.Logger.Debug($"Audio config: {this.Config.ToJson()}");
         }
 
+        public UniTask LoadSounds(params string[] names)
+        {
+            return UniTask.WhenAll(names.Select(this.GetSoundSource));
+        }
+
+        public void UnloadSounds(params string[] names)
+        {
+            names.ForEach(this.RecycleSoundSource);
+        }
+
         public void PlaySoundOneShot(string name)
         {
             this.GetSoundSource(name).ContinueWith(soundSource =>
@@ -138,6 +147,19 @@ namespace UniT.Audio
                     return soundSource;
                 });
             });
+        }
+
+        private void RecycleSoundSource(string name)
+        {
+            if (!this.spawnedSoundSource.Remove(name, out var soundSource))
+            {
+                this.Logger.Warning($"Trying to release sound {name} that was not loaded");
+                return;
+            }
+
+            soundSource.Stop();
+            this.pooledSoundSource.Enqueue(soundSource);
+            this.addressableManager.Unload(name);
         }
 
         private void ConfigureAllSoundSources()

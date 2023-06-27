@@ -1,5 +1,6 @@
 namespace UniT.Audio
 {
+    using Cysharp.Threading.Tasks;
     using UniT.Logging;
 
     public interface IAudioManager
@@ -9,6 +10,10 @@ namespace UniT.Audio
         public AudioConfig Config { get; }
 
         public string CurrentMusic { get; }
+
+        public UniTask LoadSounds(params string[] names);
+
+        public void UnloadSounds(params string[] names);
 
         public void PlaySoundOneShot(string name);
 
