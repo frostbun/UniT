@@ -2,6 +2,7 @@ namespace UniT.Data.Converters.Base
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using UniT.Data.Converters.Collections;
     using UniT.Data.Converters.DateTime;
@@ -11,7 +12,13 @@ namespace UniT.Data.Converters.Base
 
     public class ConverterManager
     {
-        public static readonly ConverterManager Instance = new();
+        public static readonly ConverterManager Instance;
+
+        static ConverterManager()
+        {
+            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+            Instance                                = new();
+        }
 
         private readonly List<IConverter> converters = new();
 
