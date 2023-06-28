@@ -1,6 +1,8 @@
 namespace UniT.UI
 {
     using System;
+    using System.Linq;
+    using UniT.Extensions;
     using UniT.Utils;
     using UnityEngine;
 
@@ -29,10 +31,16 @@ namespace UniT.UI
 
         protected virtual void Initialize()
         {
+            this.GetComponentsInChildren<IInitializable>(true)
+                .Where(initializable => initializable != this)
+                .ForEach(initializable => initializable.Initialize());
         }
 
         protected virtual void Dispose()
         {
+            this.GetComponentsInChildren<IDisposable>(true)
+                .Where(disposable => disposable != this)
+                .ForEach(disposable => disposable.Dispose());
         }
 
         protected virtual void OnShow()
