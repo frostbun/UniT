@@ -19,6 +19,8 @@ namespace UniT.Audio
 
         public void PlaySound(string name, bool force = false);
 
+        public UniTask LoadMusic(string name);
+
         public void PlayMusic(string name, bool force = false);
 
         public void PauseMusic();

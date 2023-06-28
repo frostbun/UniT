@@ -107,15 +107,21 @@ namespace UniT.Audio
             }).Forget();
         }
 
+        public UniTask LoadMusic(string name)
+        {
+            return this.addressableManager.Load<AudioClip>(name);
+        }
+
         public void PlayMusic(string name, bool force = false)
         {
             if (!force && this.CurrentMusic == name) return;
+            this.musicSource.Stop();
+            if (this.CurrentMusic != name && this.CurrentMusic != null) this.addressableManager.Unload(this.CurrentMusic);
+            this.CurrentMusic = name;
             this.addressableManager.Load<AudioClip>(name).ContinueWith(audioClip =>
             {
                 this.musicSource.clip = audioClip;
                 this.musicSource.Play();
-                if (this.CurrentMusic != null) this.addressableManager.Unload(this.CurrentMusic);
-                this.CurrentMusic = name;
                 this.Logger.Debug($"Playing music {name}");
             }).Forget();
         }
