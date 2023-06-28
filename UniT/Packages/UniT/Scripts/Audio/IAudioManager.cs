@@ -17,7 +17,11 @@ namespace UniT.Audio
 
         public void PlaySoundOneShot(string name);
 
-        public void PlaySound(string name, bool force = false);
+        public void PlaySound(string name, bool loop = false, bool force = false);
+
+        public void StopSounds(params string[] names);
+
+        public void StopAllSounds();
 
         public UniTask LoadMusic(string name);
 

@@ -1,6 +1,7 @@
 namespace UniT.Audio
 {
     using System.Collections.Generic;
+    using System.Linq;
     using Cysharp.Threading.Tasks;
     using UniT.Addressables;
     using UniT.Extensions;
@@ -97,14 +98,25 @@ namespace UniT.Audio
             }).Forget();
         }
 
-        public void PlaySound(string name, bool force = false)
+        public void PlaySound(string name, bool loop = false, bool force = false)
         {
             this.GetSoundSource(name).ContinueWith(soundSource =>
             {
+                soundSource.loop = loop;
                 if (!force && soundSource.isPlaying) return;
                 soundSource.Play();
                 this.Logger.Debug($"Playing sound {name}");
             }).Forget();
+        }
+
+        public void StopSounds(params string[] names)
+        {
+            names.ForEach(this.StopSound);
+        }
+
+        public void StopAllSounds()
+        {
+            this.StopSounds(this.spawnedSoundSource.Keys.ToArray());
         }
 
         public UniTask LoadMusic(string name)
@@ -115,7 +127,7 @@ namespace UniT.Audio
         public void PlayMusic(string name, bool force = false)
         {
             if (!force && this.CurrentMusic == name) return;
-            this.musicSource.Stop();
+            this.StopMusic();
             if (this.CurrentMusic != name && this.CurrentMusic != null) this.addressableManager.Unload(this.CurrentMusic);
             this.CurrentMusic = name;
             this.addressableManager.Load<AudioClip>(name).ContinueWith(audioClip =>
@@ -138,7 +150,9 @@ namespace UniT.Audio
 
         public void StopMusic()
         {
+            if (this.CurrentMusic == null) return;
             this.musicSource.Stop();
+            this.Logger.Debug($"Stopped music {this.CurrentMusic}");
         }
 
         private UniTask<AudioSource> GetSoundSource(string name)
@@ -155,17 +169,31 @@ namespace UniT.Audio
             });
         }
 
+        private void StopSound(string name)
+        {
+            if (!this.spawnedSoundSource.TryGetValue(name, out var soundSource))
+            {
+                this.Logger.Warning($"Trying to stop sound {name} that was not loaded");
+                return;
+            }
+
+            soundSource.Stop();
+            this.Logger.Debug($"Stopped sound {name}");
+        }
+
         private void RecycleSoundSource(string name)
         {
+            this.StopSound(name);
+
             if (!this.spawnedSoundSource.Remove(name, out var soundSource))
             {
                 this.Logger.Warning($"Trying to release sound {name} that was not loaded");
                 return;
             }
 
-            soundSource.Stop();
             this.pooledSoundSource.Enqueue(soundSource);
             this.addressableManager.Unload(name);
+            this.Logger.Debug($"Recycled sound source {name}");
         }
 
         private void ConfigureAllSoundSources()
