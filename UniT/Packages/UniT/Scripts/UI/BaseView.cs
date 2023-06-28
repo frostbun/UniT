@@ -32,14 +32,14 @@ namespace UniT.UI
         protected virtual void Initialize()
         {
             this.GetComponentsInChildren<IInitializable>(true)
-                .Where(initializable => initializable != this)
+                .Skip(1)
                 .ForEach(initializable => initializable.Initialize());
         }
 
         protected virtual void Dispose()
         {
             this.GetComponentsInChildren<IDisposable>(true)
-                .Where(disposable => disposable != this)
+                .Skip(1)
                 .ForEach(disposable => disposable.Dispose());
         }
 
