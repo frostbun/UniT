@@ -6,8 +6,7 @@ namespace UniT.UI
     using UniT.Utils;
     using UnityEngine;
 
-    public abstract class BaseView<TPresenter> : MonoBehaviour, IView, IInitializable, IDisposable
-        where TPresenter : IPresenter
+    public abstract class BaseView<TPresenter> : MonoBehaviour, IView where TPresenter : IPresenter
     {
         GameObject IView.gameObject => this.gameObject;
 
@@ -17,9 +16,21 @@ namespace UniT.UI
 
         IViewManager.IViewInstance IView.Instance { set => this.Instance = value; }
 
-        void IInitializable.Initialize() => this.Initialize();
+        void IInitializable.Initialize()
+        {
+            this.GetComponentsInChildren<IInitializable>(true)
+                .Skip(1)
+                .ForEach(initializable => initializable.Initialize());
+            this.Initialize();
+        }
 
-        void IDisposable.Dispose() => this.Dispose();
+        void IDisposable.Dispose()
+        {
+            this.GetComponentsInChildren<IDisposable>(true)
+                .Skip(1)
+                .ForEach(disposable => disposable.Dispose());
+            this.Dispose();
+        }
 
         void IView.OnShow() => this.OnShow();
 
@@ -31,16 +42,10 @@ namespace UniT.UI
 
         protected virtual void Initialize()
         {
-            this.GetComponentsInChildren<IInitializable>(true)
-                .Skip(1)
-                .ForEach(initializable => initializable.Initialize());
         }
 
         protected virtual void Dispose()
         {
-            this.GetComponentsInChildren<IDisposable>(true)
-                .Skip(1)
-                .ForEach(disposable => disposable.Dispose());
         }
 
         protected virtual void OnShow()

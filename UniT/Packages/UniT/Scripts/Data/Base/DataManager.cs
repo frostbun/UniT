@@ -51,17 +51,17 @@ namespace UniT.Data.Base
 
         public UniTask PopulateAllData()
         {
-            return this.PopulateData(this.dataCache.Keys.ToArray());
+            return this.PopulateData(this.dataCache.Keys!.ToArray());
         }
 
         public UniTask SaveAllData()
         {
-            return this.SaveData(this.dataCache.Keys.ToArray());
+            return this.SaveData(this.dataCache.Keys!.ToArray());
         }
 
         public UniTask FlushAllData()
         {
-            return this.FlushData(this.dataCache.Keys.ToArray());
+            return this.FlushData(this.dataCache.Keys!.ToArray());
         }
 
         private UniTask PopulateData_Internal(Type dataType)

@@ -7,7 +7,6 @@ namespace UniT.UI
     using UniT.Addressables;
     using UniT.Extensions;
     using UniT.Extensions.UniTask;
-    using UniT.Utils;
     using UnityEngine;
     using ILogger = UniT.Logging.ILogger;
 
@@ -45,8 +44,8 @@ namespace UniT.UI
                 this.view.Presenter = this.presenter;
                 this.presenter.View = this.view;
 
-                if (this.view is IInitializable initializableView) initializableView.Initialize();
-                if (this.presenter is IInitializable initializablePresenter) initializablePresenter.Initialize();
+                this.view.Initialize();
+                this.presenter.Initialize();
 
                 this.manager.Logger.Debug($"Instantiated {this.view.GetType().Name}");
             }
@@ -61,48 +60,47 @@ namespace UniT.UI
             public void Stack()
             {
                 this.EnsureViewIsHidden();
-                this.view.OnShow();
                 this.transform.SetParent(this.manager.stackingViewsContainer, false);
                 this.transform.SetAsLastSibling();
-                this.manager.instances.Values
-                    .Where(instance => instance.CurrentStatus is ViewStatus.Floating or ViewStatus.Stacking)
-                    .ForEach(instance => instance.Hide_Internal());
                 this.manager.instanceStack.Remove(this);
                 this.manager.instanceStack.Add(this);
                 this.CurrentStatus = ViewStatus.Stacking;
+                this.view.OnShow();
+                this.manager.instances.Values.ToArray()
+                    .Where(instance => instance != this && instance.CurrentStatus is ViewStatus.Floating or ViewStatus.Stacking)
+                    .ForEach(instance => instance.EnsureViewIsHidden());
             }
 
             public void Float()
             {
                 this.EnsureViewIsHidden();
-                this.view.OnShow();
                 this.transform.SetParent(this.manager.floatingViewsContainer, false);
                 this.transform.SetAsLastSibling();
                 this.CurrentStatus = ViewStatus.Floating;
+                this.view.OnShow();
             }
 
             public void Detach()
             {
                 this.EnsureViewIsHidden();
-                this.view.OnShow();
                 this.transform.SetParent(this.manager.detachedViewsContainer, false);
                 this.transform.SetAsLastSibling();
                 this.CurrentStatus = ViewStatus.Detached;
+                this.view.OnShow();
             }
 
             public void Hide()
             {
-                this.Hide_Internal();
+                this.EnsureViewIsHidden();
                 this.RemoveFromStack();
             }
 
             public void Dispose()
             {
-                this.EnsureViewIsNotDisposed();
                 this.EnsureViewIsHidden();
 
-                if (this.view is IDisposable disposableView) disposableView.Dispose();
-                if (this.presenter is IDisposable disposablePresenter) disposablePresenter.Dispose();
+                this.presenter.Dispose();
+                this.view.Dispose();
 
                 this.manager.instances.Remove(this.view.GetType());
                 this.RemoveFromStack();
@@ -117,15 +115,6 @@ namespace UniT.UI
                 this.CurrentStatus = ViewStatus.Disposed;
             }
 
-            private void Hide_Internal()
-            {
-                this.EnsureViewIsNotDisposed();
-                if (this._currentStatus is ViewStatus.Hidden) return;
-                this.transform.SetParent(this.manager.hiddenViewsContainer, false);
-                this.view.OnHide();
-                this.CurrentStatus = ViewStatus.Hidden;
-            }
-
             private void RemoveFromStack()
             {
                 this.manager.instanceStack.Remove(this);
@@ -136,7 +125,10 @@ namespace UniT.UI
             private void EnsureViewIsHidden()
             {
                 this.EnsureViewIsNotDisposed();
-                if (this._currentStatus is not ViewStatus.Hidden) this.Hide_Internal();
+                if (this._currentStatus is ViewStatus.Hidden) return;
+                this.transform.SetParent(this.manager.hiddenViewsContainer, false);
+                this.CurrentStatus = ViewStatus.Hidden;
+                this.view.OnHide();
             }
 
             private void EnsureViewIsNotDisposed()
@@ -173,7 +165,7 @@ namespace UniT.UI
             this.Logger.Info($"{this.GetType().Name} instantiated");
         }
 
-        public IViewManager.IViewInstance StackingView => this.instances.Values.SingleOrDefault(instance => instance.CurrentStatus is ViewStatus.Stacking);
+        public IViewManager.IViewInstance StackingView => this.instanceStack.LastOrDefault(instance => instance.CurrentStatus is ViewStatus.Stacking);
 
         public IEnumerable<IViewManager.IViewInstance> FloatingViews => this.instances.Values.Where(instance => instance.CurrentStatus is ViewStatus.Floating).OrderByDescending(instance => instance.transform.GetSiblingIndex());
 

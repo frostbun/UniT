@@ -7,8 +7,7 @@ namespace UniT.UI
     {
     }
 
-    public abstract class BasePresenter<TView, TModel> : IPresenter, IInitializable, IDisposable
-        where TView : IView
+    public abstract class BasePresenter<TView, TModel> : IPresenter where TView : IView
     {
         IView IPresenter.View { set => this.View = (TView)value; }
 

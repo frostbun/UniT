@@ -1,8 +1,10 @@
 namespace UniT.UI
 {
+    using System;
+    using UniT.Utils;
     using UnityEngine;
 
-    public interface IView
+    public interface IView : IInitializable, IDisposable
     {
         protected internal GameObject gameObject { get; }
 
