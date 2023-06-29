@@ -30,5 +30,10 @@ namespace UniT.Extensions
         {
             return enumerable.Any(tuple => predicate(tuple.Item1, tuple.Item2));
         }
+
+        public static Dictionary<TFirst, TSecond> ToDictionary<TFirst, TSecond>(this IEnumerable<(TFirst, TSecond)> enumerable)
+        {
+            return enumerable.ToDictionary(tuple => tuple.Item1, tuple => tuple.Item2);
+        }
     }
 }

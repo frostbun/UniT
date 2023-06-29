@@ -55,7 +55,7 @@ namespace UniT.Extensions
 
         public static Dictionary<TKey, TValue> Clone<TKey, TValue>(this IDictionary<TKey, TValue> dictionary)
         {
-            return dictionary.ToDictionaryOneToOne(kv => kv.Key, kv => kv.Value);
+            return new(dictionary);
         }
 
         public static ReadOnlyDictionary<TKey, TValue> AsReadOnly<TKey, TValue>(this IDictionary<TKey, TValue> dictionary)
