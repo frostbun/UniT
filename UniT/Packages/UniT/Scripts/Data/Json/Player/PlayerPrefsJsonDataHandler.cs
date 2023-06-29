@@ -1,9 +1,11 @@
 namespace UniT.Data.Json.Player
 {
     using System;
+    using System.Linq;
     using Cysharp.Threading.Tasks;
     using UniT.Data.Base;
     using UniT.Data.Json.Base;
+    using UniT.Extensions;
     using UnityEngine;
 
     public class PlayerPrefsJsonDataHandler : BaseJsonDataHandler
@@ -19,14 +21,14 @@ namespace UniT.Data.Json.Player
             return UniTask.CompletedTask;
         }
 
-        protected override UniTask<string> GetRawData(string key)
+        protected override UniTask<string[]> GetRawData(string[] keys)
         {
-            return UniTask.FromResult(PlayerPrefs.GetString(key));
+            return UniTask.FromResult(keys.Select(PlayerPrefs.GetString).ToArray());
         }
 
-        protected override UniTask SaveRawData(string key, string json)
+        protected override UniTask SaveRawData(string[] keys, string[] rawDatas)
         {
-            PlayerPrefs.SetString(key, json);
+            IterTools.Zip(keys, rawDatas).ForEach(PlayerPrefs.SetString);
             return UniTask.CompletedTask;
         }
     }

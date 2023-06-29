@@ -1,6 +1,7 @@
 namespace UniT.Data.Base
 {
     using System;
+    using System.Linq;
     using Cysharp.Threading.Tasks;
     using UniT.Extensions;
 
@@ -8,18 +9,14 @@ namespace UniT.Data.Base
     {
         bool IDataHandler.CanHandle(Type type) => this.CanHandle(type);
 
-        UniTask IDataHandler.Populate(IData data) =>
-            this.GetRawData(data.GetType().GetKeyAttribute())
-                .ContinueWith(rawData =>
-                {
-                    if (rawData.IsNullOrWhitespace()) return;
-                    this.PopulateData(rawData, data);
-                });
+        UniTask IDataHandler.Populate(IData[] datas) =>
+            this.GetRawData(datas.Select(data => data.GetType().GetKeyAttribute()).ToArray())
+                .ContinueWith(rawDatas => IterTools.Zip(rawDatas, datas).Where((rawData, data) => !rawData.IsNullOrWhitespace()).ForEach(this.PopulateData));
 
-        UniTask IDataHandler.Save(IData data) =>
+        UniTask IDataHandler.Save(IData[] datas) =>
             this.SaveRawData(
-                data.GetType().GetKeyAttribute(),
-                this.SerializeData(data)
+                datas.Select(data => data.GetType().GetKeyAttribute()).ToArray(),
+                datas.Select(this.SerializeData).ToArray()
             );
 
         UniTask IDataHandler.Flush() => this.Flush();
@@ -28,9 +25,9 @@ namespace UniT.Data.Base
 
         protected abstract UniTask Flush();
 
-        protected abstract UniTask<string> GetRawData(string key);
+        protected abstract UniTask<string[]> GetRawData(string[] keys);
 
-        protected abstract UniTask SaveRawData(string key, string rawData);
+        protected abstract UniTask SaveRawData(string[] keys, string[] rawDatas);
 
         protected abstract void PopulateData(string rawData, IData data);
 

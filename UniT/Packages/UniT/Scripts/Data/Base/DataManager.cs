@@ -27,26 +27,22 @@ namespace UniT.Data.Base
 
             this.Logger = logger;
             this.dataTypeToHandlerType.ForEach((dataType, handlerType) => this.Logger.Info($"Found {dataType.Name} - {handlerType.Name}"));
-            this.Logger.Info($"{this.GetType().Name} instantiated with {this.dataCache.Count} data and {this.handlerCache.Count} handlers");
+            this.Logger.Info($"{this.GetType().Name} instantiated with {this.dataCache.Count} datas and {this.handlerCache.Count} handlers");
         }
 
         public UniTask PopulateData(params Type[] dataTypes)
         {
-            return UniTask.WhenAll(dataTypes.Select(this.PopulateData_Internal));
+            return UniTask.WhenAll(dataTypes.GroupBy(dataType => this.dataTypeToHandlerType[dataType]).Select(group => this.handlerCache[group.Key].Populate(group.Select(dataType => this.dataCache[dataType]).ToArray()).ContinueWith(() => dataTypes.ForEach(dataType => this.Logger.Debug($"Loaded {dataType.Name}")))));
         }
 
         public UniTask SaveData(params Type[] dataTypes)
         {
-            return UniTask.WhenAll(dataTypes.Select(this.SaveData_Internal));
+            return UniTask.WhenAll(dataTypes.GroupBy(dataType => this.dataTypeToHandlerType[dataType]).Select(group => this.handlerCache[group.Key].Save(group.Select(dataType => this.dataCache[dataType]).ToArray()).ContinueWith(() => dataTypes.ForEach(dataType => this.Logger.Debug($"Saved {dataType.Name}")))));
         }
 
         public UniTask FlushData(params Type[] dataTypes)
         {
-            return UniTask.WhenAll(
-                dataTypes.Select(dataType => this.dataTypeToHandlerType[dataType])
-                         .Distinct()
-                         .Select(this.FlushHandler_Internal)
-            );
+            return UniTask.WhenAll(dataTypes.Select(dataType => this.dataTypeToHandlerType[dataType]).Distinct().Select(handlerType => this.handlerCache[handlerType].Flush().ContinueWith(() => this.Logger.Debug($"Flushed {handlerType.Name}"))));
         }
 
         public UniTask PopulateAllData()
@@ -62,27 +58,6 @@ namespace UniT.Data.Base
         public UniTask FlushAllData()
         {
             return this.FlushData(this.dataCache.Keys!.ToArray());
-        }
-
-        private UniTask PopulateData_Internal(Type dataType)
-        {
-            return this.handlerCache[this.dataTypeToHandlerType[dataType]]
-                       .Populate(this.dataCache[dataType])
-                       .ContinueWith(() => this.Logger.Debug($"Loaded {dataType.Name}"));
-        }
-
-        private UniTask SaveData_Internal(Type dataType)
-        {
-            return this.handlerCache[this.dataTypeToHandlerType[dataType]]
-                       .Save(this.dataCache[dataType])
-                       .ContinueWith(() => this.Logger.Debug($"Saved {dataType.Name}"));
-        }
-
-        private UniTask FlushHandler_Internal(Type handlerType)
-        {
-            return this.handlerCache[handlerType]
-                       .Flush()
-                       .ContinueWith(() => this.Logger.Debug($"Flushed {handlerType.Name}"));
         }
     }
 }

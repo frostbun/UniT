@@ -3,6 +3,7 @@ namespace UniT.Extensions
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.Linq;
 
     public static class DictionaryExtensions
     {
@@ -26,27 +27,17 @@ namespace UniT.Extensions
 
         public static IEnumerable<KeyValuePair<TKey, TValue>> Where<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, Func<TKey, TValue, bool> predicate)
         {
-            foreach (var kv in dictionary)
-            {
-                if (!predicate(kv.Key, kv.Value)) continue;
-                yield return kv;
-            }
+            return dictionary.Where(kv => predicate(kv.Key, kv.Value));
         }
 
         public static IEnumerable<TResult> Select<TKey, TValue, TResult>(this IDictionary<TKey, TValue> dictionary, Func<TKey, TValue, TResult> selector)
         {
-            foreach (var (key, value) in dictionary)
-            {
-                yield return selector(key, value);
-            }
+            return dictionary.Select(kv => selector(kv.Key, kv.Value));
         }
 
         public static void ForEach<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, Action<TKey, TValue> action)
         {
-            foreach (var (key, value) in dictionary)
-            {
-                action(key, value);
-            }
+            dictionary.ForEach(kv => action(kv.Key, kv.Value));
         }
 
         public static int RemoveAll<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, Func<TKey, TValue, bool> predicate)

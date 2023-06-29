@@ -5,6 +5,7 @@ namespace UniT.Data.Converters.Collections
     using System.Collections.Generic;
     using System.Linq;
     using UniT.Data.Converters.Base;
+    using UniT.Extensions;
 
     public class DictionaryGenericConverter : BaseGenericConverter
     {

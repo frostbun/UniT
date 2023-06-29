@@ -21,17 +21,20 @@ namespace UniT.Data.Csv.Blueprint
             return base.CanHandle(type) && typeof(IBlueprintData).IsAssignableFrom(type);
         }
 
-        protected override UniTask<string> GetRawData(string key)
+        protected override UniTask<string[]> GetRawData(string[] keys)
         {
-            return this.addressableManager.Load<TextAsset>(key).ContinueWith(blueprint =>
+            return UniTask.WhenAll(keys.Select(key =>
             {
-                var text = blueprint.text;
-                this.addressableManager.Unload(key);
-                return text;
-            });
+                return this.addressableManager.Load<TextAsset>(key).ContinueWith(blueprint =>
+                {
+                    var text = blueprint.text;
+                    this.addressableManager.Unload(key);
+                    return text;
+                });
+            }));
         }
 
-        protected override UniTask SaveRawData(string key, string rawData)
+        protected override UniTask SaveRawData(string[] keys, string[] rawDatas)
         {
             return UniTask.CompletedTask;
         }

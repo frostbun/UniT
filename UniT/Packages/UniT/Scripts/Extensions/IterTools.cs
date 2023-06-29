@@ -27,6 +27,16 @@ namespace UniT.Extensions
             }
         }
 
+        public static IEnumerable<(TFirst, TSecond)> Zip<TFirst, TSecond>(IEnumerable<TFirst> first, IEnumerable<TSecond> second)
+        {
+            return Zip(first, second, (i1, i2) => (i1, i2));
+        }
+
+        public static IEnumerable<(TFirst, TSecond, TThird)> Zip<TFirst, TSecond, TThird>(IEnumerable<TFirst> first, IEnumerable<TSecond> second, IEnumerable<TThird> third)
+        {
+            return Zip(first, second, third, (i1, i2, i3) => (i1, i2, i3));
+        }
+
         public static IEnumerable<T[]> Zip<T>(params IEnumerable<T>[] enumerables)
         {
             var enumerators = enumerables.GetEnumerators();
@@ -71,6 +81,16 @@ namespace UniT.Extensions
             }
         }
 
+        public static IEnumerable<(TFirst, TSecond)> ZipLongest<TFirst, TSecond>(IEnumerable<TFirst> first, IEnumerable<TSecond> second)
+        {
+            return ZipLongest(first, second, (i1, i2) => (i1, i2));
+        }
+
+        public static IEnumerable<(TFirst, TSecond, TThird)> ZipLongest<TFirst, TSecond, TThird>(IEnumerable<TFirst> first, IEnumerable<TSecond> second, IEnumerable<TThird> third)
+        {
+            return ZipLongest(first, second, third, (i1, i2, i3) => (i1, i2, i3));
+        }
+
         public static IEnumerable<T[]> ZipLongest<T>(params IEnumerable<T>[] enumerables)
         {
             var enumerators = enumerables.GetEnumerators();
@@ -82,6 +102,21 @@ namespace UniT.Extensions
             }
 
             enumerators.Dispose();
+        }
+
+        public static bool SequenceEqual<T>(IEnumerable<T> first, IEnumerable<T> second) where T : IEquatable<T>
+        {
+            return ZipLongest(first, second).Reverse().All((i1, i2) => i1.Equals(i2));
+        }
+
+        public static bool SequenceSmaller<T>(IEnumerable<T> first, IEnumerable<T> second) where T : IComparable<T>
+        {
+            return ZipLongest(first, second).Reverse().All((i1, i2) => i1.CompareTo(i2) < 0);
+        }
+
+        public static bool SequenceGreater<T>(IEnumerable<T> first, IEnumerable<T> second) where T : IComparable<T>
+        {
+            return ZipLongest(first, second).Reverse().All((i1, i2) => i1.CompareTo(i2) > 0);
         }
 
         public static IEnumerable<T[]> Product<T>(params IEnumerable<T>[] enumerables)

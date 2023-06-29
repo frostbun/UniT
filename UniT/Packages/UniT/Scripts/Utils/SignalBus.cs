@@ -2,43 +2,37 @@ namespace UniT.Utils
 {
     using System;
     using System.Collections.Generic;
+    using UniT.Extensions;
 
     public static class SignalBus<T> where T : class
     {
-        private static readonly HashSet<Action<T>> callbackWithSignal = new();
-        private static readonly HashSet<Action>    callbackNoSignal   = new();
+        private static readonly HashSet<Action<T>> callbacksWithSignal = new();
+        private static readonly HashSet<Action>    callbacksNoSignal   = new();
 
         public static void Fire(T signal)
         {
-            foreach (var action in callbackWithSignal)
-            {
-                action.Invoke(signal);
-            }
-
-            foreach (var action in callbackNoSignal)
-            {
-                action.Invoke();
-            }
+            callbacksWithSignal.ForEach(callback => callback(signal));
+            callbacksNoSignal.ForEach(callback => callback());
         }
 
         public static void Subscribe(Action<T> callback)
         {
-            callbackWithSignal.Add(callback);
+            callbacksWithSignal.Add(callback);
         }
 
         public static void Subscribe(Action callback)
         {
-            callbackNoSignal.Add(callback);
+            callbacksNoSignal.Add(callback);
         }
 
         public static void Unsubscribe(Action<T> callback)
         {
-            callbackWithSignal.Remove(callback);
+            callbacksWithSignal.Remove(callback);
         }
 
         public static void Unsubscribe(Action callback)
         {
-            callbackNoSignal.Remove(callback);
+            callbacksNoSignal.Remove(callback);
         }
     }
 }

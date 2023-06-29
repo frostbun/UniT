@@ -72,7 +72,7 @@ namespace UniT.Utils
                 return n1 - -n2;
             }
 
-            return new(IterTools.ZipLongest(n1.values, n2.values).Select(p => p[0] + p[1]).ToList(), n1.sign);
+            return new(IterTools.ZipLongest(n1.values, n2.values, (v1, v2) => v1 + v2).ToList(), n1.sign);
         }
 
         public static BigNumber operator +(BigNumber n1, int n2)
@@ -92,7 +92,7 @@ namespace UniT.Utils
                 return -(n2 - n1);
             }
 
-            return new(IterTools.ZipLongest(n1.values, n2.values).Select(p => p[0] - p[1]).ToList(), n1.sign);
+            return new(IterTools.ZipLongest(n1.values, n2.values, (v1, v2) => v1 - v2).ToList(), n1.sign);
         }
 
         public static BigNumber operator -(BigNumber n1, int n2)
@@ -123,7 +123,7 @@ namespace UniT.Utils
                 return n1 is null && n2 is null;
             }
 
-            return n1.sign == n2.sign && Enumerable.SequenceEqual(n1.values, n2.values);
+            return n1.sign == n2.sign && IterTools.SequenceEqual(n1.values, n2.values);
         }
 
         public static bool operator !=(BigNumber n1, BigNumber n2)
@@ -143,7 +143,7 @@ namespace UniT.Utils
                 return -n1 >= -n2;
             }
 
-            return IterTools.ZipLongest(n1.values, n2.values).Reverse().All(p => p[0] < p[1]);
+            return IterTools.SequenceSmaller(n1.values, n2.values);
         }
 
         public static bool operator <=(BigNumber n1, BigNumber n2)
@@ -163,7 +163,7 @@ namespace UniT.Utils
                 return -n1 <= -n2;
             }
 
-            return IterTools.ZipLongest(n1.values, n2.values).Reverse().All(p => p[0] > p[1]);
+            return IterTools.SequenceGreater(n1.values, n2.values);
         }
 
         public static bool operator >=(BigNumber n1, BigNumber n2)
