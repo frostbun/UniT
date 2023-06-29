@@ -6,12 +6,13 @@ namespace UniT.Data.Csv.Blueprint
     using UniT.Data.Base;
     using UniT.Data.Csv.Base;
     using UnityEngine;
+    using ILogger = UniT.Logging.ILogger;
 
     public class BlueprintAddressableCsvDataHandler : BaseCsvDataHandler
     {
         private readonly IAddressableManager addressableManager;
 
-        public BlueprintAddressableCsvDataHandler(IAddressableManager addressableManager) : base()
+        public BlueprintAddressableCsvDataHandler(IAddressableManager addressableManager, ILogger logger = null) : base(logger)
         {
             this.addressableManager = addressableManager;
         }
@@ -21,7 +22,7 @@ namespace UniT.Data.Csv.Blueprint
             return base.CanHandle(type) && typeof(IBlueprintData).IsAssignableFrom(type);
         }
 
-        protected override UniTask<string[]> GetRawData(string[] keys)
+        protected override UniTask<string[]> LoadRawData(string[] keys)
         {
             return UniTask.WhenAll(keys.Select(key =>
             {

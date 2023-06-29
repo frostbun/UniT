@@ -15,7 +15,7 @@ namespace UniT.Data.Base
         private readonly ReadOnlyDictionary<Type, IDataHandler> handlerCache;
         private readonly ReadOnlyDictionary<Type, Type>         dataTypeToHandlerType;
 
-        public DataManager(IData[] dataCache, IDataHandler[] handlerCache, ILogger logger)
+        public DataManager(IData[] dataCache, IDataHandler[] handlerCache, ILogger logger = null)
         {
             this.dataCache    = dataCache.ToDictionary(data => data.GetType(), data => data).AsReadOnly();
             this.handlerCache = handlerCache.ToDictionary(handler => handler.GetType(), handler => handler).AsReadOnly();
@@ -25,24 +25,24 @@ namespace UniT.Data.Base
                         ?? throw new($"No handler found for type {data.GetType().Name}")
             ).AsReadOnly();
 
-            this.Logger = logger;
-            this.dataTypeToHandlerType.ForEach((dataType, handlerType) => this.Logger.Info($"Found {dataType.Name} - {handlerType.Name}"));
-            this.Logger.Info($"{this.GetType().Name} instantiated with {this.dataCache.Count} datas and {this.handlerCache.Count} handlers");
+            this.Logger = logger ?? ILogger.Factory.CreateDefault(this.GetType().Name);
+            this.dataTypeToHandlerType.ForEach((dataType, handlerType) => this.Logger.Debug($"Found {dataType.Name} - {handlerType.Name}"));
+            this.Logger.Info($"Instantiated with {this.dataCache.Count} datas and {this.handlerCache.Count} handlers");
         }
 
         public UniTask PopulateData(params Type[] dataTypes)
         {
-            return UniTask.WhenAll(dataTypes.GroupBy(dataType => this.dataTypeToHandlerType[dataType]).Select(group => this.handlerCache[group.Key].Populate(group.Select(dataType => this.dataCache[dataType]).ToArray()).ContinueWith(() => dataTypes.ForEach(dataType => this.Logger.Debug($"Loaded {dataType.Name}")))));
+            return UniTask.WhenAll(dataTypes.GroupBy(dataType => this.dataTypeToHandlerType[dataType]).Select(group => this.handlerCache[group.Key].Populate(group.Select(dataType => this.dataCache[dataType]).ToArray())));
         }
 
         public UniTask SaveData(params Type[] dataTypes)
         {
-            return UniTask.WhenAll(dataTypes.GroupBy(dataType => this.dataTypeToHandlerType[dataType]).Select(group => this.handlerCache[group.Key].Save(group.Select(dataType => this.dataCache[dataType]).ToArray()).ContinueWith(() => dataTypes.ForEach(dataType => this.Logger.Debug($"Saved {dataType.Name}")))));
+            return UniTask.WhenAll(dataTypes.GroupBy(dataType => this.dataTypeToHandlerType[dataType]).Select(group => this.handlerCache[group.Key].Save(group.Select(dataType => this.dataCache[dataType]).ToArray())));
         }
 
         public UniTask FlushData(params Type[] dataTypes)
         {
-            return UniTask.WhenAll(dataTypes.Select(dataType => this.dataTypeToHandlerType[dataType]).Distinct().Select(handlerType => this.handlerCache[handlerType].Flush().ContinueWith(() => this.Logger.Debug($"Flushed {handlerType.Name}"))));
+            return UniTask.WhenAll(dataTypes.Select(dataType => this.dataTypeToHandlerType[dataType]).Distinct().Select(handlerType => this.handlerCache[handlerType].Flush()));
         }
 
         public UniTask PopulateAllData()

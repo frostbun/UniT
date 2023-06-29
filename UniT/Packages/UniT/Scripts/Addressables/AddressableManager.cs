@@ -19,12 +19,12 @@ namespace UniT.Addressables
         private readonly Dictionary<string, AsyncOperationHandle>                loadedAssets;
         private readonly Dictionary<string, AsyncOperationHandle<SceneInstance>> loadedScenes;
 
-        public AddressableManager(ILogger logger)
+        public AddressableManager(ILogger logger = null)
         {
             this.loadedAssets = new();
             this.loadedScenes = new();
-            this.Logger       = logger;
-            this.Logger.Info($"{this.GetType().Name} instantiated");
+            this.Logger       = logger ?? ILogger.Factory.CreateDefault(this.GetType().Name);
+            this.Logger.Info("Instantiated");
         }
 
         public UniTask<T> Load<T>(string key = null, IProgress<float> progress = null, CancellationToken cancellationToken = default)

@@ -23,7 +23,7 @@ namespace UniT.Audio
         private readonly Queue<AudioSource>              pooledSoundSource;
         private readonly Dictionary<string, AudioSource> spawnedSoundSource;
 
-        public AudioManager(AudioConfig config, IAddressableManager addressableManager, ILogger logger)
+        public AudioManager(AudioConfig config, IAddressableManager addressableManager, ILogger logger = null)
         {
             this.Config             = config;
             this.addressableManager = addressableManager;
@@ -36,8 +36,8 @@ namespace UniT.Audio
             this.pooledSoundSource  = new();
             this.spawnedSoundSource = new();
 
-            this.Logger = logger;
-            this.Logger.Info($"{this.GetType().Name} instantiated");
+            this.Logger = logger ?? ILogger.Factory.CreateDefault(this.GetType().Name);
+            this.Logger.Info("Instantiated");
         }
 
         public void Initialize()

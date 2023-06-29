@@ -1,11 +1,13 @@
 namespace UniT.Data.Base
 {
     using System;
-    using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
+    using UniT.Logging;
 
     public interface IDataHandler
     {
+        public ILogger Logger { get; }
+
         protected internal bool CanHandle(Type type);
 
         protected internal UniTask Populate(IData[] datas);

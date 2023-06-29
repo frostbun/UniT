@@ -4,9 +4,14 @@ namespace UniT.Data.Csv.Base
     using System.IO;
     using Sylvan.Data.Csv;
     using UniT.Data.Base;
+    using UniT.Logging;
 
     public abstract class BaseCsvDataHandler : BaseDataHandler
     {
+        protected BaseCsvDataHandler(ILogger logger = null) : base(logger)
+        {
+        }
+
         protected override bool CanHandle(Type type)
         {
             return base.CanHandle(type) && typeof(ICsvData).IsAssignableFrom(type);

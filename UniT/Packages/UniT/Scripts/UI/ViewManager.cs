@@ -151,18 +151,18 @@ namespace UniT.UI
 
         public ILogger Logger { get; private set; }
 
-        private          IPresenterFactory              presenterFactory;
         private          IAddressableManager            addressableManager;
+        private          IPresenterFactory              presenterFactory;
         private readonly Dictionary<Type, ViewInstance> instances     = new();
         private readonly Dictionary<Type, string>       keys          = new();
         private readonly List<ViewInstance>             instanceStack = new();
 
-        public void Inject(IPresenterFactory presenterFactory, IAddressableManager addressableManager, ILogger logger)
+        public void Construct(IAddressableManager addressableManager, IPresenterFactory presenterFactory = null, ILogger logger = null)
         {
-            this.presenterFactory   = presenterFactory;
             this.addressableManager = addressableManager;
-            this.Logger             = logger;
-            this.Logger.Info($"{this.GetType().Name} instantiated");
+            this.presenterFactory   = presenterFactory ?? IPresenterFactory.Factory.Create(type => (IPresenter)Activator.CreateInstance(type));
+            this.Logger             = logger ?? ILogger.Factory.CreateDefault(this.GetType().Name);
+            this.Logger.Info("Instantiated");
         }
 
         public IViewManager.IViewInstance StackingView => this.instanceStack.LastOrDefault(instance => instance.CurrentStatus is ViewStatus.Stacking);

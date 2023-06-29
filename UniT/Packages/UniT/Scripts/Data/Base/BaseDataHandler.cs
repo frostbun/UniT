@@ -4,30 +4,45 @@ namespace UniT.Data.Base
     using System.Linq;
     using Cysharp.Threading.Tasks;
     using UniT.Extensions;
+    using UniT.Logging;
 
     public abstract class BaseDataHandler : IDataHandler
     {
+        public ILogger Logger { get; }
+
+        protected BaseDataHandler(ILogger logger = null)
+        {
+            this.Logger = logger ?? ILogger.Factory.CreateDefault(this.GetType().Name);
+            this.Logger.Info("Instantiated");
+        }
+
         bool IDataHandler.CanHandle(Type type) => this.CanHandle(type);
 
-        UniTask IDataHandler.Populate(IData[] datas) =>
-            this.GetRawData(datas.Select(data => data.GetType().GetKeyAttribute()).ToArray())
-                .ContinueWith(rawDatas => IterTools.Zip(rawDatas, datas).Where((rawData, data) => !rawData.IsNullOrWhitespace()).ForEach(this.PopulateData));
+        UniTask IDataHandler.Populate(IData[] datas)
+        {
+            var keys = datas.Select(data => data.GetType().GetKeyAttribute()).ToArray();
+            return this.LoadRawData(keys)
+                       .ContinueWith(rawDatas => IterTools.Zip(rawDatas, datas).Where((rawData, data) => !rawData.IsNullOrWhitespace()).ForEach(this.PopulateData))
+                       .ContinueWith(() => this.Logger.Debug($"Loaded {keys.ToJson()}"));
+        }
 
-        UniTask IDataHandler.Save(IData[] datas) =>
-            this.SaveRawData(
-                datas.Select(data => data.GetType().GetKeyAttribute()).ToArray(),
-                datas.Select(this.SerializeData).ToArray()
-            );
+        UniTask IDataHandler.Save(IData[] datas)
+        {
+            var keys     = datas.Select(data => data.GetType().GetKeyAttribute()).ToArray();
+            var rawDatas = datas.Select(this.SerializeData).ToArray();
+            return this.SaveRawData(keys, rawDatas)
+                       .ContinueWith(() => this.Logger.Debug($"Saved {keys.ToJson()}"));
+        }
 
-        UniTask IDataHandler.Flush() => this.Flush();
+        UniTask IDataHandler.Flush() => this.Flush().ContinueWith(() => this.Logger.Debug("Flushed"));
 
         protected virtual bool CanHandle(Type type) => typeof(IData).IsAssignableFrom(type);
 
-        protected abstract UniTask Flush();
-
-        protected abstract UniTask<string[]> GetRawData(string[] keys);
+        protected abstract UniTask<string[]> LoadRawData(string[] keys);
 
         protected abstract UniTask SaveRawData(string[] keys, string[] rawDatas);
+
+        protected abstract UniTask Flush();
 
         protected abstract void PopulateData(string rawData, IData data);
 
