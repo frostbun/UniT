@@ -16,6 +16,17 @@ namespace UniT.Extensions
             return enumerable.Select(tuple => selector(tuple.Item1, tuple.Item2));
         }
 
+        public static (IEnumerable<TFirst>, IEnumerable<TSecond>) Unzip<TFirst, TSecond>(this IEnumerable<(TFirst, TSecond)> enumerable)
+        {
+            var tuples = enumerable.ToArray();
+            return (tuples.Select(tuple => tuple.Item1), tuples.Select(tuple => tuple.Item2));
+        }
+
+        public static TResult Aggregate<TFirst, TSecond, TResult>(this IEnumerable<(TFirst, TSecond)> enumerable, TResult seed, Func<TResult, TFirst, TSecond, TResult> func)
+        {
+            return enumerable.Aggregate(seed, (current, tuple) => func(current, tuple.Item1, tuple.Item2));
+        }
+
         public static void ForEach<TFirst, TSecond>(this IEnumerable<(TFirst, TSecond)> enumerable, Action<TFirst, TSecond> action)
         {
             enumerable.ForEach(tuple => action(tuple.Item1, tuple.Item2));
