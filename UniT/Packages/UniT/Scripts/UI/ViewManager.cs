@@ -162,7 +162,6 @@ namespace UniT.UI
             this.addressableManager = addressableManager;
             this.presenterFactory   = presenterFactory ?? IPresenterFactory.Factory.Create(type => (IPresenter)Activator.CreateInstance(type));
             this.Logger             = logger ?? ILogger.Factory.CreateDefault(this.GetType().Name);
-            this.Logger.Info("Instantiated");
         }
 
         public IViewManager.IViewInstance StackingView => this.instanceStack.LastOrDefault(instance => instance.CurrentStatus is ViewStatus.Stacking);
@@ -177,11 +176,7 @@ namespace UniT.UI
         {
             return this.instances.GetOrAdd(
                 typeof(TView),
-                () => new(
-                    view,
-                    this.presenterFactory.Create(typeof(TPresenter)),
-                    this
-                )
+                () => new(view, this.presenterFactory.Create(typeof(TPresenter)), this)
             );
         }
 
@@ -191,16 +186,11 @@ namespace UniT.UI
         {
             return this.instances.GetOrAdd(
                 typeof(TView),
-                () => this.addressableManager.LoadComponent<TView>(key)
-                          .ContinueWith(view =>
-                          {
-                              this.keys.Add(typeof(TView), key);
-                              return new ViewInstance(
-                                  Instantiate(view),
-                                  this.presenterFactory.Create(typeof(TPresenter)),
-                                  this
-                              );
-                          })
+                () => this.addressableManager.LoadComponent<TView>(key).ContinueWith(view =>
+                {
+                    this.keys.Add(typeof(TView), key);
+                    return new ViewInstance(Instantiate(view), this.presenterFactory.Create(typeof(TPresenter)), this);
+                })
             ).Cast<ViewInstance, IViewManager.IViewInstance>();
         }
 

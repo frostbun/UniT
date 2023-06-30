@@ -35,6 +35,11 @@ namespace UniT.Extensions
             return dictionary.Select(kv => selector(kv.Key, kv.Value));
         }
 
+        public static TResult Aggregate<TKey, TValue, TResult>(this IDictionary<TKey, TValue> dictionary, TResult seed, Func<TResult, TKey, TValue, TResult> func)
+        {
+            return dictionary.Aggregate(seed, (current, kv) => func(current, kv.Key, kv.Value));
+        }
+
         public static void ForEach<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, Action<TKey, TValue> action)
         {
             dictionary.ForEach(kv => action(kv.Key, kv.Value));

@@ -12,6 +12,7 @@ namespace UniT.Logging
         {
             this.Name   = name;
             this.Config = config ?? new();
+            ((ILogger)this).Info("Instantiated");
         }
 
         void ILogger.Debug(string message)

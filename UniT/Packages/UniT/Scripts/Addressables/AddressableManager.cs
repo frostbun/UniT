@@ -24,7 +24,6 @@ namespace UniT.Addressables
             this.loadedAssets = new();
             this.loadedScenes = new();
             this.Logger       = logger ?? ILogger.Factory.CreateDefault(this.GetType().Name);
-            this.Logger.Info("Instantiated");
         }
 
         public UniTask<T> Load<T>(string key = null, IProgress<float> progress = null, CancellationToken cancellationToken = default)

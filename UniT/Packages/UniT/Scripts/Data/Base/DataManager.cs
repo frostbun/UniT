@@ -27,7 +27,6 @@ namespace UniT.Data.Base
 
             this.Logger = logger ?? ILogger.Factory.CreateDefault(this.GetType().Name);
             this.dataTypeToHandlerType.ForEach((dataType, handlerType) => this.Logger.Debug($"Found {dataType.Name} - {handlerType.Name}"));
-            this.Logger.Info($"Instantiated with {this.dataCache.Count} datas and {this.handlerCache.Count} handlers");
         }
 
         public UniTask PopulateData(params Type[] dataTypes)

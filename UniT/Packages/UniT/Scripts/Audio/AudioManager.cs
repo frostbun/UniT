@@ -37,7 +37,6 @@ namespace UniT.Audio
             this.spawnedSoundSource = new();
 
             this.Logger = logger ?? ILogger.Factory.CreateDefault(this.GetType().Name);
-            this.Logger.Info("Instantiated");
         }
 
         public void Initialize()
