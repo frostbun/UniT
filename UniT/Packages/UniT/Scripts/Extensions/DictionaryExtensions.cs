@@ -12,9 +12,9 @@ namespace UniT.Extensions
             return dictionary.TryGetValue(key, out var value) ? value : (valueFactory ?? (() => default))();
         }
 
-        public static TValue GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<TValue> valueFactory)
+        public static TValue GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<TValue> valueFactory = null)
         {
-            dictionary.TryAdd(key, valueFactory);
+            dictionary.TryAdd(key, valueFactory ?? (() => default));
             return dictionary[key];
         }
 
