@@ -7,7 +7,7 @@ namespace UniT.Audio
     {
         public ILogger Logger { get; }
 
-        public AudioConfig Config { get; }
+        public IAudioConfig Config { get; }
 
         public string CurrentMusic { get; }
 

@@ -13,7 +13,7 @@ namespace UniT.Audio
     public class AudioManager : IAudioManager, IInitializable
     {
         public ILogger     Logger { get; }
-        public AudioConfig Config { get; }
+        public IAudioConfig Config { get; }
 
         public string CurrentMusic { get; private set; }
 
@@ -23,7 +23,7 @@ namespace UniT.Audio
         private readonly Queue<AudioSource>              pooledSoundSource;
         private readonly Dictionary<string, AudioSource> spawnedSoundSource;
 
-        public AudioManager(AudioConfig config, IAddressableManager addressableManager, ILogger logger = null)
+        public AudioManager(IAudioConfig config, IAddressableManager addressableManager, ILogger logger = null)
         {
             this.Config             = config;
             this.addressableManager = addressableManager;
