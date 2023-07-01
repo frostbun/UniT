@@ -7,6 +7,7 @@ namespace UniT.UI
     using UniT.Addressables;
     using UniT.Extensions;
     using UniT.Extensions.UniTask;
+    using UniT.Utils;
     using UnityEngine;
     using ILogger = UniT.Logging.ILogger;
 

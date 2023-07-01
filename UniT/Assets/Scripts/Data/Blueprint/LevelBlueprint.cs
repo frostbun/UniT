@@ -1,4 +1,4 @@
-namespace BlueprintData
+namespace Data.Blueprint
 {
     using UniT.Data.Csv.Blueprint;
 
@@ -8,7 +8,5 @@ namespace BlueprintData
 
     public class LevelRecord
     {
-        public int    Id;
-        public string Name;
     }
 }

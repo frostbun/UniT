@@ -1,4 +1,4 @@
-namespace UniT.Extensions
+namespace UniT.Utils
 {
     using System;
     using System.Linq;
