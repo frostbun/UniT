@@ -12,7 +12,7 @@ namespace UniT.Audio
 
     public class AudioManager : IAudioManager, IInitializable
     {
-        public ILogger     Logger { get; }
+        public ILogger      Logger { get; }
         public IAudioConfig Config { get; }
 
         public string CurrentMusic { get; private set; }

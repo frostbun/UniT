@@ -188,7 +188,7 @@ namespace UniT.Utils
 
         public int CompareTo(BigNumber other)
         {
-            if (other is null) return this.sign ? 1 : -1;
+            if (other is null) return this.sign ? -1 : 1;
             if (this == other) return 0;
             return this < other ? -1 : 1;
         }

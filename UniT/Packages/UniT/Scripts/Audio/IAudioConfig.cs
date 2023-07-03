@@ -1,6 +1,6 @@
 namespace UniT.Audio
 {
-    using UniT.Utils;
+    using UniT.Reactive;
 
     public interface IAudioConfig
     {
