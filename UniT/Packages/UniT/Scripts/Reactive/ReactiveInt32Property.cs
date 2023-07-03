@@ -53,12 +53,12 @@ namespace UniT.Reactive
 
         public static bool operator ==(ReactiveInt32Property property, int value)
         {
-            return property.Value == value;
+            return property!.Value == value;
         }
 
         public static bool operator !=(ReactiveInt32Property property, int value)
         {
-            return property.Value != value;
+            return property!.Value != value;
         }
     }
 }
