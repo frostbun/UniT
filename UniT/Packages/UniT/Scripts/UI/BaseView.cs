@@ -3,7 +3,7 @@ namespace UniT.UI
     using System;
     using System.Linq;
     using UniT.Extensions;
-    using UniT.Utils;
+    using UniT.Utilities;
     using UnityEngine;
 
     public abstract class BaseView<TPresenter> : MonoBehaviour, IView where TPresenter : IPresenter

@@ -5,7 +5,7 @@ namespace UniT.Data.Base
     using Cysharp.Threading.Tasks;
     using UniT.Extensions;
     using UniT.Logging;
-    using UniT.Utils;
+    using UniT.Utilities;
 
     public abstract class BaseDataHandler : IDataHandler
     {

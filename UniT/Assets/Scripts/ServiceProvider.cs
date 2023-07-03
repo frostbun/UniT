@@ -6,7 +6,7 @@ using UniT.Data.Csv.Blueprint;
 using UniT.Data.Json.Player;
 using UniT.ObjectPool;
 using UniT.UI;
-using UniT.Utils;
+using UniT.Utilities;
 using UnityEngine;
 
 public class ServiceProvider : MonoBehaviour

@@ -1,7 +1,7 @@
 namespace UniT.UI
 {
     using System;
-    using UniT.Utils;
+    using UniT.Utilities;
     using UnityEngine;
 
     public interface IView : IInitializable, IDisposable

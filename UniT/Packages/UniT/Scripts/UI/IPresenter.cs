@@ -1,7 +1,7 @@
 namespace UniT.UI
 {
     using System;
-    using UniT.Utils;
+    using UniT.Utilities;
 
     public interface IPresenter : IInitializable, IDisposable
     {

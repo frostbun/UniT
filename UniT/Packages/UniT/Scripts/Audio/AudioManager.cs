@@ -6,7 +6,7 @@ namespace UniT.Audio
     using UniT.Addressables;
     using UniT.Extensions;
     using UniT.Extensions.UniTask;
-    using UniT.Utils;
+    using UniT.Utilities;
     using UnityEngine;
     using ILogger = UniT.Logging.ILogger;
 

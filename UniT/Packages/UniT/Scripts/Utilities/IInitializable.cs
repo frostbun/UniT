@@ -1,4 +1,4 @@
-namespace UniT.Utils
+namespace UniT.Utilities
 {
     public interface IInitializable
     {

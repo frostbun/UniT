@@ -1,7 +1,7 @@
 namespace UniT.UI
 {
     using System;
-    using UniT.Utils;
+    using UniT.Utilities;
 
     public abstract class BasePresenter<TView> : BasePresenter<TView, object> where TView : IView
     {

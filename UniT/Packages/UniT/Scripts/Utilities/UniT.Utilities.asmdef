@@ -1,5 +1,5 @@
 {
-  "name": "UniT.Utils",
+  "name": "UniT.Utilities",
   "rootNamespace": "UniT",
   "references": [
     "UniT.Extensions"

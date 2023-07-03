@@ -7,7 +7,7 @@
     "UniTask",
     "UniTask.Addressables",
     "UniT.Logging",
-    "UniT.Utils",
+    "UniT.Utilities",
     "UniT.Extensions"
   ]
 }

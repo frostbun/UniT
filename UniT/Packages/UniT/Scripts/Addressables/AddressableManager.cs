@@ -5,7 +5,7 @@ namespace UniT.Addressables
     using System.Threading;
     using Cysharp.Threading.Tasks;
     using UniT.Extensions;
-    using UniT.Utils;
+    using UniT.Utilities;
     using UnityEngine;
     using UnityEngine.AddressableAssets;
     using UnityEngine.ResourceManagement.AsyncOperations;

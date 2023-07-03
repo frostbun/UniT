@@ -1,4 +1,4 @@
-namespace UniT.Utils
+namespace UniT.Utilities
 {
     using System;
     using System.Collections.Generic;
