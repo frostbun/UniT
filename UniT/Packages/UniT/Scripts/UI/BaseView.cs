@@ -1,8 +1,6 @@
 namespace UniT.UI
 {
     using System;
-    using System.Linq;
-    using UniT.Extensions;
     using UniT.Utilities;
     using UnityEngine;
 
@@ -16,21 +14,9 @@ namespace UniT.UI
 
         IViewManager.IViewInstance IView.Instance { set => this.Instance = value; }
 
-        void IInitializable.Initialize()
-        {
-            this.GetComponentsInChildren<IInitializable>(true)
-                .Skip(1)
-                .ForEach(initializable => initializable.Initialize());
-            this.Initialize();
-        }
+        void IInitializable.Initialize() => this.Initialize();
 
-        void IDisposable.Dispose()
-        {
-            this.GetComponentsInChildren<IDisposable>(true)
-                .Skip(1)
-                .ForEach(disposable => disposable.Dispose());
-            this.Dispose();
-        }
+        void IDisposable.Dispose() => this.Dispose();
 
         void IView.OnShow() => this.OnShow();
 

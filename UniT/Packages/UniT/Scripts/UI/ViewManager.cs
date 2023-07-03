@@ -60,34 +60,18 @@ namespace UniT.UI
 
             public void Stack()
             {
-                this.EnsureViewIsHidden();
-                this.transform.SetParent(this.manager.stackingViewsContainer, false);
-                this.transform.SetAsLastSibling();
-                this.manager.instanceStack.Remove(this);
-                this.manager.instanceStack.Add(this);
-                this.CurrentStatus = ViewStatus.Stacking;
-                this.view.OnShow();
-                this.manager.instances.Values.ToArray()
-                    .Where(instance => instance != this && instance.CurrentStatus is ViewStatus.Floating or ViewStatus.Stacking)
-                    .ForEach(instance => instance.EnsureViewIsHidden());
+                this.Show_Internal(ViewStatus.Stacking);
+                this.AddToStack();
             }
 
             public void Float()
             {
-                this.EnsureViewIsHidden();
-                this.transform.SetParent(this.manager.floatingViewsContainer, false);
-                this.transform.SetAsLastSibling();
-                this.CurrentStatus = ViewStatus.Floating;
-                this.view.OnShow();
+                this.Show_Internal(ViewStatus.Floating);
             }
 
             public void Detach()
             {
-                this.EnsureViewIsHidden();
-                this.transform.SetParent(this.manager.detachedViewsContainer, false);
-                this.transform.SetAsLastSibling();
-                this.CurrentStatus = ViewStatus.Detached;
-                this.view.OnShow();
+                this.Show_Internal(ViewStatus.Detached);
             }
 
             public void Hide()
@@ -100,20 +84,52 @@ namespace UniT.UI
             {
                 this.EnsureViewIsHidden();
 
-                this.presenter.Dispose();
-                this.view.Dispose();
-
                 this.manager.instances.Remove(this.view.GetType());
                 this.RemoveFromStack();
 
+                this.CurrentStatus = ViewStatus.Disposed;
+                this.presenter.Dispose();
+                this.view.Dispose();
                 Destroy(this.view.gameObject);
 
                 if (this.manager.keys.Remove(this.view.GetType(), out var key))
                 {
                     this.manager.addressableManager.Unload(key);
                 }
+            }
 
-                this.CurrentStatus = ViewStatus.Disposed;
+            private void Show_Internal(ViewStatus status)
+            {
+                this.EnsureViewIsHidden();
+                this.transform.SetParent(
+                    status switch
+                    {
+                        ViewStatus.Stacking => this.manager.stackingViewsContainer,
+                        ViewStatus.Floating => this.manager.floatingViewsContainer,
+                        ViewStatus.Detached => this.manager.detachedViewsContainer,
+                        _                   => throw new ArgumentOutOfRangeException(nameof(status), status, null),
+                    },
+                    false
+                );
+                this.transform.SetAsLastSibling();
+                this.CurrentStatus = status;
+                this.view.OnShow();
+            }
+
+            private void AddToStack()
+            {
+                var index = this.manager.instanceStack.IndexOf(this);
+                if (index == -1)
+                {
+                    this.manager.instanceStack.Add(this);
+                }
+                else
+                {
+                    this.manager.instanceStack.RemoveRange(index, this.manager.instanceStack.Count - index - 1);
+                }
+                this.manager.instances.Values.ToArray()
+                    .Where(instance => instance != this && instance.CurrentStatus is ViewStatus.Floating or ViewStatus.Stacking)
+                    .ForEach(instance => instance.EnsureViewIsHidden());
             }
 
             private void RemoveFromStack()

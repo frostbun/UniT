@@ -19,19 +19,25 @@ namespace UniT.Extensions.UniTask
             return dictionary.TryAdd(key, valueFactory).ContinueWith(_ => dictionary[key]);
         }
 
-        public static UniTask<bool> TryAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<UniTask<TValue>> valueFactory)
+        public static async UniTask<bool> TryAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<UniTask<TValue>> valueFactory)
         {
-            if (dictionary.ContainsKey(key)) return UniTask.FromResult(false);
+            if (dictionary.ContainsKey(key)) return false;
             var taskKey = ((IDictionary)dictionary, key);
-            if (tasks.Contains(taskKey)) return UniTask.WaitUntil(() => !tasks.Contains(taskKey)).ContinueWith(() => false);
+            if (tasks.Contains(taskKey))
+            {
+                await UniTask.WaitUntil(() => !tasks.Contains(taskKey));
+                return false;
+            }
             tasks.Add(taskKey);
-            return valueFactory().SuppressCancellationThrow().ContinueWith(task =>
+            try
+            {
+                dictionary.Add(key, await valueFactory());
+                return true;
+            }
+            finally
             {
                 tasks.Remove(taskKey);
-                if (task.IsCanceled) throw new OperationCanceledException();
-                dictionary[key] = task.Result;
-                return true;
-            });
+            }
         }
     }
 }

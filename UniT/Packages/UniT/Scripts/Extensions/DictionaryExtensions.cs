@@ -21,7 +21,7 @@ namespace UniT.Extensions
         public static bool TryAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<TValue> valueFactory)
         {
             if (dictionary.ContainsKey(key)) return false;
-            dictionary[key] = valueFactory();
+            dictionary.Add(key, valueFactory());
             return true;
         }
 
@@ -54,7 +54,6 @@ namespace UniT.Extensions
                 dictionary.Remove(key);
                 count++;
             }
-
             return count;
         }
 
@@ -73,9 +72,8 @@ namespace UniT.Extensions
             var dictionary = new Dictionary<TKey, TValue>();
             foreach (var item in source)
             {
-                dictionary[keySelector(item)] = valueSelector(item);
+                dictionary.Add(keySelector(item), valueSelector(item));
             }
-
             return dictionary;
         }
 
@@ -87,10 +85,9 @@ namespace UniT.Extensions
                 var key = keySelector(item);
                 foreach (var value in valuesSelector(item))
                 {
-                    dictionary[key] = value;
+                    dictionary.Add(key, value);
                 }
             }
-
             return dictionary;
         }
 
@@ -102,10 +99,9 @@ namespace UniT.Extensions
                 var value = valueSelector(item);
                 foreach (var key in keysSelector(item))
                 {
-                    dictionary[key] = value;
+                    dictionary.Add(key, value);
                 }
             }
-
             return dictionary;
         }
 
@@ -118,11 +114,10 @@ namespace UniT.Extensions
                 {
                     foreach (var value in valuesSelector(item))
                     {
-                        dictionary[key] = value;
+                        dictionary.Add(key, value);
                     }
                 }
             }
-
             return dictionary;
         }
     }
