@@ -154,14 +154,19 @@ namespace UniT.Extensions
             return Product(Repeat(enumerable, repeat).ToArray());
         }
 
+        public static IEnumerable<int> Range(int start, int count)
+        {
+            while (count-- > 0) yield return start++;
+        }
+
         public static IEnumerable<T> Repeat<T>(T value, int count)
         {
-            while (count-- != 0) yield return value;
+            while (count-- > 0) yield return value;
         }
 
         public static IEnumerable<T> Repeat<T>(Func<T> valueFactory, int count)
         {
-            while (count-- != 0) yield return valueFactory();
+            while (count-- > 0) yield return valueFactory();
         }
 
         private static IEnumerator<T>[] GetEnumerators<T>(this IEnumerable<IEnumerable<T>> enumerables) => enumerables.Select(e => e.GetEnumerator()).ToArray();

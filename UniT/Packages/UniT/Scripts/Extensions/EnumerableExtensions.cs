@@ -29,9 +29,8 @@ namespace UniT.Extensions
             return enumerable.OrderBy(_ => Guid.NewGuid());
         }
 
-        public static IEnumerable<T> Cycle<T>(this IEnumerable<T> enumerable, int count = -1)
+        public static IEnumerable<T> Cycle<T>(this IEnumerable<T> enumerable)
         {
-            if (count == 0) yield break;
             var cache = new List<T>();
             foreach (var item in enumerable)
             {
@@ -39,13 +38,18 @@ namespace UniT.Extensions
                 cache.Add(item);
             }
 
-            while (--count != 0)
+            while (cache.Count > 0)
             {
                 foreach (var item in cache)
                 {
                     yield return item;
                 }
             }
+        }
+
+        public static IEnumerable<(int, T)> Enumerate<T>(this IEnumerable<T> enumerable, int start = 0)
+        {
+            return enumerable.Select(item => (start++, item));
         }
 
         public static IEnumerable<T> Slice<T>(this IEnumerable<T> enumerable, int start, int stop, int step = 1)
