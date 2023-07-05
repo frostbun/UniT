@@ -46,7 +46,6 @@ namespace UniT.UI
                 this.presenter.View = this.view;
 
                 this.view.Initialize();
-                this.presenter.Initialize();
 
                 this.manager.Logger.Debug($"Instantiated {this.view.GetType().Name}");
             }
@@ -88,7 +87,6 @@ namespace UniT.UI
                 this.RemoveFromStack();
 
                 this.CurrentStatus = ViewStatus.Disposed;
-                this.presenter.Dispose();
                 this.view.Dispose();
                 Destroy(this.view.gameObject);
 
