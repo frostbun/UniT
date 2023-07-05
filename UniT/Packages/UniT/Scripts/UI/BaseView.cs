@@ -6,13 +6,13 @@ namespace UniT.UI
 
     public abstract class BaseView<TPresenter> : MonoBehaviour, IView where TPresenter : IPresenter
     {
-        GameObject IView.gameObject => this.gameObject;
+        GameObject IView.GameObject => this.gameObject;
 
-        Transform IView.transform => this.transform;
+        Transform IView.Transform => this.transform;
+
+        IContract IView.Contract { set => this.Contract = value; }
 
         IPresenter IView.Presenter { set => this.Presenter = (TPresenter)value; }
-
-        IViewManager.IViewInstance IView.Instance { set => this.Instance = value; }
 
         void IInitializable.Initialize() => this.Initialize();
 
@@ -22,9 +22,9 @@ namespace UniT.UI
 
         void IView.OnHide() => this.OnHide();
 
-        protected TPresenter Presenter { get; private set; }
+        protected IContract Contract { get; private set; }
 
-        public IViewManager.IViewInstance Instance { get; private set; }
+        protected TPresenter Presenter { get; private set; }
 
         protected virtual void Initialize()
         {

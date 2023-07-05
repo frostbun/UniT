@@ -6,13 +6,13 @@ namespace UniT.UI
 
     public interface IView : IInitializable, IDisposable
     {
-        protected internal GameObject gameObject { get; }
+        protected internal GameObject GameObject { get; }
 
-        protected internal Transform transform { get; }
+        protected internal Transform Transform { get; }
+
+        protected internal IContract Contract { set; }
 
         protected internal IPresenter Presenter { set; }
-
-        protected internal IViewManager.IViewInstance Instance { set; }
 
         protected internal void OnShow();
 

@@ -1,17 +1,13 @@
 namespace UniT.UI
 {
-    public abstract class BasePresenter<TView> : BasePresenter<TView, object> where TView : IView
+    public abstract class BasePresenter<TView> : IPresenter where TView : IView
     {
-    }
+        IContract IPresenter.Contract { set => this.Contract = value; }
 
-    public abstract class BasePresenter<TView, TModel> : IPresenter where TView : IView
-    {
         IView IPresenter.View { set => this.View = (TView)value; }
 
-        object IPresenter.Model { set => this.Model = (TModel)value; }
+        protected IContract Contract { get; private set; }
 
         protected TView View { get; private set; }
-
-        protected TModel Model { get; private set; }
     }
 }
