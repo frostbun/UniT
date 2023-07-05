@@ -2,6 +2,7 @@
   "name": "UniT.Utilities",
   "rootNamespace": "UniT",
   "references": [
+    "UniTask",
     "UniT.Extensions"
   ]
 }
