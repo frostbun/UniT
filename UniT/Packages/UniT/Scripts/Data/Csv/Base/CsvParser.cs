@@ -39,8 +39,7 @@ namespace UniT.Data.Csv.Base
                 if (ordinal == -1) throw new InvalidOperationException($"Field {field.Name} - {field.GetCsvFieldName()} not found in csv. If this is intentional, add the [CsvIgnore] attribute to the field.");
                 var str = this.reader.GetString(ordinal);
                 if (str.IsNullOrWhitespace()) continue;
-                var converter = ConverterManager.Instance.GetConverter(field.FieldType);
-                var value     = converter.ConvertFromString(str, field.FieldType);
+                var value = ConverterManager.Instance.ConvertFromString(str, field.FieldType);
                 field.SetValue(row, value);
                 if (field == this.keyField) keyFieldIsSet = true;
             }

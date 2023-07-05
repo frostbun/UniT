@@ -5,24 +5,23 @@ namespace UniT.Data.Converters.Tuples
     using UniT.Data.Converters.Base;
     using UnityEngine;
 
+    /// <summary>
+    ///     Depends on <see cref="TupleConverter"/>
+    /// </summary>
     public class Vector2Converter : BaseConverter
     {
         protected override Type ConvertibleType => typeof(Vector2);
 
         protected override object ConvertFromString(string str, Type type)
         {
-            var tupleType      = typeof(ValueTuple<float, float>);
-            var tupleConverter = ConverterManager.Instance.GetConverter(tupleType);
-            var tuple          = (ITuple)tupleConverter.ConvertFromString(str, tupleType);
+            var tuple = (ITuple)ConverterManager.Instance.ConvertFromString(str, typeof(ValueTuple<float, float>));
             return new Vector2((float)tuple[0], (float)tuple[1]);
         }
 
         protected override string ConvertToString(object obj, Type type)
         {
-            var tupleType      = typeof(ValueTuple<float, float>);
-            var tupleConverter = ConverterManager.Instance.GetConverter(tupleType);
-            var vector         = (Vector2)obj;
-            return tupleConverter.ConvertToString((vector.x, vector.y), tupleType);
+            var vector = (Vector2)obj;
+            return ConverterManager.Instance.ConvertToString((vector.x, vector.y), typeof(ValueTuple<float, float>));
         }
     }
 }

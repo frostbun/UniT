@@ -12,7 +12,7 @@ namespace UniT.Data.Converters.Base
 
     public class ConverterManager
     {
-        public static readonly ConverterManager Instance;
+        public static ConverterManager Instance { get; }
 
         static ConverterManager()
         {
@@ -24,7 +24,7 @@ namespace UniT.Data.Converters.Base
 
         private ConverterManager()
         {
-            this.AddConverter(new DefaultConverter());
+            this.AddConverter(new JsonConverter()); // Default converter
 
             #region Primitives
 
@@ -87,6 +87,16 @@ namespace UniT.Data.Converters.Base
         public void AddConverter(IConverter converter)
         {
             this.converters.Add(converter);
+        }
+
+        public object ConvertFromString(string str, Type type)
+        {
+            return this.GetConverter(type).ConvertFromString(str, type);
+        }
+
+        public string ConvertToString(object obj, Type type)
+        {
+            return this.GetConverter(type).ConvertToString(obj, type);
         }
     }
 }

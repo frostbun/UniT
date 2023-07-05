@@ -179,6 +179,7 @@ namespace UniT.UI
             this.addressableManager = addressableManager;
             this.presenterFactory   = presenterFactory ?? IPresenterFactory.Factory.Create(type => (IPresenter)Activator.CreateInstance(type));
             this.Logger             = logger ?? ILogger.Factory.CreateDefault(this.GetType().Name);
+            DontDestroyOnLoad(this);
         }
 
         public IViewManager.IViewInstance StackingView => this.instanceStack.LastOrDefault(instance => instance.CurrentStatus is ViewStatus.Stacking);

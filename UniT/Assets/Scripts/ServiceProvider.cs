@@ -41,7 +41,6 @@ public class ServiceProvider : MonoBehaviour
         ServiceProvider<IInitializable>.Add(audioManager);
 
         this.viewManager.Construct(addressableManager);
-        DontDestroyOnLoad(this.viewManager);
         ServiceProvider<IViewManager>.Add(this.viewManager);
 
         #endregion

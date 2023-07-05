@@ -5,22 +5,21 @@ namespace UniT.Data.Converters.Collections
     using System.Collections.ObjectModel;
     using UniT.Data.Converters.Base;
 
+    /// <summary>
+    ///     Depends on <see cref="ListGenericConverter"/>
+    /// </summary>
     public class ReadonlyCollectionGenericConverter : BaseGenericConverter
     {
         protected override Type ConvertibleType => typeof(ReadOnlyCollection<>);
 
         protected override object ConvertFromString(string str, Type type)
         {
-            var listType      = typeof(List<>).MakeGenericType(type.GetGenericArguments());
-            var listConverter = ConverterManager.Instance.GetConverter(listType);
-            return Activator.CreateInstance(type, listConverter.ConvertFromString(str, listType));
+            return Activator.CreateInstance(type, ConverterManager.Instance.ConvertFromString(str, typeof(List<>).MakeGenericType(type.GetGenericArguments())));
         }
 
         protected override string ConvertToString(object obj, Type type)
         {
-            var listType      = typeof(List<>).MakeGenericType(type.GetGenericArguments());
-            var listConverter = ConverterManager.Instance.GetConverter(listType);
-            return listConverter.ConvertToString(obj, listType);
+            return ConverterManager.Instance.ConvertToString(obj, typeof(List<>).MakeGenericType(type.GetGenericArguments()));
         }
     }
 }

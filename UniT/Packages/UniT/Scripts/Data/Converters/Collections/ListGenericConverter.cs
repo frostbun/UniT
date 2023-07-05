@@ -6,22 +6,21 @@ namespace UniT.Data.Converters.Collections
     using System.Linq;
     using UniT.Data.Converters.Base;
 
+    /// <summary>
+    ///     Depends on <see cref="ArrayConverter"/>
+    /// </summary>
     public class ListGenericConverter : BaseGenericConverter
     {
         protected override Type ConvertibleType => typeof(List<>);
 
         protected override object ConvertFromString(string str, Type type)
         {
-            var arrayType      = type.GetGenericArguments()[0].MakeArrayType();
-            var arrayConverter = ConverterManager.Instance.GetConverter(arrayType);
-            return Activator.CreateInstance(type, arrayConverter.ConvertFromString(str, arrayType));
+            return Activator.CreateInstance(type, ConverterManager.Instance.ConvertFromString(str, type.GetGenericArguments()[0].MakeArrayType()));
         }
 
         protected override string ConvertToString(object obj, Type type)
         {
-            var arrayType      = type.GetGenericArguments()[0].MakeArrayType();
-            var arrayConverter = ConverterManager.Instance.GetConverter(arrayType);
-            return arrayConverter.ConvertToString(((IList)obj).Cast<object>().ToArray(), arrayType);
+            return ConverterManager.Instance.ConvertToString(((IList)obj).Cast<object>().ToArray(), type.GetGenericArguments()[0].MakeArrayType());
         }
     }
 }
