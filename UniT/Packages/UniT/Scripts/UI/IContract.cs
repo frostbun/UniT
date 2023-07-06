@@ -10,7 +10,7 @@ namespace UniT.UI
             Hidden,
             Stacking,
             Floating,
-            Detached,
+            Docked,
         }
 
         public Status CurrentStatus { get; }
@@ -23,7 +23,7 @@ namespace UniT.UI
 
         public void Float();
 
-        public void Detach();
+        public void Dock();
 
         public void Hide();
     }

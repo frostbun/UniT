@@ -13,7 +13,7 @@ namespace UniT.UI
 
         public IEnumerable<IContract> FloatingContracts { get; }
 
-        public IEnumerable<IContract> DetachedContracts { get; }
+        public IEnumerable<IContract> DockedContracts { get; }
 
         public IContract GetContract<TView, TPresenter>(TView view)
             where TView : Component, IView

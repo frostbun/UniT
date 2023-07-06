@@ -100,7 +100,7 @@ Transform:
   - {fileID: 7547957594928417604}
   - {fileID: 7372673301018505727}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &7991008976951920389
 MonoBehaviour:
@@ -114,10 +114,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f2d2f4cb21f4a9eba110eb044b51470, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hiddenViewsContainer: {fileID: 4844402355532486865}
-  stackingViewsContainer: {fileID: 5023623361030653169}
-  floatingViewsContainer: {fileID: 6122369654255445415}
-  detachedViewsContainer: {fileID: 2370031990960692002}
+  hiddenViews: {fileID: 4844402355532486865}
+  stackingViews: {fileID: 5023623361030653169}
+  floatingViews: {fileID: 6122369654255445415}
+  dockedViews: {fileID: 2370031990960692002}
 --- !u!1 &2329050281855682475
 GameObject:
   m_ObjectHideFlags: 0
@@ -270,7 +270,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2370031990960692002}
   m_Layer: 0
-  m_Name: DetachedViews
+  m_Name: DockedViews
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

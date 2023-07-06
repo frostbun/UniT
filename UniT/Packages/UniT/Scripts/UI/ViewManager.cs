@@ -27,7 +27,7 @@ namespace UniT.UI
                 }
             }
 
-            public Transform Transform => this.view.Transform;
+            public Transform ViewTransform { get; }
 
             private readonly IView                      view;
             private readonly IPresenter                 presenter;
@@ -46,6 +46,9 @@ namespace UniT.UI
                 this.presenter.View = this.view;
 
                 this.view.Initialize();
+
+                this.ViewTransform = this.view.Transform;
+                this.ViewTransform.SetParent(this.manager.hiddenViews, false);
 
                 this.manager.Logger.Debug($"Instantiated {this.view.GetType().Name}");
             }
@@ -72,9 +75,9 @@ namespace UniT.UI
                 this.Show_Internal(IContract.Status.Floating);
             }
 
-            public void Detach()
+            public void Dock()
             {
-                this.Show_Internal(IContract.Status.Detached);
+                this.Show_Internal(IContract.Status.Docked);
             }
 
             public void Hide()
@@ -87,7 +90,7 @@ namespace UniT.UI
             {
                 this.EnsureViewIsHidden();
 
-                this.manager.instances.Remove(this.view.GetType());
+                this.manager.contracts.Remove(this.view.GetType());
                 this.RemoveFromStack();
 
                 this.CurrentStatus = IContract.Status.Disposed;
@@ -103,49 +106,49 @@ namespace UniT.UI
             private void Show_Internal(IContract.Status status)
             {
                 this.EnsureViewIsHidden();
-                this.Transform.SetParent(
+                this.ViewTransform.SetParent(
                     status switch
                     {
-                        IContract.Status.Stacking => this.manager.stackingViewsContainer,
-                        IContract.Status.Floating => this.manager.floatingViewsContainer,
-                        IContract.Status.Detached => this.manager.detachedViewsContainer,
+                        IContract.Status.Stacking => this.manager.stackingViews,
+                        IContract.Status.Floating => this.manager.floatingViews,
+                        IContract.Status.Docked   => this.manager.dockedViews,
                         _                         => throw new ArgumentOutOfRangeException(nameof(status), status, null),
                     },
                     false
                 );
-                this.Transform.SetAsLastSibling();
+                this.ViewTransform.SetAsLastSibling();
                 this.CurrentStatus = status;
                 this.view.OnShow();
             }
 
             private void AddToStack()
             {
-                var index = this.manager.instanceStack.IndexOf(this);
+                var index = this.manager.stack.IndexOf(this);
                 if (index == -1)
                 {
-                    this.manager.instanceStack.Add(this);
+                    this.manager.stack.Add(this);
                 }
                 else
                 {
-                    this.manager.instanceStack.RemoveRange(index, this.manager.instanceStack.Count - index - 1);
+                    this.manager.stack.RemoveRange(index + 1, this.manager.stack.Count - index - 1);
                 }
-                this.manager.instances.Values.ToArray()
-                    .Where(instance => instance != this && instance.CurrentStatus is IContract.Status.Floating or IContract.Status.Stacking)
-                    .ForEach(instance => instance.EnsureViewIsHidden());
+                this.manager.contracts.Values.ToArray()
+                    .Where(contract => contract != this && contract.CurrentStatus is IContract.Status.Floating or IContract.Status.Stacking)
+                    .ForEach(contract => contract.EnsureViewIsHidden());
             }
 
             private void RemoveFromStack()
             {
-                this.manager.instanceStack.Remove(this);
-                if (this.manager.StackingContract is not null || this.manager.instanceStack.Count < 1) return;
-                this.manager.instanceStack[^1].Stack();
+                this.manager.stack.Remove(this);
+                if (this.manager.StackingContract is not null || this.manager.stack.Count < 1) return;
+                this.manager.stack[^1].Stack();
             }
 
             private void EnsureViewIsHidden()
             {
                 this.EnsureViewIsNotDisposed();
                 if (this._currentStatus is IContract.Status.Hidden) return;
-                this.Transform.SetParent(this.manager.hiddenViewsContainer, false);
+                this.ViewTransform.SetParent(this.manager.hiddenViews, false);
                 this.CurrentStatus = IContract.Status.Hidden;
                 this.view.OnHide();
             }
@@ -157,24 +160,24 @@ namespace UniT.UI
         }
 
         [SerializeField]
-        private RectTransform hiddenViewsContainer;
+        private RectTransform hiddenViews;
 
         [SerializeField]
-        private RectTransform stackingViewsContainer;
+        private RectTransform stackingViews;
 
         [SerializeField]
-        private RectTransform floatingViewsContainer;
+        private RectTransform floatingViews;
 
         [SerializeField]
-        private RectTransform detachedViewsContainer;
+        private RectTransform dockedViews;
 
         public ILogger Logger { get; private set; }
 
         private          IAddressableManager        addressableManager;
         private          IPresenterFactory          presenterFactory;
-        private readonly Dictionary<Type, Contract> instances     = new();
-        private readonly Dictionary<Type, string>   keys          = new();
-        private readonly List<Contract>             instanceStack = new();
+        private readonly Dictionary<Type, Contract> contracts = new();
+        private readonly List<Contract>             stack     = new();
+        private readonly Dictionary<Type, string>   keys      = new();
 
         public void Construct(IAddressableManager addressableManager, IPresenterFactory presenterFactory = null, ILogger logger = null)
         {
@@ -184,17 +187,17 @@ namespace UniT.UI
             DontDestroyOnLoad(this);
         }
 
-        public IContract StackingContract => this.instanceStack.LastOrDefault(instance => instance.CurrentStatus is IContract.Status.Stacking);
+        public IContract StackingContract => this.stack.LastOrDefault(contract => contract.CurrentStatus is IContract.Status.Stacking);
 
-        public IEnumerable<IContract> FloatingContracts => this.instances.Values.Where(instance => instance.CurrentStatus is IContract.Status.Floating).OrderByDescending(instance => instance.Transform.GetSiblingIndex());
+        public IEnumerable<IContract> FloatingContracts => this.contracts.Values.Where(contract => contract.CurrentStatus is IContract.Status.Floating).OrderByDescending(contract => contract.ViewTransform.GetSiblingIndex());
 
-        public IEnumerable<IContract> DetachedContracts => this.instances.Values.Where(instance => instance.CurrentStatus is IContract.Status.Stacking).OrderByDescending(instance => instance.Transform.GetSiblingIndex());
+        public IEnumerable<IContract> DockedContracts => this.contracts.Values.Where(contract => contract.CurrentStatus is IContract.Status.Docked).OrderByDescending(contract => contract.ViewTransform.GetSiblingIndex());
 
         public IContract GetContract<TView, TPresenter>(TView view)
             where TView : Component, IView
             where TPresenter : IPresenter
         {
-            return this.instances.GetOrAdd(
+            return this.contracts.GetOrAdd(
                 typeof(TView),
                 () => new(view, this.presenterFactory.Create(typeof(TPresenter)), this)
             );
@@ -204,7 +207,7 @@ namespace UniT.UI
             where TView : Component, IView
             where TPresenter : IPresenter
         {
-            return this.instances.GetOrAdd(
+            return this.contracts.GetOrAdd(
                 typeof(TView),
                 () => this.addressableManager.LoadComponent<TView>(key).ContinueWith(view =>
                 {
