@@ -29,34 +29,54 @@ namespace UniT.Data.Base
             this.dataTypeToHandlerType.ForEach((dataType, handlerType) => this.Logger.Debug($"Found {dataType.Name} - {handlerType.Name}"));
         }
 
-        public UniTask PopulateData(params Type[] dataTypes)
+        public T Get<T>() where T : IData
+        {
+            return (T)this.dataCache.GetOrDefault(typeof(T));
+        }
+
+        public UniTask Populate<T>() where T : IData
+        {
+            return this.Populate(typeof(T));
+        }
+
+        public UniTask Save<T>() where T : IData
+        {
+            return this.Save(typeof(T));
+        }
+
+        public UniTask Flush<T>() where T : IData
+        {
+            return this.Flush(typeof(T));
+        }
+
+        public UniTask Populate(params Type[] dataTypes)
         {
             return UniTask.WhenAll(dataTypes.GroupBy(dataType => this.dataTypeToHandlerType[dataType]).Select(group => this.handlerCache[group.Key].Populate(group.Select(dataType => this.dataCache[dataType]).ToArray())));
         }
 
-        public UniTask SaveData(params Type[] dataTypes)
+        public UniTask Save(params Type[] dataTypes)
         {
             return UniTask.WhenAll(dataTypes.GroupBy(dataType => this.dataTypeToHandlerType[dataType]).Select(group => this.handlerCache[group.Key].Save(group.Select(dataType => this.dataCache[dataType]).ToArray())));
         }
 
-        public UniTask FlushData(params Type[] dataTypes)
+        public UniTask Flush(params Type[] dataTypes)
         {
             return UniTask.WhenAll(dataTypes.Select(dataType => this.dataTypeToHandlerType[dataType]).Distinct().Select(handlerType => this.handlerCache[handlerType].Flush()));
         }
 
-        public UniTask PopulateAllData()
+        public UniTask PopulateAll()
         {
-            return this.PopulateData(this.dataCache.Keys!.ToArray());
+            return this.Populate(this.dataCache.Keys!.ToArray());
         }
 
-        public UniTask SaveAllData()
+        public UniTask SaveAll()
         {
-            return this.SaveData(this.dataCache.Keys!.ToArray());
+            return this.Save(this.dataCache.Keys!.ToArray());
         }
 
-        public UniTask FlushAllData()
+        public UniTask FlushAll()
         {
-            return this.FlushData(this.dataCache.Keys!.ToArray());
+            return this.Flush(this.dataCache.Keys!.ToArray());
         }
     }
 }

@@ -8,16 +8,24 @@ namespace UniT.Data.Base
     {
         public ILogger Logger { get; }
 
-        public UniTask PopulateData(params Type[] dataTypes);
+        public T Get<T>() where T : IData;
 
-        public UniTask SaveData(params Type[] dataTypes);
+        public UniTask Populate<T>() where T : IData;
 
-        public UniTask FlushData(params Type[] dataTypes);
+        public UniTask Save<T>() where T : IData;
 
-        public UniTask PopulateAllData();
+        public UniTask Flush<T>() where T : IData;
 
-        public UniTask SaveAllData();
+        public UniTask Populate(params Type[] dataTypes);
 
-        public UniTask FlushAllData();
+        public UniTask Save(params Type[] dataTypes);
+
+        public UniTask Flush(params Type[] dataTypes);
+
+        public UniTask PopulateAll();
+
+        public UniTask SaveAll();
+
+        public UniTask FlushAll();
     }
 }
