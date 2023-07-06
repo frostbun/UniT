@@ -58,8 +58,8 @@ namespace UniT.Data.Converters.Base
             this.AddConverter(new ArrayConverter());
             this.AddConverter(new ListGenericConverter()); // Depend on ArrayConverter
             this.AddConverter(new DictionaryGenericConverter()); // Depend on ArrayConverter
-            this.AddConverter(new ReadonlyCollectionGenericConverter()); // Depend on ListGenericConverter
-            this.AddConverter(new ReadonlyDictionaryGenericConverter()); // Depend on DictionaryGenericConverter
+            this.AddConverter(new ReadOnlyCollectionGenericConverter()); // Depend on ListGenericConverter
+            this.AddConverter(new ReadOnlyDictionaryGenericConverter()); // Depend on DictionaryGenericConverter
 
             #endregion
 

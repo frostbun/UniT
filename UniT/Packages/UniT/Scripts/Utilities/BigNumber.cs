@@ -2,7 +2,6 @@ namespace UniT.Utilities
 {
     using System;
     using System.Collections.Generic;
-    using System.Collections.ObjectModel;
     using System.Linq;
     using UniT.Extensions;
 
@@ -11,8 +10,8 @@ namespace UniT.Utilities
         public static int      Mod     = (int)1e3;
         public static string[] Letters = IterTools.Product(" abcdefghijklmnopqrstuvwxyzx".ToCharArray(), 3).Select(chars => string.Join("", chars).Trim()).ToArray();
 
-        private readonly ReadOnlyCollection<int> values;
-        private readonly bool                    sign; // false: positive, true: negative
+        private readonly int[] values;
+        private readonly bool  sign; // false: positive, true: negative
 
         public BigNumber(int value = 0) : this(new() { Math.Abs(value) }, value < 0)
         {
@@ -42,7 +41,7 @@ namespace UniT.Utilities
                 values.RemoveAt(values.Count - 1);
             }
 
-            this.values = values.AsReadOnly();
+            this.values = values.ToArray();
             this.sign   = sign;
         }
 
@@ -50,14 +49,19 @@ namespace UniT.Utilities
         {
             var sign         = this.sign ? "-" : "";
             var integerValue = this.values[^1];
-            var decimalValue = this.values.Count > 1 ? $".{this.values[^2] / (Mod / 10)}" : "";
-            var letter       = this.values.Count > 1 ? Letters[this.values.Count - 1] : "";
+            var decimalValue = this.values.Length > 1 ? $".{this.values[^2] / (Mod / 10)}" : "";
+            var letter       = this.values.Length > 1 ? Letters[this.values.Length - 1] : "";
             return sign + integerValue + decimalValue + letter;
         }
 
         public static BigNumber Abs(BigNumber number)
         {
             return new(number.values.ToList(), false);
+        }
+
+        public static implicit operator BigNumber(int value)
+        {
+            return new(value);
         }
 
         public static BigNumber operator -(BigNumber number)
@@ -75,11 +79,6 @@ namespace UniT.Utilities
             return new(IterTools.ZipLongest(n1.values, n2.values, (v1, v2) => v1 + v2).ToList(), n1.sign);
         }
 
-        public static BigNumber operator +(BigNumber n1, int n2)
-        {
-            return n1 + new BigNumber(n2);
-        }
-
         public static BigNumber operator -(BigNumber n1, BigNumber n2)
         {
             if (n1.sign != n2.sign)
@@ -93,11 +92,6 @@ namespace UniT.Utilities
             }
 
             return new(IterTools.ZipLongest(n1.values, n2.values, (v1, v2) => v1 - v2).ToList(), n1.sign);
-        }
-
-        public static BigNumber operator -(BigNumber n1, int n2)
-        {
-            return n1 - new BigNumber(n2);
         }
 
         public static BigNumber operator *(BigNumber n1, int n2)
