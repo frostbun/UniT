@@ -29,6 +29,16 @@ namespace UniT.Extensions
             return enumerable.OrderBy(_ => Guid.NewGuid());
         }
 
+        public static IEnumerable<T> Sample<T>(this IEnumerable<T> enumerable, int count)
+        {
+            return enumerable.Shuffle().Take(count);
+        }
+
+        public static T Choice<T>(this IEnumerable<T> enumerable)
+        {
+            return enumerable.Shuffle().First();
+        }
+
         public static IEnumerable<T> Cycle<T>(this IEnumerable<T> enumerable)
         {
             var cache = new List<T>();
