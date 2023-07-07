@@ -169,6 +169,11 @@ namespace UniT.Extensions
             while (count-- > 0) yield return valueFactory();
         }
 
+        public static void Repeat(Action action, int count)
+        {
+            while (count-- > 0) action();
+        }
+
         private static IEnumerator<T>[] GetEnumerators<T>(this IEnumerable<IEnumerable<T>> enumerables) => enumerables.Select(e => e.GetEnumerator()).ToArray();
         private static bool[]           MoveNexts<T>(this IEnumerable<IEnumerator<T>> enumerators)      => enumerators.Select(e => e.MoveNext()).ToArray();
         private static T[]              GetCurrents<T>(this IEnumerable<IEnumerator<T>> enumerators)    => enumerators.Select(e => e.Current).ToArray();
