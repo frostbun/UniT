@@ -1,6 +1,5 @@
 namespace UniT.Data.Csv.Blueprint
 {
-    using UniT.Data.Base;
     using UniT.Data.Csv.Base;
 
     public class BlueprintCsvData : CsvData, IBlueprintCsvData

@@ -1,7 +1,5 @@
 namespace UniT.UI
 {
-    using System;
-    using UniT.Utilities;
     using UnityEngine;
 
     public abstract class BaseView<TPresenter> : MonoBehaviour, IView where TPresenter : IPresenter
@@ -14,13 +12,13 @@ namespace UniT.UI
 
         IPresenter IView.Presenter { set => this.Presenter = (TPresenter)value; }
 
-        void IInitializable.Initialize() => this.Initialize();
-
-        void IDisposable.Dispose() => this.Dispose();
+        void IView.Initialize() => this.Initialize();
 
         void IView.OnShow() => this.OnShow();
 
         void IView.OnHide() => this.OnHide();
+
+        void IView.Dispose() => this.Dispose();
 
         protected IContract Contract { get; private set; }
 
@@ -30,15 +28,15 @@ namespace UniT.UI
         {
         }
 
-        protected virtual void Dispose()
-        {
-        }
-
         protected virtual void OnShow()
         {
         }
 
         protected virtual void OnHide()
+        {
+        }
+
+        protected virtual void Dispose()
         {
         }
     }

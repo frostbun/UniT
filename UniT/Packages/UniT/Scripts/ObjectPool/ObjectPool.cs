@@ -21,7 +21,7 @@ namespace UniT.ObjectPool
             IterTools.Repeat(() =>
             {
                 var instance = Instantiate(pool.prefab, pool.transform);
-                instance.gameObject.SetActive(false);
+                instance.SetActive(false);
                 return instance;
             }, initialCount).ForEach(pool.pooledObjects.Enqueue);
             return pool;
@@ -32,7 +32,7 @@ namespace UniT.ObjectPool
             var instance = this.pooledObjects.DequeueOrDefault(() => Instantiate(this.prefab));
             this.spawnedObjects.Add(instance);
             instance.transform.SetParent(null);
-            instance.gameObject.SetActive(true);
+            instance.SetActive(true);
             return instance;
         }
 
@@ -121,8 +121,9 @@ namespace UniT.ObjectPool
 
         private void Recycle_Internal(GameObject instance)
         {
-            instance.gameObject.SetActive(false);
+            instance.SetActive(false);
             instance.transform.SetParent(this.transform);
+            instance.GetComponentsInChildren<IRecyclable>().ForEach(recyclable => recyclable.Recycle());
             this.pooledObjects.Enqueue(instance);
         }
     }

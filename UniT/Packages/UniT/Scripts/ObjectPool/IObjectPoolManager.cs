@@ -7,7 +7,7 @@ namespace UniT.ObjectPool
     public interface IObjectPoolManager
     {
         public ILogger Logger { get; }
-        
+
         public void InstantiatePool(GameObject prefab, int initialCount = 1);
 
         public void InstantiatePool<T>(T component, int initialCount = 1) where T : Component;
@@ -83,7 +83,8 @@ namespace UniT.ObjectPool
         public UniTask<T> Spawn<T>(Quaternion rotation) where T : Component;
 
         public UniTask<T> Spawn<T>(Transform parent) where T : Component;
-        public void       Recycle(GameObject instance);
+
+        public void Recycle(GameObject instance);
 
         public void Recycle<T>(T component) where T : Component;
 
