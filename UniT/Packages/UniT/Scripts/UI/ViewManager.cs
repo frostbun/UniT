@@ -80,18 +80,18 @@ namespace UniT.UI
                 this.Show_Internal(IContract.Status.Docked);
             }
 
-            public void Hide()
+            public void Hide(bool autoStack = true)
             {
-                this.EnsureViewIsHidden();
-                this.RemoveFromStack();
+                this.Hide_Internal();
+                this.RemoveFromStack(autoStack);
             }
 
-            public void Dispose()
+            public void Dispose(bool autoStack = true)
             {
-                this.EnsureViewIsHidden();
+                this.Hide_Internal();
 
                 this.manager.contracts.Remove(this.view.GetType());
-                this.RemoveFromStack();
+                this.RemoveFromStack(autoStack);
 
                 this.CurrentStatus = IContract.Status.Disposed;
                 this.view.Dispose();
@@ -105,7 +105,7 @@ namespace UniT.UI
 
             private void Show_Internal(IContract.Status status)
             {
-                this.EnsureViewIsHidden();
+                this.Hide_Internal();
                 this.ViewTransform.SetParent(
                     status switch
                     {
@@ -121,6 +121,15 @@ namespace UniT.UI
                 this.view.OnShow();
             }
 
+            private void Hide_Internal()
+            {
+                if (this.CurrentStatus is IContract.Status.Disposed) throw new ObjectDisposedException(this.view.GetType().Name);
+                if (this._currentStatus is IContract.Status.Hidden) return;
+                this.ViewTransform.SetParent(this.manager.hiddenViews, false);
+                this.CurrentStatus = IContract.Status.Hidden;
+                this.view.OnHide();
+            }
+
             private void AddToStack()
             {
                 var index = this.manager.stack.IndexOf(this);
@@ -134,28 +143,16 @@ namespace UniT.UI
                 }
                 this.manager.contracts.Values.ToArray()
                     .Where(contract => contract != this && contract.CurrentStatus is IContract.Status.Floating or IContract.Status.Stacking)
-                    .ForEach(contract => contract.EnsureViewIsHidden());
+                    .ForEach(contract => contract.Hide_Internal());
             }
 
-            private void RemoveFromStack()
+            private void RemoveFromStack(bool autoStack)
             {
                 this.manager.stack.Remove(this);
-                if (this.manager.StackingContract is not null || this.manager.stack.Count < 1) return;
+                if (!autoStack) return;
+                if (this.manager.StackingContract is not null) return;
+                if (this.manager.stack.Count < 1) return;
                 this.manager.stack[^1].Stack();
-            }
-
-            private void EnsureViewIsHidden()
-            {
-                this.EnsureViewIsNotDisposed();
-                if (this._currentStatus is IContract.Status.Hidden) return;
-                this.ViewTransform.SetParent(this.manager.hiddenViews, false);
-                this.CurrentStatus = IContract.Status.Hidden;
-                this.view.OnHide();
-            }
-
-            private void EnsureViewIsNotDisposed()
-            {
-                if (this.CurrentStatus is IContract.Status.Disposed) throw new ObjectDisposedException(this.view.GetType().Name);
             }
         }
 

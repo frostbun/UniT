@@ -1,8 +1,6 @@
 namespace UniT.UI
 {
-    using System;
-
-    public interface IContract : IDisposable
+    public interface IContract
     {
         public enum Status
         {
@@ -25,6 +23,8 @@ namespace UniT.UI
 
         public void Dock();
 
-        public void Hide();
+        public void Hide(bool autoStack = true);
+
+        public void Dispose(bool autoStack = true);
     }
 }
