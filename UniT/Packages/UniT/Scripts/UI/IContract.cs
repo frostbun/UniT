@@ -17,11 +17,11 @@ namespace UniT.UI
 
         public T GetExtra<T>(string key);
 
-        public void Stack();
+        public void Stack(bool force = false);
 
-        public void Float();
+        public void Float(bool force = false);
 
-        public void Dock();
+        public void Dock(bool force = false);
 
         public void Hide(bool autoStack = true);
 

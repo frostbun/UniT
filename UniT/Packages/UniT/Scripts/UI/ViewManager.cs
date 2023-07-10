@@ -64,19 +64,22 @@ namespace UniT.UI
                 return (T)this.extras.GetOrDefault(key);
             }
 
-            public void Stack()
+            public void Stack(bool force = false)
             {
+                if (!force && this.CurrentStatus is IContract.Status.Stacking) return;
                 this.Show_Internal(IContract.Status.Stacking);
                 this.AddToStack();
             }
 
-            public void Float()
+            public void Float(bool force = false)
             {
+                if (!force && this.CurrentStatus is IContract.Status.Floating) return;
                 this.Show_Internal(IContract.Status.Floating);
             }
 
-            public void Dock()
+            public void Dock(bool force = false)
             {
+                if (!force && this.CurrentStatus is IContract.Status.Docked) return;
                 this.Show_Internal(IContract.Status.Docked);
             }
 
