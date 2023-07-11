@@ -5,7 +5,6 @@ namespace UniT.Data.Base
     using Cysharp.Threading.Tasks;
     using UniT.Extensions;
     using UniT.Logging;
-    using UniT.Utilities;
 
     public abstract class BaseDataHandler : IDataHandler
     {
@@ -20,7 +19,7 @@ namespace UniT.Data.Base
 
         UniTask IDataHandler.Populate(IData[] datas)
         {
-            var keys = datas.Select(data => data.GetType().GetKeyAttribute()).ToArray();
+            var keys = datas.Select(data => data.GetType().GetKey()).ToArray();
             return this.LoadRawData(keys)
                        .ContinueWith(rawDatas => IterTools.Zip(rawDatas, datas).Where((rawData, data) => !rawData.IsNullOrWhitespace()).ForEach(this.PopulateData))
                        .ContinueWith(() => this.Logger.Debug($"Loaded {keys.ToJson()}"));
@@ -28,7 +27,7 @@ namespace UniT.Data.Base
 
         UniTask IDataHandler.Save(IData[] datas)
         {
-            var keys     = datas.Select(data => data.GetType().GetKeyAttribute()).ToArray();
+            var keys     = datas.Select(data => data.GetType().GetKey()).ToArray();
             var rawDatas = datas.Select(this.SerializeData).ToArray();
             return this.SaveRawData(keys, rawDatas)
                        .ContinueWith(() => this.Logger.Debug($"Saved {keys.ToJson()}"));

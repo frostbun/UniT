@@ -5,7 +5,6 @@ namespace UniT.ObjectPool
     using UniT.Addressables;
     using UniT.Extensions;
     using UniT.Extensions.UniTask;
-    using UniT.Utilities;
     using UnityEngine;
     using ILogger = UniT.Logging.ILogger;
 
@@ -44,7 +43,7 @@ namespace UniT.ObjectPool
 
         public UniTask InstantiatePool<T>(int initialCount = 1) where T : Component
         {
-            return this.InstantiatePool(typeof(T).GetKeyAttribute(), initialCount);
+            return this.InstantiatePool(typeof(T).GetKey(), initialCount);
         }
 
         public void DestroyPool(GameObject prefab)
@@ -77,7 +76,7 @@ namespace UniT.ObjectPool
 
         public void DestroyPool<T>() where T : Component
         {
-            this.DestroyPool(typeof(T).GetKeyAttribute());
+            this.DestroyPool(typeof(T).GetKey());
         }
 
         public GameObject Spawn(GameObject prefab)
@@ -202,32 +201,32 @@ namespace UniT.ObjectPool
 
         public UniTask<T> Spawn<T>() where T : Component
         {
-            return this.Spawn<T>(typeof(T).GetKeyAttribute());
+            return this.Spawn<T>(typeof(T).GetKey());
         }
 
         public UniTask<T> Spawn<T>(Vector3 position, Quaternion rotation, Transform parent) where T : Component
         {
-            return this.Spawn<T>(typeof(T).GetKeyAttribute(), position, rotation, parent);
+            return this.Spawn<T>(typeof(T).GetKey(), position, rotation, parent);
         }
 
         public UniTask<T> Spawn<T>(Vector3 position, Quaternion rotation) where T : Component
         {
-            return this.Spawn<T>(typeof(T).GetKeyAttribute(), position, rotation);
+            return this.Spawn<T>(typeof(T).GetKey(), position, rotation);
         }
 
         public UniTask<T> Spawn<T>(Vector3 position) where T : Component
         {
-            return this.Spawn<T>(typeof(T).GetKeyAttribute(), position);
+            return this.Spawn<T>(typeof(T).GetKey(), position);
         }
 
         public UniTask<T> Spawn<T>(Quaternion rotation) where T : Component
         {
-            return this.Spawn<T>(typeof(T).GetKeyAttribute(), rotation);
+            return this.Spawn<T>(typeof(T).GetKey(), rotation);
         }
 
         public UniTask<T> Spawn<T>(Transform parent) where T : Component
         {
-            return this.Spawn<T>(typeof(T).GetKeyAttribute(), parent);
+            return this.Spawn<T>(typeof(T).GetKey(), parent);
         }
 
         public void Recycle(GameObject instance)
@@ -264,7 +263,7 @@ namespace UniT.ObjectPool
 
         public UniTask RecycleAll<T>() where T : Component
         {
-            return this.RecycleAll(typeof(T).GetKeyAttribute());
+            return this.RecycleAll(typeof(T).GetKey());
         }
 
         private ObjectPool GetPool(GameObject prefab)

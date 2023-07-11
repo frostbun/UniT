@@ -7,7 +7,7 @@ namespace UniT.Data.Csv.Base
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public class CsvFieldAttribute : Attribute
     {
-        public readonly string Name;
+        public string Name { get; }
 
         public CsvFieldAttribute(string name)
         {

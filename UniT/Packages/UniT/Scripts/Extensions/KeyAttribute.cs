@@ -1,4 +1,4 @@
-namespace UniT.Utilities
+namespace UniT.Extensions
 {
     using System;
     using System.Linq;
@@ -7,7 +7,7 @@ namespace UniT.Utilities
     [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
     public class KeyAttribute : Attribute
     {
-        public readonly string Key;
+        public string Key { get; }
 
         public KeyAttribute(string key)
         {
@@ -17,12 +17,12 @@ namespace UniT.Utilities
 
     public static class KeyAttributeExtensions
     {
-        public static string GetKeyAttribute(this Type type)
+        public static string GetKey(this Type type)
         {
             return type.GetCustomAttribute<KeyAttribute>()?.Key ?? type.Name;
         }
 
-        public static string[] GetKeyAttributes(this Type type)
+        public static string[] GetKeys(this Type type)
         {
             return type.GetCustomAttributes<KeyAttribute>().Select(attr => attr.Key).ToArray();
         }

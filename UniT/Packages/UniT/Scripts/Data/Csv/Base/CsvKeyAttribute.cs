@@ -8,7 +8,7 @@ namespace UniT.Data.Csv.Base
     [AttributeUsage(AttributeTargets.Class)]
     public class CsvKeyAttribute : Attribute
     {
-        public readonly string Key;
+        public string Key { get; }
 
         public CsvKeyAttribute(string key)
         {

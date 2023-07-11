@@ -7,7 +7,6 @@ namespace UniT.UI
     using UniT.Addressables;
     using UniT.Extensions;
     using UniT.Extensions.UniTask;
-    using UniT.Utilities;
     using UnityEngine;
     using ILogger = UniT.Logging.ILogger;
 
@@ -67,8 +66,8 @@ namespace UniT.UI
             public void Stack(bool force = false)
             {
                 if (!force && this.CurrentStatus is IContract.Status.Stacking) return;
-                this.Show_Internal(IContract.Status.Stacking);
                 this.AddToStack();
+                this.Show_Internal(IContract.Status.Stacking);
             }
 
             public void Float(bool force = false)
@@ -91,10 +90,8 @@ namespace UniT.UI
 
             public void Dispose(bool autoStack = true)
             {
-                this.Hide_Internal();
-
+                this.Hide(autoStack);
                 this.manager.contracts.Remove(this.view.GetType());
-                this.RemoveFromStack(autoStack);
 
                 this.CurrentStatus = IContract.Status.Disposed;
                 this.view.Dispose();
@@ -145,7 +142,7 @@ namespace UniT.UI
                     this.manager.stack.RemoveRange(index + 1, this.manager.stack.Count - index - 1);
                 }
                 this.manager.contracts.Values.ToArray()
-                    .Where(contract => contract != this && contract.CurrentStatus is IContract.Status.Floating or IContract.Status.Stacking)
+                    .Where(contract => contract.CurrentStatus is IContract.Status.Floating or IContract.Status.Stacking)
                     .ForEach(contract => contract.Hide_Internal());
             }
 
@@ -182,12 +179,12 @@ namespace UniT.UI
         public void Construct(IAddressableManager addressableManager, IPresenterFactory presenterFactory = null, ILogger logger = null)
         {
             this.addressableManager = addressableManager;
-            this.presenterFactory   = presenterFactory ?? IPresenterFactory.Factory.Create(type => (IPresenter)Activator.CreateInstance(type));
+            this.presenterFactory   = presenterFactory ?? IPresenterFactory.CreateFactory(type => (IPresenter)Activator.CreateInstance(type));
             this.Logger             = logger ?? ILogger.Factory.CreateDefault(this.GetType().Name);
             DontDestroyOnLoad(this);
         }
 
-        public IContract StackingContract => this.stack.LastOrDefault(contract => contract.CurrentStatus is IContract.Status.Stacking);
+        public IContract StackingContract => this.stack.SingleOrDefault(contract => contract.CurrentStatus is IContract.Status.Stacking);
 
         public IEnumerable<IContract> FloatingContracts => this.contracts.Values.Where(contract => contract.CurrentStatus is IContract.Status.Floating).OrderByDescending(contract => contract.ViewTransform.GetSiblingIndex());
 
@@ -221,7 +218,7 @@ namespace UniT.UI
             where TView : Component, IView
             where TPresenter : IPresenter
         {
-            return this.GetContract<TView, TPresenter>(typeof(TView).GetKeyAttribute());
+            return this.GetContract<TView, TPresenter>(typeof(TView).GetKey());
         }
     }
 }

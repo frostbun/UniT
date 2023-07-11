@@ -5,7 +5,6 @@ namespace UniT.Addressables
     using System.Threading;
     using Cysharp.Threading.Tasks;
     using UniT.Extensions;
-    using UniT.Utilities;
     using UnityEngine;
     using UnityEngine.AddressableAssets;
     using UnityEngine.ResourceManagement.AsyncOperations;
@@ -29,7 +28,7 @@ namespace UniT.Addressables
 
         public UniTask<T> Load<T>(string key = null, IProgress<float> progress = null, CancellationToken cancellationToken = default)
         {
-            key ??= typeof(T).GetKeyAttribute();
+            key ??= typeof(T).GetKey();
             return this.loadedAssets.GetOrAdd(key, () => Addressables.LoadAssetAsync<T>(key))
                        .Convert<T>()
                        .ToUniTask(progress: progress, cancellationToken: cancellationToken)
@@ -43,7 +42,7 @@ namespace UniT.Addressables
 
         public UniTask<T> LoadComponent<T>(string key = null, IProgress<float> progress = null, CancellationToken cancellationToken = default) where T : Component
         {
-            return this.Load<GameObject>(key ?? typeof(T).GetKeyAttribute(), progress, cancellationToken)
+            return this.Load<GameObject>(key ?? typeof(T).GetKey(), progress, cancellationToken)
                        .ContinueWith(gameObject =>
                        {
                            var component = gameObject.GetComponent<T>();
@@ -66,7 +65,7 @@ namespace UniT.Addressables
 
         public void Unload<T>()
         {
-            this.Unload(typeof(T).GetKeyAttribute());
+            this.Unload(typeof(T).GetKey());
         }
 
         public UniTask<SceneInstance> LoadScene(string sceneName, string key = null, LoadSceneMode loadMode = LoadSceneMode.Single, bool activateOnLoad = true, int priority = 100, IProgress<float> progress = null, CancellationToken cancellationToken = default)
