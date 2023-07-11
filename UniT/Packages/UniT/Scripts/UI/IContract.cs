@@ -15,6 +15,10 @@ namespace UniT.UI
 
         public Status CurrentStatus { get; }
 
+        public IView View { get; }
+
+        public IPresenter Presenter { get; }
+
         public IContract PutExtra<T>(string key, T value);
 
         public T GetExtra<T>(string key);

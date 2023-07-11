@@ -14,9 +14,9 @@ namespace UniT.UI
 
         protected internal void Initialize();
 
-        protected internal void OnShow();
+        protected internal void Show();
 
-        protected internal void OnHide();
+        protected internal void Hide();
 
         protected internal void Dispose();
     }

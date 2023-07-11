@@ -8,11 +8,13 @@ using UniT.ObjectPool;
 using UniT.UI;
 using UniT.Utilities;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class ServiceProvider : MonoBehaviour
 {
+    [FormerlySerializedAs("viewManager")]
     [SerializeField]
-    private ViewManager viewManager;
+    private UIManager uiManager;
 
     private void Awake()
     {
@@ -40,8 +42,8 @@ public class ServiceProvider : MonoBehaviour
         ServiceProvider<IAudioManager>.Add(audioManager);
         ServiceProvider<IInitializable>.Add(audioManager);
 
-        this.viewManager.Construct(addressableManager);
-        ServiceProvider<IViewManager>.Add(this.viewManager);
+        this.uiManager.Construct(addressableManager);
+        ServiceProvider<IUIManager>.Add(this.uiManager);
 
         #endregion
     }

@@ -5,7 +5,7 @@ namespace UniT.UI
     using UnityEngine;
     using ILogger = UniT.Logging.ILogger;
 
-    public interface IViewManager
+    public interface IUIManager
     {
         public ILogger Logger { get; }
 

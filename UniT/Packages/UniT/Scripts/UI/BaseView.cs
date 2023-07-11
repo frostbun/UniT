@@ -14,9 +14,9 @@ namespace UniT.UI
 
         void IView.Initialize() => this.Initialize();
 
-        void IView.OnShow() => this.OnShow();
+        void IView.Show() => this.Show();
 
-        void IView.OnHide() => this.OnHide();
+        void IView.Hide() => this.Hide();
 
         void IView.Dispose() => this.Dispose();
 
@@ -28,11 +28,11 @@ namespace UniT.UI
         {
         }
 
-        protected virtual void OnShow()
+        protected virtual void Show()
         {
         }
 
-        protected virtual void OnHide()
+        protected virtual void Hide()
         {
         }
 
