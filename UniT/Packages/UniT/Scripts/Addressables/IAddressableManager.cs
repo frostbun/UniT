@@ -10,6 +10,11 @@ namespace UniT.Addressables
 
     public interface IAddressableManager
     {
+        public static class Factory
+        {
+            public static Func<IAddressableManager> Default { get; set; } = () => new AddressableManager();
+        }
+
         public ILogger Logger { get; }
 
         public UniTask<T> Load<T>(string key = null, IProgress<float> progress = null, CancellationToken cancellationToken = default);

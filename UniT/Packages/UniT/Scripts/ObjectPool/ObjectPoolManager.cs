@@ -19,13 +19,13 @@ namespace UniT.ObjectPool
         private readonly Dictionary<string, ObjectPool>     keyToPool;
         private readonly Dictionary<GameObject, ObjectPool> instanceToPool;
 
-        public ObjectPoolManager(IAddressableManager addressableManager, ILogger logger = null)
+        public ObjectPoolManager(IAddressableManager addressableManager = null, ILogger logger = null)
         {
-            this.addressableManager = addressableManager;
+            this.addressableManager = addressableManager ?? IAddressableManager.Factory.Default();
             this.prefabToPool       = new();
             this.keyToPool          = new();
             this.instanceToPool     = new();
-            this.Logger             = logger ?? ILogger.Factory.CreateDefault(this.GetType().Name);
+            this.Logger             = logger ?? ILogger.Factory.Default(this.GetType().Name);
         }
 
         public void InstantiatePool(GameObject prefab, int initialCount = 1)

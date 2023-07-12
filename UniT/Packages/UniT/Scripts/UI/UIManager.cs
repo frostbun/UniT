@@ -171,11 +171,11 @@ namespace UniT.UI
         private readonly List<Contract>             stack     = new();
         private readonly Dictionary<Type, string>   keys      = new();
 
-        public void Construct(IAddressableManager addressableManager, IPresenterFactory presenterFactory = null, ILogger logger = null)
+        public void Construct(IAddressableManager addressableManager = null, IPresenterFactory presenterFactory = null, ILogger logger = null)
         {
-            this.addressableManager = addressableManager;
+            this.addressableManager = addressableManager ?? IAddressableManager.Factory.Default();
             this.presenterFactory   = presenterFactory ?? IPresenterFactory.CreateFactory(type => (IPresenter)Activator.CreateInstance(type));
-            this.Logger             = logger ?? ILogger.Factory.CreateDefault(this.GetType().Name);
+            this.Logger             = logger ?? ILogger.Factory.Default(this.GetType().Name);
             DontDestroyOnLoad(this);
         }
 

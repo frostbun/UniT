@@ -12,9 +12,9 @@ namespace UniT.Data.Csv.Blueprint
     {
         private readonly IAddressableManager addressableManager;
 
-        public BlueprintAddressableCsvDataHandler(IAddressableManager addressableManager, ILogger logger = null) : base(logger)
+        public BlueprintAddressableCsvDataHandler(IAddressableManager addressableManager = null, ILogger logger = null) : base(logger)
         {
-            this.addressableManager = addressableManager;
+            this.addressableManager = addressableManager ?? IAddressableManager.Factory.Default();
         }
 
         protected override bool CanHandle(Type type)

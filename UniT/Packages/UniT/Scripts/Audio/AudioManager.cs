@@ -12,8 +12,9 @@ namespace UniT.Audio
 
     public class AudioManager : IAudioManager, IInitializable
     {
-        public ILogger      Logger { get; }
-        public IAudioConfig Config { get; }
+        public AudioConfig Config { get; }
+
+        public ILogger Logger { get; }
 
         public string CurrentMusic { get; private set; }
 
@@ -23,10 +24,10 @@ namespace UniT.Audio
         private readonly Queue<AudioSource>              pooledSoundSource;
         private readonly Dictionary<string, AudioSource> spawnedSoundSource;
 
-        public AudioManager(IAudioConfig config, IAddressableManager addressableManager, ILogger logger = null)
+        public AudioManager(AudioConfig config = null, IAddressableManager addressableManager = null, ILogger logger = null)
         {
-            this.Config             = config;
-            this.addressableManager = addressableManager;
+            this.Config             = config ?? new();
+            this.addressableManager = addressableManager ?? IAddressableManager.Factory.Default();
 
             this.audioSourceContainer = new(this.GetType().Name);
             this.musicSource          = this.audioSourceContainer.AddComponent<AudioSource>();
@@ -36,7 +37,7 @@ namespace UniT.Audio
             this.pooledSoundSource  = new();
             this.spawnedSoundSource = new();
 
-            this.Logger = logger ?? ILogger.Factory.CreateDefault(this.GetType().Name);
+            this.Logger = logger ?? ILogger.Factory.Default(this.GetType().Name);
         }
 
         public void Initialize()

@@ -12,9 +12,9 @@ namespace UniT.Data.Json.Blueprint
     {
         private readonly IAddressableManager addressableManager;
 
-        public BlueprintAddressableJsonDataHandler(IAddressableManager addressableManager, ILogger logger = null) : base(logger)
+        public BlueprintAddressableJsonDataHandler(IAddressableManager addressableManager = null, ILogger logger = null) : base(logger)
         {
-            this.addressableManager = addressableManager;
+            this.addressableManager = addressableManager ?? IAddressableManager.Factory.Default();
         }
 
         protected override bool CanHandle(Type type)

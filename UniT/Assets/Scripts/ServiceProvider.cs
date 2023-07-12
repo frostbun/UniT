@@ -1,4 +1,3 @@
-using Data.Player;
 using UniT.Addressables;
 using UniT.Audio;
 using UniT.Data.Base;
@@ -8,11 +7,9 @@ using UniT.ObjectPool;
 using UniT.UI;
 using UniT.Utilities;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class ServiceProvider : MonoBehaviour
 {
-    [FormerlySerializedAs("viewManager")]
     [SerializeField]
     private UIManager uiManager;
 
@@ -20,30 +17,30 @@ public class ServiceProvider : MonoBehaviour
     {
         #region ServiceProvider
 
-        var addressableManager = new AddressableManager();
-        ServiceProvider<IAddressableManager>.Add(addressableManager);
+        ServiceProvider<IAddressableManager>.Add(new AddressableManager());
 
-        var objectPoolManager = new ObjectPoolManager(addressableManager);
-        ServiceProvider<IObjectPoolManager>.Add(objectPoolManager);
+        ServiceProvider<IObjectPoolManager>.Add(new ObjectPoolManager());
 
-        var audioConfig = new AudioConfig();
+        this.uiManager.Construct();
+        ServiceProvider<IUIManager>.Add(this.uiManager);
 
-        var dataManager = new DataManager(
-            new IData[] { audioConfig },
-            new IDataHandler[]
-            {
-                new PlayerPrefsJsonDataHandler(),
-                new BlueprintAddressableCsvDataHandler(addressableManager),
-            }
-        );
-        ServiceProvider<IDataManager>.Add(dataManager);
-
-        var audioManager = new AudioManager(audioConfig, addressableManager);
+        var audioManager = new AudioManager();
         ServiceProvider<IAudioManager>.Add(audioManager);
         ServiceProvider<IInitializable>.Add(audioManager);
 
-        this.uiManager.Construct(addressableManager);
-        ServiceProvider<IUIManager>.Add(this.uiManager);
+        ServiceProvider<IDataManager>.Add(
+            new DataManager(
+                new IData[]
+                {
+                    audioManager.Config,
+                },
+                new IDataHandler[]
+                {
+                    new PlayerPrefsJsonDataHandler(),
+                    new BlueprintAddressableCsvDataHandler(),
+                }
+            )
+        );
 
         #endregion
     }
