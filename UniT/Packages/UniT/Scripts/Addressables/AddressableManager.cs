@@ -46,7 +46,10 @@ namespace UniT.Addressables
                        .ContinueWith(gameObject =>
                        {
                            var component = gameObject.GetComponent<T>();
-                           if (!component) throw new InvalidOperationException($"Component {typeof(T).Name} not found in GameObject {gameObject.name}");
+                           if (component is null)
+                           {
+                               throw this.Logger.Exception(new InvalidOperationException($"Component {typeof(T).Name} not found in GameObject {gameObject.name}"));
+                           }
                            return component;
                        });
         }
@@ -72,7 +75,7 @@ namespace UniT.Addressables
         {
             if (this.loadedScenes.ContainsKey(key ??= sceneName))
             {
-                throw new InvalidOperationException("Key already exists in loaded scenes");
+                throw this.Logger.Exception(new InvalidOperationException("Key already exists in loaded scenes"));
             }
 
             if (!activateOnLoad)

@@ -4,6 +4,7 @@ namespace UniT.Data.Base
     using System.Linq;
     using Cysharp.Threading.Tasks;
     using UniT.Extensions;
+    using UniT.Extensions.UniTask;
     using UniT.Logging;
 
     public abstract class BaseDataHandler : IDataHandler
@@ -21,8 +22,9 @@ namespace UniT.Data.Base
         {
             var keys = datas.Select(data => data.GetType().GetKey()).ToArray();
             return this.LoadRawData(keys)
-                       .ContinueWith(rawDatas => IterTools.Zip(rawDatas, datas).Where((rawData, data) => !rawData.IsNullOrWhitespace()).ForEach(this.PopulateData))
-                       .ContinueWith(() => this.Logger.Debug($"Loaded {keys.ToJson()}"));
+                       .ContinueWith(rawDatas => IterTools.Zip(rawDatas, datas).Where((rawData, _) => !rawData.IsNullOrWhitespace()).ForEach(this.PopulateData))
+                       .ContinueWith(() => this.Logger.Debug($"Loaded {keys.ToJson()}"))
+                       .Catch(e => throw this.Logger.Exception(e));
         }
 
         UniTask IDataHandler.Save(IData[] datas)
@@ -30,7 +32,8 @@ namespace UniT.Data.Base
             var keys     = datas.Select(data => data.GetType().GetKey()).ToArray();
             var rawDatas = datas.Select(this.SerializeData).ToArray();
             return this.SaveRawData(keys, rawDatas)
-                       .ContinueWith(() => this.Logger.Debug($"Saved {keys.ToJson()}"));
+                       .ContinueWith(() => this.Logger.Debug($"Saved {keys.ToJson()}"))
+                       .Catch(e => throw this.Logger.Exception(e));
         }
 
         UniTask IDataHandler.Flush() => this.Flush().ContinueWith(() => this.Logger.Debug("Flushed"));

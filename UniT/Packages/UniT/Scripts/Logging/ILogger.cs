@@ -25,6 +25,6 @@ namespace UniT.Logging
 
         public void Critical(string message);
 
-        public void Exception(string message, Exception exception);
+        public Exception Exception(Exception exception);
     }
 }

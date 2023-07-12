@@ -1,5 +1,6 @@
 namespace UniT.ObjectPool
 {
+    using System;
     using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
     using UniT.Addressables;
@@ -7,6 +8,7 @@ namespace UniT.ObjectPool
     using UniT.Extensions.UniTask;
     using UnityEngine;
     using ILogger = UniT.Logging.ILogger;
+    using Object = UnityEngine.Object;
 
     public class ObjectPoolManager : IObjectPoolManager
     {
@@ -28,7 +30,8 @@ namespace UniT.ObjectPool
 
         public void InstantiatePool(GameObject prefab, int initialCount = 1)
         {
-            this.prefabToPool.TryAdd(prefab, () => this.InstantiatePool_Internal(prefab, initialCount));
+            if (this.prefabToPool.TryAdd(prefab, () => this.InstantiatePool_Internal(prefab, initialCount))) return;
+            this.Logger.Warning($"Pool for prefab {prefab.name} already instantiated");
         }
 
         public void InstantiatePool<T>(T component, int initialCount = 1) where T : Component
@@ -38,7 +41,12 @@ namespace UniT.ObjectPool
 
         public UniTask InstantiatePool(string key, int initialCount = 1)
         {
-            return this.keyToPool.TryAdd(key, () => this.addressableManager.Load<GameObject>(key).ContinueWith(prefab => this.InstantiatePool_Internal(prefab, initialCount)));
+            return this.keyToPool.TryAdd(key, () => this.addressableManager.Load<GameObject>(key).ContinueWith(prefab => this.InstantiatePool_Internal(prefab, initialCount)))
+                       .ContinueWith(success =>
+                       {
+                           if (success) return;
+                           this.Logger.Warning($"Pool for key {key} already instantiated");
+                       });
         }
 
         public UniTask InstantiatePool<T>(int initialCount = 1) where T : Component
@@ -139,92 +147,92 @@ namespace UniT.ObjectPool
             return this.Spawn(component.gameObject, parent).GetComponent<T>();
         }
 
-        public UniTask<GameObject> Spawn(string key)
+        public GameObject Spawn(string key)
         {
-            return this.GetPool(key).ContinueWith(pool => this.Spawn_Internal(pool));
+            return this.Spawn_Internal(this.GetPool(key));
         }
 
-        public UniTask<GameObject> Spawn(string key, Vector3 position, Quaternion rotation, Transform parent)
+        public GameObject Spawn(string key, Vector3 position, Quaternion rotation, Transform parent)
         {
-            return this.GetPool(key).ContinueWith(pool => this.Spawn_Internal(pool, position, rotation, parent));
+            return this.Spawn_Internal(this.GetPool(key), position, rotation, parent);
         }
 
-        public UniTask<GameObject> Spawn(string key, Vector3 position, Quaternion rotation)
+        public GameObject Spawn(string key, Vector3 position, Quaternion rotation)
         {
-            return this.GetPool(key).ContinueWith(pool => this.Spawn_Internal(pool, position, rotation));
+            return this.Spawn_Internal(this.GetPool(key), position, rotation);
         }
 
-        public UniTask<GameObject> Spawn(string key, Vector3 position)
+        public GameObject Spawn(string key, Vector3 position)
         {
-            return this.GetPool(key).ContinueWith(pool => this.Spawn_Internal(pool, position));
+            return this.Spawn_Internal(this.GetPool(key), position);
         }
 
-        public UniTask<GameObject> Spawn(string key, Quaternion rotation)
+        public GameObject Spawn(string key, Quaternion rotation)
         {
-            return this.GetPool(key).ContinueWith(pool => this.Spawn_Internal(pool, rotation));
+            return this.Spawn_Internal(this.GetPool(key), rotation);
         }
 
-        public UniTask<GameObject> Spawn(string key, Transform parent)
+        public GameObject Spawn(string key, Transform parent)
         {
-            return this.GetPool(key).ContinueWith(pool => this.Spawn_Internal(pool, parent));
+            return this.Spawn_Internal(this.GetPool(key), parent);
         }
 
-        public UniTask<T> Spawn<T>(string key) where T : Component
+        public T Spawn<T>(string key) where T : Component
         {
-            return this.GetPool(key).ContinueWith(pool => this.Spawn_Internal(pool).GetComponent<T>());
+            return this.Spawn_Internal(this.GetPool(key)).GetComponent<T>();
         }
 
-        public UniTask<T> Spawn<T>(string key, Vector3 position, Quaternion rotation, Transform parent) where T : Component
+        public T Spawn<T>(string key, Vector3 position, Quaternion rotation, Transform parent) where T : Component
         {
-            return this.GetPool(key).ContinueWith(pool => this.Spawn_Internal(pool, position, rotation, parent).GetComponent<T>());
+            return this.Spawn_Internal(this.GetPool(key), position, rotation, parent).GetComponent<T>();
         }
 
-        public UniTask<T> Spawn<T>(string key, Vector3 position, Quaternion rotation) where T : Component
+        public T Spawn<T>(string key, Vector3 position, Quaternion rotation) where T : Component
         {
-            return this.GetPool(key).ContinueWith(pool => this.Spawn_Internal(pool, position, rotation).GetComponent<T>());
+            return this.Spawn_Internal(this.GetPool(key), position, rotation).GetComponent<T>();
         }
 
-        public UniTask<T> Spawn<T>(string key, Vector3 position) where T : Component
+        public T Spawn<T>(string key, Vector3 position) where T : Component
         {
-            return this.GetPool(key).ContinueWith(pool => this.Spawn_Internal(pool, position).GetComponent<T>());
+            return this.Spawn_Internal(this.GetPool(key), position).GetComponent<T>();
         }
 
-        public UniTask<T> Spawn<T>(string key, Quaternion rotation) where T : Component
+        public T Spawn<T>(string key, Quaternion rotation) where T : Component
         {
-            return this.GetPool(key).ContinueWith(pool => this.Spawn_Internal(pool, rotation).GetComponent<T>());
+            return this.Spawn_Internal(this.GetPool(key), rotation).GetComponent<T>();
         }
 
-        public UniTask<T> Spawn<T>(string key, Transform parent) where T : Component
+        public T Spawn<T>(string key, Transform parent) where T : Component
         {
-            return this.GetPool(key).ContinueWith(pool => this.Spawn_Internal(pool, parent).GetComponent<T>());
+            return this.Spawn_Internal(this.GetPool(key), parent).GetComponent<T>();
         }
 
-        public UniTask<T> Spawn<T>() where T : Component
+        public T Spawn<T>() where T : Component
         {
             return this.Spawn<T>(typeof(T).GetKey());
         }
 
-        public UniTask<T> Spawn<T>(Vector3 position, Quaternion rotation, Transform parent) where T : Component
+        public T Spawn<T>(Vector3 position, Quaternion rotation, Transform parent) where T : Component
         {
             return this.Spawn<T>(typeof(T).GetKey(), position, rotation, parent);
         }
 
-        public UniTask<T> Spawn<T>(Vector3 position, Quaternion rotation) where T : Component
+        public T Spawn<T>(Vector3 position, Quaternion rotation) where T : Component
         {
             return this.Spawn<T>(typeof(T).GetKey(), position, rotation);
         }
 
-        public UniTask<T> Spawn<T>(Vector3 position) where T : Component
+        public T Spawn<T>(Vector3 position) where T : Component
         {
             return this.Spawn<T>(typeof(T).GetKey(), position);
         }
 
-        public UniTask<T> Spawn<T>(Quaternion rotation) where T : Component
+        public T Spawn<T>(Quaternion rotation) where T : Component
         {
             return this.Spawn<T>(typeof(T).GetKey(), rotation);
         }
 
-        public UniTask<T> Spawn<T>(Transform parent) where T : Component
+        public T Spawn<T>(Transform parent) where T : Component
         {
             return this.Spawn<T>(typeof(T).GetKey(), parent);
         }
@@ -256,28 +264,29 @@ namespace UniT.ObjectPool
             this.RecycleAll(component.gameObject);
         }
 
-        public UniTask RecycleAll(string key)
+        public void RecycleAll(string key)
         {
-            return this.GetPool(key).ContinueWith(this.RecycleAll_Internal);
+            this.RecycleAll_Internal(this.GetPool(key));
         }
 
-        public UniTask RecycleAll<T>() where T : Component
+        public void RecycleAll<T>() where T : Component
         {
-            return this.RecycleAll(typeof(T).GetKey());
+            this.RecycleAll(typeof(T).GetKey());
         }
 
         private ObjectPool GetPool(GameObject prefab)
         {
-            this.InstantiatePool(prefab);
-            return this.prefabToPool[prefab];
+            if (this.prefabToPool.TryGetValue(prefab, out var pool)) return pool;
+            throw this.Logger.Exception(new InvalidOperationException($"Pool for prefab {prefab.name} was not instantiated"));
         }
 
-        private UniTask<ObjectPool> GetPool(string key)
+        private ObjectPool GetPool(string key)
         {
-            return this.InstantiatePool(key).ContinueWith(() => this.keyToPool[key]);
+            if (this.keyToPool.TryGetValue(key, out var pool)) return pool;
+            throw this.Logger.Exception(new InvalidOperationException($"Pool for key {key} was not instantiated"));
         }
 
-        private ObjectPool InstantiatePool_Internal(GameObject prefab, int initialCount = 1)
+        private ObjectPool InstantiatePool_Internal(GameObject prefab, int initialCount)
         {
             var pool = ObjectPool.Instantiate(prefab, initialCount);
             this.Logger.Debug($"Instantiated {pool.gameObject.name}");

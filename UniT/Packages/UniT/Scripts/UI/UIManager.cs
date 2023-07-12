@@ -117,7 +117,7 @@ namespace UniT.UI
 
             private void Hide_Internal()
             {
-                if (this.CurrentStatus is IContract.Status.Disposed) throw new ObjectDisposedException(this.View.GetType().Name);
+                if (this.CurrentStatus is IContract.Status.Disposed) throw this.manager.Logger.Exception(new ObjectDisposedException(this.View.GetType().Name));
                 if (this._currentStatus is IContract.Status.Hidden) return;
                 this.View.Transform.SetParent(this.manager.hiddenViews, false);
                 this.CurrentStatus = IContract.Status.Hidden;

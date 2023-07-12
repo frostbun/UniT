@@ -48,41 +48,41 @@ namespace UniT.ObjectPool
 
         public T Spawn<T>(T component, Transform parent) where T : Component;
 
-        public UniTask<GameObject> Spawn(string key);
+        public GameObject Spawn(string key);
 
-        public UniTask<GameObject> Spawn(string key, Vector3 position, Quaternion rotation, Transform parent);
+        public GameObject Spawn(string key, Vector3 position, Quaternion rotation, Transform parent);
 
-        public UniTask<GameObject> Spawn(string key, Vector3 position, Quaternion rotation);
+        public GameObject Spawn(string key, Vector3 position, Quaternion rotation);
 
-        public UniTask<GameObject> Spawn(string key, Vector3 position);
+        public GameObject Spawn(string key, Vector3 position);
 
-        public UniTask<GameObject> Spawn(string key, Quaternion rotation);
+        public GameObject Spawn(string key, Quaternion rotation);
 
-        public UniTask<GameObject> Spawn(string key, Transform parent);
+        public GameObject Spawn(string key, Transform parent);
 
-        public UniTask<T> Spawn<T>(string key) where T : Component;
+        public T Spawn<T>(string key) where T : Component;
 
-        public UniTask<T> Spawn<T>(string key, Vector3 position, Quaternion rotation, Transform parent) where T : Component;
+        public T Spawn<T>(string key, Vector3 position, Quaternion rotation, Transform parent) where T : Component;
 
-        public UniTask<T> Spawn<T>(string key, Vector3 position, Quaternion rotation) where T : Component;
+        public T Spawn<T>(string key, Vector3 position, Quaternion rotation) where T : Component;
 
-        public UniTask<T> Spawn<T>(string key, Vector3 position) where T : Component;
+        public T Spawn<T>(string key, Vector3 position) where T : Component;
 
-        public UniTask<T> Spawn<T>(string key, Quaternion rotation) where T : Component;
+        public T Spawn<T>(string key, Quaternion rotation) where T : Component;
 
-        public UniTask<T> Spawn<T>(string key, Transform parent) where T : Component;
+        public T Spawn<T>(string key, Transform parent) where T : Component;
 
-        public UniTask<T> Spawn<T>() where T : Component;
+        public T Spawn<T>() where T : Component;
 
-        public UniTask<T> Spawn<T>(Vector3 position, Quaternion rotation, Transform parent) where T : Component;
+        public T Spawn<T>(Vector3 position, Quaternion rotation, Transform parent) where T : Component;
 
-        public UniTask<T> Spawn<T>(Vector3 position, Quaternion rotation) where T : Component;
+        public T Spawn<T>(Vector3 position, Quaternion rotation) where T : Component;
 
-        public UniTask<T> Spawn<T>(Vector3 position) where T : Component;
+        public T Spawn<T>(Vector3 position) where T : Component;
 
-        public UniTask<T> Spawn<T>(Quaternion rotation) where T : Component;
+        public T Spawn<T>(Quaternion rotation) where T : Component;
 
-        public UniTask<T> Spawn<T>(Transform parent) where T : Component;
+        public T Spawn<T>(Transform parent) where T : Component;
 
         public void Recycle(GameObject instance);
 
@@ -92,6 +92,8 @@ namespace UniT.ObjectPool
 
         public void RecycleAll<T>(T component) where T : Component;
 
-        public UniTask RecycleAll(string key);
+        public void RecycleAll(string key);
+
+        public void RecycleAll<T>() where T : Component;
     }
 }

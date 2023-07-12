@@ -22,8 +22,8 @@ namespace UniT.ObjectPool
             {
                 var instance = Instantiate(pool.prefab, pool.transform);
                 instance.SetActive(false);
-                return instance;
-            }, initialCount).ForEach(pool.pooledObjects.Enqueue);
+                pool.pooledObjects.Enqueue(instance);
+            }, initialCount);
             return pool;
         }
 
