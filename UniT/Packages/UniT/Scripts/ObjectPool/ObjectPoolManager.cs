@@ -54,6 +54,26 @@ namespace UniT.ObjectPool
             return this.InstantiatePool(typeof(T).GetKey(), initialCount);
         }
 
+        public bool IsPoolReady(GameObject prefab)
+        {
+            return this.prefabToPool.ContainsKey(prefab);
+        }
+
+        public bool IsPoolReady<T>(T component) where T : Component
+        {
+            return this.IsPoolReady(component.gameObject);
+        }
+
+        public bool IsPoolReady(string key)
+        {
+            return this.keyToPool.ContainsKey(key);
+        }
+
+        public bool IsPoolReady<T>() where T : Component
+        {
+            return this.IsPoolReady(typeof(T).GetKey());
+        }
+
         public void DestroyPool(GameObject prefab)
         {
             if (!this.prefabToPool.Remove(prefab, out var pool))

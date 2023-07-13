@@ -16,6 +16,14 @@ namespace UniT.ObjectPool
 
         public UniTask InstantiatePool<T>(int initialCount = 1) where T : Component;
 
+        public bool IsPoolReady(GameObject prefab);
+
+        public bool IsPoolReady<T>(T component) where T : Component;
+
+        public bool IsPoolReady(string key);
+
+        public bool IsPoolReady<T>() where T : Component;
+
         public void DestroyPool(GameObject prefab);
 
         public void DestroyPool<T>(T component) where T : Component;
