@@ -189,7 +189,10 @@ namespace UniT.Utilities
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(this.values, this.sign);
+            var hashCode = new HashCode();
+            this.values.ForEach(hashCode.Add);
+            hashCode.Add(this.sign);
+            return hashCode.ToHashCode();
         }
     }
 }
