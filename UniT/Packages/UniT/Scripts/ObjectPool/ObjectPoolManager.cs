@@ -30,7 +30,7 @@ namespace UniT.ObjectPool
 
         public void InstantiatePool(GameObject prefab, int initialCount = 1)
         {
-            if (this.prefabToPool.TryAdd(prefab, () => this.InstantiatePool_Internal(prefab, initialCount))) return;
+            if (this.TryInstantiatePool(prefab, initialCount)) return;
             this.Logger.Warning($"Pool for prefab {prefab.name} already instantiated");
         }
 
@@ -41,7 +41,7 @@ namespace UniT.ObjectPool
 
         public UniTask InstantiatePool(string key, int initialCount = 1)
         {
-            return this.keyToPool.TryAdd(key, () => this.addressableManager.Load<GameObject>(key).ContinueWith(prefab => this.InstantiatePool_Internal(prefab, initialCount)))
+            return this.TryInstantiatePool(key, initialCount)
                        .ContinueWith(success =>
                        {
                            if (success) return;
@@ -52,6 +52,26 @@ namespace UniT.ObjectPool
         public UniTask InstantiatePool<T>(int initialCount = 1) where T : Component
         {
             return this.InstantiatePool(typeof(T).GetKey(), initialCount);
+        }
+
+        public bool TryInstantiatePool(GameObject prefab, int initialCount = 1)
+        {
+            return this.prefabToPool.TryAdd(prefab, () => this.InstantiatePool_Internal(prefab, initialCount));
+        }
+
+        public bool TryInstantiatePool<T>(T component, int initialCount = 1) where T : Component
+        {
+            return this.TryInstantiatePool(component.gameObject, initialCount);
+        }
+
+        public UniTask<bool> TryInstantiatePool(string key, int initialCount = 1)
+        {
+            return this.keyToPool.TryAdd(key, () => this.addressableManager.Load<GameObject>(key).ContinueWith(prefab => this.InstantiatePool_Internal(prefab, initialCount)));
+        }
+
+        public UniTask<bool> TryInstantiatePool<T>(int initialCount = 1) where T : Component
+        {
+            return this.TryInstantiatePool(typeof(T).GetKey(), initialCount);
         }
 
         public bool IsPoolReady(GameObject prefab)
