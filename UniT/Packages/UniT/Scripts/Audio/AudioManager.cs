@@ -105,7 +105,7 @@ namespace UniT.Audio
                 soundSource.loop = loop;
                 if (!force && soundSource.isPlaying) return;
                 soundSource.Play();
-                this.Logger.Debug($"Playing sound {name}");
+                this.Logger.Debug($"Playing sound {name}, loop: {loop}");
             }).Forget();
         }
 
@@ -187,7 +187,7 @@ namespace UniT.Audio
 
             if (!this.spawnedSoundSource.Remove(name, out var soundSource))
             {
-                this.Logger.Warning($"Trying to release sound {name} that was not loaded");
+                this.Logger.Warning($"Trying to recycle sound {name} that was not loaded");
                 return;
             }
 
