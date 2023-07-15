@@ -44,10 +44,11 @@ namespace UniT.Reactive
             this.value = value;
         }
 
-        public IDisposable Subscribe(Action<T> callback)
+        public IDisposable Subscribe(Action<T> callback, bool invokeImmediately = true)
         {
             var subscriber = new Subscriber(callback, this);
             this.subscribers.Add(subscriber);
+            if (invokeImmediately) callback(this.value);
             return subscriber;
         }
 
