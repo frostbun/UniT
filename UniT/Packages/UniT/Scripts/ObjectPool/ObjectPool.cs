@@ -33,7 +33,7 @@ namespace UniT.ObjectPool
 
         public GameObject Spawn(Vector3 position, Quaternion rotation, Transform parent)
         {
-            var instance = this.Spawn();
+            var instance = this.Spawn_Internal();
             instance.transform.SetPositionAndRotation(position, rotation);
             instance.transform.SetParent(parent);
             return instance;

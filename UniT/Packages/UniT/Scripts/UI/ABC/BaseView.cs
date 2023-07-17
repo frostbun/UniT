@@ -1,13 +1,10 @@
-namespace UniT.UI
+namespace UniT.UI.ABC
 {
+    using UniT.UI.Interfaces;
     using UnityEngine;
 
     public abstract class BaseView<TPresenter> : MonoBehaviour, IView where TPresenter : IPresenter
     {
-        GameObject IView.GameObject => this.gameObject;
-
-        Transform IView.Transform => this.transform;
-
         IContract IView.Contract { set => this.Contract = value; }
 
         IPresenter IView.Presenter { set => this.Presenter = (TPresenter)value; }

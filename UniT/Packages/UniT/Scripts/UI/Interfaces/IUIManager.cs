@@ -1,4 +1,4 @@
-namespace UniT.UI
+namespace UniT.UI.Interfaces
 {
     using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
@@ -10,6 +10,8 @@ namespace UniT.UI
         public ILogger Logger { get; }
 
         public IContract StackingContract { get; }
+
+        public IContract NextStackingContract { get; }
 
         public IEnumerable<IContract> FloatingContracts { get; }
 

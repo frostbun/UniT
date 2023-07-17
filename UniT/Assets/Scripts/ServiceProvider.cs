@@ -2,27 +2,32 @@ using UniT.Assets;
 using UniT.Audio;
 using UniT.Data.Base;
 using UniT.Data.Csv.Blueprint;
+using UniT.Data.Json.Blueprint;
 using UniT.Data.Json.Player;
 using UniT.ObjectPool;
 using UniT.UI;
+using UniT.UI.Interfaces;
 using UniT.Utilities;
 using UnityEngine;
+using Views;
 
 public class ServiceProvider : MonoBehaviour
 {
     [SerializeField]
     private UIManager uiManager;
 
+    [SerializeField]
+    private TestView testView;
+
     private void Awake()
     {
         #region ServiceProvider
 
-        ServiceProvider<IAssetsManager>.Add(new AddressablesManager());
+        ServiceProvider<IAssetsManager>.Add(IAssetsManager.Factory.Default());
 
         ServiceProvider<IObjectPoolManager>.Add(new ObjectPoolManager());
 
-        this.uiManager.Construct();
-        ServiceProvider<IUIManager>.Add(this.uiManager);
+        ServiceProvider<IUIManager>.Add(this.uiManager.Construct());
 
         var audioManager = new AudioManager();
         ServiceProvider<IAudioManager>.Add(audioManager);
@@ -37,7 +42,8 @@ public class ServiceProvider : MonoBehaviour
                 new IDataHandler[]
                 {
                     new PlayerPrefsJsonDataHandler(),
-                    new BlueprintAddressableCsvDataHandler(),
+                    new BlueprintAssetJsonDataHandler(),
+                    new BlueprintAssetCsvDataHandler(),
                 }
             )
         );
@@ -47,6 +53,7 @@ public class ServiceProvider : MonoBehaviour
 
     private void Start()
     {
+        this.uiManager.GetContract<TestView, TestPresenter>(this.testView).Stack();
         Destroy(this.gameObject);
     }
 }

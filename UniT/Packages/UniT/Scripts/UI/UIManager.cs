@@ -7,6 +7,7 @@ namespace UniT.UI
     using UniT.Assets;
     using UniT.Extensions;
     using UniT.Extensions.UniTask;
+    using UniT.UI.Interfaces;
     using UnityEngine;
     using ILogger = UniT.Logging.ILogger;
 
@@ -22,28 +23,26 @@ namespace UniT.UI
                 private set
                 {
                     this._currentStatus = value;
-                    this.manager.Logger.Debug($"{this.View.GetType().Name} status: {value}");
+                    this.manager.Logger.Debug($"{this.view.GetType().Name} status: {value}");
                 }
             }
 
-            public IView      View      { get; }
-            public IPresenter Presenter { get; }
-
+            public readonly  IView                      view;
             private readonly UIManager                  manager;
             private readonly Dictionary<string, object> extras;
 
             public Contract(IView view, IPresenter presenter, UIManager manager)
             {
                 view.Contract  = presenter.Contract = this;
-                this.View      = presenter.View     = view;
-                this.Presenter = view.Presenter     = presenter;
+                view.Presenter = presenter;
+                this.view      = presenter.View = view;
                 this.manager   = manager;
                 this.extras    = new();
 
-                this.View.Transform.SetParent(this.manager.hiddenViews, false);
-                this.View.Initialize();
+                this.view.transform.SetParent(this.manager.hiddenViews, false);
+                this.view.Initialize();
 
-                this.manager.Logger.Debug($"Instantiated {this.View.GetType().Name}");
+                this.manager.Logger.Debug($"Instantiated {this.view.GetType().Name}");
             }
 
             public IContract PutExtra<T>(string key, T value)
@@ -85,13 +84,13 @@ namespace UniT.UI
             public void Dispose(bool autoStack = true)
             {
                 this.Hide(autoStack);
-                this.manager.contracts.Remove(this.View.GetType());
+                this.manager.contracts.Remove(this.view.GetType());
 
                 this.CurrentStatus = IContract.Status.Disposed;
-                this.View.Dispose();
-                Destroy(this.View.GameObject);
+                this.view.Dispose();
+                Destroy(this.view.gameObject);
 
-                if (this.manager.keys.Remove(this.View.GetType(), out var key))
+                if (this.manager.keys.Remove(this.view.GetType(), out var key))
                 {
                     this.manager.assetsManager.Unload(key);
                 }
@@ -100,7 +99,7 @@ namespace UniT.UI
             private void Show_Internal(IContract.Status status)
             {
                 this.Hide_Internal();
-                this.View.Transform.SetParent(
+                this.view.transform.SetParent(
                     status switch
                     {
                         IContract.Status.Stacking => this.manager.stackingViews,
@@ -110,18 +109,18 @@ namespace UniT.UI
                     },
                     false
                 );
-                this.View.Transform.SetAsLastSibling();
+                this.view.transform.SetAsLastSibling();
                 this.CurrentStatus = status;
-                this.View.Show();
+                this.view.Show();
             }
 
             private void Hide_Internal()
             {
-                if (this.CurrentStatus is IContract.Status.Disposed) throw this.manager.Logger.Exception(new ObjectDisposedException(this.View.GetType().Name));
+                if (this.CurrentStatus is IContract.Status.Disposed) throw this.manager.Logger.Exception(new ObjectDisposedException(this.view.GetType().Name));
                 if (this._currentStatus is IContract.Status.Hidden) return;
-                this.View.Transform.SetParent(this.manager.hiddenViews, false);
+                this.view.transform.SetParent(this.manager.hiddenViews, false);
                 this.CurrentStatus = IContract.Status.Hidden;
-                this.View.Hide();
+                this.view.Hide();
                 this.extras.Clear();
             }
 
@@ -166,24 +165,27 @@ namespace UniT.UI
         public ILogger Logger { get; private set; }
 
         private          IAssetsManager             assetsManager;
-        private          IPresenterFactory          presenterFactory;
+        private          IPresenter.IFactory        presenterFactory;
         private readonly Dictionary<Type, Contract> contracts = new();
         private readonly List<Contract>             stack     = new();
         private readonly Dictionary<Type, string>   keys      = new();
 
-        public void Construct(IAssetsManager assetsManager = null, IPresenterFactory presenterFactory = null, ILogger logger = null)
+        public UIManager Construct(IAssetsManager assetsManager = null, IPresenter.IFactory presenterFactory = null, ILogger logger = null)
         {
             this.assetsManager    = assetsManager ?? IAssetsManager.Factory.Default();
-            this.presenterFactory = presenterFactory ?? IPresenterFactory.CreateFactory(type => (IPresenter)Activator.CreateInstance(type));
+            this.presenterFactory = presenterFactory ?? IPresenter.IFactory.Factory.Default();
             this.Logger           = logger ?? ILogger.Factory.Default(this.GetType().Name);
             this.DontDestroyOnLoad();
+            return this;
         }
 
-        public IContract StackingContract => this.stack.SingleOrDefault(contract => contract.CurrentStatus is IContract.Status.Stacking);
+        public IContract StackingContract => this.stack.LastOrDefault(contract => contract.CurrentStatus is IContract.Status.Stacking);
 
-        public IEnumerable<IContract> FloatingContracts => this.contracts.Values.Where(contract => contract.CurrentStatus is IContract.Status.Floating).OrderByDescending(contract => contract.View.Transform.GetSiblingIndex());
+        public IContract NextStackingContract => this.stack.LastOrDefault(contract => contract.CurrentStatus is not IContract.Status.Stacking);
 
-        public IEnumerable<IContract> DockedContracts => this.contracts.Values.Where(contract => contract.CurrentStatus is IContract.Status.Docked).OrderByDescending(contract => contract.View.Transform.GetSiblingIndex());
+        public IEnumerable<IContract> FloatingContracts => this.contracts.Values.Where(contract => contract.CurrentStatus is IContract.Status.Floating).OrderByDescending(contract => contract.view.transform.GetSiblingIndex());
+
+        public IEnumerable<IContract> DockedContracts => this.contracts.Values.Where(contract => contract.CurrentStatus is IContract.Status.Docked).OrderByDescending(contract => contract.view.transform.GetSiblingIndex());
 
         public IContract GetContract<TView, TPresenter>(TView view)
             where TView : Component, IView

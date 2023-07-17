@@ -1,12 +1,12 @@
-namespace UniT.UI
+namespace UniT.UI.Interfaces
 {
     using UnityEngine;
 
     public interface IView
     {
-        protected internal GameObject GameObject { get; }
+        public GameObject gameObject { get; }
 
-        protected internal Transform Transform { get; }
+        public Transform transform { get; }
 
         protected internal IContract Contract { set; }
 

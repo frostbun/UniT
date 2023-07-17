@@ -1,4 +1,4 @@
-namespace UniT.UI
+namespace UniT.UI.Interfaces
 {
     using Cysharp.Threading.Tasks;
 
@@ -6,18 +6,14 @@ namespace UniT.UI
     {
         public enum Status
         {
-            Disposed,
-            Hidden,
             Stacking,
             Floating,
             Docked,
+            Hidden,
+            Disposed,
         }
 
         public Status CurrentStatus { get; }
-
-        public IView View { get; }
-
-        public IPresenter Presenter { get; }
 
         public IContract PutExtra<T>(string key, T value);
 
@@ -34,7 +30,7 @@ namespace UniT.UI
         public void Dispose(bool autoStack = true);
     }
 
-    public static class IContractExtensions
+    public static class ContractExtensions
     {
         public static UniTask<IContract> PutExtra<T>(this UniTask<IContract> task, string key, T value)
         {

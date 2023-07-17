@@ -1,7 +1,6 @@
 namespace UniT.Utilities
 {
     using System.Collections.Generic;
-    using System.Linq;
 
     public class PriorityQueue<TElement, TPriority>
     {
@@ -36,7 +35,7 @@ namespace UniT.Utilities
 
         public TElement Peek()
         {
-            return this.items.First().Value;
+            return this.items.Values[0];
         }
     }
 }

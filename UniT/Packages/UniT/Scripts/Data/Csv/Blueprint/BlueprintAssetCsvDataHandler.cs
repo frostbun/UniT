@@ -8,11 +8,11 @@ namespace UniT.Data.Csv.Blueprint
     using UnityEngine;
     using ILogger = UniT.Logging.ILogger;
 
-    public class BlueprintAddressableCsvDataHandler : BaseCsvDataHandler
+    public class BlueprintAssetCsvDataHandler : BaseCsvDataHandler
     {
         private readonly IAssetsManager assetsManager;
 
-        public BlueprintAddressableCsvDataHandler(IAssetsManager assetsManager = null, ILogger logger = null) : base(logger)
+        public BlueprintAssetCsvDataHandler(IAssetsManager assetsManager = null, ILogger logger = null) : base(logger)
         {
             this.assetsManager = assetsManager ?? IAssetsManager.Factory.Default();
         }

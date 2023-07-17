@@ -1,5 +1,7 @@
-namespace UniT.UI
+namespace UniT.UI.ABC
 {
+    using UniT.UI.Interfaces;
+
     public abstract class BasePresenter<TView> : IPresenter where TView : IView
     {
         IContract IPresenter.Contract { set => this.Contract = value; }

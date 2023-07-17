@@ -8,11 +8,11 @@ namespace UniT.Data.Json.Blueprint
     using UnityEngine;
     using ILogger = UniT.Logging.ILogger;
 
-    public class BlueprintAddressableJsonDataHandler : BaseJsonDataHandler
+    public class BlueprintAssetJsonDataHandler : BaseJsonDataHandler
     {
         private readonly IAssetsManager assetsManager;
 
-        public BlueprintAddressableJsonDataHandler(IAssetsManager assetsManager = null, ILogger logger = null) : base(logger)
+        public BlueprintAssetJsonDataHandler(IAssetsManager assetsManager = null, ILogger logger = null) : base(logger)
         {
             this.assetsManager = assetsManager ?? IAssetsManager.Factory.Default();
         }
