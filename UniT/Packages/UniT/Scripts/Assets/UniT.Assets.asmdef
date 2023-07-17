@@ -1,5 +1,5 @@
 {
-  "name": "UniT.Addressables",
+  "name": "UniT.Assets",
   "rootNamespace": "UniT",
   "references": [
     "Unity.Addressables",

@@ -3,7 +3,7 @@ namespace UniT.ObjectPool
     using System;
     using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
-    using UniT.Addressables;
+    using UniT.Assets;
     using UniT.Extensions;
     using UniT.Extensions.UniTask;
     using UnityEngine;
@@ -14,18 +14,20 @@ namespace UniT.ObjectPool
     {
         public ILogger Logger { get; }
 
-        private readonly IAddressableManager                addressableManager;
+        private readonly IAssetsManager                     assetsManager;
+        private readonly Transform                          poolsContainer;
         private readonly Dictionary<GameObject, ObjectPool> prefabToPool;
         private readonly Dictionary<string, ObjectPool>     keyToPool;
         private readonly Dictionary<GameObject, ObjectPool> instanceToPool;
 
-        public ObjectPoolManager(IAddressableManager addressableManager = null, ILogger logger = null)
+        public ObjectPoolManager(IAssetsManager assetsManager = null, ILogger logger = null)
         {
-            this.addressableManager = addressableManager ?? IAddressableManager.Factory.Default();
-            this.prefabToPool       = new();
-            this.keyToPool          = new();
-            this.instanceToPool     = new();
-            this.Logger             = logger ?? ILogger.Factory.Default(this.GetType().Name);
+            this.assetsManager  = assetsManager ?? IAssetsManager.Factory.Default();
+            this.poolsContainer = new GameObject(this.GetType().Name).DontDestroyOnLoad().transform;
+            this.prefabToPool   = new();
+            this.keyToPool      = new();
+            this.instanceToPool = new();
+            this.Logger         = logger ?? ILogger.Factory.Default(this.GetType().Name);
         }
 
         public void InstantiatePool(GameObject prefab, int initialCount = 1)
@@ -66,7 +68,7 @@ namespace UniT.ObjectPool
 
         public UniTask<bool> TryInstantiatePool(string key, int initialCount = 1)
         {
-            return this.keyToPool.TryAdd(key, () => this.addressableManager.Load<GameObject>(key).ContinueWith(prefab => this.InstantiatePool_Internal(prefab, initialCount)));
+            return this.keyToPool.TryAdd(key, () => this.assetsManager.Load<GameObject>(key).ContinueWith(prefab => this.InstantiatePool_Internal(prefab, initialCount)));
         }
 
         public UniTask<bool> TryInstantiatePool<T>(int initialCount = 1) where T : Component
@@ -119,7 +121,7 @@ namespace UniT.ObjectPool
             }
 
             this.DestroyPool_Internal(pool);
-            this.addressableManager.Unload(key);
+            this.assetsManager.Unload(key);
         }
 
         public void DestroyPool<T>() where T : Component
@@ -329,6 +331,7 @@ namespace UniT.ObjectPool
         private ObjectPool InstantiatePool_Internal(GameObject prefab, int initialCount)
         {
             var pool = ObjectPool.Instantiate(prefab, initialCount);
+            pool.transform.SetParent(this.poolsContainer);
             this.Logger.Debug($"Instantiated {pool.gameObject.name}");
             return pool;
         }

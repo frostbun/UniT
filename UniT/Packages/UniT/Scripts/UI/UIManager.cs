@@ -4,7 +4,7 @@ namespace UniT.UI
     using System.Collections.Generic;
     using System.Linq;
     using Cysharp.Threading.Tasks;
-    using UniT.Addressables;
+    using UniT.Assets;
     using UniT.Extensions;
     using UniT.Extensions.UniTask;
     using UnityEngine;
@@ -93,7 +93,7 @@ namespace UniT.UI
 
                 if (this.manager.keys.Remove(this.View.GetType(), out var key))
                 {
-                    this.manager.addressableManager.Unload(key);
+                    this.manager.assetsManager.Unload(key);
                 }
             }
 
@@ -165,18 +165,18 @@ namespace UniT.UI
 
         public ILogger Logger { get; private set; }
 
-        private          IAddressableManager        addressableManager;
+        private          IAssetsManager             assetsManager;
         private          IPresenterFactory          presenterFactory;
         private readonly Dictionary<Type, Contract> contracts = new();
         private readonly List<Contract>             stack     = new();
         private readonly Dictionary<Type, string>   keys      = new();
 
-        public void Construct(IAddressableManager addressableManager = null, IPresenterFactory presenterFactory = null, ILogger logger = null)
+        public void Construct(IAssetsManager assetsManager = null, IPresenterFactory presenterFactory = null, ILogger logger = null)
         {
-            this.addressableManager = addressableManager ?? IAddressableManager.Factory.Default();
-            this.presenterFactory   = presenterFactory ?? IPresenterFactory.CreateFactory(type => (IPresenter)Activator.CreateInstance(type));
-            this.Logger             = logger ?? ILogger.Factory.Default(this.GetType().Name);
-            DontDestroyOnLoad(this);
+            this.assetsManager    = assetsManager ?? IAssetsManager.Factory.Default();
+            this.presenterFactory = presenterFactory ?? IPresenterFactory.CreateFactory(type => (IPresenter)Activator.CreateInstance(type));
+            this.Logger           = logger ?? ILogger.Factory.Default(this.GetType().Name);
+            this.DontDestroyOnLoad();
         }
 
         public IContract StackingContract => this.stack.SingleOrDefault(contract => contract.CurrentStatus is IContract.Status.Stacking);
@@ -201,7 +201,7 @@ namespace UniT.UI
         {
             return this.contracts.GetOrAdd(
                 typeof(TView),
-                () => this.addressableManager.LoadComponent<TView>(key).ContinueWith(view =>
+                () => this.assetsManager.LoadComponent<TView>(key).ContinueWith(view =>
                 {
                     this.keys.Add(typeof(TView), key);
                     return new Contract(Instantiate(view), this.presenterFactory.Create(typeof(TPresenter)), this);

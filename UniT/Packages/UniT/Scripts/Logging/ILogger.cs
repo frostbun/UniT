@@ -6,7 +6,7 @@ namespace UniT.Logging
     {
         public static class Factory
         {
-            public static Func<string, ILogger> Default { get; set; } = name => new Logger(name);
+            public static Func<string, ILogger> Default { get; set; } = (name) => new UnityLogger(name);
         }
 
         public string Name { get; }

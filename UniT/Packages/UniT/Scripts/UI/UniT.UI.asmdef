@@ -3,7 +3,7 @@
   "rootNamespace": "UniT",
   "references": [
     "UniTask",
-    "UniT.Addressables",
+    "UniT.Assets",
     "UniT.Logging",
     "UniT.Extensions",
     "UniT.Extensions.UniTask"

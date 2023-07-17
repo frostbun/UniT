@@ -2,9 +2,9 @@ namespace UniT.Logging
 {
     using System;
 
-    public class Logger : BaseLogger
+    public class UnityLogger : BaseLogger
     {
-        public Logger(string name, LogConfig config = null) : base(name, config)
+        public UnityLogger(string name, LogConfig config = null) : base(name, config)
         {
         }
 

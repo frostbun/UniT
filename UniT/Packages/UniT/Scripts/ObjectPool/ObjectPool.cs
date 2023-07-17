@@ -16,7 +16,6 @@ namespace UniT.ObjectPool
         public static ObjectPool Instantiate(GameObject prefab, int initialCount)
         {
             var pool = new GameObject($"{prefab.name} Pool").AddComponent<ObjectPool>();
-            DontDestroyOnLoad(pool);
             pool.prefab = prefab;
             IterTools.Repeat(() =>
             {
@@ -29,11 +28,7 @@ namespace UniT.ObjectPool
 
         public GameObject Spawn()
         {
-            var instance = this.pooledObjects.DequeueOrDefault(() => Instantiate(this.prefab));
-            this.spawnedObjects.Add(instance);
-            instance.transform.SetParent(null);
-            instance.SetActive(true);
-            return instance;
+            return this.Spawn_Internal();
         }
 
         public GameObject Spawn(Vector3 position, Quaternion rotation, Transform parent)
@@ -46,28 +41,28 @@ namespace UniT.ObjectPool
 
         public GameObject Spawn(Vector3 position, Quaternion rotation)
         {
-            var instance = this.Spawn();
+            var instance = this.Spawn_Internal();
             instance.transform.SetPositionAndRotation(position, rotation);
             return instance;
         }
 
         public GameObject Spawn(Vector3 position)
         {
-            var instance = this.Spawn();
+            var instance = this.Spawn_Internal();
             instance.transform.position = position;
             return instance;
         }
 
         public GameObject Spawn(Quaternion rotation)
         {
-            var instance = this.Spawn();
+            var instance = this.Spawn_Internal();
             instance.transform.rotation = rotation;
             return instance;
         }
 
         public GameObject Spawn(Transform parent)
         {
-            var instance = this.Spawn();
+            var instance = this.Spawn_Internal();
             instance.transform.SetParent(parent);
             return instance;
         }
@@ -119,12 +114,28 @@ namespace UniT.ObjectPool
             this.spawnedObjects.Clear();
         }
 
+        private GameObject Spawn_Internal()
+        {
+            var instance = this.pooledObjects.DequeueOrDefault(() => Instantiate(this.prefab, this.transform));
+            this.spawnedObjects.Add(instance);
+            instance.transform.SetParent(null);
+            instance.SetActive(true);
+            return instance;
+        }
+
         private void Recycle_Internal(GameObject instance)
         {
             instance.SetActive(false);
             instance.transform.SetParent(this.transform);
             instance.GetComponentsInChildren<IRecyclable>().ForEach(recyclable => recyclable.Recycle());
             this.pooledObjects.Enqueue(instance);
+        }
+
+        public new Transform transform { get; private set; }
+
+        private void Awake()
+        {
+            this.transform = this.GetComponent<Transform>();
         }
     }
 }

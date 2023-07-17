@@ -1,4 +1,4 @@
-using UniT.Addressables;
+using UniT.Assets;
 using UniT.Audio;
 using UniT.Data.Base;
 using UniT.Data.Csv.Blueprint;
@@ -17,7 +17,7 @@ public class ServiceProvider : MonoBehaviour
     {
         #region ServiceProvider
 
-        ServiceProvider<IAddressableManager>.Add(new AddressableManager());
+        ServiceProvider<IAssetsManager>.Add(new AddressablesManager());
 
         ServiceProvider<IObjectPoolManager>.Add(new ObjectPoolManager());
 

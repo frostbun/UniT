@@ -3,7 +3,7 @@ namespace UniT.Audio
     using System.Collections.Generic;
     using System.Linq;
     using Cysharp.Threading.Tasks;
-    using UniT.Addressables;
+    using UniT.Assets;
     using UniT.Extensions;
     using UniT.Extensions.UniTask;
     using UniT.Utilities;
@@ -18,24 +18,23 @@ namespace UniT.Audio
 
         public string CurrentMusic { get; private set; }
 
-        private readonly IAddressableManager             addressableManager;
-        private readonly GameObject                      audioSourceContainer;
+        private readonly IAssetsManager                  assetsManager;
+        private readonly GameObject                      audioSourcesContainer;
         private readonly AudioSource                     musicSource;
-        private readonly Queue<AudioSource>              pooledSoundSource;
-        private readonly Dictionary<string, AudioSource> spawnedSoundSource;
+        private readonly Queue<AudioSource>              pooledSoundSources;
+        private readonly Dictionary<string, AudioSource> loadedSoundSources;
 
-        public AudioManager(AudioConfig config = null, IAddressableManager addressableManager = null, ILogger logger = null)
+        public AudioManager(AudioConfig config = null, IAssetsManager assetsManager = null, ILogger logger = null)
         {
-            this.Config             = config ?? new();
-            this.addressableManager = addressableManager ?? IAddressableManager.Factory.Default();
+            this.Config                = config ?? new();
+            this.assetsManager         = assetsManager ?? IAssetsManager.Factory.Default();
+            this.audioSourcesContainer = new GameObject(this.GetType().Name).DontDestroyOnLoad();
 
-            this.audioSourceContainer = new(this.GetType().Name);
-            this.musicSource          = this.audioSourceContainer.AddComponent<AudioSource>();
-            this.musicSource.loop     = true;
-            Object.DontDestroyOnLoad(this.audioSourceContainer);
+            this.musicSource      = this.audioSourcesContainer.AddComponent<AudioSource>();
+            this.musicSource.loop = true;
 
-            this.pooledSoundSource  = new();
-            this.spawnedSoundSource = new();
+            this.pooledSoundSources = new();
+            this.loadedSoundSources = new();
 
             this.Logger = logger ?? ILogger.Factory.Default(this.GetType().Name);
         }
@@ -116,21 +115,21 @@ namespace UniT.Audio
 
         public void StopAllSounds()
         {
-            this.StopSounds(this.spawnedSoundSource.Keys.ToArray());
+            this.StopSounds(this.loadedSoundSources.Keys.ToArray());
         }
 
         public UniTask LoadMusic(string name)
         {
-            return this.addressableManager.Load<AudioClip>(name);
+            return this.assetsManager.Load<AudioClip>(name);
         }
 
         public void PlayMusic(string name, bool force = false)
         {
             if (!force && this.CurrentMusic == name) return;
             this.StopMusic();
-            if (this.CurrentMusic != name && this.CurrentMusic != null) this.addressableManager.Unload(this.CurrentMusic);
+            if (this.CurrentMusic != name && this.CurrentMusic != null) this.assetsManager.Unload(this.CurrentMusic);
             this.CurrentMusic = name;
-            this.addressableManager.Load<AudioClip>(name).ContinueWith(audioClip =>
+            this.assetsManager.Load<AudioClip>(name).ContinueWith(audioClip =>
             {
                 this.musicSource.clip = audioClip;
                 this.musicSource.Play();
@@ -157,11 +156,11 @@ namespace UniT.Audio
 
         private UniTask<AudioSource> GetSoundSource(string name)
         {
-            return this.spawnedSoundSource.GetOrAdd(name, () =>
+            return this.loadedSoundSources.GetOrAdd(name, () =>
             {
-                return this.addressableManager.Load<AudioClip>(name).ContinueWith(audioClip =>
+                return this.assetsManager.Load<AudioClip>(name).ContinueWith(audioClip =>
                 {
-                    var soundSource = this.pooledSoundSource.DequeueOrDefault(() => this.audioSourceContainer.AddComponent<AudioSource>());
+                    var soundSource = this.pooledSoundSources.DequeueOrDefault(() => this.audioSourcesContainer.AddComponent<AudioSource>());
                     this.ConfigureSoundSource(soundSource);
                     soundSource.clip = audioClip;
                     return soundSource;
@@ -171,7 +170,7 @@ namespace UniT.Audio
 
         private void StopSound(string name)
         {
-            if (!this.spawnedSoundSource.TryGetValue(name, out var soundSource))
+            if (!this.loadedSoundSources.TryGetValue(name, out var soundSource))
             {
                 this.Logger.Warning($"Trying to stop sound {name} that was not loaded");
                 return;
@@ -185,20 +184,20 @@ namespace UniT.Audio
         {
             this.StopSound(name);
 
-            if (!this.spawnedSoundSource.Remove(name, out var soundSource))
+            if (!this.loadedSoundSources.Remove(name, out var soundSource))
             {
                 this.Logger.Warning($"Trying to recycle sound {name} that was not loaded");
                 return;
             }
 
-            this.pooledSoundSource.Enqueue(soundSource);
-            this.addressableManager.Unload(name);
+            this.pooledSoundSources.Enqueue(soundSource);
+            this.assetsManager.Unload(name);
             this.Logger.Debug($"Recycled sound source {name}");
         }
 
         private void ConfigureAllSoundSources()
         {
-            this.spawnedSoundSource.Values.ForEach(this.ConfigureSoundSource);
+            this.loadedSoundSources.Values.ForEach(this.ConfigureSoundSource);
         }
 
         private void ConfigureSoundSource(AudioSource soundSource)

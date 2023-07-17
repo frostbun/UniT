@@ -1,4 +1,4 @@
-namespace UniT.Addressables
+namespace UniT.Assets
 {
     using System;
     using System.Threading;
@@ -8,11 +8,11 @@ namespace UniT.Addressables
     using UnityEngine.SceneManagement;
     using ILogger = UniT.Logging.ILogger;
 
-    public interface IAddressableManager
+    public interface IAssetsManager
     {
         public static class Factory
         {
-            public static Func<IAddressableManager> Default { get; set; } = () => new AddressableManager();
+            public static Func<IAssetsManager> Default { get; set; } = () => new AddressablesManager();
         }
 
         public ILogger Logger { get; }

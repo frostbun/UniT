@@ -2,7 +2,7 @@ namespace UniT.Data.Csv.Blueprint
 {
     using System;
     using Cysharp.Threading.Tasks;
-    using UniT.Addressables;
+    using UniT.Assets;
     using UniT.Data.Base;
     using UniT.Data.Csv.Base;
     using UnityEngine;
@@ -10,11 +10,11 @@ namespace UniT.Data.Csv.Blueprint
 
     public class BlueprintAddressableCsvDataHandler : BaseCsvDataHandler
     {
-        private readonly IAddressableManager addressableManager;
+        private readonly IAssetsManager assetsManager;
 
-        public BlueprintAddressableCsvDataHandler(IAddressableManager addressableManager = null, ILogger logger = null) : base(logger)
+        public BlueprintAddressableCsvDataHandler(IAssetsManager assetsManager = null, ILogger logger = null) : base(logger)
         {
-            this.addressableManager = addressableManager ?? IAddressableManager.Factory.Default();
+            this.assetsManager = assetsManager ?? IAssetsManager.Factory.Default();
         }
 
         protected override bool CanHandle(Type type)
@@ -26,10 +26,10 @@ namespace UniT.Data.Csv.Blueprint
         {
             return UniTask.WhenAll(keys.Select(key =>
             {
-                return this.addressableManager.Load<TextAsset>(key).ContinueWith(blueprint =>
+                return this.assetsManager.Load<TextAsset>(key).ContinueWith(blueprint =>
                 {
                     var text = blueprint.text;
-                    this.addressableManager.Unload(key);
+                    this.assetsManager.Unload(key);
                     return text;
                 });
             }));
