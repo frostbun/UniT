@@ -5,6 +5,7 @@
     "UniTask",
     "UniT.Assets",
     "UniT.Logging",
+    "UniT.Utilities",
     "UniT.Extensions",
     "UniT.Extensions.UniTask"
   ]

@@ -1,28 +1,17 @@
 namespace UniT.UI.Interfaces
 {
     using System;
+    using UniT.Utilities;
 
     public interface IPresenter
     {
-        public interface IFactory
+        public class Factory : DelegateFactory<IPresenter, Type>
         {
-            private class PresenterFactory : IFactory
+            public static Func<Factory> Default { get; set; } = () => new(type => (IPresenter)Activator.CreateInstance(type));
+
+            public Factory(Func<Type, IPresenter> factory) : base(factory)
             {
-                private readonly Func<Type, IPresenter> factory;
-
-                public PresenterFactory(Func<Type, IPresenter> factory) => this.factory = factory;
-
-                public IPresenter Create(Type type) => this.factory(type);
             }
-
-            public static class Factory
-            {
-                public static Func<IFactory> Default { get; set; } = () => new PresenterFactory(type => (IPresenter)Activator.CreateInstance(type));
-
-                public static IFactory Create(Func<Type, IPresenter> factory) => new PresenterFactory(factory);
-            }
-
-            public IPresenter Create(Type type);
         }
 
         protected internal IContract Contract { set; }

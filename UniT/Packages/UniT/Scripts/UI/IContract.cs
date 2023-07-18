@@ -1,4 +1,4 @@
-namespace UniT.UI.Interfaces
+namespace UniT.UI
 {
     using Cysharp.Threading.Tasks;
 

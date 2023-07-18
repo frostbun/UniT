@@ -23,7 +23,7 @@ namespace UniT.Assets
         {
             this.loadedAssets = new();
             this.loadedScenes = new();
-            this.Logger       = logger ?? ILogger.Factory.Default(this.GetType().Name);
+            this.Logger       = logger ?? ILogger.Default(this.GetType().Name);
         }
 
         public UniTask<T> Load<T>(string key = null, IProgress<float> progress = null, CancellationToken cancellationToken = default)

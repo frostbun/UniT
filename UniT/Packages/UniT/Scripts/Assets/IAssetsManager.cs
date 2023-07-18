@@ -10,10 +10,7 @@ namespace UniT.Assets
 
     public interface IAssetsManager
     {
-        public static class Factory
-        {
-            public static Func<IAssetsManager> Default { get; set; } = () => new AddressablesManager();
-        }
+        public static Func<IAssetsManager> Default { get; set; } = () => new AddressablesManager();
 
         public ILogger Logger { get; }
 

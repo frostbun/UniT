@@ -13,7 +13,7 @@ namespace UniT.Data.Base
 
         protected BaseDataHandler(ILogger logger = null)
         {
-            this.Logger = logger ?? ILogger.Factory.Default(this.GetType().Name);
+            this.Logger = logger ?? ILogger.Default(this.GetType().Name);
         }
 
         bool IDataHandler.CanHandle(Type type) => this.CanHandle(type);

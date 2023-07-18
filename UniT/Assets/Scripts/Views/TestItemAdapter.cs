@@ -1,8 +1,8 @@
 namespace Views
 {
-    using UniT.UI.Adapter.ABC;
+    using UniT.UI.Item.Bases;
 
-    public class TestItemAdapter : BaseNonRecyclableItemAdapter<string, TestItemView, TestItemPresenter>
+    public class TestItemAdapter : SimpleItemAdapter<string, TestItemView>
     {
     }
 }

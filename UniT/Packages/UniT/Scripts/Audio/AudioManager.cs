@@ -27,7 +27,7 @@ namespace UniT.Audio
         public AudioManager(AudioConfig config = null, IAssetsManager assetsManager = null, ILogger logger = null)
         {
             this.Config                = config ?? new();
-            this.assetsManager         = assetsManager ?? IAssetsManager.Factory.Default();
+            this.assetsManager         = assetsManager ?? IAssetsManager.Default();
             this.audioSourcesContainer = new GameObject(this.GetType().Name).DontDestroyOnLoad();
 
             this.musicSource      = this.audioSourcesContainer.AddComponent<AudioSource>();
@@ -36,7 +36,7 @@ namespace UniT.Audio
             this.pooledSoundSources = new();
             this.loadedSoundSources = new();
 
-            this.Logger = logger ?? ILogger.Factory.Default(this.GetType().Name);
+            this.Logger = logger ?? ILogger.Default(this.GetType().Name);
         }
 
         public void Initialize()

@@ -14,7 +14,7 @@ namespace UniT.Data.Csv.Blueprint
 
         public BlueprintAssetCsvDataHandler(IAssetsManager assetsManager = null, ILogger logger = null) : base(logger)
         {
-            this.assetsManager = assetsManager ?? IAssetsManager.Factory.Default();
+            this.assetsManager = assetsManager ?? IAssetsManager.Default();
         }
 
         protected override bool CanHandle(Type type)

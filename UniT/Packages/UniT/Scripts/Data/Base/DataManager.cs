@@ -25,7 +25,7 @@ namespace UniT.Data.Base
                         ?? throw new($"No handler found for type {data.GetType().Name}")
             ).AsReadOnly();
 
-            this.Logger = logger ?? ILogger.Factory.Default(this.GetType().Name);
+            this.Logger = logger ?? ILogger.Default(this.GetType().Name);
             this.dataTypeToHandlerType.ForEach((dataType, handlerType) => this.Logger.Debug($"Found {dataType.Name} - {handlerType.Name}"));
         }
 

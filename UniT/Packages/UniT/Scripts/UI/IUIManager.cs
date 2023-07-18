@@ -1,7 +1,8 @@
-namespace UniT.UI.Interfaces
+namespace UniT.UI
 {
     using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
+    using UniT.UI.Interfaces;
     using UnityEngine;
     using ILogger = UniT.Logging.ILogger;
 

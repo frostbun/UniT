@@ -1,4 +1,4 @@
-namespace UniT.UI.ABC
+namespace UniT.UI.Bases
 {
     using UniT.UI.Interfaces;
     using UnityEngine;
@@ -36,5 +36,9 @@ namespace UniT.UI.ABC
         protected virtual void Dispose()
         {
         }
+    }
+
+    public abstract class BaseView : BaseView<NoPresenter>
+    {
     }
 }

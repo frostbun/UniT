@@ -22,12 +22,12 @@ namespace UniT.ObjectPool
 
         public ObjectPoolManager(IAssetsManager assetsManager = null, ILogger logger = null)
         {
-            this.assetsManager  = assetsManager ?? IAssetsManager.Factory.Default();
+            this.assetsManager  = assetsManager ?? IAssetsManager.Default();
             this.poolsContainer = new GameObject(this.GetType().Name).DontDestroyOnLoad().transform;
             this.prefabToPool   = new();
             this.keyToPool      = new();
             this.instanceToPool = new();
-            this.Logger         = logger ?? ILogger.Factory.Default(this.GetType().Name);
+            this.Logger         = logger ?? ILogger.Default(this.GetType().Name);
         }
 
         public void InstantiatePool(GameObject prefab, int initialCount = 1)

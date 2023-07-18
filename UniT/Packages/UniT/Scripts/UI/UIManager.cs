@@ -165,16 +165,16 @@ namespace UniT.UI
         public ILogger Logger { get; private set; }
 
         private          IAssetsManager             assetsManager;
-        private          IPresenter.IFactory        presenterFactory;
+        private          IPresenter.Factory         presenterFactory;
         private readonly Dictionary<Type, Contract> contracts = new();
         private readonly List<Contract>             stack     = new();
         private readonly Dictionary<Type, string>   keys      = new();
 
-        public UIManager Construct(IAssetsManager assetsManager = null, IPresenter.IFactory presenterFactory = null, ILogger logger = null)
+        public UIManager Construct(IAssetsManager assetsManager = null, IPresenter.Factory presenterFactory = null, ILogger logger = null)
         {
-            this.assetsManager    = assetsManager ?? IAssetsManager.Factory.Default();
-            this.presenterFactory = presenterFactory ?? IPresenter.IFactory.Factory.Default();
-            this.Logger           = logger ?? ILogger.Factory.Default(this.GetType().Name);
+            this.assetsManager    = assetsManager ?? IAssetsManager.Default();
+            this.presenterFactory = presenterFactory ?? IPresenter.Factory.Default();
+            this.Logger           = logger ?? ILogger.Default(this.GetType().Name);
             this.DontDestroyOnLoad();
             return this;
         }

@@ -1,9 +1,9 @@
 namespace Views
 {
-    using UniT.UI.ABC;
+    using UniT.UI.Bases;
     using UnityEngine;
 
-    public class TestView : BaseView<TestPresenter>
+    public class TestView : BaseView
     {
         [field: SerializeField]
         public TestItemAdapter AdapterTestItem { get; private set; }
@@ -24,9 +24,5 @@ namespace Views
                 "Test 10",
             }).Show();
         }
-    }
-
-    public class TestPresenter : BasePresenter<TestView>
-    {
     }
 }

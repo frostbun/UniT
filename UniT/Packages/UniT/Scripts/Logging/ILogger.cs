@@ -4,10 +4,7 @@ namespace UniT.Logging
 
     public interface ILogger
     {
-        public static class Factory
-        {
-            public static Func<string, ILogger> Default { get; set; } = name => new UnityLogger(name);
-        }
+        public static Func<string, ILogger> Default { get; set; } = name => new UnityLogger(name);
 
         public string Name { get; }
 

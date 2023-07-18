@@ -1,21 +1,17 @@
 namespace Views
 {
     using TMPro;
-    using UniT.UI.Adapter.ABC;
+    using UniT.UI.Item.Bases;
     using UnityEngine;
 
-    public class TestItemView : BaseItemView<string, TestItemPresenter>
+    public class TestItemView : BaseItemView<string>
     {
         [field: SerializeField]
         public TMP_Text Txt { get; private set; }
 
         protected override void Show()
         {
-            this.Txt.text = this.Contract.Item;
+            this.Txt.text = this.Item;
         }
-    }
-
-    public class TestItemPresenter : BaseItemPresenter<string, TestItemView>
-    {
     }
 }

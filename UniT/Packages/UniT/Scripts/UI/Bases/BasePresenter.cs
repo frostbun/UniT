@@ -1,4 +1,4 @@
-namespace UniT.UI.ABC
+namespace UniT.UI.Bases
 {
     using UniT.UI.Interfaces;
 
@@ -11,5 +11,9 @@ namespace UniT.UI.ABC
         protected IContract Contract { get; private set; }
 
         protected TView View { get; private set; }
+    }
+
+    public sealed class NoPresenter : BasePresenter<IView>
+    {
     }
 }

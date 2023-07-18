@@ -1,16 +1,16 @@
-namespace UniT.UI.Adapter.Interfaces
+namespace UniT.UI.Item.Interfaces
 {
     using UnityEngine;
 
-    public interface IItemView<TItem>
+    public interface IItemView
     {
         public GameObject gameObject { get; }
 
         public Transform transform { get; }
 
-        protected internal IItemContract<TItem> Contract { set; }
+        protected internal object Item { set; }
 
-        protected internal IItemPresenter<TItem> Presenter { set; }
+        protected internal IItemPresenter Presenter { set; }
 
         protected internal void Initialize();
 
