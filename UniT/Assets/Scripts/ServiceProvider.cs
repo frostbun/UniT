@@ -6,8 +6,6 @@ using UniT.Data.Json.Blueprint;
 using UniT.Data.Json.Player;
 using UniT.ObjectPool;
 using UniT.UI;
-using UniT.UI.Bases;
-using UniT.UI.Interfaces;
 using UniT.Utilities;
 using UnityEngine;
 using Views;
@@ -54,7 +52,7 @@ public class ServiceProvider : MonoBehaviour
 
     private void Start()
     {
-        this.uiManager.GetContract<TestView, NoPresenter>(this.testView).Stack();
+        this.uiManager.GetView(this.testView).Stack();
         Destroy(this.gameObject);
     }
 }

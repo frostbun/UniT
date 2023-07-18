@@ -1,44 +1,61 @@
 namespace UniT.UI.Item.Bases
 {
+    using System;
     using UniT.UI.Item.Interfaces;
     using UnityEngine;
 
-    public abstract class BaseItemView<TItem, TPresenter> : MonoBehaviour, IItemView where TPresenter : IItemPresenter
+    public abstract class BaseItemView<TItem> : MonoBehaviour, IItemView
     {
-        object IItemView.Item { set => this.Item = (TItem)value; }
+        void IItemView.Initialize()
+        {
+            this.OnInitialize();
+        }
 
-        IItemPresenter IItemView.Presenter { set => this.Presenter = (TPresenter)value; }
+        void IItemView.Show(object item)
+        {
+            this.transform.SetAsLastSibling();
+            this.gameObject.SetActive(true);
+            this.Item = (TItem)item;
+            this.OnShow();
+        }
 
-        void IItemView.Initialize() => this.Initialize();
+        void IItemView.Hide()
+        {
+            this.gameObject.SetActive(false);
+            this.OnHide();
+        }
 
-        void IItemView.Show() => this.Show();
-
-        void IItemView.Hide() => this.Hide();
-
-        void IItemView.Dispose() => this.Dispose();
+        void IItemView.Dispose()
+        {
+            Destroy(this.gameObject);
+            this.OnDispose();
+        }
 
         public TItem Item { get; private set; }
 
-        protected TPresenter Presenter { get; private set; }
-
-        protected virtual void Initialize()
+        protected virtual void OnInitialize()
         {
         }
 
-        protected virtual void Show()
+        protected virtual void OnShow()
         {
         }
 
-        protected virtual void Hide()
+        protected virtual void OnHide()
         {
         }
 
-        protected virtual void Dispose()
+        protected virtual void OnDispose()
         {
         }
     }
 
-    public abstract class BaseItemView<TItem> : BaseItemView<TItem, NoItemPresenter>
+    public abstract class BaseItemView<TItem, TPresenter> : BaseItemView<TItem>, IItemViewWithPresenter where TPresenter : IItemPresenter
     {
+        Type IItemViewWithPresenter.PresenterType => typeof(TPresenter);
+
+        IItemPresenter IItemViewWithPresenter.Presenter { set => this.Presenter = (TPresenter)value; }
+
+        protected TPresenter Presenter { get; private set; }
     }
 }

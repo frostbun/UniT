@@ -9,7 +9,7 @@ namespace Views
         [field: SerializeField]
         public TMP_Text Txt { get; private set; }
 
-        protected override void Show()
+        protected override void OnShow()
         {
             this.Txt.text = this.Item;
         }

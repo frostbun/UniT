@@ -8,9 +8,14 @@ namespace Views
         [field: SerializeField]
         public TestItemAdapter AdapterTestItem { get; private set; }
 
-        protected override void Initialize()
+        protected override void OnInitialize()
         {
-            this.AdapterTestItem.Construct(new[]
+            this.AdapterTestItem.Construct();
+        }
+
+        protected override void OnShow()
+        {
+            this.AdapterTestItem.Show(new[]
             {
                 "Test 1",
                 "Test 2",
@@ -22,7 +27,17 @@ namespace Views
                 "Test 8",
                 "Test 9",
                 "Test 10",
-            }).Show();
+            });
+        }
+
+        protected override void OnHide()
+        {
+            this.AdapterTestItem.Hide();
+        }
+
+        protected override void OnDispose()
+        {
+            this.AdapterTestItem.Dispose();
         }
     }
 }
