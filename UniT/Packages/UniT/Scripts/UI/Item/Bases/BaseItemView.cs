@@ -52,9 +52,11 @@ namespace UniT.UI.Item.Bases
 
     public abstract class BaseItemView<TItem, TPresenter> : BaseItemView<TItem>, IItemViewWithPresenter where TPresenter : IItemPresenter
     {
-        Type IItemViewWithPresenter.PresenterType => typeof(TPresenter);
+        Type IItemViewWithPresenter.PresenterType => this.PresenterType;
 
         IItemPresenter IItemViewWithPresenter.Presenter { set => this.Presenter = (TPresenter)value; }
+
+        protected virtual Type PresenterType => typeof(TPresenter);
 
         protected TPresenter Presenter { get; private set; }
     }

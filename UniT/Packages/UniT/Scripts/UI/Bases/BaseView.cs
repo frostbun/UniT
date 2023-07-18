@@ -10,7 +10,6 @@ namespace UniT.UI.Bases
     {
         public IView.Status CurrentStatus { get; private set; } = IView.Status.Hidden;
 
-        private          IUIManager                 manager;
         private readonly Dictionary<string, object> extras = new();
 
         public IView PutExtra<T>(string key, T value)
@@ -24,9 +23,11 @@ namespace UniT.UI.Bases
             return (T)this.extras.GetOrDefault(key);
         }
 
+        public IUIManager Manager { get; private set; }
+
         void IView.Initialize(IUIManager manager)
         {
-            this.manager = manager;
+            this.Manager = manager;
             this.OnInitialize();
         }
 
@@ -34,7 +35,7 @@ namespace UniT.UI.Bases
         {
             if (!force && this.CurrentStatus is IView.Status.Stacking) return;
             this.Hide(false, false);
-            this.manager.Stack(this);
+            this.Manager.Stack(this);
             this.CurrentStatus = IView.Status.Stacking;
             this.OnShow();
         }
@@ -44,7 +45,7 @@ namespace UniT.UI.Bases
             if (!force && this.CurrentStatus is IView.Status.Floating) return;
             this.Hide(false, false);
             this.CurrentStatus = IView.Status.Floating;
-            this.manager.Float(this);
+            this.Manager.Float(this);
             this.OnShow();
         }
 
@@ -52,7 +53,7 @@ namespace UniT.UI.Bases
         {
             if (!force && this.CurrentStatus is IView.Status.Docked) return;
             this.Hide(false, false);
-            this.manager.Dock(this);
+            this.Manager.Dock(this);
             this.CurrentStatus = IView.Status.Docked;
             this.OnShow();
         }
@@ -60,10 +61,10 @@ namespace UniT.UI.Bases
         public void Hide(bool removeFromStack = true, bool autoStack = true)
         {
             if (this.CurrentStatus is IView.Status.Hidden) return;
-            this.manager.Hide(this);
+            this.Manager.Hide(this);
             this.CurrentStatus = IView.Status.Hidden;
-            if (removeFromStack) this.manager.RemoveFromStack(this);
-            if (autoStack) this.manager.StackNextView();
+            if (removeFromStack) this.Manager.RemoveFromStack(this);
+            if (autoStack) this.Manager.StackNextView();
             this.OnHide();
             this.extras.Clear();
         }
@@ -72,7 +73,7 @@ namespace UniT.UI.Bases
         {
             this.Hide(true, autoStack);
             Destroy(this.gameObject);
-            this.manager.Dispose(this);
+            this.Manager.Dispose(this);
             this.CurrentStatus = IView.Status.Disposed;
             this.OnDispose();
         }
@@ -96,9 +97,11 @@ namespace UniT.UI.Bases
 
     public abstract class BaseView<TPresenter> : BaseView, IViewWithPresenter where TPresenter : IPresenter
     {
-        Type IViewWithPresenter.PresenterType => typeof(TPresenter);
+        Type IViewWithPresenter.PresenterType => this.PresenterType;
 
         IPresenter IViewWithPresenter.Presenter { set => this.Presenter = (TPresenter)value; }
+
+        protected virtual Type PresenterType => typeof(TPresenter);
 
         protected TPresenter Presenter { get; private set; }
     }

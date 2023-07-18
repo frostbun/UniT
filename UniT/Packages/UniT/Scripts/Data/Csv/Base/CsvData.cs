@@ -6,40 +6,22 @@ namespace UniT.Data.Csv.Base
 
     public class CsvData : ICsvData
     {
-        Type ICsvData.GetRowType()
-        {
-            return this.GetType();
-        }
+        Type ICsvData.RowType => this.GetType();
 
-        void ICsvData.Add(object key, object value)
-        {
-            value.CopyTo(this);
-        }
+        void ICsvData.Add(object key, object value) => value.CopyTo(this);
     }
 
     public class CsvData<T> : List<T>, ICsvData
     {
-        Type ICsvData.GetRowType()
-        {
-            return typeof(T);
-        }
+        Type ICsvData.RowType => typeof(T);
 
-        void ICsvData.Add(object key, object value)
-        {
-            this.Add((T)value);
-        }
+        void ICsvData.Add(object key, object value) => this.Add((T)value);
     }
 
     public class CsvData<TKey, TValue> : Dictionary<TKey, TValue>, ICsvData
     {
-        Type ICsvData.GetRowType()
-        {
-            return typeof(TValue);
-        }
+        Type ICsvData.RowType => typeof(TValue);
 
-        void ICsvData.Add(object key, object value)
-        {
-            this.Add((TKey)key, (TValue)value);
-        }
+        void ICsvData.Add(object key, object value) => this.Add((TKey)key, (TValue)value);
     }
 }

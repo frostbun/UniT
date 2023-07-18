@@ -22,7 +22,7 @@ namespace UniT.Data.Csv.Base
         {
             this.data                           = data;
             this.reader                         = reader;
-            this.rowType                        = data.GetRowType();
+            this.rowType                        = data.RowType;
             this.keyField                       = this.rowType.GetCsvKeyField();
             (this.csvFields, this.normalFields) = this.rowType.GetAllFields().Where(field => !field.IsCsvIgnored()).Split(field => typeof(ICsvData).IsAssignableFrom(field.FieldType));
             this.nestedParsers                  = new();

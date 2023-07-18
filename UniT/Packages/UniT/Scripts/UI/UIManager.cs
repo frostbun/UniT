@@ -126,13 +126,14 @@ namespace UniT.UI
 
         void IUIManager.Dispose(IView view)
         {
+            this.views.Remove(view.GetType());
             if (!this.keys.Remove(view.GetType(), out var key)) return;
             this.assetsManager.Unload(key);
         }
 
         void IUIManager.RemoveFromStack(IView view)
         {
-            this.views.Remove(view.GetType());
+            this.stack.Remove(view);
         }
 
         void IUIManager.StackNextView()
