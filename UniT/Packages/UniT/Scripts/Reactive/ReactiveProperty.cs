@@ -2,6 +2,7 @@ namespace UniT.Reactive
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
 
     public class ReactiveProperty<T>
     {
@@ -35,7 +36,7 @@ namespace UniT.Reactive
             set
             {
                 this.value = value;
-                this.subscribers.ForEach(subscriber => subscriber.callback(value));
+                this.subscribers.ToList().ForEach(subscriber => subscriber.callback(value));
             }
         }
 
