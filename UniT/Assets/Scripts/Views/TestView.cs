@@ -5,17 +5,17 @@ namespace Views
 
     public class TestView : BaseView
     {
-        [field: SerializeField]
-        public TestItemAdapter AdapterTestItem { get; private set; }
+        [SerializeField]
+        private TestItemAdapter testItemAdapter;
 
         protected override void OnInitialize()
         {
-            this.AdapterTestItem.Construct();
+            this.Manager.Initialize(this.testItemAdapter);
         }
 
         protected override void OnShow()
         {
-            this.AdapterTestItem.Show(new[]
+            this.testItemAdapter.Show(new[]
             {
                 "Test 1",
                 "Test 2",
@@ -32,12 +32,12 @@ namespace Views
 
         protected override void OnHide()
         {
-            this.AdapterTestItem.Hide();
+            this.testItemAdapter.Hide();
         }
 
         protected override void OnDispose()
         {
-            this.AdapterTestItem.Dispose();
+            this.testItemAdapter.Dispose();
         }
     }
 }

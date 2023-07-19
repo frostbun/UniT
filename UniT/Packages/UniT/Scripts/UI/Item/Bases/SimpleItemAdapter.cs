@@ -5,7 +5,7 @@ namespace UniT.UI.Item.Bases
     using UniT.UI.Item.Interfaces;
     using UnityEngine;
 
-    public abstract class SimpleItemAdapter<TItem, TView> : MonoBehaviour where TView : Component, IItemView
+    public abstract class SimpleItemAdapter<TItem, TView> : MonoBehaviour, IItemAdapter where TView : Component, IItemView
     {
         [SerializeField]
         private RectTransform content;
@@ -13,17 +13,20 @@ namespace UniT.UI.Item.Bases
         [SerializeField]
         private TView itemPrefab;
 
+        private          IUIManager             manager;
         private          IItemPresenter.Factory presenterFactory;
         private readonly Queue<IItemView>       pooledViews  = new();
         private readonly HashSet<IItemView>     spawnedViews = new();
 
-        public void Construct(IItemPresenter.Factory presenterFactory = null)
+        void IItemAdapter.Initialize(IUIManager manager, IItemPresenter.Factory presenterFactory)
         {
+            this.manager          = manager;
             this.presenterFactory = presenterFactory ?? IItemPresenter.Factory.Default();
         }
 
         public void Show(IEnumerable<TItem> items)
         {
+            this.Hide();
             items.ForEach(item =>
             {
                 var view = this.pooledViews.DequeueOrDefault(
@@ -36,7 +39,7 @@ namespace UniT.UI.Item.Bases
                             presenter.View              = view;
                             viewWithPresenter.Presenter = presenter;
                         }
-                        view.Initialize();
+                        view.Initialize(this.manager);
                         return view;
                     });
                 view.Show(item);

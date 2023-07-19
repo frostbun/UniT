@@ -173,7 +173,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 751436d3c8da4766827a8712f9816f3f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <AdapterTestItem>k__BackingField: {fileID: 174549290}
+  testItemAdapter: {fileID: 174549290}
 --- !u!1 &174549285
 GameObject:
   m_ObjectHideFlags: 0

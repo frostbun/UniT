@@ -5,7 +5,7 @@ namespace UniT.UI.Item.Interfaces
 
     public interface IItemView
     {
-        protected internal void Initialize();
+        protected internal void Initialize(IUIManager manager);
 
         protected internal void Show(object item);
 

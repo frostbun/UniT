@@ -52,7 +52,7 @@ public class ServiceProvider : MonoBehaviour
 
     private void Start()
     {
-        this.uiManager.GetView(this.testView).Stack();
+        this.uiManager.Initialize(this.testView).Stack();
         Destroy(this.gameObject);
     }
 }

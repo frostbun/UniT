@@ -3,6 +3,7 @@ namespace UniT.UI
     using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
     using UniT.UI.Interfaces;
+    using UniT.UI.Item.Interfaces;
     using UnityEngine;
     using ILogger = UniT.Logging.ILogger;
 
@@ -20,11 +21,13 @@ namespace UniT.UI
 
         public IEnumerable<IView> DockedViews { get; }
 
-        public IView GetView<TView>(TView view) where TView : Component, IView;
-
         public UniTask<IView> GetView<TView>(string key) where TView : Component, IView;
 
         public UniTask<IView> GetView<TView>() where TView : Component, IView;
+
+        public IView Initialize(IView view);
+
+        public IItemAdapter Initialize(IItemAdapter itemAdapter);
 
         #endregion
 

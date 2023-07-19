@@ -6,8 +6,9 @@ namespace UniT.UI.Item.Bases
 
     public abstract class BaseItemView<TItem> : MonoBehaviour, IItemView
     {
-        void IItemView.Initialize()
+        void IItemView.Initialize(IUIManager manager)
         {
+            this.Manager = manager;
             this.OnInitialize();
         }
 
@@ -31,7 +32,8 @@ namespace UniT.UI.Item.Bases
             this.OnDispose();
         }
 
-        public TItem Item { get; private set; }
+        public IUIManager Manager { get; private set; }
+        public TItem      Item    { get; private set; }
 
         protected virtual void OnInitialize()
         {
