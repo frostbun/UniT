@@ -29,19 +29,18 @@ namespace UniT.UI.Item.Bases
             this.Hide();
             items.ForEach(item =>
             {
-                var view = this.pooledViews.DequeueOrDefault(
-                    () =>
+                var view = this.pooledViews.DequeueOrDefault(() =>
+                {
+                    var view = Instantiate(this.itemPrefab, this.content);
+                    if (view is IItemViewWithPresenter viewWithPresenter)
                     {
-                        var view = Instantiate(this.itemPrefab, this.content);
-                        if (view is IItemViewWithPresenter viewWithPresenter)
-                        {
-                            var presenter = this.presenterFactory.Create(viewWithPresenter.PresenterType);
-                            presenter.View              = view;
-                            viewWithPresenter.Presenter = presenter;
-                        }
-                        view.Initialize(this.manager);
-                        return view;
-                    });
+                        var presenter = this.presenterFactory.Create(viewWithPresenter.PresenterType);
+                        presenter.View              = view;
+                        viewWithPresenter.Presenter = presenter;
+                    }
+                    view.Initialize(this.manager);
+                    return view;
+                });
                 view.Show(item);
                 this.spawnedViews.Add(view);
             });
