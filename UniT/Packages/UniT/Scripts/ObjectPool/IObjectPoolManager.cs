@@ -40,65 +40,15 @@ namespace UniT.ObjectPool
 
         public void DestroyPool<T>() where T : Component;
 
-        public GameObject Spawn(GameObject prefab);
+        public GameObject Spawn(GameObject prefab, Vector3? position = null, Quaternion? rotation = null, Transform parent = null);
 
-        public GameObject Spawn(GameObject prefab, Vector3 position, Quaternion rotation, Transform parent);
+        public T Spawn<T>(T component, Vector3? position = null, Quaternion? rotation = null, Transform parent = null) where T : Component;
 
-        public GameObject Spawn(GameObject prefab, Vector3 position, Quaternion rotation);
+        public GameObject Spawn(string key, Vector3? position = null, Quaternion? rotation = null, Transform parent = null);
 
-        public GameObject Spawn(GameObject prefab, Vector3 position);
+        public T Spawn<T>(string key, Vector3? position = null, Quaternion? rotation = null, Transform parent = null) where T : Component;
 
-        public GameObject Spawn(GameObject prefab, Quaternion rotation);
-
-        public GameObject Spawn(GameObject prefab, Transform parent);
-
-        public T Spawn<T>(T component) where T : Component;
-
-        public T Spawn<T>(T component, Vector3 position, Quaternion rotation, Transform parent) where T : Component;
-
-        public T Spawn<T>(T component, Vector3 position, Quaternion rotation) where T : Component;
-
-        public T Spawn<T>(T component, Vector3 position) where T : Component;
-
-        public T Spawn<T>(T component, Quaternion rotation) where T : Component;
-
-        public T Spawn<T>(T component, Transform parent) where T : Component;
-
-        public GameObject Spawn(string key);
-
-        public GameObject Spawn(string key, Vector3 position, Quaternion rotation, Transform parent);
-
-        public GameObject Spawn(string key, Vector3 position, Quaternion rotation);
-
-        public GameObject Spawn(string key, Vector3 position);
-
-        public GameObject Spawn(string key, Quaternion rotation);
-
-        public GameObject Spawn(string key, Transform parent);
-
-        public T Spawn<T>(string key) where T : Component;
-
-        public T Spawn<T>(string key, Vector3 position, Quaternion rotation, Transform parent) where T : Component;
-
-        public T Spawn<T>(string key, Vector3 position, Quaternion rotation) where T : Component;
-
-        public T Spawn<T>(string key, Vector3 position) where T : Component;
-
-        public T Spawn<T>(string key, Quaternion rotation) where T : Component;
-
-        public T Spawn<T>(string key, Transform parent) where T : Component;
-
-        public T Spawn<T>() where T : Component;
-
-        public T Spawn<T>(Vector3 position, Quaternion rotation, Transform parent) where T : Component;
-
-        public T Spawn<T>(Vector3 position, Quaternion rotation) where T : Component;
-
-        public T Spawn<T>(Vector3 position) where T : Component;
-
-        public T Spawn<T>(Quaternion rotation) where T : Component;
-
-        public T Spawn<T>(Transform parent) where T : Component;
+        public T Spawn<T>(Vector3? position = null, Quaternion? rotation = null, Transform parent = null) where T : Component;
 
         public void Recycle(GameObject instance);
 

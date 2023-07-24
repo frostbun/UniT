@@ -129,154 +129,29 @@ namespace UniT.ObjectPool
             this.DestroyPool(typeof(T).GetKey());
         }
 
-        public GameObject Spawn(GameObject prefab)
-        {
-            return this.Spawn_Internal(this.GetPool(prefab));
-        }
-
-        public GameObject Spawn(GameObject prefab, Vector3 position, Quaternion rotation, Transform parent)
+        public GameObject Spawn(GameObject prefab, Vector3? position = null, Quaternion? rotation = null, Transform parent = null)
         {
             return this.Spawn_Internal(this.GetPool(prefab), position, rotation, parent);
         }
 
-        public GameObject Spawn(GameObject prefab, Vector3 position, Quaternion rotation)
-        {
-            return this.Spawn_Internal(this.GetPool(prefab), position, rotation);
-        }
-
-        public GameObject Spawn(GameObject prefab, Vector3 position)
-        {
-            return this.Spawn_Internal(this.GetPool(prefab), position);
-        }
-
-        public GameObject Spawn(GameObject prefab, Quaternion rotation)
-        {
-            return this.Spawn_Internal(this.GetPool(prefab), rotation);
-        }
-
-        public GameObject Spawn(GameObject prefab, Transform parent)
-        {
-            return this.Spawn_Internal(this.GetPool(prefab), parent);
-        }
-
-        public T Spawn<T>(T component) where T : Component
-        {
-            return this.Spawn(component.gameObject).GetComponent<T>();
-        }
-
-        public T Spawn<T>(T component, Vector3 position, Quaternion rotation, Transform parent) where T : Component
+        public T Spawn<T>(T component, Vector3? position = null, Quaternion? rotation = null, Transform parent = null) where T : Component
         {
             return this.Spawn(component.gameObject, position, rotation, parent).GetComponent<T>();
         }
 
-        public T Spawn<T>(T component, Vector3 position, Quaternion rotation) where T : Component
-        {
-            return this.Spawn(component.gameObject, position, rotation).GetComponent<T>();
-        }
-
-        public T Spawn<T>(T component, Vector3 position) where T : Component
-        {
-            return this.Spawn(component.gameObject, position).GetComponent<T>();
-        }
-
-        public T Spawn<T>(T component, Quaternion rotation) where T : Component
-        {
-            return this.Spawn(component.gameObject, rotation).GetComponent<T>();
-        }
-
-        public T Spawn<T>(T component, Transform parent) where T : Component
-        {
-            return this.Spawn(component.gameObject, parent).GetComponent<T>();
-        }
-
-        public GameObject Spawn(string key)
-        {
-            return this.Spawn_Internal(this.GetPool(key));
-        }
-
-        public GameObject Spawn(string key, Vector3 position, Quaternion rotation, Transform parent)
+        public GameObject Spawn(string key, Vector3? position = null, Quaternion? rotation = null, Transform parent = null)
         {
             return this.Spawn_Internal(this.GetPool(key), position, rotation, parent);
         }
 
-        public GameObject Spawn(string key, Vector3 position, Quaternion rotation)
+        public T Spawn<T>(string key, Vector3? position = null, Quaternion? rotation = null, Transform parent = null) where T : Component
         {
-            return this.Spawn_Internal(this.GetPool(key), position, rotation);
+            return this.Spawn(key, position, rotation, parent).GetComponent<T>();
         }
 
-        public GameObject Spawn(string key, Vector3 position)
-        {
-            return this.Spawn_Internal(this.GetPool(key), position);
-        }
-
-        public GameObject Spawn(string key, Quaternion rotation)
-        {
-            return this.Spawn_Internal(this.GetPool(key), rotation);
-        }
-
-        public GameObject Spawn(string key, Transform parent)
-        {
-            return this.Spawn_Internal(this.GetPool(key), parent);
-        }
-
-        public T Spawn<T>(string key) where T : Component
-        {
-            return this.Spawn_Internal(this.GetPool(key)).GetComponent<T>();
-        }
-
-        public T Spawn<T>(string key, Vector3 position, Quaternion rotation, Transform parent) where T : Component
-        {
-            return this.Spawn_Internal(this.GetPool(key), position, rotation, parent).GetComponent<T>();
-        }
-
-        public T Spawn<T>(string key, Vector3 position, Quaternion rotation) where T : Component
-        {
-            return this.Spawn_Internal(this.GetPool(key), position, rotation).GetComponent<T>();
-        }
-
-        public T Spawn<T>(string key, Vector3 position) where T : Component
-        {
-            return this.Spawn_Internal(this.GetPool(key), position).GetComponent<T>();
-        }
-
-        public T Spawn<T>(string key, Quaternion rotation) where T : Component
-        {
-            return this.Spawn_Internal(this.GetPool(key), rotation).GetComponent<T>();
-        }
-
-        public T Spawn<T>(string key, Transform parent) where T : Component
-        {
-            return this.Spawn_Internal(this.GetPool(key), parent).GetComponent<T>();
-        }
-
-        public T Spawn<T>() where T : Component
-        {
-            return this.Spawn<T>(typeof(T).GetKey());
-        }
-
-        public T Spawn<T>(Vector3 position, Quaternion rotation, Transform parent) where T : Component
+        public T Spawn<T>(Vector3? position = null, Quaternion? rotation = null, Transform parent = null) where T : Component
         {
             return this.Spawn<T>(typeof(T).GetKey(), position, rotation, parent);
-        }
-
-        public T Spawn<T>(Vector3 position, Quaternion rotation) where T : Component
-        {
-            return this.Spawn<T>(typeof(T).GetKey(), position, rotation);
-        }
-
-        public T Spawn<T>(Vector3 position) where T : Component
-        {
-            return this.Spawn<T>(typeof(T).GetKey(), position);
-        }
-
-        public T Spawn<T>(Quaternion rotation) where T : Component
-        {
-            return this.Spawn<T>(typeof(T).GetKey(), rotation);
-        }
-
-        public T Spawn<T>(Transform parent) where T : Component
-        {
-            return this.Spawn<T>(typeof(T).GetKey(), parent);
         }
 
         public void Recycle(GameObject instance)
@@ -343,49 +218,9 @@ namespace UniT.ObjectPool
             this.Logger.Debug($"Destroyed {pool.gameObject.name}");
         }
 
-        private GameObject Spawn_Internal(ObjectPool pool)
-        {
-            var instance = pool.Spawn();
-            this.instanceToPool.Add(instance, pool);
-            this.Logger.Debug($"Spawned {instance.name}");
-            return instance;
-        }
-
-        private GameObject Spawn_Internal(ObjectPool pool, Vector3 position, Quaternion rotation, Transform parent)
+        private GameObject Spawn_Internal(ObjectPool pool, Vector3? position = null, Quaternion? rotation = null, Transform parent = null)
         {
             var instance = pool.Spawn(position, rotation, parent);
-            this.instanceToPool.Add(instance, pool);
-            this.Logger.Debug($"Spawned {instance.name}");
-            return instance;
-        }
-
-        private GameObject Spawn_Internal(ObjectPool pool, Vector3 position, Quaternion rotation)
-        {
-            var instance = pool.Spawn(position, rotation);
-            this.instanceToPool.Add(instance, pool);
-            this.Logger.Debug($"Spawned {instance.name}");
-            return instance;
-        }
-
-        private GameObject Spawn_Internal(ObjectPool pool, Vector3 position)
-        {
-            var instance = pool.Spawn(position);
-            this.instanceToPool.Add(instance, pool);
-            this.Logger.Debug($"Spawned {instance.name}");
-            return instance;
-        }
-
-        private GameObject Spawn_Internal(ObjectPool pool, Quaternion rotation)
-        {
-            var instance = pool.Spawn(rotation);
-            this.instanceToPool.Add(instance, pool);
-            this.Logger.Debug($"Spawned {instance.name}");
-            return instance;
-        }
-
-        private GameObject Spawn_Internal(ObjectPool pool, Transform parent)
-        {
-            var instance = pool.Spawn(parent);
             this.instanceToPool.Add(instance, pool);
             this.Logger.Debug($"Spawned {instance.name}");
             return instance;

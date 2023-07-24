@@ -35,7 +35,6 @@ namespace UniT.Assets
                        .ContinueWith(asset =>
                        {
                            this.Logger.Debug($"Loaded asset {key}");
-                           progress?.Report(1);
                            return asset;
                        });
         }
