@@ -35,13 +35,19 @@ namespace UniT.Data.Csv.Base
 
             foreach (var field in this.normalFields)
             {
-                var ordinal = this.reader.GetOrdinal(field.GetCsvFieldName());
-                if (ordinal == -1) throw new InvalidOperationException($"Field {field.Name} - {field.GetCsvFieldName()} not found in csv. If this is intentional, add the [CsvIgnore] attribute to the field.");
-                var str = this.reader.GetString(ordinal);
-                if (str.IsNullOrWhitespace()) continue;
-                var value = ConverterManager.Instance.ConvertFromString(str, field.FieldType);
-                field.SetValue(row, value);
-                if (field == this.keyField) keyFieldIsSet = true;
+                try
+                {
+                    var ordinal = this.reader.GetOrdinal(field.GetCsvFieldName());
+                    var str     = this.reader.GetString(ordinal);
+                    if (str.IsNullOrWhitespace()) continue;
+                    var value = ConverterManager.Instance.ConvertFromString(str, field.FieldType);
+                    field.SetValue(row, value);
+                    if (field == this.keyField) keyFieldIsSet = true;
+                }
+                catch (IndexOutOfRangeException)
+                {
+                    throw new InvalidOperationException($"Field {field.Name} - {field.GetCsvFieldName()} not found in {this.data.GetType().Name}. If this is intentional, add the [CsvIgnore] attribute to the field.");
+                }
             }
 
             if (keyFieldIsSet) this.nestedParsers.Clear();
