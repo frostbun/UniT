@@ -1,7 +1,7 @@
 namespace UniT.Utilities
 {
-    using System;
     using System.Collections.Generic;
+    using System.Linq;
 
     public static class ServiceProvider<T> where T : class
     {
@@ -14,7 +14,7 @@ namespace UniT.Utilities
 
         public static T Get()
         {
-            return _instances.Count > 0 ? _instances[0] : throw new InvalidOperationException($"No instance of {typeof(T).Name} found");
+            return _instances.Single();
         }
 
         public static T[] GetAll()
