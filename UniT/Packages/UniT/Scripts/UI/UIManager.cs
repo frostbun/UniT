@@ -98,7 +98,7 @@ namespace UniT.UI
         public void Dispose(IView view, bool autoStack = true)
         {
             this.Hide(view, true, autoStack);
-            Destroy(this.gameObject);
+            Destroy(view.gameObject);
             this.views.Remove(view.GetType());
             if (!this.keys.Remove(view.GetType(), out var key)) return;
             this.assetsManager.Unload(key);
