@@ -5,6 +5,8 @@ using UniT.Data.Base;
 using UniT.Extensions;
 using UniT.ObjectPool;
 using UniT.UI;
+using UniT.UI.Interfaces;
+using UniT.UI.Item.Interfaces;
 using UniT.Utilities;
 using UnityEngine;
 
@@ -16,6 +18,9 @@ public class EntryPoint : MonoBehaviour
     private void Awake()
     {
         #region ServiceProvider
+
+        ServiceProvider.Add(new IPresenter.Factory(type => (IPresenter)ServiceProvider.Instantiate(type)));
+        ServiceProvider.Add(new IItemPresenter.Factory(type => (IItemPresenter)ServiceProvider.Instantiate(type)));
 
         typeof(IPlayerData).GetDerivedTypes().ForEach(ServiceProvider.AddInterfacesAndSelf);
         typeof(IBlueprintData).GetDerivedTypes().ForEach(ServiceProvider.AddInterfacesAndSelf);
