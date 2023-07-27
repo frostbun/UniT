@@ -56,6 +56,8 @@ namespace UniT.Utilities
         public static object Instantiate(Type type)
         {
             if (type.IsInterface) throw new($"Cannot instantiate interface {type}");
+            if (type.IsAbstract) throw new($"Cannot instantiate abstract class {type}");
+            if (type.IsGenericType) throw new($"Cannot instantiate generic type {type}");
             var ctor = type.GetConstructors().SingleOrDefault()
                        ?? throw new($"Zero or more than one constructor found for type {type}");
             return ctor.Invoke(ResolveParameters(ctor.GetParameters()));
