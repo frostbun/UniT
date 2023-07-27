@@ -47,7 +47,9 @@ namespace UniT.Assets
                            var component = gameObject.GetComponent<T>();
                            if (component is null)
                            {
-                               throw this.Logger.Exception(new InvalidOperationException($"Component {typeof(T).Name} not found in GameObject {gameObject.name}"));
+                               var exception = new InvalidOperationException($"Component {typeof(T).Name} not found in GameObject {gameObject.name}");
+                               this.Logger.Exception(exception);
+                               throw exception;
                            }
                            return component;
                        });
@@ -73,7 +75,9 @@ namespace UniT.Assets
         {
             if (this.loadedScenes.ContainsKey(key ??= sceneName))
             {
-                throw this.Logger.Exception(new InvalidOperationException("Key already exists in loaded scenes"));
+                var exception = new InvalidOperationException($"Key {key} already exists in loaded scenes");
+                this.Logger.Exception(exception);
+                throw exception;
             }
             if (!activateOnLoad)
             {

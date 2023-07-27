@@ -24,7 +24,7 @@ namespace UniT.Data.Base
             return this.LoadRawData(keys)
                        .ContinueWith(rawDatas => IterTools.Zip(rawDatas, datas).Where((rawData, _) => !rawData.IsNullOrWhitespace()).ForEach(this.PopulateData))
                        .ContinueWith(() => this.Logger.Debug($"Loaded {keys.ToJson()}"))
-                       .Catch(e => throw this.Logger.Exception(e));
+                       .Catch(this.Logger.Exception);
         }
 
         UniTask IDataHandler.Save(IData[] datas)
@@ -33,7 +33,7 @@ namespace UniT.Data.Base
             var rawDatas = datas.Select(this.SerializeData).ToArray();
             return this.SaveRawData(keys, rawDatas)
                        .ContinueWith(() => this.Logger.Debug($"Saved {keys.ToJson()}"))
-                       .Catch(e => throw this.Logger.Exception(e));
+                       .Catch(this.Logger.Exception);
         }
 
         UniTask IDataHandler.Flush() => this.Flush().ContinueWith(() => this.Logger.Debug("Flushed"));

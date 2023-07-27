@@ -194,13 +194,17 @@ namespace UniT.ObjectPool
         private ObjectPool GetPool(GameObject prefab)
         {
             if (this.prefabToPool.TryGetValue(prefab, out var pool)) return pool;
-            throw this.Logger.Exception(new InvalidOperationException($"Pool for prefab {prefab.name} was not instantiated"));
+            var exception = new InvalidOperationException($"Pool for prefab {prefab.name} was not instantiated");
+            this.Logger.Exception(exception);
+            throw exception;
         }
 
         private ObjectPool GetPool(string key)
         {
             if (this.keyToPool.TryGetValue(key, out var pool)) return pool;
-            throw this.Logger.Exception(new InvalidOperationException($"Pool for key {key} was not instantiated"));
+            var exception = new InvalidOperationException($"Pool for key {key} was not instantiated");
+            this.Logger.Exception(exception);
+            throw exception;
         }
 
         private ObjectPool InstantiatePool_Internal(GameObject prefab, int initialCount)

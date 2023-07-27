@@ -45,11 +45,10 @@ namespace UniT.Logging
             this.Critical($"[Critical][{this.Name}] {message}");
         }
 
-        Exception ILogger.Exception(Exception exception)
+        void ILogger.Exception(Exception exception)
         {
-            if (this.Config.Level > LogLevel.Exception) return exception;
+            if (this.Config.Level > LogLevel.Exception) return;
             this.Exception($"[Exception][{this.Name}] {exception.Message}", exception);
-            return exception;
         }
 
         protected abstract void Debug(string message);
