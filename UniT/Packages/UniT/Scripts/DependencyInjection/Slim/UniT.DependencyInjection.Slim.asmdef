@@ -1,0 +1,7 @@
+{
+  "name": "UniT.DependencyInjection.Slim",
+  "rootNamespace": "UniT",
+  "references": [
+    "UniT.Extensions"
+  ]
+}
