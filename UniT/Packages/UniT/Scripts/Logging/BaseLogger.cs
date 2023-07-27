@@ -8,7 +8,7 @@ namespace UniT.Logging
 
         public LogConfig Config { get; }
 
-        protected BaseLogger(string name, LogConfig config = null)
+        protected BaseLogger(string name, LogConfig config)
         {
             this.Name   = name;
             this.Config = config ?? new();

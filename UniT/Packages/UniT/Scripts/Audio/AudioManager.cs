@@ -12,7 +12,7 @@ namespace UniT.Audio
 
     public class AudioManager : IAudioManager, IInitializable
     {
-        public AudioConfig Config { get; }
+        public IAudioConfig Config { get; }
 
         public ILogger Logger { get; }
 
@@ -24,9 +24,9 @@ namespace UniT.Audio
         private readonly Queue<AudioSource>              pooledSoundSources;
         private readonly Dictionary<string, AudioSource> loadedSoundSources;
 
-        public AudioManager(AudioConfig config = null, IAssetsManager assetsManager = null, ILogger logger = null)
+        public AudioManager(IAudioConfig config, IAssetsManager assetsManager = null, ILogger logger = null)
         {
-            this.Config                = config ?? new();
+            this.Config                = config;
             this.assetsManager         = assetsManager ?? IAssetsManager.Default();
             this.audioSourcesContainer = new GameObject(this.GetType().Name).DontDestroyOnLoad();
 
@@ -41,40 +41,57 @@ namespace UniT.Audio
 
         public void Initialize()
         {
+            void ConfigureAllSoundSources()
+            {
+                this.loadedSoundSources.Values.ForEach(this.ConfigureSoundSource);
+            }
+
+            void ConfigureMusicSource()
+            {
+                this.musicSource.volume = this.Config.MusicVolume.Value * this.Config.MasterVolume.Value;
+                this.musicSource.mute   = this.Config.MuteMusic.Value || this.Config.MuteMaster.Value;
+            }
+
             this.Config.SoundVolume.Subscribe(value =>
             {
-                this.ConfigureAllSoundSources();
+                ConfigureAllSoundSources();
                 this.Logger.Debug($"Sound volume set to {value}");
             });
+
             this.Config.MuteSound.Subscribe(value =>
             {
-                this.ConfigureAllSoundSources();
+                ConfigureAllSoundSources();
                 this.Logger.Debug(value ? "Sound volume muted" : "Sound volume unmuted");
             });
+
             this.Config.MusicVolume.Subscribe(value =>
             {
-                this.ConfigureMusicSource();
+                ConfigureMusicSource();
                 this.Logger.Debug($"Music volume set to {value}");
             });
+
             this.Config.MuteMusic.Subscribe(value =>
             {
-                this.ConfigureMusicSource();
+                ConfigureMusicSource();
                 this.Logger.Debug(value ? "Music volume muted" : "Music volume unmuted");
             });
+
             this.Config.MasterVolume.Subscribe(value =>
             {
-                this.ConfigureAllSoundSources();
-                this.ConfigureMusicSource();
+                ConfigureAllSoundSources();
+                ConfigureMusicSource();
                 this.Logger.Debug($"Master volume set to {value}");
             });
+
             this.Config.MuteMaster.Subscribe(value =>
             {
-                this.ConfigureAllSoundSources();
-                this.ConfigureMusicSource();
+                ConfigureAllSoundSources();
+                ConfigureMusicSource();
                 this.Logger.Debug(value ? "Master volume muted" : "Master volume unmuted");
             });
-            this.ConfigureAllSoundSources();
-            this.ConfigureMusicSource();
+
+            ConfigureAllSoundSources();
+            ConfigureMusicSource();
             this.Logger.Debug($"Audio config: {this.Config.ToJson()}");
         }
 
@@ -85,7 +102,19 @@ namespace UniT.Audio
 
         public void UnloadSounds(params string[] names)
         {
-            names.ForEach(this.RecycleSoundSource);
+            names.ForEach(name =>
+            {
+                if (!this.loadedSoundSources.Remove(name, out var soundSource))
+                {
+                    this.Logger.Warning($"Trying to unload sound {name} that was not loaded");
+                    return;
+                }
+                soundSource.Stop();
+                soundSource.clip = null;
+                this.assetsManager.Unload(name);
+                this.pooledSoundSources.Enqueue(soundSource);
+                this.Logger.Debug($"Unloaded sound {name}");
+            });
         }
 
         public void PlaySoundOneShot(string name)
@@ -110,7 +139,16 @@ namespace UniT.Audio
 
         public void StopSounds(params string[] names)
         {
-            names.ForEach(this.StopSound);
+            names.ForEach(name =>
+            {
+                if (!this.loadedSoundSources.TryGetValue(name, out var soundSource))
+                {
+                    this.Logger.Warning($"Trying to stop sound {name} that was not loaded");
+                    return;
+                }
+                soundSource.Stop();
+                this.Logger.Debug($"Stopped sound {name}");
+            });
         }
 
         public void StopAllSounds()
@@ -120,18 +158,21 @@ namespace UniT.Audio
 
         public UniTask LoadMusic(string name)
         {
-            return this.assetsManager.Load<AudioClip>(name);
+            if (this.CurrentMusic == name) return UniTask.CompletedTask;
+            return this.assetsManager.Load<AudioClip>(name).ContinueWith(audioClip =>
+            {
+                if (this.CurrentMusic == name) return; // Another load request was made while this one was loading
+                if (this.CurrentMusic != null) this.assetsManager.Unload(this.CurrentMusic);
+                this.CurrentMusic     = name;
+                this.musicSource.clip = audioClip;
+            });
         }
 
         public void PlayMusic(string name, bool force = false)
         {
-            if (!force && this.CurrentMusic == name) return;
-            this.StopMusic();
-            if (this.CurrentMusic != name && this.CurrentMusic != null) this.assetsManager.Unload(this.CurrentMusic);
-            this.CurrentMusic = name;
-            this.assetsManager.Load<AudioClip>(name).ContinueWith(audioClip =>
+            this.LoadMusic(name).ContinueWith(() =>
             {
-                this.musicSource.clip = audioClip;
+                if (!force && this.musicSource.isPlaying) return;
                 this.musicSource.Play();
                 this.Logger.Debug($"Playing music {name}");
             }).Forget();
@@ -149,9 +190,7 @@ namespace UniT.Audio
 
         public void StopMusic()
         {
-            if (this.CurrentMusic == null) return;
             this.musicSource.Stop();
-            this.Logger.Debug($"Stopped music {this.CurrentMusic}");
         }
 
         private UniTask<AudioSource> GetSoundSource(string name)
@@ -160,56 +199,23 @@ namespace UniT.Audio
             {
                 return this.assetsManager.Load<AudioClip>(name).ContinueWith(audioClip =>
                 {
-                    var soundSource = this.pooledSoundSources.DequeueOrDefault(() => this.audioSourcesContainer.AddComponent<AudioSource>());
-                    this.ConfigureSoundSource(soundSource);
+                    var soundSource = this.pooledSoundSources.DequeueOrDefault(() =>
+                    {
+                        var soundSource = this.audioSourcesContainer.AddComponent<AudioSource>();
+                        this.ConfigureSoundSource(soundSource);
+                        return soundSource;
+                    });
                     soundSource.clip = audioClip;
+                    this.Logger.Debug($"Loaded sound {name}");
                     return soundSource;
                 });
             });
-        }
-
-        private void StopSound(string name)
-        {
-            if (!this.loadedSoundSources.TryGetValue(name, out var soundSource))
-            {
-                this.Logger.Warning($"Trying to stop sound {name} that was not loaded");
-                return;
-            }
-
-            soundSource.Stop();
-            this.Logger.Debug($"Stopped sound {name}");
-        }
-
-        private void RecycleSoundSource(string name)
-        {
-            this.StopSound(name);
-
-            if (!this.loadedSoundSources.Remove(name, out var soundSource))
-            {
-                this.Logger.Warning($"Trying to recycle sound {name} that was not loaded");
-                return;
-            }
-
-            this.pooledSoundSources.Enqueue(soundSource);
-            this.assetsManager.Unload(name);
-            this.Logger.Debug($"Recycled sound source {name}");
-        }
-
-        private void ConfigureAllSoundSources()
-        {
-            this.loadedSoundSources.Values.ForEach(this.ConfigureSoundSource);
         }
 
         private void ConfigureSoundSource(AudioSource soundSource)
         {
             soundSource.volume = this.Config.SoundVolume.Value * this.Config.MasterVolume.Value;
             soundSource.mute   = this.Config.MuteSound.Value || this.Config.MuteMaster.Value;
-        }
-
-        private void ConfigureMusicSource()
-        {
-            this.musicSource.volume = this.Config.MusicVolume.Value * this.Config.MasterVolume.Value;
-            this.musicSource.mute   = this.Config.MuteMusic.Value || this.Config.MuteMaster.Value;
         }
     }
 }

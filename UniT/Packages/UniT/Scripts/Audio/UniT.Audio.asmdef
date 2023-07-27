@@ -5,7 +5,6 @@
     "UniTask",
     "UniT.Assets",
     "UniT.Logging",
-    "UniT.Data",
     "UniT.Reactive",
     "UniT.Utilities",
     "UniT.Extensions",

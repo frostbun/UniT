@@ -45,7 +45,12 @@ namespace UniT.Utilities
 
         public static object Get(Type type)
         {
-            return GetCache(type).SingleOrDefault() ?? throw new($"No instance found for type {type}");
+            return GetOrDefault(type) ?? throw new($"Zero or more than one instance found for {type.Name}");
+        }
+
+        public static object GetOrDefault(Type type)
+        {
+            return GetCache(type).SingleOrDefault();
         }
 
         public static object[] GetAll(Type type)
@@ -55,19 +60,19 @@ namespace UniT.Utilities
 
         public static object Instantiate(Type type)
         {
-            if (type.IsInterface) throw new($"Cannot instantiate interface {type}");
-            if (type.IsAbstract) throw new($"Cannot instantiate abstract class {type}");
-            if (type.IsGenericType) throw new($"Cannot instantiate generic type {type}");
+            if (type.IsInterface) throw new($"Cannot instantiate interface {type.Name}");
+            if (type.IsAbstract) throw new($"Cannot instantiate abstract class {type.Name}");
+            if (type.IsGenericType) throw new($"Cannot instantiate generic type {type.Name}");
             var ctor = type.GetConstructors().SingleOrDefault()
-                       ?? throw new($"Zero or more than one constructor found for type {type}");
-            return ctor.Invoke(ResolveParameters(ctor.GetParameters()));
+                       ?? throw new($"Zero or more than one constructor found for {type.Name}");
+            return ctor.Invoke(ResolveParameters(ctor.GetParameters(), $"instantiating {type.Name}"));
         }
 
         public static object Invoke(object obj, string methodName)
         {
             var method = obj.GetType().GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-                         ?? throw new($"No method found with name {methodName} on type {obj.GetType()}");
-            return method.Invoke(obj, ResolveParameters(method.GetParameters()));
+                         ?? throw new($"Method {methodName} not found on {obj.GetType().Name}");
+            return method.Invoke(obj, ResolveParameters(method.GetParameters(), $"invoking {methodName} on {obj.GetType().Name}"));
         }
 
         #region Generic
@@ -97,6 +102,11 @@ namespace UniT.Utilities
             return (T)Get(typeof(T));
         }
 
+        public static T GetOrDefault<T>()
+        {
+            return (T)GetOrDefault(typeof(T));
+        }
+
         public static T[] GetAll<T>()
         {
             return GetAll(typeof(T)).Cast<T>().ToArray();
@@ -111,14 +121,14 @@ namespace UniT.Utilities
 
         #region Private
 
-        private static readonly Dictionary<Type, HashSet<object>> Cache = new();
+        private static readonly Dictionary<Type, List<object>> Cache = new();
 
-        private static HashSet<object> GetCache(Type type)
+        private static List<object> GetCache(Type type)
         {
             return Cache.GetOrAdd(type, () => new());
         }
 
-        private static object[] ResolveParameters(ParameterInfo[] parameters)
+        private static object[] ResolveParameters(ParameterInfo[] parameters, string context)
         {
             return parameters.Select(parameter =>
             {
@@ -132,8 +142,8 @@ namespace UniT.Utilities
                 }
                 else
                 {
-                    var instance = GetCache(parameterType).SingleOrDefault();
-                    if (instance is null && !parameter.HasDefaultValue) throw new($"Cannot resolve type {parameterType} for parameter {parameter.Name}");
+                    var instance = GetOrDefault(parameterType);
+                    if (instance is null && !parameter.HasDefaultValue) throw new($"Cannot resolve {parameterType.Name} for {parameter.Name} while {context}");
                     return instance ?? parameter.DefaultValue;
                 }
             }).ToArray();
