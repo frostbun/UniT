@@ -2,37 +2,52 @@ namespace UniT.Utilities
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using UniT.Extensions;
 
-    public static class SignalBus<T> where T : class
+    public static class SignalBus
     {
-        private static readonly HashSet<Action<T>> callbacksWithSignal = new();
-        private static readonly HashSet<Action>    callbacksNoSignal   = new();
+        private static readonly Dictionary<Type, HashSet<object>> CallbacksWithSignal = new();
+        private static readonly Dictionary<Type, HashSet<object>> CallbacksNoSignal   = new();
 
-        public static void Fire(T signal)
+        public static void Fire<T>(T signal)
         {
-            callbacksWithSignal.ForEach(callback => callback(signal));
-            callbacksNoSignal.ForEach(callback => callback());
+            GetCallbacksWithSignal<T>()
+                .Cast<Action<T>>()
+                .ForEach(callback => callback(signal));
+            GetCallbacksNoSignal<T>()
+                .Cast<Action>()
+                .ForEach(callback => callback());
         }
 
-        public static void Subscribe(Action<T> callback)
+        public static void Subscribe<T>(Action<T> callback)
         {
-            callbacksWithSignal.Add(callback);
+            GetCallbacksWithSignal<T>().Add(callback);
         }
 
-        public static void Subscribe(Action callback)
+        public static void Subscribe<T>(Action callback)
         {
-            callbacksNoSignal.Add(callback);
+            GetCallbacksNoSignal<T>().Add(callback);
         }
 
-        public static void Unsubscribe(Action<T> callback)
+        public static void Unsubscribe<T>(Action<T> callback)
         {
-            callbacksWithSignal.Remove(callback);
+            GetCallbacksWithSignal<T>().Remove(callback);
         }
 
-        public static void Unsubscribe(Action callback)
+        public static void Unsubscribe<T>(Action callback)
         {
-            callbacksNoSignal.Remove(callback);
+            GetCallbacksNoSignal<T>().Remove(callback);
+        }
+
+        private static HashSet<object> GetCallbacksWithSignal<T>()
+        {
+            return CallbacksWithSignal.GetOrAdd(typeof(T), () => new());
+        }
+
+        private static HashSet<object> GetCallbacksNoSignal<T>()
+        {
+            return CallbacksNoSignal.GetOrAdd(typeof(T), () => new());
         }
     }
 }
