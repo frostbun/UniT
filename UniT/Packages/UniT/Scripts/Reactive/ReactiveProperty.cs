@@ -40,7 +40,7 @@ namespace UniT.Reactive
             }
         }
 
-        public ReactiveProperty(T value)
+        public ReactiveProperty(T value = default)
         {
             this.value = value;
         }

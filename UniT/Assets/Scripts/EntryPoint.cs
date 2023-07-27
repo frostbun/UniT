@@ -1,46 +1,49 @@
-using UniT.Assets;
-using UniT.Audio;
-using UniT.Data.Base;
-using UniT.Data.Csv.Blueprint;
-using UniT.Data.Json.Player;
-using UniT.Extensions;
-using UniT.ObjectPool;
-using UniT.UI;
-using UniT.UI.Interfaces;
-using UniT.UI.Item.Interfaces;
-using UniT.Utilities;
-using UnityEngine;
-
-public class EntryPoint : MonoBehaviour
+namespace UniT.Example
 {
-    [SerializeField]
-    private UIManager uiManager;
+    using UniT.Assets;
+    using UniT.Audio;
+    using UniT.Data.Base;
+    using UniT.Data.Csv.Blueprint;
+    using UniT.Data.Json.Player;
+    using UniT.DependencyInjection;
+    using UniT.Extensions;
+    using UniT.ObjectPool;
+    using UniT.UI;
+    using UniT.UI.Interfaces;
+    using UniT.UI.Item.Interfaces;
+    using UnityEngine;
 
-    private void Awake()
+    public class EntryPoint : MonoBehaviour
     {
-        #region ServiceProvider
+        [SerializeField]
+        private UIManager uiManager;
 
-        typeof(IPlayerData).GetDerivedTypes().ForEach(ServiceProvider.AddInterfacesAndSelf);
-        typeof(IBlueprintData).GetDerivedTypes().ForEach(ServiceProvider.AddInterfacesAndSelf);
+        private void Awake()
+        {
+            #region ServiceProvider
 
-        ServiceProvider.AddInterfaces<AddressablesManager>();
-        ServiceProvider.AddInterfaces<ObjectPoolManager>();
-        ServiceProvider.AddInterfaces<AudioManager>();
+            typeof(IPlayerData).GetDerivedTypes().ForEach(ServiceProvider.AddInterfacesAndSelf);
+            typeof(IBlueprintData).GetDerivedTypes().ForEach(ServiceProvider.AddInterfacesAndSelf);
 
-        ServiceProvider.Add(new IPresenter.Factory(type => (IPresenter)ServiceProvider.Instantiate(type)));
-        ServiceProvider.Add(new IItemPresenter.Factory(type => (IItemPresenter)ServiceProvider.Instantiate(type)));
-        ServiceProvider.AddInterfaces(ServiceProvider.Invoke(this.uiManager, nameof(this.uiManager.Construct)));
+            ServiceProvider.AddInterfaces<AddressablesManager>();
+            ServiceProvider.AddInterfaces<ObjectPoolManager>();
+            ServiceProvider.AddInterfaces<AudioManager>();
 
-        ServiceProvider.AddInterfaces<PlayerPrefsJsonDataHandler>();
-        ServiceProvider.AddInterfaces<BlueprintAssetCsvDataHandler>();
+            ServiceProvider.Add(new IPresenter.Factory(type => (IPresenter)ServiceProvider.Instantiate(type)));
+            ServiceProvider.Add(new IItemPresenter.Factory(type => (IItemPresenter)ServiceProvider.Instantiate(type)));
+            ServiceProvider.AddInterfaces(ServiceProvider.Invoke(this.uiManager, nameof(this.uiManager.Construct)));
 
-        ServiceProvider.AddInterfaces<DataManager>();
+            ServiceProvider.AddInterfaces<PlayerPrefsJsonDataHandler>();
+            ServiceProvider.AddInterfaces<BlueprintAssetCsvDataHandler>();
 
-        #endregion
-    }
+            ServiceProvider.AddInterfaces<DataManager>();
 
-    private void Start()
-    {
-        Destroy(this.gameObject);
+            #endregion
+        }
+
+        private void Start()
+        {
+            Destroy(this.gameObject);
+        }
     }
 }

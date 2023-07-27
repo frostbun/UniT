@@ -1,0 +1,7 @@
+{
+  "name": "UniT.DependencyInjection",
+  "rootNamespace": "UniT",
+  "references": [
+    "UniT.Extensions"
+  ]
+}

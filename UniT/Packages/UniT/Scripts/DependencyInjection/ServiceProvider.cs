@@ -1,4 +1,4 @@
-namespace UniT.Utilities
+namespace UniT.DependencyInjection
 {
     using System;
     using System.Collections.Generic;
