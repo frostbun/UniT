@@ -1,0 +1,8 @@
+{
+  "name": "UniT.Signal",
+  "rootNamespace": "UniT",
+  "references": [
+    "UniT.Logging",
+    "UniT.Extensions"
+  ]
+}

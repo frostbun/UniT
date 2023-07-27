@@ -7,8 +7,8 @@ namespace UniT.Utilities
 
     public class BigNumber : IComparable, IComparable<BigNumber>, IEquatable<BigNumber>
     {
-        public static int      Mod     = (int)1e3;
-        public static string[] Letters = IterTools.Product(" abcdefghijklmnopqrstuvwxyzx".ToCharArray(), 3).Select(chars => string.Join("", chars).Trim()).ToArray();
+        public static int      Mod     { get; set; } = (int)1e3;
+        public static string[] Letters { get; set; } = IterTools.Product(" abcdefghijklmnopqrstuvwxyzx".ToCharArray(), 3).Select(chars => string.Join("", chars).Trim()).ToArray();
 
         private readonly int[] values;
         private readonly bool  sign; // false: positive, true: negative
