@@ -9,8 +9,6 @@ namespace UniT.UI
 
     public interface IUIManager
     {
-        #region Public APIs
-
         public ILogger Logger { get; }
 
         public IView StackingView { get; }
@@ -27,27 +25,17 @@ namespace UniT.UI
 
         public IView Initialize(IView view);
 
+        public void Stack(IView view, bool force = false);
+
+        public void Float(IView view, bool force = false);
+
+        public void Dock(IView view, bool force = false);
+
+        public void Hide(IView view, bool removeFromStack = true, bool autoStack = true);
+
+        public void Dispose(IView view, bool autoStack = true);
+
         public IItemAdapter Initialize(IItemAdapter itemAdapter);
-
-        #endregion
-
-        #region Internal APIs
-
-        protected internal void Stack(IView view);
-
-        protected internal void Float(IView view);
-
-        protected internal void Dock(IView view);
-
-        protected internal void Hide(IView view);
-
-        protected internal void Dispose(IView view);
-
-        protected internal void RemoveFromStack(IView view);
-
-        protected internal void StackNextView();
-
-        #endregion
     }
 
     public static class ViewExtensions

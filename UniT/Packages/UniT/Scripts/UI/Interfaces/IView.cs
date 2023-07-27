@@ -14,13 +14,17 @@ namespace UniT.UI.Interfaces
             Disposed,
         }
 
-        public Status CurrentStatus { get; }
+        public GameObject gameObject { get; }
+
+        public Transform transform { get; }
+
+        public IUIManager Manager { get; protected internal set; }
+
+        public Status CurrentStatus { get; protected internal set; }
 
         public IView PutExtra<T>(string key, T value);
 
         public T GetExtra<T>(string key);
-
-        protected internal void Initialize(IUIManager manager);
 
         public void Stack(bool force = false);
 
@@ -32,7 +36,13 @@ namespace UniT.UI.Interfaces
 
         public void Dispose(bool autoStack = true);
 
-        public Transform transform { get; }
+        protected internal void OnInitialize();
+
+        protected internal void OnShow();
+
+        protected internal void OnHide();
+
+        protected internal void OnDispose();
     }
 
     public interface IViewWithPresenter : IView

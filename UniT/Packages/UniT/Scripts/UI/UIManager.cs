@@ -47,8 +47,6 @@ namespace UniT.UI
             return this.DontDestroyOnLoad();
         }
 
-        #region Public APIs
-
         public ILogger Logger { get; private set; }
 
         public IView StackingView => this.stack.LastOrDefault(view => view.CurrentStatus is IView.Status.Stacking);
@@ -81,15 +79,32 @@ namespace UniT.UI
             return this.views.GetOrAdd(view.GetType(), () => this.Initialize_Internal(view));
         }
 
-        public IItemAdapter Initialize(IItemAdapter itemAdapter)
+        public void Stack(IView view, bool force = false) => this.Show_Internal(view, force, IView.Status.Stacking);
+
+        public void Float(IView view, bool force = false) => this.Show_Internal(view, force, IView.Status.Floating);
+
+        public void Dock(IView view, bool force = false) => this.Show_Internal(view, force, IView.Status.Docked);
+
+        public void Hide(IView view, bool removeFromStack = true, bool autoStack = true)
         {
-            itemAdapter.Initialize(this, this.itemPresenterFactory);
-            return itemAdapter;
+            if (view.CurrentStatus is IView.Status.Hidden) return;
+            view.transform.SetParent(this.hiddenViews, false);
+            this.Logger.Debug($"{view.GetType().Name} status: {view.CurrentStatus = IView.Status.Hidden}");
+            view.OnHide();
+            if (removeFromStack) this.RemoveFromStack(view);
+            if (autoStack) this.StackNextView();
         }
 
-        #endregion
-
-        #region Internal APIs
+        public void Dispose(IView view, bool autoStack = true)
+        {
+            this.Hide(view, true, autoStack);
+            Destroy(this.gameObject);
+            this.views.Remove(view.GetType());
+            if (!this.keys.Remove(view.GetType(), out var key)) return;
+            this.assetsManager.Unload(key);
+            this.Logger.Debug($"{view.GetType().Name} status: {view.CurrentStatus = IView.Status.Disposed}");
+            view.OnDispose();
+        }
 
         private IView Initialize_Internal(IView view)
         {
@@ -99,14 +114,45 @@ namespace UniT.UI
                 presenter.View              = view;
                 viewWithPresenter.Presenter = presenter;
             }
-            view.Initialize(this);
+            view.Manager = this;
+            view.transform.SetParent(this.hiddenViews, false);
+            view.CurrentStatus = IView.Status.Hidden;
+            this.Logger.Debug($"Initialized {view.GetType().Name}");
+            view.OnInitialize();
             return view;
         }
 
-        void IUIManager.Stack(IView view)
+        private void Show_Internal(IView view, bool force, IView.Status nextStatus)
         {
-            view.transform.SetParent(this.stackingViews, false);
+            if (!force && view.CurrentStatus == nextStatus) return;
+            this.Hide(view, false, false);
+            switch (nextStatus)
+            {
+                case IView.Status.Stacking:
+                {
+                    this.AddToStack(view);
+                    this.HideUndockedViews();
+                    view.transform.SetParent(this.stackingViews, false);
+                    break;
+                }
+                case IView.Status.Floating:
+                {
+                    view.transform.SetParent(this.floatingViews, false);
+                    break;
+                }
+                case IView.Status.Docked:
+                {
+                    view.transform.SetParent(this.dockedViews, false);
+                    break;
+                }
+            }
             view.transform.SetAsLastSibling();
+            this.Logger.Debug($"{view.GetType().Name} status: {view.CurrentStatus = nextStatus}");
+            view.OnShow();
+        }
+
+        private void AddToStack(IView view)
+        {
             var index = this.stack.IndexOf(view);
             if (index == -1)
             {
@@ -116,46 +162,30 @@ namespace UniT.UI
             {
                 this.stack.RemoveRange(index + 1, this.stack.Count - index - 1);
             }
-            this.views.Values.ToArray()
-                .Where(view => view.CurrentStatus is IView.Status.Floating or IView.Status.Stacking)
-                .ForEach(view => view.Hide(false, false));
         }
 
-        void IUIManager.Float(IView view)
-        {
-            view.transform.SetParent(this.floatingViews, false);
-            view.transform.SetAsLastSibling();
-        }
-
-        void IUIManager.Dock(IView view)
-        {
-            view.transform.SetParent(this.dockedViews, false);
-            view.transform.SetAsLastSibling();
-        }
-
-        void IUIManager.Hide(IView view)
-        {
-            view.transform.SetParent(this.hiddenViews, false);
-        }
-
-        void IUIManager.Dispose(IView view)
-        {
-            this.views.Remove(view.GetType());
-            if (!this.keys.Remove(view.GetType(), out var key)) return;
-            this.assetsManager.Unload(key);
-        }
-
-        void IUIManager.RemoveFromStack(IView view)
+        private void RemoveFromStack(IView view)
         {
             this.stack.Remove(view);
         }
 
-        void IUIManager.StackNextView()
+        private void StackNextView()
         {
             if (this.StackingView is not null) return;
             this.NextStackingView?.Stack();
         }
 
-        #endregion
+        private void HideUndockedViews()
+        {
+            this.views.Values.ToArray()
+                .Where(view => view.CurrentStatus is IView.Status.Floating or IView.Status.Stacking)
+                .ForEach(view => this.Hide(view, false, false));
+        }
+
+        public IItemAdapter Initialize(IItemAdapter itemAdapter)
+        {
+            itemAdapter.Initialize(this, this.itemPresenterFactory);
+            return itemAdapter;
+        }
     }
 }
