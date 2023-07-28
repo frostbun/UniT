@@ -89,10 +89,6 @@ namespace UniT.Audio
                 ConfigureMusicSource();
                 this.Logger.Debug(value ? "Master volume muted" : "Master volume unmuted");
             });
-
-            ConfigureAllSoundSources();
-            ConfigureMusicSource();
-            this.Logger.Debug($"Audio config: {this.Config.ToJson()}");
         }
 
         public UniTask LoadSounds(params string[] names)
