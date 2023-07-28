@@ -5,20 +5,22 @@ namespace UniT.Assets
     using System.Threading;
     using Cysharp.Threading.Tasks;
     using UniT.Extensions;
+    using UniT.Logging;
     using UnityEngine;
     using UnityEngine.Networking;
     using ILogger = UniT.Logging.ILogger;
 
     public class ExternalAssetsManager : IExternalAssetsManager
     {
-        public ILogger Logger { get; }
+        public LogConfig LogConfig => this.logger.Config;
 
         private readonly Dictionary<string, UnityWebRequestAsyncOperation> loadedAssets;
+        private readonly ILogger                                           logger;
 
         public ExternalAssetsManager(ILogger logger = null)
         {
             this.loadedAssets = new();
-            this.Logger       = logger ?? ILogger.Default(this.GetType().Name);
+            this.logger       = logger ?? ILogger.Default(this.GetType().Name);
         }
 
         public UniTask<Texture2D> DownloadTexture(string url, IProgress<float> progress = null, CancellationToken cancellationToken = default)
@@ -37,11 +39,11 @@ namespace UniT.Assets
         {
             if (!this.loadedAssets.Remove(key, out var request))
             {
-                this.Logger.Warning($"Trying to unload asset {key} that was not loaded");
+                this.logger.Warning($"Trying to unload asset {key} that was not loaded");
                 return;
             }
             request.webRequest.Dispose();
-            this.Logger.Debug($"Unloaded asset {key}");
+            this.logger.Debug($"Unloaded asset {key}");
         }
     }
 }

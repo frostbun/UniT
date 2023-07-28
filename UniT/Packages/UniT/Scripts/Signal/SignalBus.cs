@@ -8,14 +8,15 @@ namespace UniT.Signal
 
     public class SignalBus : ISignalBus
     {
-        public ILogger Logger { get; }
+        public LogConfig LogConfig => this.logger.Config;
 
         private readonly Dictionary<Type, HashSet<object>> callbacksWithSignal = new();
         private readonly Dictionary<Type, HashSet<object>> callbacksNoSignal   = new();
+        private readonly ILogger                           logger;
 
         public SignalBus(ILogger logger = null)
         {
-            this.Logger = logger ?? ILogger.Default(this.GetType().Name);
+            this.logger = logger ?? ILogger.Default(this.GetType().Name);
         }
 
         public void Fire<T>(T signal)
@@ -23,7 +24,7 @@ namespace UniT.Signal
             var count = this.GetCallbacksWithSignal<T>().Count + this.GetCallbacksNoSignal<T>().Count;
             if (count == 0)
             {
-                this.Logger.Warning($"No subscribers for signal {typeof(T)}");
+                this.logger.Warning($"No subscribers for signal {typeof(T)}");
                 return;
             }
             this.GetCallbacksWithSignal<T>()
@@ -32,31 +33,31 @@ namespace UniT.Signal
             this.GetCallbacksNoSignal<T>()
                 .Cast<Action>()
                 .ForEach(callback => callback());
-            this.Logger.Debug($"Fired signal {typeof(T)} to {count} subscribers");
+            this.logger.Debug($"Fired signal {typeof(T)} to {count} subscribers");
         }
 
         public void Subscribe<T>(Action<T> callback)
         {
             if (this.GetCallbacksWithSignal<T>().Add(callback)) return;
-            this.Logger.Warning($"Callback {callback} already subscribed to signal {typeof(T)}");
+            this.logger.Warning($"Callback {callback} already subscribed to signal {typeof(T)}");
         }
 
         public void Subscribe<T>(Action callback)
         {
             if (this.GetCallbacksNoSignal<T>().Add(callback)) return;
-            this.Logger.Warning($"Callback {callback} already subscribed to signal {typeof(T)}");
+            this.logger.Warning($"Callback {callback} already subscribed to signal {typeof(T)}");
         }
 
         public void Unsubscribe<T>(Action<T> callback)
         {
             if (this.GetCallbacksWithSignal<T>().Remove(callback)) return;
-            this.Logger.Warning($"Callback {callback} not subscribed to signal {typeof(T)}");
+            this.logger.Warning($"Callback {callback} not subscribed to signal {typeof(T)}");
         }
 
         public void Unsubscribe<T>(Action callback)
         {
             if (this.GetCallbacksNoSignal<T>().Remove(callback)) return;
-            this.Logger.Warning($"Callback {callback} not subscribed to signal {typeof(T)}");
+            this.logger.Warning($"Callback {callback} not subscribed to signal {typeof(T)}");
         }
 
         private HashSet<object> GetCallbacksWithSignal<T>()

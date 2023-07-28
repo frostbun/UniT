@@ -6,7 +6,7 @@ namespace UniT.Data.Base
 
     public interface IDataHandler
     {
-        public ILogger Logger { get; }
+        public LogConfig LogConfig { get; }
 
         protected internal bool CanHandle(Type type);
 

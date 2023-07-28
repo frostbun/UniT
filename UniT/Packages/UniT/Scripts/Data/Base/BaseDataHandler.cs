@@ -9,11 +9,13 @@ namespace UniT.Data.Base
 
     public abstract class BaseDataHandler : IDataHandler
     {
-        public ILogger Logger { get; }
+        public LogConfig LogConfig => this.logger.Config;
+
+        protected readonly ILogger logger;
 
         protected BaseDataHandler(ILogger logger = null)
         {
-            this.Logger = logger ?? ILogger.Default(this.GetType().Name);
+            this.logger = logger ?? ILogger.Default(this.GetType().Name);
         }
 
         bool IDataHandler.CanHandle(Type type) => this.CanHandle(type);
@@ -23,8 +25,8 @@ namespace UniT.Data.Base
             var keys = datas.Select(data => data.GetType().GetKey()).ToArray();
             return this.LoadRawData(keys)
                        .ContinueWith(rawDatas => IterTools.Zip(rawDatas, datas).Where((rawData, _) => !rawData.IsNullOrWhitespace()).ForEach(this.PopulateData))
-                       .ContinueWith(() => this.Logger.Debug($"Loaded {keys.ToJson()}"))
-                       .Catch(this.Logger.Exception);
+                       .ContinueWith(() => this.logger.Debug($"Loaded {keys.ToJson()}"))
+                       .Catch(this.logger.Exception);
         }
 
         UniTask IDataHandler.Save(IData[] datas)
@@ -32,11 +34,11 @@ namespace UniT.Data.Base
             var keys     = datas.Select(data => data.GetType().GetKey()).ToArray();
             var rawDatas = datas.Select(this.SerializeData).ToArray();
             return this.SaveRawData(keys, rawDatas)
-                       .ContinueWith(() => this.Logger.Debug($"Saved {keys.ToJson()}"))
-                       .Catch(this.Logger.Exception);
+                       .ContinueWith(() => this.logger.Debug($"Saved {keys.ToJson()}"))
+                       .Catch(this.logger.Exception);
         }
 
-        UniTask IDataHandler.Flush() => this.Flush().ContinueWith(() => this.Logger.Debug("Flushed"));
+        UniTask IDataHandler.Flush() => this.Flush().ContinueWith(() => this.logger.Debug("Flushed"));
 
         protected virtual bool CanHandle(Type type) => typeof(IData).IsAssignableFrom(type);
 

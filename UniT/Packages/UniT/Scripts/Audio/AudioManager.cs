@@ -6,23 +6,23 @@ namespace UniT.Audio
     using UniT.Assets;
     using UniT.Extensions;
     using UniT.Extensions.UniTask;
+    using UniT.Logging;
     using UniT.Utilities;
     using UnityEngine;
     using ILogger = UniT.Logging.ILogger;
 
     public class AudioManager : IAudioManager, IInitializable
     {
-        public IAudioConfig Config { get; }
-
-        public ILogger Logger { get; }
-
-        public string CurrentMusic { get; private set; }
+        public LogConfig    LogConfig    => this.logger.Config;
+        public IAudioConfig Config       { get; }
+        public string       CurrentMusic { get; private set; }
 
         private readonly IAssetsManager                  assetsManager;
         private readonly GameObject                      audioSourcesContainer;
         private readonly AudioSource                     musicSource;
         private readonly Queue<AudioSource>              pooledSoundSources;
         private readonly Dictionary<string, AudioSource> loadedSoundSources;
+        private readonly ILogger                         logger;
 
         public AudioManager(IAudioConfig config, IAssetsManager assetsManager = null, ILogger logger = null)
         {
@@ -36,7 +36,7 @@ namespace UniT.Audio
             this.pooledSoundSources = new();
             this.loadedSoundSources = new();
 
-            this.Logger = logger ?? ILogger.Default(this.GetType().Name);
+            this.logger = logger ?? ILogger.Default(this.GetType().Name);
         }
 
         public void Initialize()
@@ -55,39 +55,39 @@ namespace UniT.Audio
             this.Config.SoundVolume.Subscribe(value =>
             {
                 ConfigureAllSoundSources();
-                this.Logger.Debug($"Sound volume set to {value}");
+                this.logger.Debug($"Sound volume set to {value}");
             });
 
             this.Config.MuteSound.Subscribe(value =>
             {
                 ConfigureAllSoundSources();
-                this.Logger.Debug(value ? "Sound volume muted" : "Sound volume unmuted");
+                this.logger.Debug(value ? "Sound volume muted" : "Sound volume unmuted");
             });
 
             this.Config.MusicVolume.Subscribe(value =>
             {
                 ConfigureMusicSource();
-                this.Logger.Debug($"Music volume set to {value}");
+                this.logger.Debug($"Music volume set to {value}");
             });
 
             this.Config.MuteMusic.Subscribe(value =>
             {
                 ConfigureMusicSource();
-                this.Logger.Debug(value ? "Music volume muted" : "Music volume unmuted");
+                this.logger.Debug(value ? "Music volume muted" : "Music volume unmuted");
             });
 
             this.Config.MasterVolume.Subscribe(value =>
             {
                 ConfigureAllSoundSources();
                 ConfigureMusicSource();
-                this.Logger.Debug($"Master volume set to {value}");
+                this.logger.Debug($"Master volume set to {value}");
             });
 
             this.Config.MuteMaster.Subscribe(value =>
             {
                 ConfigureAllSoundSources();
                 ConfigureMusicSource();
-                this.Logger.Debug(value ? "Master volume muted" : "Master volume unmuted");
+                this.logger.Debug(value ? "Master volume muted" : "Master volume unmuted");
             });
         }
 
@@ -102,14 +102,14 @@ namespace UniT.Audio
             {
                 if (!this.loadedSoundSources.Remove(name, out var soundSource))
                 {
-                    this.Logger.Warning($"Trying to unload sound {name} that was not loaded");
+                    this.logger.Warning($"Trying to unload sound {name} that was not loaded");
                     return;
                 }
                 soundSource.Stop();
                 soundSource.clip = null;
                 this.assetsManager.Unload(name);
                 this.pooledSoundSources.Enqueue(soundSource);
-                this.Logger.Debug($"Unloaded sound {name}");
+                this.logger.Debug($"Unloaded sound {name}");
             });
         }
 
@@ -118,7 +118,7 @@ namespace UniT.Audio
             this.GetSoundSource(name).ContinueWith(soundSource =>
             {
                 soundSource.PlayOneShot(soundSource.clip);
-                this.Logger.Debug($"Playing sound one shot {name}");
+                this.logger.Debug($"Playing sound one shot {name}");
             }).Forget();
         }
 
@@ -129,7 +129,7 @@ namespace UniT.Audio
                 soundSource.loop = loop;
                 if (!force && soundSource.isPlaying) return;
                 soundSource.Play();
-                this.Logger.Debug($"Playing sound {name}, loop: {loop}");
+                this.logger.Debug($"Playing sound {name}, loop: {loop}");
             }).Forget();
         }
 
@@ -139,11 +139,11 @@ namespace UniT.Audio
             {
                 if (!this.loadedSoundSources.TryGetValue(name, out var soundSource))
                 {
-                    this.Logger.Warning($"Trying to stop sound {name} that was not loaded");
+                    this.logger.Warning($"Trying to stop sound {name} that was not loaded");
                     return;
                 }
                 soundSource.Stop();
-                this.Logger.Debug($"Stopped sound {name}");
+                this.logger.Debug($"Stopped sound {name}");
             });
         }
 
@@ -170,7 +170,7 @@ namespace UniT.Audio
             {
                 if (!force && this.musicSource.isPlaying) return;
                 this.musicSource.Play();
-                this.Logger.Debug($"Playing music {name}");
+                this.logger.Debug($"Playing music {name}");
             }).Forget();
         }
 
@@ -202,7 +202,7 @@ namespace UniT.Audio
                         return soundSource;
                     });
                     soundSource.clip = audioClip;
-                    this.Logger.Debug($"Loaded sound {name}");
+                    this.logger.Debug($"Loaded sound {name}");
                     return soundSource;
                 });
             });

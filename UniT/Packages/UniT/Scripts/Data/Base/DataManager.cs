@@ -9,11 +9,12 @@ namespace UniT.Data.Base
 
     public class DataManager : IDataManager
     {
-        public ILogger Logger { get; }
+        public LogConfig LogConfig => this.logger.Config;
 
         private readonly ReadOnlyDictionary<Type, IData>        dataCache;
         private readonly ReadOnlyDictionary<Type, IDataHandler> handlerCache;
         private readonly ReadOnlyDictionary<Type, Type>         dataTypeToHandlerType;
+        private readonly ILogger                                logger;
 
         public DataManager(IData[] dataCache, IDataHandler[] handlerCache, ILogger logger = null)
         {
@@ -25,8 +26,8 @@ namespace UniT.Data.Base
                         ?? throw new($"No handler found for type {data.GetType().Name}")
             ).AsReadOnly();
 
-            this.Logger = logger ?? ILogger.Default(this.GetType().Name);
-            this.dataTypeToHandlerType.ForEach((dataType, handlerType) => this.Logger.Debug($"Found {dataType.Name} - {handlerType.Name}"));
+            this.logger = logger ?? ILogger.Default(this.GetType().Name);
+            this.dataTypeToHandlerType.ForEach((dataType, handlerType) => this.logger.Debug($"Found {dataType.Name} - {handlerType.Name}"));
         }
 
         public T Get<T>() where T : IData

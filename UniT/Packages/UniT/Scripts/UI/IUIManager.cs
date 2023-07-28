@@ -2,14 +2,14 @@ namespace UniT.UI
 {
     using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
+    using UniT.Logging;
     using UniT.UI.Interfaces;
     using UniT.UI.Item.Interfaces;
     using UnityEngine;
-    using ILogger = UniT.Logging.ILogger;
 
     public interface IUIManager
     {
-        public ILogger Logger { get; }
+        public LogConfig LogConfig { get; }
 
         public IView StackingView { get; }
 

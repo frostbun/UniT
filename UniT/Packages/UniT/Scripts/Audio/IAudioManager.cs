@@ -5,9 +5,9 @@ namespace UniT.Audio
 
     public interface IAudioManager
     {
-        public IAudioConfig Config { get; }
+        public LogConfig LogConfig { get; }
 
-        public ILogger Logger { get; }
+        public IAudioConfig Config { get; }
 
         public string CurrentMusic { get; }
 

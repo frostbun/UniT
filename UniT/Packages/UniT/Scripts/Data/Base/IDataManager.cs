@@ -6,7 +6,7 @@ namespace UniT.Data.Base
 
     public interface IDataManager
     {
-        public ILogger Logger { get; }
+        public LogConfig LogConfig { get; }
 
         public T Get<T>() where T : IData;
 

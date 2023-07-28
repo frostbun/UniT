@@ -7,6 +7,7 @@ namespace UniT.UI
     using UniT.Assets;
     using UniT.Extensions;
     using UniT.Extensions.UniTask;
+    using UniT.Logging;
     using UniT.UI.Interfaces;
     using UniT.UI.Item.Interfaces;
     using UnityEngine;
@@ -29,6 +30,7 @@ namespace UniT.UI
         private          IPresenter.Factory       presenterFactory;
         private          IItemPresenter.Factory   itemPresenterFactory;
         private          IAssetsManager           assetsManager;
+        private          ILogger                  logger;
         private readonly Dictionary<Type, IView>  views = new();
         private readonly List<IView>              stack = new();
         private readonly Dictionary<Type, string> keys  = new();
@@ -43,11 +45,11 @@ namespace UniT.UI
             this.presenterFactory     = presenterFactory ?? IPresenter.Factory.Default();
             this.itemPresenterFactory = itemPresenterFactory ?? IItemPresenter.Factory.Default();
             this.assetsManager        = assetsManager ?? IAssetsManager.Default();
-            this.Logger               = logger ?? ILogger.Default(this.GetType().Name);
+            this.logger               = logger ?? ILogger.Default(this.GetType().Name);
             return this.DontDestroyOnLoad();
         }
 
-        public ILogger Logger { get; private set; }
+        public LogConfig LogConfig => this.logger.Config;
 
         public IView StackingView => this.stack.LastOrDefault(view => view.CurrentStatus is IView.Status.Stacking);
 
@@ -89,7 +91,7 @@ namespace UniT.UI
         {
             if (view.CurrentStatus is IView.Status.Hidden) return;
             view.transform.SetParent(this.hiddenViews, false);
-            this.Logger.Debug($"{view.GetType().Name} status: {view.CurrentStatus = IView.Status.Hidden}");
+            this.logger.Debug($"{view.GetType().Name} status: {view.CurrentStatus = IView.Status.Hidden}");
             view.OnHide();
             if (removeFromStack) this.RemoveFromStack(view);
             if (autoStack) this.StackNextView();
@@ -102,7 +104,7 @@ namespace UniT.UI
             this.views.Remove(view.GetType());
             if (!this.keys.Remove(view.GetType(), out var key)) return;
             this.assetsManager.Unload(key);
-            this.Logger.Debug($"{view.GetType().Name} status: {view.CurrentStatus = IView.Status.Disposed}");
+            this.logger.Debug($"{view.GetType().Name} status: {view.CurrentStatus = IView.Status.Disposed}");
             view.OnDispose();
         }
 
@@ -117,7 +119,7 @@ namespace UniT.UI
             view.Manager = this;
             view.transform.SetParent(this.hiddenViews, false);
             view.CurrentStatus = IView.Status.Hidden;
-            this.Logger.Debug($"Initialized {view.GetType().Name}");
+            this.logger.Debug($"Initialized {view.GetType().Name}");
             view.OnInitialize();
             return view;
         }
@@ -147,7 +149,7 @@ namespace UniT.UI
                 }
             }
             view.transform.SetAsLastSibling();
-            this.Logger.Debug($"{view.GetType().Name} status: {view.CurrentStatus = nextStatus}");
+            this.logger.Debug($"{view.GetType().Name} status: {view.CurrentStatus = nextStatus}");
             view.OnShow();
         }
 

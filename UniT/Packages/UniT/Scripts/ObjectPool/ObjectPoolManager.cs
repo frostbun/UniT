@@ -6,19 +6,21 @@ namespace UniT.ObjectPool
     using UniT.Assets;
     using UniT.Extensions;
     using UniT.Extensions.UniTask;
+    using UniT.Logging;
     using UnityEngine;
     using ILogger = UniT.Logging.ILogger;
     using Object = UnityEngine.Object;
 
     public class ObjectPoolManager : IObjectPoolManager
     {
-        public ILogger Logger { get; }
+        public LogConfig LogConfig => this.logger.Config;
 
         private readonly IAssetsManager                     assetsManager;
         private readonly Transform                          poolsContainer;
         private readonly Dictionary<GameObject, ObjectPool> prefabToPool;
         private readonly Dictionary<string, ObjectPool>     keyToPool;
         private readonly Dictionary<GameObject, ObjectPool> instanceToPool;
+        private readonly ILogger                            logger;
 
         public ObjectPoolManager(IAssetsManager assetsManager = null, ILogger logger = null)
         {
@@ -27,13 +29,13 @@ namespace UniT.ObjectPool
             this.prefabToPool   = new();
             this.keyToPool      = new();
             this.instanceToPool = new();
-            this.Logger         = logger ?? ILogger.Default(this.GetType().Name);
+            this.logger         = logger ?? ILogger.Default(this.GetType().Name);
         }
 
         public void InstantiatePool(GameObject prefab, int initialCount = 1)
         {
             if (this.TryInstantiatePool(prefab, initialCount)) return;
-            this.Logger.Warning($"Pool for prefab {prefab.name} already instantiated");
+            this.logger.Warning($"Pool for prefab {prefab.name} already instantiated");
         }
 
         public void InstantiatePool<T>(T component, int initialCount = 1) where T : Component
@@ -47,7 +49,7 @@ namespace UniT.ObjectPool
                        .ContinueWith(success =>
                        {
                            if (success) return;
-                           this.Logger.Warning($"Pool for key {key} already instantiated");
+                           this.logger.Warning($"Pool for key {key} already instantiated");
                        });
         }
 
@@ -100,7 +102,7 @@ namespace UniT.ObjectPool
         {
             if (!this.prefabToPool.Remove(prefab, out var pool))
             {
-                this.Logger.Warning($"Trying to destroy pool for prefab {prefab.name} that was not instantiated");
+                this.logger.Warning($"Trying to destroy pool for prefab {prefab.name} that was not instantiated");
                 return;
             }
 
@@ -116,7 +118,7 @@ namespace UniT.ObjectPool
         {
             if (!this.keyToPool.Remove(key, out var pool))
             {
-                this.Logger.Warning($"Trying to destroy pool for key {key} that was not instantiated");
+                this.logger.Warning($"Trying to destroy pool for key {key} that was not instantiated");
                 return;
             }
 
@@ -158,12 +160,12 @@ namespace UniT.ObjectPool
         {
             if (!this.instanceToPool.Remove(instance, out var pool))
             {
-                this.Logger.Warning($"Trying to recycle {instance.name} that was not spawned from {this.GetType().Name}");
+                this.logger.Warning($"Trying to recycle {instance.name} that was not spawned from {this.GetType().Name}");
                 return;
             }
 
             pool.Recycle(instance);
-            this.Logger.Debug($"Recycled {instance.name}");
+            this.logger.Debug($"Recycled {instance.name}");
         }
 
         public void Recycle<T>(T component) where T : Component
@@ -195,7 +197,7 @@ namespace UniT.ObjectPool
         {
             if (this.prefabToPool.TryGetValue(prefab, out var pool)) return pool;
             var exception = new InvalidOperationException($"Pool for prefab {prefab.name} was not instantiated");
-            this.Logger.Exception(exception);
+            this.logger.Exception(exception);
             throw exception;
         }
 
@@ -203,7 +205,7 @@ namespace UniT.ObjectPool
         {
             if (this.keyToPool.TryGetValue(key, out var pool)) return pool;
             var exception = new InvalidOperationException($"Pool for key {key} was not instantiated");
-            this.Logger.Exception(exception);
+            this.logger.Exception(exception);
             throw exception;
         }
 
@@ -211,7 +213,7 @@ namespace UniT.ObjectPool
         {
             var pool = ObjectPool.Instantiate(prefab, initialCount);
             pool.transform.SetParent(this.poolsContainer);
-            this.Logger.Debug($"Instantiated {pool.gameObject.name}");
+            this.logger.Debug($"Instantiated {pool.gameObject.name}");
             return pool;
         }
 
@@ -219,14 +221,14 @@ namespace UniT.ObjectPool
         {
             this.RecycleAll_Internal(pool);
             Object.Destroy(pool.gameObject);
-            this.Logger.Debug($"Destroyed {pool.gameObject.name}");
+            this.logger.Debug($"Destroyed {pool.gameObject.name}");
         }
 
         private GameObject Spawn_Internal(ObjectPool pool, Vector3? position = null, Quaternion? rotation = null, Transform parent = null)
         {
             var instance = pool.Spawn(position, rotation, parent);
             this.instanceToPool.Add(instance, pool);
-            this.Logger.Debug($"Spawned {instance.name}");
+            this.logger.Debug($"Spawned {instance.name}");
             return instance;
         }
 
@@ -234,7 +236,7 @@ namespace UniT.ObjectPool
         {
             pool.RecycleAll();
             this.instanceToPool.RemoveAll((_, otherPool) => otherPool == pool);
-            this.Logger.Debug($"Recycled all {pool.gameObject.name}");
+            this.logger.Debug($"Recycled all {pool.gameObject.name}");
         }
     }
 }

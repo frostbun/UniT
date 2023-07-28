@@ -5,7 +5,7 @@ namespace UniT.Signal
 
     public interface ISignalBus
     {
-        public ILogger Logger { get; }
+        public LogConfig LogConfig { get; }
 
         public void Fire<T>(T signal);
 

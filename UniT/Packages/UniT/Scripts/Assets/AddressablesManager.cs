@@ -5,6 +5,7 @@ namespace UniT.Assets
     using System.Threading;
     using Cysharp.Threading.Tasks;
     using UniT.Extensions;
+    using UniT.Logging;
     using UnityEngine;
     using UnityEngine.AddressableAssets;
     using UnityEngine.ResourceManagement.AsyncOperations;
@@ -14,16 +15,17 @@ namespace UniT.Assets
 
     public class AddressablesManager : IAssetsManager
     {
-        public ILogger Logger { get; }
+        public LogConfig LogConfig => this.logger.Config;
 
         private readonly Dictionary<string, AsyncOperationHandle>                loadedAssets;
         private readonly Dictionary<string, AsyncOperationHandle<SceneInstance>> loadedScenes;
+        private readonly ILogger                                                 logger;
 
         public AddressablesManager(ILogger logger = null)
         {
             this.loadedAssets = new();
             this.loadedScenes = new();
-            this.Logger       = logger ?? ILogger.Default(this.GetType().Name);
+            this.logger       = logger ?? ILogger.Default(this.GetType().Name);
         }
 
         public UniTask<T> Load<T>(string key = null, IProgress<float> progress = null, CancellationToken cancellationToken = default)
@@ -34,7 +36,7 @@ namespace UniT.Assets
                        .ToUniTask(progress: progress, cancellationToken: cancellationToken)
                        .ContinueWith(asset =>
                        {
-                           this.Logger.Debug($"Loaded asset {key}");
+                           this.logger.Debug($"Loaded asset {key}");
                            return asset;
                        });
         }
@@ -48,7 +50,7 @@ namespace UniT.Assets
                            if (component is null)
                            {
                                var exception = new InvalidOperationException($"Component {typeof(T).Name} not found in GameObject {gameObject.name}");
-                               this.Logger.Exception(exception);
+                               this.logger.Exception(exception);
                                throw exception;
                            }
                            return component;
@@ -59,11 +61,11 @@ namespace UniT.Assets
         {
             if (!this.loadedAssets.Remove(key, out var handle))
             {
-                this.Logger.Warning($"Trying to unload asset {key} that was not loaded");
+                this.logger.Warning($"Trying to unload asset {key} that was not loaded");
                 return;
             }
             Addressables.Release(handle);
-            this.Logger.Debug($"Unloaded asset {key}");
+            this.logger.Debug($"Unloaded asset {key}");
         }
 
         public void Unload<T>()
@@ -76,12 +78,12 @@ namespace UniT.Assets
             if (this.loadedScenes.ContainsKey(key ??= sceneName))
             {
                 var exception = new InvalidOperationException($"Key {key} already exists in loaded scenes");
-                this.Logger.Exception(exception);
+                this.logger.Exception(exception);
                 throw exception;
             }
             if (!activateOnLoad)
             {
-                this.Logger.Warning("Set `activateOnLoad` to false will block all other `AsyncOperationHandle` until the scene is activated");
+                this.logger.Warning("Set `activateOnLoad` to false will block all other `AsyncOperationHandle` until the scene is activated");
             }
             return (this.loadedScenes[key] = Addressables.LoadSceneAsync(sceneName, loadMode, activateOnLoad, priority))
                    .ToUniTask(progress: progress, cancellationToken: cancellationToken)
@@ -91,7 +93,7 @@ namespace UniT.Assets
                        {
                            this.loadedScenes.RemoveAll((oldKey, _) => oldKey != key);
                        }
-                       this.Logger.Debug($"Loaded scene {key}");
+                       this.logger.Debug($"Loaded scene {key}");
                        return scene;
                    });
         }
@@ -100,12 +102,12 @@ namespace UniT.Assets
         {
             if (!this.loadedScenes.Remove(key, out var scene))
             {
-                this.Logger.Warning($"Trying to unload scene {key} that was not loaded");
+                this.logger.Warning($"Trying to unload scene {key} that was not loaded");
                 return UniTask.CompletedTask;
             }
             return Addressables.UnloadSceneAsync(scene)
                                .ToUniTask(progress: progress, cancellationToken: cancellationToken)
-                               .ContinueWith(_ => this.Logger.Debug($"Unloaded scene {key}"));
+                               .ContinueWith(_ => this.logger.Debug($"Unloaded scene {key}"));
         }
     }
 }
