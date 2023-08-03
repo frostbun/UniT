@@ -2,21 +2,18 @@ namespace UniT.Example
 {
     using UniT.Assets;
     using UniT.Audio;
-    using UniT.Data.Base;
-    using UniT.Data.Csv.Blueprint;
-    using UniT.Data.Json.Player;
+    using UniT.Data;
+    using UniT.Data.Csv;
+    using UniT.Data.Json;
     using UniT.DependencyInjection;
     using UniT.Extensions;
     using UniT.ObjectPool;
     using UniT.UI;
-    using UniT.UI.Interfaces;
-    using UniT.UI.Item.Interfaces;
     using UnityEngine;
 
     public class EntryPoint : MonoBehaviour
     {
-        [SerializeField]
-        private UIManager uiManager;
+        [SerializeField] private UIManager _uiManager;
 
         private void Awake()
         {
@@ -30,8 +27,7 @@ namespace UniT.Example
             ServiceProvider.AddInterfaces<AudioManager>();
 
             ServiceProvider.Add(new IPresenter.Factory(type => (IPresenter)ServiceProvider.Instantiate(type)));
-            ServiceProvider.Add(new IItemPresenter.Factory(type => (IItemPresenter)ServiceProvider.Instantiate(type)));
-            ServiceProvider.AddInterfaces(ServiceProvider.Invoke(this.uiManager, nameof(this.uiManager.Construct)));
+            ServiceProvider.AddInterfaces(ServiceProvider.Invoke(this._uiManager, nameof(this._uiManager.Construct)));
 
             ServiceProvider.AddInterfaces<PlayerPrefsJsonDataHandler>();
             ServiceProvider.AddInterfaces<BlueprintAssetCsvDataHandler>();

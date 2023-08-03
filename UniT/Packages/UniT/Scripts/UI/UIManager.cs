@@ -8,186 +8,170 @@ namespace UniT.UI
     using UniT.Extensions;
     using UniT.Extensions.UniTask;
     using UniT.Logging;
-    using UniT.UI.Interfaces;
-    using UniT.UI.Item.Interfaces;
+    using UniT.UI.Screen;
     using UnityEngine;
+    using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;
 
     public class UIManager : MonoBehaviour, IUIManager
     {
-        [SerializeField]
-        private RectTransform hiddenViews;
+        [SerializeField] private RectTransform _hiddenScreens;
+        [SerializeField] private RectTransform _stackingScreens;
+        [SerializeField] private RectTransform _floatingScreens;
+        [SerializeField] private RectTransform _dockedScreens;
 
-        [SerializeField]
-        private RectTransform stackingViews;
+        private          IPresenter.Factory            _presenterFactory;
+        private          IAssetsManager                _assetsManager;
+        private          ILogger                       _logger;
+        private readonly Dictionary<Type, IScreenView> _screens     = new();
+        private readonly List<IScreenView>             _screenStack = new();
+        private readonly Dictionary<Type, string>      _keys        = new();
 
-        [SerializeField]
-        private RectTransform floatingViews;
-
-        [SerializeField]
-        private RectTransform dockedViews;
-
-        private          IPresenter.Factory       presenterFactory;
-        private          IItemPresenter.Factory   itemPresenterFactory;
-        private          IAssetsManager           assetsManager;
-        private          ILogger                  logger;
-        private readonly Dictionary<Type, IView>  views = new();
-        private readonly List<IView>              stack = new();
-        private readonly Dictionary<Type, string> keys  = new();
-
-        public UIManager Construct(
-            IPresenter.Factory presenterFactory = null,
-            IItemPresenter.Factory itemPresenterFactory = null,
-            IAssetsManager assetsManager = null,
-            ILogger logger = null
-        )
+        [Preserve]
+        public UIManager Construct(IPresenter.Factory presenterFactory = null, IAssetsManager assetsManager = null, ILogger logger = null)
         {
-            this.presenterFactory     = presenterFactory ?? IPresenter.Factory.Default();
-            this.itemPresenterFactory = itemPresenterFactory ?? IItemPresenter.Factory.Default();
-            this.assetsManager        = assetsManager ?? IAssetsManager.Default();
-            this.logger               = logger ?? ILogger.Default(this.GetType().Name);
+            this._presenterFactory = presenterFactory ?? IPresenter.Factory.Default();
+            this._assetsManager    = assetsManager ?? IAssetsManager.Default();
+            this._logger           = logger ?? ILogger.Default(this.GetType().Name);
             return this.DontDestroyOnLoad();
         }
 
-        public LogConfig LogConfig => this.logger.Config;
+        public LogConfig LogConfig => this._logger.Config;
 
-        public IView StackingView => this.stack.LastOrDefault(view => view.CurrentStatus is IView.Status.Stacking);
-
-        public IView NextStackingView => this.stack.LastOrDefault(view => view.CurrentStatus is not IView.Status.Stacking);
-
-        public IEnumerable<IView> FloatingViews => this.views.Values.Where(view => view.CurrentStatus is IView.Status.Floating);
-
-        public IEnumerable<IView> DockedViews => this.views.Values.Where(view => view.CurrentStatus is IView.Status.Docked);
-
-        public UniTask<IView> GetView<TView>(string key) where TView : Component, IView
+        public TView Initialize<TView>(TView view) where TView : IView
         {
-            return this.views.GetOrAdd(
-                typeof(TView),
-                () => this.assetsManager.LoadComponent<TView>(key).ContinueWith(viewPrefab =>
-                {
-                    this.keys.Add(typeof(TView), key);
-                    return this.Initialize_Internal(Instantiate(viewPrefab));
-                })
-            );
-        }
-
-        public UniTask<IView> GetView<TView>() where TView : Component, IView
-        {
-            return this.GetView<TView>(typeof(TView).GetKey());
-        }
-
-        public IView Initialize(IView view)
-        {
-            return this.views.GetOrAdd(view.GetType(), () => this.Initialize_Internal(view));
-        }
-
-        public void Stack(IView view, bool force = false) => this.Show_Internal(view, force, IView.Status.Stacking);
-
-        public void Float(IView view, bool force = false) => this.Show_Internal(view, force, IView.Status.Floating);
-
-        public void Dock(IView view, bool force = false) => this.Show_Internal(view, force, IView.Status.Docked);
-
-        public void Hide(IView view, bool removeFromStack = true, bool autoStack = true)
-        {
-            if (view.CurrentStatus is IView.Status.Hidden) return;
-            view.transform.SetParent(this.hiddenViews, false);
-            this.logger.Debug($"{view.GetType().Name} status: {view.CurrentStatus = IView.Status.Hidden}");
-            view.OnHide();
-            if (removeFromStack) this.RemoveFromStack(view);
-            if (autoStack) this.StackNextView();
-        }
-
-        public void Dispose(IView view, bool autoStack = true)
-        {
-            this.Hide(view, true, autoStack);
-            Destroy(view.gameObject);
-            this.views.Remove(view.GetType());
-            if (!this.keys.Remove(view.GetType(), out var key)) return;
-            this.assetsManager.Unload(key);
-            this.logger.Debug($"{view.GetType().Name} status: {view.CurrentStatus = IView.Status.Disposed}");
-            view.OnDispose();
-        }
-
-        private IView Initialize_Internal(IView view)
-        {
-            if (view is IViewWithPresenter viewWithPresenter)
+            if (view is IScreenView screen)
             {
-                var presenter = this.presenterFactory.Create(viewWithPresenter.PresenterType);
+                if (!this._screens.TryAdd(view.GetType(), screen))
+                {
+                    this._logger.Warning($"ScreenView {view.GetType().Name} already initialized");
+                    return view;
+                }
+                screen.transform.SetParent(this._hiddenScreens, false);
+                screen.CurrentStatus = IScreenView.Status.Hidden;
+            }
+            if (view is IScreenViewWithPresenter viewWithPresenter)
+            {
+                var presenter = this._presenterFactory.Create(viewWithPresenter.PresenterType);
                 presenter.View              = view;
                 viewWithPresenter.Presenter = presenter;
             }
             view.Manager = this;
-            view.transform.SetParent(this.hiddenViews, false);
-            view.CurrentStatus = IView.Status.Hidden;
-            this.logger.Debug($"Initialized {view.GetType().Name}");
+            this._logger.Debug($"Initialized {view.GetType().Name}");
             view.OnInitialize();
             return view;
         }
 
-        private void Show_Internal(IView view, bool force, IView.Status nextStatus)
+        public IScreenView StackingScreen => this._screenStack.LastOrDefault(view => view.CurrentStatus is IScreenView.Status.Stacking);
+
+        public IScreenView NextScreenInStack => this._screenStack.LastOrDefault(view => view.CurrentStatus is not IScreenView.Status.Stacking);
+
+        public IEnumerable<IScreenView> FloatingScreens => this._screens.Values.Where(view => view.CurrentStatus is IScreenView.Status.Floating);
+
+        public IEnumerable<IScreenView> DockedScreens => this._screens.Values.Where(view => view.CurrentStatus is IScreenView.Status.Docked);
+
+        public UniTask<IScreenView> GetScreen<TScreenView>(string key) where TScreenView : Component, IScreenView
         {
-            if (!force && view.CurrentStatus == nextStatus) return;
-            this.Hide(view, false, false);
+            return this._screens.GetOrAdd(
+                typeof(TScreenView),
+                () => this._assetsManager.LoadComponent<TScreenView>(key).ContinueWith(screenPrefab =>
+                {
+                    this._keys.Add(typeof(TScreenView), key);
+                    return (IScreenView)this.Initialize(Instantiate(screenPrefab));
+                })
+            );
+        }
+
+        public UniTask<IScreenView> GetScreen<TScreenView>() where TScreenView : Component, IScreenView
+        {
+            return this.GetScreen<TScreenView>(typeof(TScreenView).GetKey());
+        }
+
+        public void Stack(IScreenView screen, bool force = false) => this.Show(screen, force, IScreenView.Status.Stacking);
+
+        public void Float(IScreenView screen, bool force = false) => this.Show(screen, force, IScreenView.Status.Floating);
+
+        public void Dock(IScreenView screen, bool force = false) => this.Show(screen, force, IScreenView.Status.Docked);
+
+        public void Hide(IScreenView screen, bool removeFromStack = true, bool autoStack = true)
+        {
+            if (screen.CurrentStatus is IScreenView.Status.Hidden) return;
+            screen.transform.SetParent(this._hiddenScreens, false);
+            this._logger.Debug($"{screen.GetType().Name} status: {screen.CurrentStatus = IScreenView.Status.Hidden}");
+            screen.OnHide();
+            if (removeFromStack) this.RemoveFromStack(screen);
+            if (autoStack) this.StackNextScreen();
+        }
+
+        public void Dispose(IScreenView screen, bool autoStack = true)
+        {
+            this.Hide(screen, true, autoStack);
+            Destroy(screen.gameObject);
+            this._screens.Remove(screen.GetType());
+            if (!this._keys.Remove(screen.GetType(), out var key)) return;
+            this._assetsManager.Unload(key);
+            this._logger.Debug($"{screen.GetType().Name} status: {screen.CurrentStatus = IScreenView.Status.Disposed}");
+            screen.OnDispose();
+        }
+
+        private void Show(IScreenView screen, bool force, IScreenView.Status nextStatus)
+        {
+            if (!force && screen.CurrentStatus == nextStatus) return;
+            this.Hide(screen, false, false);
             switch (nextStatus)
             {
-                case IView.Status.Stacking:
+                case IScreenView.Status.Stacking:
                 {
-                    this.AddToStack(view);
-                    this.HideUndockedViews();
-                    view.transform.SetParent(this.stackingViews, false);
+                    this.AddToStack(screen);
+                    this.HideUndockedScreens();
+                    screen.transform.SetParent(this._stackingScreens, false);
                     break;
                 }
-                case IView.Status.Floating:
+                case IScreenView.Status.Floating:
                 {
-                    view.transform.SetParent(this.floatingViews, false);
+                    screen.transform.SetParent(this._floatingScreens, false);
                     break;
                 }
-                case IView.Status.Docked:
+                case IScreenView.Status.Docked:
                 {
-                    view.transform.SetParent(this.dockedViews, false);
+                    screen.transform.SetParent(this._dockedScreens, false);
                     break;
                 }
             }
-            view.transform.SetAsLastSibling();
-            this.logger.Debug($"{view.GetType().Name} status: {view.CurrentStatus = nextStatus}");
-            view.OnShow();
+            screen.transform.SetAsLastSibling();
+            this._logger.Debug($"{screen.GetType().Name} status: {screen.CurrentStatus = nextStatus}");
+            screen.OnShow();
         }
 
-        private void AddToStack(IView view)
+        private void AddToStack(IScreenView screen)
         {
-            var index = this.stack.IndexOf(view);
+            var index = this._screenStack.IndexOf(screen);
             if (index == -1)
             {
-                this.stack.Add(view);
+                this._screenStack.Add(screen);
             }
             else
             {
-                this.stack.RemoveRange(index + 1, this.stack.Count - index - 1);
+                this._screenStack.RemoveRange(index + 1, this._screenStack.Count - index - 1);
             }
         }
 
-        private void RemoveFromStack(IView view)
+        private void RemoveFromStack(IScreenView screen)
         {
-            this.stack.Remove(view);
+            this._screenStack.Remove(screen);
         }
 
-        private void StackNextView()
+        private void StackNextScreen()
         {
-            if (this.StackingView is not null) return;
-            this.NextStackingView?.Stack();
+            if (this.StackingScreen is not null) return;
+            this.NextScreenInStack?.Stack();
         }
 
-        private void HideUndockedViews()
+        private void HideUndockedScreens()
         {
-            this.views.Values.ToArray()
-                .Where(view => view.CurrentStatus is IView.Status.Floating or IView.Status.Stacking)
-                .ForEach(view => this.Hide(view, false, false));
-        }
-
-        public IItemAdapter Initialize(IItemAdapter itemAdapter)
-        {
-            itemAdapter.Initialize(this, this.itemPresenterFactory);
-            return itemAdapter;
+            this._screens.Values.ToArray()
+                .Where(screen => screen.CurrentStatus is IScreenView.Status.Floating or IScreenView.Status.Stacking)
+                .ForEach(screen => this.Hide(screen, false, false));
         }
     }
 }

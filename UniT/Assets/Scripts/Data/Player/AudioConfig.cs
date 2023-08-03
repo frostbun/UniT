@@ -1,7 +1,7 @@
 namespace UniT.Example.Data.Player
 {
     using UniT.Audio;
-    using UniT.Data.Json.Player;
+    using UniT.Data.Json;
     using UniT.Reactive;
 
     public class AudioConfig : IAudioConfig, IPlayerJsonData

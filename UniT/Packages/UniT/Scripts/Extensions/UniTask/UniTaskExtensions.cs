@@ -5,11 +5,6 @@ namespace UniT.Extensions.UniTask
 
     public static class UniTaskExtensions
     {
-        public static UniTask<TResult> Cast<TSource, TResult>(this UniTask<TSource> task) where TSource : TResult
-        {
-            return task.ContinueWith(result => (TResult)result);
-        }
-
         public static async UniTask Catch(this UniTask task, Action<Exception> handler)
         {
             try

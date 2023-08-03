@@ -3,7 +3,6 @@ namespace UniT.Data.Converters.Collections
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using UniT.Data.Converters.Base;
 
     /// <summary>
     ///     Depends on <see cref="DictionaryGenericConverter"/>

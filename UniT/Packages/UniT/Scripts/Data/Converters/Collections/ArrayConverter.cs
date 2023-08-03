@@ -2,15 +2,14 @@ namespace UniT.Data.Converters.Collections
 {
     using System;
     using System.Linq;
-    using UniT.Data.Converters.Base;
 
     public class ArrayConverter : BaseConverter
     {
-        private readonly string separator;
+        private readonly string _separator;
 
         public ArrayConverter(string separator = ";")
         {
-            this.separator = separator;
+            this._separator = separator;
         }
 
         protected override Type ConvertibleType => typeof(Array);
@@ -19,7 +18,7 @@ namespace UniT.Data.Converters.Collections
         {
             var elementType      = type.GetElementType();
             var elementConverter = ConverterManager.Instance.GetConverter(elementType);
-            var elements         = str.Split(this.separator);
+            var elements         = str.Split(this._separator);
             var array            = Array.CreateInstance(elementType, elements.Length);
             for (var i = 0; i < elements.Length; ++i)
             {
@@ -33,7 +32,7 @@ namespace UniT.Data.Converters.Collections
         {
             var elementType      = type.GetElementType();
             var elementConverter = ConverterManager.Instance.GetConverter(elementType);
-            return string.Join(this.separator, ((Array)obj).Cast<object>().Select(element => elementConverter.ConvertToString(element, elementType)));
+            return string.Join(this._separator, ((Array)obj).Cast<object>().Select(element => elementConverter.ConvertToString(element, elementType)));
         }
     }
 }

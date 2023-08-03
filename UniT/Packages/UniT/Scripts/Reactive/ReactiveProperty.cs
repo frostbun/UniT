@@ -8,54 +8,54 @@ namespace UniT.Reactive
     {
         private class Subscriber : IDisposable
         {
-            public readonly  Action<T>           callback;
-            private readonly ReactiveProperty<T> property;
-            private          bool                isDisposed;
+            public readonly  Action<T>           _callback;
+            private readonly ReactiveProperty<T> _property;
+            private          bool                _isDisposed;
 
             public Subscriber(Action<T> callback, ReactiveProperty<T> property)
             {
-                this.callback   = callback;
-                this.property   = property;
-                this.isDisposed = false;
+                this._callback   = callback;
+                this._property   = property;
+                this._isDisposed = false;
             }
 
             public void Dispose()
             {
-                if (this.isDisposed) throw new ObjectDisposedException(nameof(Subscriber));
-                this.property.subscribers.Remove(this);
-                this.isDisposed = true;
+                if (this._isDisposed) throw new ObjectDisposedException(nameof(Subscriber));
+                this._property._subscribers.Remove(this);
+                this._isDisposed = true;
             }
         }
 
-        private          T                value;
-        private readonly List<Subscriber> subscribers = new(); // Allowing multiple subscriptions
+        private          T                _value;
+        private readonly List<Subscriber> _subscribers = new(); // Allowing multiple subscriptions
 
         public T Value
         {
-            get => this.value;
+            get => this._value;
             set
             {
-                this.value = value;
-                this.subscribers.ToList().ForEach(subscriber => subscriber.callback(value));
+                this._value = value;
+                this._subscribers.ToList().ForEach(subscriber => subscriber._callback(value));
             }
         }
 
         public ReactiveProperty(T value = default)
         {
-            this.value = value;
+            this._value = value;
         }
 
         public IDisposable Subscribe(Action<T> callback, bool invokeImmediately = true)
         {
             var subscriber = new Subscriber(callback, this);
-            this.subscribers.Add(subscriber);
-            if (invokeImmediately) callback(this.value);
+            this._subscribers.Add(subscriber);
+            if (invokeImmediately) callback(this._value);
             return subscriber;
         }
 
         public void Unsubscribe(Action<T> callback)
         {
-            this.subscribers.Find(subscriber => subscriber.callback == callback)?.Dispose();
+            this._subscribers.Find(subscriber => subscriber._callback == callback)?.Dispose();
         }
     }
 }

@@ -6,7 +6,7 @@ namespace UniT.Extensions.UniTask
 
     public static class DictionaryUniTaskExtensions
     {
-        private static readonly HashSet<object> locks = new();
+        private static readonly HashSet<object> Locks = new();
 
         public static UniTask<TValue> GetOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<UniTask<TValue>> valueFactory)
         {
@@ -22,15 +22,15 @@ namespace UniT.Extensions.UniTask
         {
             if (dictionary.ContainsKey(key)) return UniTask.FromResult(false);
             var @lock = (dictionary, key);
-            if (locks.Contains(@lock)) return UniTask.WaitUntil(() => !locks.Contains(@lock)).ContinueWith(() => false);
-            locks.Add(@lock);
+            if (Locks.Contains(@lock)) return UniTask.WaitUntil(() => !Locks.Contains(@lock)).ContinueWith(() => false);
+            Locks.Add(@lock);
             return valueFactory().ContinueWith(value =>
             {
                 dictionary.Add(key, value);
                 return true;
             }).Finally(() =>
             {
-                locks.Remove(@lock);
+                Locks.Remove(@lock);
             });
         }
     }

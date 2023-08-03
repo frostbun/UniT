@@ -10,8 +10,8 @@ namespace UniT.Utilities
         public static int      Mod     { get; set; } = (int)1e3;
         public static string[] Letters { get; set; } = IterTools.Product(" abcdefghijklmnopqrstuvwxyzx".ToCharArray(), 3).Select(chars => string.Join("", chars).Trim()).ToArray();
 
-        private readonly int[] values;
-        private readonly bool  sign; // false: positive, true: negative
+        private readonly int[] _values;
+        private readonly bool  _sign; // false: positive, true: negative
 
         public BigNumber(int value = 0) : this(new() { Math.Abs(value) }, value < 0)
         {
@@ -41,22 +41,22 @@ namespace UniT.Utilities
                 values.RemoveAt(values.Count - 1);
             }
 
-            this.values = values.ToArray();
-            this.sign   = sign;
+            this._values = values.ToArray();
+            this._sign   = sign;
         }
 
         public override string ToString()
         {
-            var sign         = this.sign ? "-" : "";
-            var integerValue = this.values[^1];
-            var decimalValue = this.values.Length > 1 ? $".{this.values[^2] / (Mod / 10)}" : "";
-            var letter       = this.values.Length > 1 ? Letters[this.values.Length - 1] : "";
+            var sign         = this._sign ? "-" : "";
+            var integerValue = this._values[^1];
+            var decimalValue = this._values.Length > 1 ? $".{this._values[^2] / (Mod / 10)}" : "";
+            var letter       = this._values.Length > 1 ? Letters[this._values.Length - 1] : "";
             return sign + integerValue + decimalValue + letter;
         }
 
         public static BigNumber Abs(BigNumber number)
         {
-            return new(number.values.ToList(), false);
+            return new(number._values.ToList(), false);
         }
 
         public static implicit operator BigNumber(int value)
@@ -66,22 +66,22 @@ namespace UniT.Utilities
 
         public static BigNumber operator -(BigNumber number)
         {
-            return new(number.values.ToList(), !number.sign);
+            return new(number._values.ToList(), !number._sign);
         }
 
         public static BigNumber operator +(BigNumber n1, BigNumber n2)
         {
-            if (n1.sign != n2.sign)
+            if (n1._sign != n2._sign)
             {
                 return n1 - -n2;
             }
 
-            return new(IterTools.ZipLongest(n1.values, n2.values, (v1, v2) => v1 + v2).ToList(), n1.sign);
+            return new(IterTools.ZipLongest(n1._values, n2._values, (v1, v2) => v1 + v2).ToList(), n1._sign);
         }
 
         public static BigNumber operator -(BigNumber n1, BigNumber n2)
         {
-            if (n1.sign != n2.sign)
+            if (n1._sign != n2._sign)
             {
                 return n1 + -n2;
             }
@@ -91,20 +91,20 @@ namespace UniT.Utilities
                 return -(n2 - n1);
             }
 
-            return new(IterTools.ZipLongest(n1.values, n2.values, (v1, v2) => v1 - v2).ToList(), n1.sign);
+            return new(IterTools.ZipLongest(n1._values, n2._values, (v1, v2) => v1 - v2).ToList(), n1._sign);
         }
 
         public static BigNumber operator *(BigNumber n1, int n2)
         {
-            return new(n1.values.Select(value => value * Math.Abs(n2)).ToList(), n1.sign ^ (n2 < 0));
+            return new(n1._values.Select(value => value * Math.Abs(n2)).ToList(), n1._sign ^ (n2 < 0));
         }
 
         public static BigNumber operator *(BigNumber n1, BigNumber n2)
         {
             var padding = new List<int>();
-            return n2.values.Aggregate(new BigNumber(new(), n1.sign ^ n2.sign), (result, value) =>
+            return n2._values.Aggregate(new BigNumber(new(), n1._sign ^ n2._sign), (result, value) =>
             {
-                result += new BigNumber(padding.Concat((n1 * value).values).ToList(), result.sign);
+                result += new BigNumber(padding.Concat((n1 * value)._values).ToList(), result._sign);
                 padding.Add(0);
                 return result;
             });
@@ -117,7 +117,7 @@ namespace UniT.Utilities
                 return n1 is null && n2 is null;
             }
 
-            return n1.sign == n2.sign && IterTools.SequenceEqual(n1.values, n2.values);
+            return n1._sign == n2._sign && IterTools.SequenceEqual(n1._values, n2._values);
         }
 
         public static bool operator !=(BigNumber n1, BigNumber n2)
@@ -127,17 +127,17 @@ namespace UniT.Utilities
 
         public static bool operator <(BigNumber n1, BigNumber n2)
         {
-            if (n1.sign != n2.sign)
+            if (n1._sign != n2._sign)
             {
-                return n1.sign;
+                return n1._sign;
             }
 
-            if (n1.sign)
+            if (n1._sign)
             {
                 return -n1 >= -n2;
             }
 
-            return IterTools.SequenceSmaller(n1.values, n2.values);
+            return IterTools.SequenceSmaller(n1._values, n2._values);
         }
 
         public static bool operator <=(BigNumber n1, BigNumber n2)
@@ -147,17 +147,17 @@ namespace UniT.Utilities
 
         public static bool operator >(BigNumber n1, BigNumber n2)
         {
-            if (n1.sign != n2.sign)
+            if (n1._sign != n2._sign)
             {
-                return n2.sign;
+                return n2._sign;
             }
 
-            if (n1.sign)
+            if (n1._sign)
             {
                 return -n1 <= -n2;
             }
 
-            return IterTools.SequenceGreater(n1.values, n2.values);
+            return IterTools.SequenceGreater(n1._values, n2._values);
         }
 
         public static bool operator >=(BigNumber n1, BigNumber n2)
@@ -182,7 +182,7 @@ namespace UniT.Utilities
 
         public int CompareTo(BigNumber other)
         {
-            if (other is null) return this.sign ? -1 : 1;
+            if (other is null) return this._sign ? -1 : 1;
             if (this == other) return 0;
             return this < other ? -1 : 1;
         }
@@ -190,8 +190,8 @@ namespace UniT.Utilities
         public override int GetHashCode()
         {
             var hashCode = new HashCode();
-            this.values.ForEach(hashCode.Add);
-            hashCode.Add(this.sign);
+            this._values.ForEach(hashCode.Add);
+            hashCode.Add(this._sign);
             return hashCode.ToHashCode();
         }
     }

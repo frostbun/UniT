@@ -14,19 +14,19 @@ namespace UniT.Utilities
 
     public abstract class DelegateFactory<TProduct> : IFactory<TProduct>
     {
-        private readonly Func<TProduct> factory;
+        private readonly Func<TProduct> _factory;
 
-        protected DelegateFactory(Func<TProduct> factory) => this.factory = factory;
+        protected DelegateFactory(Func<TProduct> factory) => this._factory = factory;
 
-        public TProduct Create() => this.factory();
+        public TProduct Create() => this._factory();
     }
 
     public abstract class DelegateFactory<TProduct, TModel> : IFactory<TProduct, TModel>
     {
-        private readonly Func<TModel, TProduct> factory;
+        private readonly Func<TModel, TProduct> _factory;
 
-        protected DelegateFactory(Func<TModel, TProduct> factory) => this.factory = factory;
+        protected DelegateFactory(Func<TModel, TProduct> factory) => this._factory = factory;
 
-        public TProduct Create(TModel model) => this.factory(model);
+        public TProduct Create(TModel model) => this._factory(model);
     }
 }

@@ -3,71 +3,35 @@ namespace UniT.UI
     using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
     using UniT.Logging;
-    using UniT.UI.Interfaces;
-    using UniT.UI.Item.Interfaces;
+    using UniT.UI.Screen;
     using UnityEngine;
 
     public interface IUIManager
     {
         public LogConfig LogConfig { get; }
 
-        public IView StackingView { get; }
+        public TView Initialize<TView>(TView view) where TView : IView;
 
-        public IView NextStackingView { get; }
+        public IScreenView StackingScreen { get; }
 
-        public IEnumerable<IView> FloatingViews { get; }
+        public IScreenView NextScreenInStack { get; }
 
-        public IEnumerable<IView> DockedViews { get; }
+        public IEnumerable<IScreenView> FloatingScreens { get; }
 
-        public UniTask<IView> GetView<TView>(string key) where TView : Component, IView;
+        public IEnumerable<IScreenView> DockedScreens { get; }
 
-        public UniTask<IView> GetView<TView>() where TView : Component, IView;
+        public UniTask<IScreenView> GetScreen<TScreenView>(string key) where TScreenView : Component, IScreenView;
 
-        public IView Initialize(IView view);
+        public UniTask<IScreenView> GetScreen<TScreenView>() where TScreenView : Component, IScreenView;
 
-        public void Stack(IView view, bool force = false);
+        public void Stack(IScreenView screen, bool force = false);
 
-        public void Float(IView view, bool force = false);
+        public void Float(IScreenView screen, bool force = false);
 
-        public void Dock(IView view, bool force = false);
+        public void Dock(IScreenView screen, bool force = false);
 
-        public void Hide(IView view, bool removeFromStack = true, bool autoStack = true);
+        public void Hide(IScreenView screen, bool removeFromStack = true, bool autoStack = true);
 
-        public void Dispose(IView view, bool autoStack = true);
-
-        public IItemAdapter Initialize(IItemAdapter itemAdapter);
-    }
-
-    public static class ViewExtensions
-    {
-        public static UniTask<IView> PutExtra<T>(this UniTask<IView> task, string key, T value)
-        {
-            return task.ContinueWith(view => view.PutExtra(key, value));
-        }
-
-        public static UniTask Stack(this UniTask<IView> task, bool force = false)
-        {
-            return task.ContinueWith(view => view.Stack(force));
-        }
-
-        public static UniTask Float(this UniTask<IView> task, bool force = false)
-        {
-            return task.ContinueWith(view => view.Float(force));
-        }
-
-        public static UniTask Dock(this UniTask<IView> task, bool force = false)
-        {
-            return task.ContinueWith(view => view.Dock(force));
-        }
-
-        public static UniTask Hide(this UniTask<IView> task, bool removeFromStack = true, bool autoStack = true)
-        {
-            return task.ContinueWith(view => view.Hide(removeFromStack, autoStack));
-        }
-
-        public static UniTask Dispose(this UniTask<IView> task, bool autoStack = true)
-        {
-            return task.ContinueWith(view => view.Dispose(autoStack));
-        }
+        public void Dispose(IScreenView screen, bool autoStack = true);
     }
 }

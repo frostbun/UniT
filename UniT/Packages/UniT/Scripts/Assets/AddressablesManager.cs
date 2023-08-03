@@ -11,32 +11,34 @@ namespace UniT.Assets
     using UnityEngine.ResourceManagement.AsyncOperations;
     using UnityEngine.ResourceManagement.ResourceProviders;
     using UnityEngine.SceneManagement;
+    using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;
 
     public class AddressablesManager : IAssetsManager
     {
-        public LogConfig LogConfig => this.logger.Config;
+        public LogConfig LogConfig => this._logger.Config;
 
-        private readonly Dictionary<string, AsyncOperationHandle>                loadedAssets;
-        private readonly Dictionary<string, AsyncOperationHandle<SceneInstance>> loadedScenes;
-        private readonly ILogger                                                 logger;
+        private readonly Dictionary<string, AsyncOperationHandle>                _loadedAssets;
+        private readonly Dictionary<string, AsyncOperationHandle<SceneInstance>> _loadedScenes;
+        private readonly ILogger                                                 _logger;
 
+        [Preserve]
         public AddressablesManager(ILogger logger = null)
         {
-            this.loadedAssets = new();
-            this.loadedScenes = new();
-            this.logger       = logger ?? ILogger.Default(this.GetType().Name);
+            this._loadedAssets = new();
+            this._loadedScenes = new();
+            this._logger       = logger ?? ILogger.Default(this.GetType().Name);
         }
 
         public UniTask<T> Load<T>(string key = null, IProgress<float> progress = null, CancellationToken cancellationToken = default)
         {
             key ??= typeof(T).GetKey();
-            return this.loadedAssets.GetOrAdd(key, () => Addressables.LoadAssetAsync<T>(key))
+            return this._loadedAssets.GetOrAdd(key, () => Addressables.LoadAssetAsync<T>(key))
                        .Convert<T>()
                        .ToUniTask(progress: progress, cancellationToken: cancellationToken)
                        .ContinueWith(asset =>
                        {
-                           this.logger.Debug($"Loaded asset {key}");
+                           this._logger.Debug($"Loaded asset {key}");
                            return asset;
                        });
         }
@@ -50,7 +52,7 @@ namespace UniT.Assets
                            if (component is null)
                            {
                                var exception = new InvalidOperationException($"Component {typeof(T).Name} not found in GameObject {gameObject.name}");
-                               this.logger.Exception(exception);
+                               this._logger.Exception(exception);
                                throw exception;
                            }
                            return component;
@@ -59,13 +61,13 @@ namespace UniT.Assets
 
         public void Unload(string key)
         {
-            if (!this.loadedAssets.Remove(key, out var handle))
+            if (!this._loadedAssets.Remove(key, out var handle))
             {
-                this.logger.Warning($"Trying to unload asset {key} that was not loaded");
+                this._logger.Warning($"Trying to unload asset {key} that was not loaded");
                 return;
             }
             Addressables.Release(handle);
-            this.logger.Debug($"Unloaded asset {key}");
+            this._logger.Debug($"Unloaded asset {key}");
         }
 
         public void Unload<T>()
@@ -75,39 +77,39 @@ namespace UniT.Assets
 
         public UniTask<SceneInstance> LoadScene(string sceneName, string key = null, LoadSceneMode loadMode = LoadSceneMode.Single, bool activateOnLoad = true, int priority = 100, IProgress<float> progress = null, CancellationToken cancellationToken = default)
         {
-            if (this.loadedScenes.ContainsKey(key ??= sceneName))
+            if (this._loadedScenes.ContainsKey(key ??= sceneName))
             {
                 var exception = new InvalidOperationException($"Key {key} already exists in loaded scenes");
-                this.logger.Exception(exception);
+                this._logger.Exception(exception);
                 throw exception;
             }
             if (!activateOnLoad)
             {
-                this.logger.Warning("Set `activateOnLoad` to false will block all other `AsyncOperationHandle` until the scene is activated");
+                this._logger.Warning("Set `activateOnLoad` to false will block all other `AsyncOperationHandle` until the scene is activated");
             }
-            return (this.loadedScenes[key] = Addressables.LoadSceneAsync(sceneName, loadMode, activateOnLoad, priority))
+            return (this._loadedScenes[key] = Addressables.LoadSceneAsync(sceneName, loadMode, activateOnLoad, priority))
                    .ToUniTask(progress: progress, cancellationToken: cancellationToken)
                    .ContinueWith(scene =>
                    {
                        if (loadMode is LoadSceneMode.Single)
                        {
-                           this.loadedScenes.RemoveAll((oldKey, _) => oldKey != key);
+                           this._loadedScenes.RemoveAll((oldKey, _) => oldKey != key);
                        }
-                       this.logger.Debug($"Loaded scene {key}");
+                       this._logger.Debug($"Loaded scene {key}");
                        return scene;
                    });
         }
 
         public UniTask UnloadScene(string key, IProgress<float> progress = null, CancellationToken cancellationToken = default)
         {
-            if (!this.loadedScenes.Remove(key, out var scene))
+            if (!this._loadedScenes.Remove(key, out var scene))
             {
-                this.logger.Warning($"Trying to unload scene {key} that was not loaded");
+                this._logger.Warning($"Trying to unload scene {key} that was not loaded");
                 return UniTask.CompletedTask;
             }
             return Addressables.UnloadSceneAsync(scene)
                                .ToUniTask(progress: progress, cancellationToken: cancellationToken)
-                               .ContinueWith(_ => this.logger.Debug($"Unloaded scene {key}"));
+                               .ContinueWith(_ => this._logger.Debug($"Unloaded scene {key}"));
         }
     }
 }

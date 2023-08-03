@@ -1,7 +1,6 @@
 namespace UniT.Data.Converters.Primitives
 {
     using System;
-    using UniT.Data.Converters.Base;
 
     public class Int32Converter : BaseConverter
     {

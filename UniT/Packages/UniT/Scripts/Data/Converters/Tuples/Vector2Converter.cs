@@ -2,7 +2,6 @@ namespace UniT.Data.Converters.Tuples
 {
     using System;
     using System.Runtime.CompilerServices;
-    using UniT.Data.Converters.Base;
     using UnityEngine;
 
     /// <summary>

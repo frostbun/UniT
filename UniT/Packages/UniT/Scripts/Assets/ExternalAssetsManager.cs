@@ -8,24 +8,26 @@ namespace UniT.Assets
     using UniT.Logging;
     using UnityEngine;
     using UnityEngine.Networking;
+    using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;
 
     public class ExternalAssetsManager : IExternalAssetsManager
     {
-        public LogConfig LogConfig => this.logger.Config;
+        public LogConfig LogConfig => this._logger.Config;
 
-        private readonly Dictionary<string, UnityWebRequestAsyncOperation> loadedAssets;
-        private readonly ILogger                                           logger;
+        private readonly Dictionary<string, UnityWebRequestAsyncOperation> _loadedAssets;
+        private readonly ILogger                                           _logger;
 
+        [Preserve]
         public ExternalAssetsManager(ILogger logger = null)
         {
-            this.loadedAssets = new();
-            this.logger       = logger ?? ILogger.Default(this.GetType().Name);
+            this._loadedAssets = new();
+            this._logger       = logger ?? ILogger.Default(this.GetType().Name);
         }
 
         public UniTask<Texture2D> DownloadTexture(string url, IProgress<float> progress = null, CancellationToken cancellationToken = default)
         {
-            return this.loadedAssets.GetOrAdd(url, () =>
+            return this._loadedAssets.GetOrAdd(url, () =>
                        {
                            var request = new UnityWebRequest(url);
                            request.downloadHandler = new DownloadHandlerTexture();
@@ -37,13 +39,13 @@ namespace UniT.Assets
 
         public void Unload(string key)
         {
-            if (!this.loadedAssets.Remove(key, out var request))
+            if (!this._loadedAssets.Remove(key, out var request))
             {
-                this.logger.Warning($"Trying to unload asset {key} that was not loaded");
+                this._logger.Warning($"Trying to unload asset {key} that was not loaded");
                 return;
             }
             request.webRequest.Dispose();
-            this.logger.Debug($"Unloaded asset {key}");
+            this._logger.Debug($"Unloaded asset {key}");
         }
     }
 }

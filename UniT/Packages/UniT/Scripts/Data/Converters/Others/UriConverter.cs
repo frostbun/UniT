@@ -1,7 +1,6 @@
 namespace UniT.Data.Converters.Others
 {
     using System;
-    using UniT.Data.Converters.Base;
 
     public class UriConverter : BaseConverter
     {

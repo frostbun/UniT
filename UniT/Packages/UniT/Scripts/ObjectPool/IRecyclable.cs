@@ -2,6 +2,6 @@ namespace UniT.ObjectPool
 {
     public interface IRecyclable
     {
-        public void Recycle();
+        protected internal void Recycle();
     }
 }
