@@ -21,6 +21,16 @@ namespace UniT.Extensions
             return enumerable.Aggregate(seed, (current, tuple) => func(current, tuple.Item1, tuple.Item2));
         }
 
+        public static TResult Min<TFirst, TSecond, TResult>(this IEnumerable<(TFirst, TSecond)> enumerable, Func<TFirst, TSecond, TResult> selector)
+        {
+            return enumerable.Min(tuple => selector(tuple.Item1, tuple.Item2));
+        }
+
+        public static TResult Max<TFirst, TSecond, TResult>(this IEnumerable<(TFirst, TSecond)> enumerable, Func<TFirst, TSecond, TResult> selector)
+        {
+            return enumerable.Max(tuple => selector(tuple.Item1, tuple.Item2));
+        }
+
         public static void ForEach<TFirst, TSecond>(this IEnumerable<(TFirst, TSecond)> enumerable, Action<TFirst, TSecond> action)
         {
             enumerable.ForEach(tuple => action(tuple.Item1, tuple.Item2));
