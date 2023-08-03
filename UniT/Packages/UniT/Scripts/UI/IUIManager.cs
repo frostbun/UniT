@@ -12,26 +12,26 @@ namespace UniT.UI
 
         public TView Initialize<TView>(TView view) where TView : IView;
 
-        public IScreenView StackingScreen { get; }
+        public IScreen StackingScreen { get; }
 
-        public IScreenView NextScreenInStack { get; }
+        public IScreen NextScreenInStack { get; }
 
-        public IEnumerable<IScreenView> FloatingScreens { get; }
+        public IEnumerable<IScreen> FloatingScreens { get; }
 
-        public IEnumerable<IScreenView> DockedScreens { get; }
+        public IEnumerable<IScreen> DockedScreens { get; }
 
-        public UniTask<IScreenView> GetScreen<TScreenView>(string key) where TScreenView : Component, IScreenView;
+        public UniTask<IScreen> GetScreen<TScreen>(string key) where TScreen : Component, IScreen;
 
-        public UniTask<IScreenView> GetScreen<TScreenView>() where TScreenView : Component, IScreenView;
+        public UniTask<IScreen> GetScreen<TScreen>() where TScreen : Component, IScreen;
 
-        public void Stack(IScreenView screen, bool force = false);
+        public void Stack(IScreen screen, bool force = false);
 
-        public void Float(IScreenView screen, bool force = false);
+        public void Float(IScreen screen, bool force = false);
 
-        public void Dock(IScreenView screen, bool force = false);
+        public void Dock(IScreen screen, bool force = false);
 
-        public void Hide(IScreenView screen, bool removeFromStack = true, bool autoStack = true);
+        public void Hide(IScreen screen, bool removeFromStack = true, bool autoStack = true);
 
-        public void Dispose(IScreenView screen, bool autoStack = true);
+        public void Dispose(IScreen screen, bool autoStack = true);
     }
 }

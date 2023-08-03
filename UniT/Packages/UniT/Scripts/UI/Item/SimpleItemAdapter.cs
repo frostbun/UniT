@@ -4,7 +4,7 @@ namespace UniT.UI.Item
     using UniT.Extensions;
     using UnityEngine;
 
-    public abstract class SimpleItemAdapter<TItem, TView> : BaseView, IItemAdapter where TView : Component, IItemView
+    public abstract class SimpleItemAdapter<TItem, TView> : BaseView where TView : Component, IItemView
     {
         [SerializeField] private RectTransform _content;
         [SerializeField] private TView         _itemPrefab;
