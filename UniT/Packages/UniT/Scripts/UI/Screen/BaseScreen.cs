@@ -14,7 +14,7 @@ namespace UniT.UI.Screen
             this.OnHide();
         }
 
-        public IScreen.Status CurrentStatus { get; private set; }
+        public IScreen.Status CurrentStatus { get; private set; } = IScreen.Status.Hidden;
 
         private readonly Dictionary<string, object> _extras = new();
 

@@ -20,6 +20,8 @@ namespace UniT.UI
 
         public IEnumerable<IScreen> DockedScreens { get; }
 
+        public IScreen GetScreen(IScreen screen);
+
         public UniTask<IScreen> GetScreen<TScreen>(string key) where TScreen : Component, IScreen;
 
         public UniTask<IScreen> GetScreen<TScreen>() where TScreen : Component, IScreen;

@@ -40,16 +40,6 @@ namespace UniT.UI
 
         public TView Initialize<TView>(TView view) where TView : IView
         {
-            if (view is IScreen screen)
-            {
-                if (!this._screens.TryAdd(view.GetType(), screen))
-                {
-                    this._logger.Warning($"ScreenView {view.GetType().Name} already initialized");
-                    return view;
-                }
-                screen.transform.SetParent(this._hiddenScreens, false);
-                screen.CurrentStatus = IScreen.Status.Hidden;
-            }
             if (view is IViewWithPresenter viewWithPresenter)
             {
                 var presenter = this._presenterFactory.Create(viewWithPresenter.PresenterType);
@@ -70,6 +60,13 @@ namespace UniT.UI
 
         public IEnumerable<IScreen> DockedScreens => this._screens.Values.Where(screen => screen.CurrentStatus is IScreen.Status.Docked);
 
+        public IScreen GetScreen(IScreen screen)
+        {
+            var initializedScreen = this._screens.GetOrAdd(screen.GetType(), () => this.Initialize(screen));
+            if (initializedScreen != screen) this._logger.Warning($"Found another instance of {screen.GetType().Name} in the manager. Using the cached instance.");
+            return initializedScreen;
+        }
+
         public UniTask<IScreen> GetScreen<TScreen>(string key) where TScreen : Component, IScreen
         {
             return this._screens.GetOrAdd(
@@ -77,7 +74,7 @@ namespace UniT.UI
                 () => this._assetsManager.LoadComponent<TScreen>(key).ContinueWith(screenPrefab =>
                 {
                     this._keys.Add(typeof(TScreen), key);
-                    return (IScreen)this.Initialize(Instantiate(screenPrefab));
+                    return (IScreen)this.Initialize(Instantiate(screenPrefab, this._hiddenScreens, false));
                 })
             );
         }
@@ -106,12 +103,12 @@ namespace UniT.UI
         public void Dispose(IScreen screen, bool autoStack = true)
         {
             this.Hide(screen, true, autoStack);
-            Destroy(screen.gameObject);
             this._screens.Remove(screen.GetType());
-            if (!this._keys.Remove(screen.GetType(), out var key)) return;
-            this._assetsManager.Unload(key);
             this._logger.Debug($"{screen.GetType().Name} status: {screen.CurrentStatus = IScreen.Status.Disposed}");
             screen.OnDispose();
+            Destroy(screen.gameObject);
+            if (!this._keys.Remove(screen.GetType(), out var key)) return;
+            this._assetsManager.Unload(key);
         }
 
         private void Show(IScreen screen, bool force, IScreen.Status nextStatus)
