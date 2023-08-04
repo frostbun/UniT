@@ -16,8 +16,8 @@ namespace UniT.Utilities
 
     public static class InitializableExtensions
     {
-        public static void Initialize(this IEnumerable<IInitializable> initializables) => initializables.ForEach(initializable => initializable.Initialize());
+        public static void InitializeAll(this IEnumerable<IInitializable> initializables) => initializables.ForEach(initializable => initializable.Initialize());
 
-        public static UniTask InitializeAsync(this IEnumerable<IAsyncInitializable> asyncInitializables) => UniTask.WhenAll(asyncInitializables.Select(asyncInitializable => asyncInitializable.InitializeAsync()));
+        public static UniTask InitializeAllAsync(this IEnumerable<IAsyncInitializable> asyncInitializables) => UniTask.WhenAll(asyncInitializables.Select(asyncInitializable => asyncInitializable.InitializeAsync()));
     }
 }
