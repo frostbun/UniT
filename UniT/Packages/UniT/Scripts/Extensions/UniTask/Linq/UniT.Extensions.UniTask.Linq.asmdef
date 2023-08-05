@@ -1,8 +1,0 @@
-{
-  "name": "UniT.Extensions.UniTask.Linq",
-  "rootNamespace": "UniT",
-  "references": [
-    "UniTask",
-    "UniTask.Linq"
-  ]
-}

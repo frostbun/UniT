@@ -6,7 +6,6 @@ namespace UniT.UI
     using Cysharp.Threading.Tasks;
     using UniT.Assets;
     using UniT.Extensions;
-    using UniT.Extensions.UniTask;
     using UniT.Logging;
     using UniT.UI.Screen;
     using UnityEngine;

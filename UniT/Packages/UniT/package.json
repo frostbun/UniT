@@ -2,19 +2,20 @@
   "name": "com.frostbun.unit",
   "displayName": "UniT",
   "version": "1.0.0",
-  "unity": "2022.3",
   "description": "",
+  "license": "MIT",
+  "unity": "2023.5",
   "author": {
     "name": "frostbun",
     "email": "manhnb1911@gmail.com",
     "url": "https://github.com/frostbun"
   },
-  "license": "MIT",
   "dependencies": {
     "com.unity.addressables": "1.21.12",
     "com.unity.nuget.newtonsoft-json": "3.2.1"
   },
   "gitDependencies": {
-    "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask"
+    "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
+    "com.frostbun.unit.extensions": "https://github.com/frostbun/UniT.Extensions.git"
   }
 }

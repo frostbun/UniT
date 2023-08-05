@@ -5,7 +5,6 @@ namespace UniT.Audio
     using Cysharp.Threading.Tasks;
     using UniT.Assets;
     using UniT.Extensions;
-    using UniT.Extensions.UniTask;
     using UniT.Logging;
     using UniT.Utilities;
     using UnityEngine;

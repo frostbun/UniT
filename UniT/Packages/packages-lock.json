@@ -1,14 +1,14 @@
 {
   "dependencies": {
-    "com.coffee.git-dependency-resolver": {
-      "version": "https://github.com/mob-sakai/GitDependencyResolverForUnity.git",
+    "com.cysharp.unitask": {
+      "version": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "d4fc38c92fb139b4184912f20556ab27a3b519fa"
+      "hash": "d210e3d76adc0cce77f4ad2af1ade88dad6b1d5a"
     },
-    "com.cysharp.unitask": {
-      "version": "file:.com.cysharp.unitask@2.3.3",
+    "com.frostbun.fbinstant": {
+      "version": "file:FbInstant",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}
@@ -21,6 +21,12 @@
         "com.unity.addressables": "1.21.12",
         "com.unity.nuget.newtonsoft-json": "3.2.1"
       }
+    },
+    "com.frostbun.unit.extensions": {
+      "version": "file:UniT.Extensions",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
     },
     "com.unity.2d.sprite": {
       "version": "1.0.0",

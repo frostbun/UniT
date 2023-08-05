@@ -5,7 +5,6 @@ namespace UniT.ObjectPool
     using Cysharp.Threading.Tasks;
     using UniT.Assets;
     using UniT.Extensions;
-    using UniT.Extensions.UniTask;
     using UniT.Logging;
     using UnityEngine;
     using UnityEngine.Scripting;
