@@ -2,7 +2,7 @@
   "name": "com.frostbun.unit",
   "displayName": "UniT",
   "version": "1.0.0",
-  "description": "",
+  "description": "A lightweight Unity library for common tasks",
   "license": "MIT",
   "unity": "2023.5",
   "author": {
