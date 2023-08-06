@@ -92,7 +92,7 @@ namespace UniT.UI
         public void Hide(IScreen screen, bool removeFromStack = true, bool autoStack = true)
         {
             if (screen.CurrentStatus is IScreen.Status.Hidden) return;
-            screen.transform.SetParent(this._hiddenScreens, false);
+            screen.Transform.SetParent(this._hiddenScreens, false);
             this._logger.Debug($"{screen.GetType().Name} status: {screen.CurrentStatus = IScreen.Status.Hidden}");
             screen.OnHide();
             if (removeFromStack) this.RemoveFromStack(screen);
@@ -105,7 +105,7 @@ namespace UniT.UI
             this._screens.Remove(screen.GetType());
             this._logger.Debug($"{screen.GetType().Name} status: {screen.CurrentStatus = IScreen.Status.Disposed}");
             screen.OnDispose();
-            Destroy(screen.gameObject);
+            Destroy(screen.GameObject);
             if (!this._keys.Remove(screen.GetType(), out var key)) return;
             this._assetsManager.Unload(key);
         }
@@ -120,21 +120,21 @@ namespace UniT.UI
                 {
                     this.AddToStack(screen);
                     this.HideUndockedScreens();
-                    screen.transform.SetParent(this._stackingScreens, false);
+                    screen.Transform.SetParent(this._stackingScreens, false);
                     break;
                 }
                 case IScreen.Status.Floating:
                 {
-                    screen.transform.SetParent(this._floatingScreens, false);
+                    screen.Transform.SetParent(this._floatingScreens, false);
                     break;
                 }
                 case IScreen.Status.Docked:
                 {
-                    screen.transform.SetParent(this._dockedScreens, false);
+                    screen.Transform.SetParent(this._dockedScreens, false);
                     break;
                 }
             }
-            screen.transform.SetAsLastSibling();
+            screen.Transform.SetAsLastSibling();
             this._logger.Debug($"{screen.GetType().Name} status: {screen.CurrentStatus = nextStatus}");
             screen.OnShow();
         }

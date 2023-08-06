@@ -4,9 +4,31 @@ namespace UniT.UI.Item
 
     public abstract class BaseItemView<TItem> : BaseView, IItemView
     {
+        public TItem Item { get; private set; }
+
+        protected virtual void OnShow()
+        {
+        }
+
+        protected virtual void OnHide()
+        {
+        }
+
+        protected virtual void OnDispose()
+        {
+        }
+
+        #region Interface Implementation
+
         object IItemView.Item { set => this.Item = (TItem)value; }
 
-        public TItem Item { get; private set; }
+        void IItemView.OnShow() => this.OnShow();
+
+        void IItemView.OnHide() => this.OnHide();
+
+        void IItemView.OnDispose() => this.OnDispose();
+
+        #endregion
     }
 
     public abstract class BaseItemView<TItem, TPresenter> : BaseItemView<TItem>, IItemViewWithPresenter where TPresenter : IPresenter

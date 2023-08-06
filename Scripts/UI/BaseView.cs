@@ -5,33 +5,23 @@ namespace UniT.UI
 
     public abstract class BaseView : MonoBehaviour, IView
     {
-        IUIManager IView.Manager { get => this.Manager; set => this.Manager = value; }
-
-        void IView.OnInitialize() => this.OnInitialize();
-
-        void IView.OnShow() => this.OnShow();
-
-        void IView.OnHide() => this.OnHide();
-
-        void IView.OnDispose() => this.OnDispose();
-
         public IUIManager Manager { get; private set; }
 
         protected virtual void OnInitialize()
         {
         }
 
-        protected virtual void OnShow()
-        {
-        }
+        #region Interface Implementation
 
-        protected virtual void OnHide()
-        {
-        }
+        IUIManager IView.Manager { get => this.Manager; set => this.Manager = value; }
 
-        protected virtual void OnDispose()
-        {
-        }
+        void IView.OnInitialize() => this.OnInitialize();
+
+        GameObject IView.GameObject => this.gameObject;
+
+        Transform IView.Transform => this.transform;
+
+        #endregion
     }
 
     public abstract class BaseView<TPresenter> : BaseView, IViewWithPresenter where TPresenter : IPresenter

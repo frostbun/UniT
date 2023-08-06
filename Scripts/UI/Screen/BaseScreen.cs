@@ -6,14 +6,6 @@ namespace UniT.UI.Screen
 
     public abstract class BaseScreen : BaseView, IScreen
     {
-        IScreen.Status IScreen.CurrentStatus { get => this.CurrentStatus; set => this.CurrentStatus = value; }
-
-        void IView.OnHide()
-        {
-            this._extras.Clear();
-            this.OnHide();
-        }
-
         public IScreen.Status CurrentStatus { get; private set; } = IScreen.Status.Hidden;
 
         private readonly Dictionary<string, object> _extras = new();
@@ -28,6 +20,34 @@ namespace UniT.UI.Screen
         {
             return (T)this._extras.GetOrDefault(key);
         }
+
+        protected virtual void OnShow()
+        {
+        }
+
+        protected virtual void OnHide()
+        {
+        }
+
+        protected virtual void OnDispose()
+        {
+        }
+
+        #region Interface Implementation
+
+        IScreen.Status IScreen.CurrentStatus { get => this.CurrentStatus; set => this.CurrentStatus = value; }
+
+        void IScreen.OnShow() => this.OnShow();
+
+        void IScreen.OnHide()
+        {
+            this._extras.Clear();
+            this.OnHide();
+        }
+
+        void IScreen.OnDispose() => this.OnDispose();
+
+        #endregion
     }
 
     public abstract class BaseScreen<TPresenter> : BaseScreen, IScreenWithPresenter where TPresenter : IPresenter

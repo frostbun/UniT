@@ -9,15 +9,9 @@ namespace UniT.UI
 
         protected internal void OnInitialize();
 
-        protected internal void OnShow();
+        protected internal GameObject GameObject { get; }
 
-        protected internal void OnHide();
-
-        protected internal void OnDispose();
-
-        public GameObject gameObject { get; }
-
-        public Transform transform { get; }
+        protected internal Transform Transform { get; }
     }
 
     public interface IViewWithPresenter : IView
