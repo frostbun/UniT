@@ -1,5 +1,5 @@
 {
-  "name": "com.frostbun.unit",
+  "name": "com.frostbun.unit.core",
   "displayName": "UniT",
   "version": "1.0.0",
   "description": "A lightweight Unity library for common tasks",

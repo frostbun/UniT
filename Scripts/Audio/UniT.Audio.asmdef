@@ -6,7 +6,6 @@
     "UniT.Assets",
     "UniT.Logging",
     "UniT.Reactive",
-    "UniT.Utilities",
     "UniT.Extensions",
     "UniT.Extensions.UniTask"
   ]

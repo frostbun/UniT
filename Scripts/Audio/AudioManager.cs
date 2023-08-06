@@ -6,7 +6,6 @@ namespace UniT.Audio
     using UniT.Assets;
     using UniT.Extensions;
     using UniT.Logging;
-    using UniT.Utilities;
     using UnityEngine;
     using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;

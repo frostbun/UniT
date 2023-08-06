@@ -1,7 +1,7 @@
 namespace UniT.UI
 {
     using System;
-    using UniT.Utilities;
+    using UniT.Extensions;
 
     public interface IPresenter
     {
