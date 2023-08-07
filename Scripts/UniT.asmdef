@@ -1,10 +1,11 @@
 {
-  "name": "UniT.ObjectPool",
+  "name": "UniT",
   "rootNamespace": "UniT",
   "references": [
+    "Unity.Addressables",
+    "Unity.ResourceManager",
     "UniTask",
-    "UniT.Assets",
-    "UniT.Logging",
+    "UniTask.Addressables",
     "UniT.Extensions",
     "UniT.Extensions.UniTask"
   ]
