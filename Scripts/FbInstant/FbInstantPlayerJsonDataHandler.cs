@@ -1,6 +1,7 @@
 ﻿#if UNIT_FBINSTANT
 namespace UniT.Data.Json
 {
+    using System;
     using Cysharp.Threading.Tasks;
     using FbInstant.Player;
     using UniT.Extensions;
@@ -15,6 +16,11 @@ namespace UniT.Data.Json
         public FbInstantPlayerJsonDataHandler(FbInstantPlayer player, ILogger logger = null) : base(logger)
         {
             this._player = player;
+        }
+
+        protected override bool CanHandle(Type type)
+        {
+            return base.CanHandle(type) && typeof(IPlayerData).IsAssignableFrom(type);
         }
 
         protected override UniTask<string[]> LoadRawData(string[] keys)
