@@ -8,11 +8,11 @@
 
 2. Install via git url
     ```
-    https://github.com/frostbun/UniT.git?path=UniT/Packages/UniT
+    https://github.com/frostbun/UniT.git
     ```
     or add
     ```
-    "com.frostbun.unit": "https://github.com/frostbun/UniT.git?path=UniT/Packages/UniT"
+    "com.frostbun.unit": "https://github.com/frostbun/UniT.git"
     ```
     to your `Packages/manifest.json`
 
