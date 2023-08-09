@@ -4,48 +4,48 @@ namespace UniT.UI.Item
     using UniT.Extensions;
     using UnityEngine;
 
-    public abstract class SimpleItemAdapter<TItem, TView> : BaseView where TView : Component, IItemView
+    public abstract class SimpleItemAdapter<TModel, TView> : BaseView where TView : Component, IItemView
     {
         [SerializeField] private RectTransform _content;
         [SerializeField] private TView         _itemPrefab;
 
-        private readonly Queue<IItemView>   _pooledViews  = new();
-        private readonly HashSet<IItemView> _spawnedViews = new();
+        private readonly Queue<IItemView>   _pooledItems  = new();
+        private readonly HashSet<IItemView> _spawnedItems = new();
 
-        public void Show(IEnumerable<TItem> items)
+        public void Show(IEnumerable<TModel> models)
         {
             this.Hide();
-            items.ForEach(item =>
+            models.ForEach(model =>
             {
-                var itemView = this._pooledViews.DequeueOrDefault(() => this.Manager.Initialize(Instantiate(this._itemPrefab, this._content)));
-                itemView.Transform.SetAsLastSibling();
-                itemView.GameObject.SetActive(true);
-                itemView.Item = item;
-                itemView.OnShow();
-                this._spawnedViews.Add(itemView);
+                var item = this._pooledItems.DequeueOrDefault(() => this.Manager.Initialize(Instantiate(this._itemPrefab, this._content)));
+                item.Transform.SetAsLastSibling();
+                item.GameObject.SetActive(true);
+                item.Model = model;
+                item.OnShow();
+                this._spawnedItems.Add(item);
             });
         }
 
         public void Hide()
         {
-            this._spawnedViews.ForEach(itemView =>
+            this._spawnedItems.ForEach(itemView =>
             {
                 itemView.GameObject.SetActive(false);
                 itemView.OnHide();
-                this._pooledViews.Enqueue(itemView);
+                this._pooledItems.Enqueue(itemView);
             });
-            this._spawnedViews.Clear();
+            this._spawnedItems.Clear();
         }
 
         public void Dispose()
         {
             this.Hide();
-            this._pooledViews.ForEach(itemView =>
+            this._pooledItems.ForEach(itemView =>
             {
                 itemView.OnDispose();
                 Destroy(itemView.GameObject);
             });
-            this._pooledViews.Clear();
+            this._pooledItems.Clear();
         }
     }
 }

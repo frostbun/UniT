@@ -12,7 +12,7 @@ namespace UniT.UI.Screen
 
         public IScreen PutExtra<T>(string key, T value)
         {
-            this._extras.Add(key, value);
+            this._extras[key] = value;
             return this;
         }
 

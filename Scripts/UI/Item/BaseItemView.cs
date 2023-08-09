@@ -2,9 +2,9 @@ namespace UniT.UI.Item
 {
     using System;
 
-    public abstract class BaseItemView<TItem> : BaseView, IItemView
+    public abstract class BaseItemView<TModel> : BaseView, IItemView
     {
-        public TItem Item { get; private set; }
+        public TModel Model { get; private set; }
 
         protected virtual void OnShow()
         {
@@ -20,7 +20,7 @@ namespace UniT.UI.Item
 
         #region Interface Implementation
 
-        object IItemView.Item { set => this.Item = (TItem)value; }
+        object IItemView.Model { set => this.Model = (TModel)value; }
 
         void IItemView.OnShow() => this.OnShow();
 
@@ -31,7 +31,7 @@ namespace UniT.UI.Item
         #endregion
     }
 
-    public abstract class BaseItemView<TItem, TPresenter> : BaseItemView<TItem>, IItemViewWithPresenter where TPresenter : IPresenter
+    public abstract class BaseItemView<TModel, TPresenter> : BaseItemView<TModel>, IItemViewWithPresenter where TPresenter : IPresenter
     {
         Type IViewWithPresenter.PresenterType => this.PresenterType;
 
