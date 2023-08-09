@@ -41,19 +41,19 @@ namespace UniT.Advertisements
 
         public bool IsInterstitialAdReady() => this._config.InterstitialAdIds.Any(this._advertisement.IsInterstitialAdReady);
 
-        public void LoadInterstitialAd() => this.Invoke(this._config.InterstitialAdIds, this._advertisement.LoadInterstitialAd);
-
         public void ShowInterstitialAd(Action onComplete = null) => this.InvokeOnce(this._config.InterstitialAdIds, this._advertisement.IsInterstitialAdReady, this._advertisement.ShowInterstitialAd, this.LoadInterstitialAd, onComplete);
 
         public bool IsRewardedAdReady() => this._config.RewardedAdIds.Any(this._advertisement.IsRewardedAdReady);
-
-        public void LoadRewardedAd() => this.Invoke(this._config.RewardedAdIds, this._advertisement.LoadRewardedAd);
 
         public void ShowRewardedAd(Action onSuccess, Action onComplete = null) => this.InvokeOnce(this._config.RewardedAdIds, this._advertisement.IsRewardedAdReady, this._advertisement.ShowRewardedAd, this.LoadRewardedAd + onSuccess, onComplete);
 
         #endregion
 
         #region Private
+
+        private void LoadInterstitialAd() => this.Invoke(this._config.InterstitialAdIds, this._advertisement.LoadInterstitialAd);
+
+        private void LoadRewardedAd() => this.Invoke(this._config.RewardedAdIds, this._advertisement.LoadRewardedAd);
 
         private static readonly int[] RetryIntervals = { 4, 8, 16, 32, 64 };
 

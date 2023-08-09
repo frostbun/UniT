@@ -32,11 +32,6 @@ namespace UniT.Advertisements
             return true;
         }
 
-        public void LoadInterstitialAd()
-        {
-            this._logger.Debug("LoadInterstitialAd");
-        }
-
         public void ShowInterstitialAd(Action onComplete = null)
         {
             this._logger.Debug("ShowInterstitialAd");
@@ -47,11 +42,6 @@ namespace UniT.Advertisements
         {
             this._logger.Debug("IsRewardedAdReady");
             return true;
-        }
-
-        public void LoadRewardedAd()
-        {
-            this._logger.Debug("LoadRewardedAd");
         }
 
         public void ShowRewardedAd(Action onSuccess, Action onComplete = null)
