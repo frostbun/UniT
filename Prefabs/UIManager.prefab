@@ -114,10 +114,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f2d2f4cb21f4a9eba110eb044b51470, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _hiddenScreens: {fileID: 4844402355532486865}
-  _stackingScreens: {fileID: 5023623361030653169}
-  _floatingScreens: {fileID: 6122369654255445415}
-  _dockedScreens: {fileID: 2370031990960692002}
+  _hiddenActivities: {fileID: 4844402355532486865}
+  _stackingActivities: {fileID: 5023623361030653169}
+  _floatingActivities: {fileID: 6122369654255445415}
+  _dockedActivities: {fileID: 2370031990960692002}
 --- !u!1 &2329050281855682475
 GameObject:
   m_ObjectHideFlags: 0
@@ -233,7 +233,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5023623361030653169}
   m_Layer: 0
-  m_Name: StackingScreens
+  m_Name: StackingActivities
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -268,7 +268,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2370031990960692002}
   m_Layer: 0
-  m_Name: DockedScreens
+  m_Name: DockedActivities
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -303,7 +303,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6122369654255445415}
   m_Layer: 0
-  m_Name: FloatingScreens
+  m_Name: FloatingActivities
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -338,7 +338,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4844402355532486865}
   m_Layer: 0
-  m_Name: HiddenScreens
+  m_Name: HiddenActivities
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -1,6 +1,6 @@
-namespace UniT.UI.Screen
+namespace UniT.UI.Activity
 {
-    public interface IScreen : IView
+    public interface IActivity : IView
     {
         public enum Status
         {
@@ -13,7 +13,7 @@ namespace UniT.UI.Screen
 
         public Status CurrentStatus { get; protected internal set; }
 
-        public IScreen PutExtra<T>(string key, T value);
+        public IActivity PutExtra<T>(string key, T value);
 
         public T GetExtra<T>(string key);
 
@@ -24,7 +24,7 @@ namespace UniT.UI.Screen
         protected internal void OnDispose();
     }
 
-    public interface IScreenWithPresenter : IScreen, IViewWithPresenter
+    public interface IActivityWithPresenter : IActivity, IViewWithPresenter
     {
     }
 }

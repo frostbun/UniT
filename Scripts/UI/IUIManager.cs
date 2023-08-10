@@ -3,7 +3,7 @@ namespace UniT.UI
     using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
     using UniT.Logging;
-    using UniT.UI.Screen;
+    using UniT.UI.Activity;
     using UnityEngine;
 
     public interface IUIManager
@@ -12,28 +12,28 @@ namespace UniT.UI
 
         public TView Initialize<TView>(TView view) where TView : IView;
 
-        public IScreen StackingScreen { get; }
+        public IActivity StackingActivity { get; }
 
-        public IScreen NextScreenInStack { get; }
+        public IActivity NextActivityInStack { get; }
 
-        public IEnumerable<IScreen> FloatingScreens { get; }
+        public IEnumerable<IActivity> FloatingActivities { get; }
 
-        public IEnumerable<IScreen> DockedScreens { get; }
+        public IEnumerable<IActivity> DockedActivities { get; }
 
-        public IScreen GetScreen(IScreen screen);
+        public IActivity GetActivity(IActivity activity);
 
-        public UniTask<IScreen> GetScreen<TScreen>(string key) where TScreen : Component, IScreen;
+        public UniTask<IActivity> GetActivity<TActivity>(string key) where TActivity : Component, IActivity;
 
-        public UniTask<IScreen> GetScreen<TScreen>() where TScreen : Component, IScreen;
+        public UniTask<IActivity> GetActivity<TActivity>() where TActivity : Component, IActivity;
 
-        public void Stack(IScreen screen, bool force = false);
+        public void Stack(IActivity activity, bool force = false);
 
-        public void Float(IScreen screen, bool force = false);
+        public void Float(IActivity activity, bool force = false);
 
-        public void Dock(IScreen screen, bool force = false);
+        public void Dock(IActivity activity, bool force = false);
 
-        public void Hide(IScreen screen, bool removeFromStack = true, bool autoStack = true);
+        public void Hide(IActivity activity, bool removeFromStack = true, bool autoStack = true);
 
-        public void Dispose(IScreen screen, bool autoStack = true);
+        public void Dispose(IActivity activity, bool autoStack = true);
     }
 }

@@ -1,16 +1,16 @@
-namespace UniT.UI.Screen
+namespace UniT.UI.Activity
 {
     using System;
     using System.Collections.Generic;
     using UniT.Extensions;
 
-    public abstract class BaseScreen : BaseView, IScreen
+    public abstract class BaseActivity : BaseView, IActivity
     {
-        public IScreen.Status CurrentStatus { get; private set; } = IScreen.Status.Hidden;
+        public IActivity.Status CurrentStatus { get; private set; } = IActivity.Status.Hidden;
 
         private readonly Dictionary<string, object> _extras = new();
 
-        public IScreen PutExtra<T>(string key, T value)
+        public IActivity PutExtra<T>(string key, T value)
         {
             this._extras[key] = value;
             return this;
@@ -35,22 +35,22 @@ namespace UniT.UI.Screen
 
         #region Interface Implementation
 
-        IScreen.Status IScreen.CurrentStatus { get => this.CurrentStatus; set => this.CurrentStatus = value; }
+        IActivity.Status IActivity.CurrentStatus { get => this.CurrentStatus; set => this.CurrentStatus = value; }
 
-        void IScreen.OnShow() => this.OnShow();
+        void IActivity.OnShow() => this.OnShow();
 
-        void IScreen.OnHide()
+        void IActivity.OnHide()
         {
             this._extras.Clear();
             this.OnHide();
         }
 
-        void IScreen.OnDispose() => this.OnDispose();
+        void IActivity.OnDispose() => this.OnDispose();
 
         #endregion
     }
 
-    public abstract class BaseScreen<TPresenter> : BaseScreen, IScreenWithPresenter where TPresenter : IPresenter
+    public abstract class BaseActivity<TPresenter> : BaseActivity, IActivityWithPresenter where TPresenter : IPresenter
     {
         Type IViewWithPresenter.PresenterType => this.PresenterType;
 

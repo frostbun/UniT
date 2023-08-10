@@ -28,11 +28,11 @@ namespace UniT.UI.Item
 
         public void Hide()
         {
-            this._spawnedItems.ForEach(itemView =>
+            this._spawnedItems.ForEach(item =>
             {
-                itemView.GameObject.SetActive(false);
-                itemView.OnHide();
-                this._pooledItems.Enqueue(itemView);
+                item.GameObject.SetActive(false);
+                item.OnHide();
+                this._pooledItems.Enqueue(item);
             });
             this._spawnedItems.Clear();
         }
@@ -40,10 +40,10 @@ namespace UniT.UI.Item
         public void Dispose()
         {
             this.Hide();
-            this._pooledItems.ForEach(itemView =>
+            this._pooledItems.ForEach(item =>
             {
-                itemView.OnDispose();
-                Destroy(itemView.GameObject);
+                item.OnDispose();
+                Destroy(item.GameObject);
             });
             this._pooledItems.Clear();
         }
