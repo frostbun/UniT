@@ -4,9 +4,9 @@ namespace UniT.Audio
     using System.Linq;
     using System.Runtime.CompilerServices;
     using Cysharp.Threading.Tasks;
-    using UniT.Assets;
     using UniT.Extensions;
     using UniT.Logging;
+    using UniT.ResourceManager;
     using UnityEngine;
     using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;
@@ -15,7 +15,7 @@ namespace UniT.Audio
     {
         #region Constructor
 
-        private readonly IAssetsManager                  _assetsManager;
+        private readonly IAssetManager                   _assetManager;
         private readonly GameObject                      _audioSourcesContainer;
         private readonly AudioSource                     _musicSource;
         private readonly Queue<AudioSource>              _pooledSoundSources;
@@ -23,10 +23,10 @@ namespace UniT.Audio
         private readonly ILogger                         _logger;
 
         [Preserve]
-        public AudioManager(IAudioConfig config, IAssetsManager assetsManager = null, ILogger logger = null)
+        public AudioManager(IAudioConfig config, IAssetManager assetManager = null, ILogger logger = null)
         {
-            this.Config         = config;
-            this._assetsManager = assetsManager ?? IAssetsManager.Default();
+            this.Config        = config;
+            this._assetManager = assetManager ?? IAssetManager.Default();
 
             this._audioSourcesContainer = new GameObject(this.GetType().Name).DontDestroyOnLoad();
 
@@ -119,7 +119,7 @@ namespace UniT.Audio
                 }
                 soundSource.Stop();
                 soundSource.clip = null;
-                this._assetsManager.Unload(name);
+                this._assetManager.Unload(name);
                 this._pooledSoundSources.Enqueue(soundSource);
                 this._logger.Debug($"Unloaded sound {name}");
             });
@@ -167,10 +167,10 @@ namespace UniT.Audio
         public UniTask LoadMusic(string name)
         {
             if (this.CurrentMusic == name) return UniTask.CompletedTask;
-            return this._assetsManager.Load<AudioClip>(name).ContinueWith(audioClip =>
+            return this._assetManager.Load<AudioClip>(name).ContinueWith(audioClip =>
             {
                 if (this.CurrentMusic == name) return; // Another load request was made while this one was loading
-                if (this.CurrentMusic != null) this._assetsManager.Unload(this.CurrentMusic);
+                if (this.CurrentMusic != null) this._assetManager.Unload(this.CurrentMusic);
                 this.CurrentMusic      = name;
                 this._musicSource.clip = audioClip;
             });
@@ -210,7 +210,7 @@ namespace UniT.Audio
         {
             return this._loadedSoundSources.GetOrAdd(name, () =>
             {
-                return this._assetsManager.Load<AudioClip>(name).ContinueWith(audioClip =>
+                return this._assetManager.Load<AudioClip>(name).ContinueWith(audioClip =>
                 {
                     var soundSource = this._pooledSoundSources.DequeueOrDefault(() =>
                     {

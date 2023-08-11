@@ -1,7 +1,8 @@
-namespace UniT.Assets
+namespace UniT.ResourceManager
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using Cysharp.Threading.Tasks;
     using UniT.Extensions;
@@ -11,7 +12,7 @@ namespace UniT.Assets
     using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;
 
-    public class ExternalAssetsManager : IExternalAssetsManager
+    public class ExternalAssetManager : IExternalAssetManager
     {
         #region Constructor
 
@@ -19,10 +20,22 @@ namespace UniT.Assets
         private readonly ILogger                                           _logger;
 
         [Preserve]
-        public ExternalAssetsManager(ILogger logger = null)
+        public ExternalAssetManager(ILogger logger = null)
         {
             this._loadedAssets = new();
             this._logger       = logger ?? ILogger.Default(this.GetType().Name);
+        }
+
+        #endregion
+
+        #region Finalizer
+
+        ~ExternalAssetManager() => this.Dispose();
+
+        public void Dispose()
+        {
+            this._loadedAssets.Keys.ToList().ForEach(this.Unload);
+            this._logger.Debug("Disposed");
         }
 
         #endregion

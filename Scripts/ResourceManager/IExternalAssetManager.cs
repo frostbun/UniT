@@ -1,4 +1,4 @@
-namespace UniT.Assets
+namespace UniT.ResourceManager
 {
     using System;
     using System.Threading;
@@ -6,7 +6,7 @@ namespace UniT.Assets
     using UniT.Logging;
     using UnityEngine;
 
-    public interface IExternalAssetsManager
+    public interface IExternalAssetManager : IDisposable
     {
         public LogConfig LogConfig { get; }
 

@@ -1,7 +1,8 @@
-namespace UniT.Assets
+namespace UniT.ResourceManager
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using Cysharp.Threading.Tasks;
     using UniT.Extensions;
@@ -9,25 +10,33 @@ namespace UniT.Assets
     using UnityEngine;
     using UnityEngine.AddressableAssets;
     using UnityEngine.ResourceManagement.AsyncOperations;
-    using UnityEngine.ResourceManagement.ResourceProviders;
-    using UnityEngine.SceneManagement;
     using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;
 
-    public class AddressablesManager : IAssetsManager
+    public class AddressableAssetManager : IAssetManager
     {
         #region Constructor
 
-        private readonly Dictionary<string, AsyncOperationHandle>                _loadedAssets;
-        private readonly Dictionary<string, AsyncOperationHandle<SceneInstance>> _loadedScenes;
-        private readonly ILogger                                                 _logger;
+        private readonly Dictionary<string, AsyncOperationHandle> _loadedAssets;
+        private readonly ILogger                                  _logger;
 
         [Preserve]
-        public AddressablesManager(ILogger logger = null)
+        public AddressableAssetManager(ILogger logger = null)
         {
             this._loadedAssets = new();
-            this._loadedScenes = new();
             this._logger       = logger ?? ILogger.Default(this.GetType().Name);
+        }
+
+        #endregion
+
+        #region Finalizer
+
+        ~AddressableAssetManager() => this.Dispose();
+
+        public void Dispose()
+        {
+            this._loadedAssets.Keys.ToList().ForEach(this.Unload);
+            this._logger.Debug("Disposed");
         }
 
         #endregion
@@ -79,43 +88,6 @@ namespace UniT.Assets
         public void Unload<T>()
         {
             this.Unload(typeof(T).GetKey());
-        }
-
-        public UniTask<SceneInstance> LoadScene(string sceneName, string key = null, LoadSceneMode loadMode = LoadSceneMode.Single, bool activateOnLoad = true, int priority = 100, IProgress<float> progress = null, CancellationToken cancellationToken = default)
-        {
-            if (this._loadedScenes.ContainsKey(key ??= sceneName))
-            {
-                var exception = new InvalidOperationException($"Key {key} already exists in loaded scenes");
-                this._logger.Exception(exception);
-                throw exception;
-            }
-            if (!activateOnLoad)
-            {
-                this._logger.Warning("Set `activateOnLoad` to false will block all other `AsyncOperationHandle` until the scene is activated");
-            }
-            return (this._loadedScenes[key] = Addressables.LoadSceneAsync(sceneName, loadMode, activateOnLoad, priority))
-                   .ToUniTask(progress: progress, cancellationToken: cancellationToken)
-                   .ContinueWith(scene =>
-                   {
-                       if (loadMode is LoadSceneMode.Single)
-                       {
-                           this._loadedScenes.RemoveAll((oldKey, _) => oldKey != key);
-                       }
-                       this._logger.Debug($"Loaded scene {key}");
-                       return scene;
-                   });
-        }
-
-        public UniTask UnloadScene(string key, IProgress<float> progress = null, CancellationToken cancellationToken = default)
-        {
-            if (!this._loadedScenes.Remove(key, out var scene))
-            {
-                this._logger.Warning($"Trying to unload scene {key} that was not loaded");
-                return UniTask.CompletedTask;
-            }
-            return Addressables.UnloadSceneAsync(scene)
-                               .ToUniTask(progress: progress, cancellationToken: cancellationToken)
-                               .ContinueWith(_ => this._logger.Debug($"Unloaded scene {key}"));
         }
 
         #endregion

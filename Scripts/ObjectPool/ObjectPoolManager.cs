@@ -4,9 +4,9 @@ namespace UniT.ObjectPool
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
     using Cysharp.Threading.Tasks;
-    using UniT.Assets;
     using UniT.Extensions;
     using UniT.Logging;
+    using UniT.ResourceManager;
     using UnityEngine;
     using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;
@@ -16,7 +16,7 @@ namespace UniT.ObjectPool
     {
         #region Constructor
 
-        private readonly IAssetsManager                     _assetsManager;
+        private readonly IAssetManager                      _assetManager;
         private readonly Transform                          _poolsContainer;
         private readonly Dictionary<GameObject, ObjectPool> _prefabToPool;
         private readonly Dictionary<string, ObjectPool>     _keyToPool;
@@ -24,9 +24,9 @@ namespace UniT.ObjectPool
         private readonly ILogger                            _logger;
 
         [Preserve]
-        public ObjectPoolManager(IAssetsManager assetsManager = null, ILogger logger = null)
+        public ObjectPoolManager(IAssetManager assetManager = null, ILogger logger = null)
         {
-            this._assetsManager  = assetsManager ?? IAssetsManager.Default();
+            this._assetManager   = assetManager ?? IAssetManager.Default();
             this._poolsContainer = new GameObject(this.GetType().Name).DontDestroyOnLoad().transform;
             this._prefabToPool   = new();
             this._keyToPool      = new();
@@ -52,7 +52,7 @@ namespace UniT.ObjectPool
 
         public UniTask<bool> InstantiatePool(string key, int initialCount = 1)
         {
-            return this._keyToPool.TryAdd(key, () => this._assetsManager.Load<GameObject>(key).ContinueWith(prefab => this.InstantiatePool_Internal(prefab, initialCount)));
+            return this._keyToPool.TryAdd(key, () => this._assetManager.Load<GameObject>(key).ContinueWith(prefab => this.InstantiatePool_Internal(prefab, initialCount)));
         }
 
         public UniTask<bool> InstantiatePool<T>(int initialCount = 1) where T : Component
@@ -105,7 +105,7 @@ namespace UniT.ObjectPool
             }
 
             this.DestroyPool_Internal(pool);
-            this._assetsManager.Unload(key);
+            this._assetManager.Unload(key);
         }
 
         public void DestroyPool<T>() where T : Component

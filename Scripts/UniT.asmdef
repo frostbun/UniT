@@ -2,8 +2,8 @@
   "name": "UniT",
   "rootNamespace": "UniT",
   "references": [
-    "Unity.Addressables",
     "Unity.ResourceManager",
+    "Unity.Addressables",
     "UniTask",
     "UniTask.Addressables",
     "UniT.Extensions",
