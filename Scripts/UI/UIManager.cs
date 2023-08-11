@@ -3,6 +3,7 @@ namespace UniT.UI
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Runtime.CompilerServices;
     using Cysharp.Threading.Tasks;
     using UniT.Assets;
     using UniT.Extensions;
@@ -14,6 +15,8 @@ namespace UniT.UI
 
     public class UIManager : MonoBehaviour, IUIManager
     {
+        #region Constructor
+
         [SerializeField] private RectTransform _hiddenActivities;
         [SerializeField] private RectTransform _stackingActivities;
         [SerializeField] private RectTransform _floatingActivities;
@@ -34,6 +37,10 @@ namespace UniT.UI
             this._logger           = logger ?? ILogger.Default(this.GetType().Name);
             return this.DontDestroyOnLoad();
         }
+
+        #endregion
+
+        #region Public
 
         public LogConfig LogConfig => this._logger.Config;
 
@@ -66,8 +73,9 @@ namespace UniT.UI
             return initializedActivity;
         }
 
-        public UniTask<IActivity> GetActivity<TActivity>(string key) where TActivity : Component, IActivity
+        public UniTask<IActivity> GetActivity<TActivity>(string key = null) where TActivity : Component, IActivity
         {
+            key ??= typeof(TActivity).GetKey();
             return this._activities.GetOrAdd(
                 typeof(TActivity),
                 () => this._assetsManager.LoadComponent<TActivity>(key).ContinueWith(activityPrefab =>
@@ -76,11 +84,6 @@ namespace UniT.UI
                     return (IActivity)this.Initialize(Instantiate(activityPrefab, this._hiddenActivities, false));
                 })
             );
-        }
-
-        public UniTask<IActivity> GetActivity<TActivity>() where TActivity : Component, IActivity
-        {
-            return this.GetActivity<TActivity>(typeof(TActivity).GetKey());
         }
 
         public void Stack(IActivity activity, bool force = false) => this.Show(activity, force, IActivity.Status.Stacking);
@@ -110,6 +113,11 @@ namespace UniT.UI
             this._assetsManager.Unload(key);
         }
 
+        #endregion
+
+        #region Private
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void Show(IActivity activity, bool force, IActivity.Status nextStatus)
         {
             if (!force && activity.CurrentStatus == nextStatus) return;
@@ -139,6 +147,7 @@ namespace UniT.UI
             activity.OnShow();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void AddToStack(IActivity activity)
         {
             var index = this._activityStack.IndexOf(activity);
@@ -152,11 +161,13 @@ namespace UniT.UI
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void RemoveFromStack(IActivity activity)
         {
             this._activityStack.Remove(activity);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void StackNextActivity()
         {
             if (this.StackingActivity is not null) return;
@@ -165,11 +176,14 @@ namespace UniT.UI
             this.Stack(nextActivity);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void HideUndockedActivities()
         {
             this._activities.Values.ToArray()
                 .Where(activity => activity.CurrentStatus is IActivity.Status.Floating or IActivity.Status.Stacking)
                 .ForEach(activity => this.Hide(activity, false, false));
         }
+
+        #endregion
     }
 }

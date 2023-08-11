@@ -10,8 +10,6 @@ namespace UniT.Data
 
     public class DataManager : IDataManager
     {
-        public LogConfig LogConfig => this._logger.Config;
-
         private readonly ReadOnlyDictionary<Type, IData>        _dataCache;
         private readonly ReadOnlyDictionary<Type, IDataHandler> _handlerCache;
         private readonly ReadOnlyDictionary<Type, Type>         _dataTypeToHandlerType;
@@ -31,6 +29,8 @@ namespace UniT.Data
             this._logger = logger ?? ILogger.Default(this.GetType().Name);
             this._dataTypeToHandlerType.ForEach((dataType, handlerType) => this._logger.Debug($"Found {dataType.Name} - {handlerType.Name}"));
         }
+
+        public LogConfig LogConfig => this._logger.Config;
 
         public T Get<T>() where T : IData
         {

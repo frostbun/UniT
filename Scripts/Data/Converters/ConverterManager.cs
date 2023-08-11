@@ -4,6 +4,7 @@ namespace UniT.Data.Converters
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
+    using System.Runtime.CompilerServices;
     using UniT.Data.Converters.Collections;
     using UniT.Data.Converters.DateTime;
     using UniT.Data.Converters.Others;
@@ -89,11 +90,13 @@ namespace UniT.Data.Converters
             this._converters.Add(converter);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public object ConvertFromString(string str, Type type)
         {
             return this.GetConverter(type).ConvertFromString(str, type);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string ConvertToString(object obj, Type type)
         {
             return this.GetConverter(type).ConvertToString(obj, type);

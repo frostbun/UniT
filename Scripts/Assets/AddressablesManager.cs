@@ -16,7 +16,7 @@ namespace UniT.Assets
 
     public class AddressablesManager : IAssetsManager
     {
-        public LogConfig LogConfig => this._logger.Config;
+        #region Constructor
 
         private readonly Dictionary<string, AsyncOperationHandle>                _loadedAssets;
         private readonly Dictionary<string, AsyncOperationHandle<SceneInstance>> _loadedScenes;
@@ -29,6 +29,12 @@ namespace UniT.Assets
             this._loadedScenes = new();
             this._logger       = logger ?? ILogger.Default(this.GetType().Name);
         }
+
+        #endregion
+
+        #region Public
+
+        public LogConfig LogConfig => this._logger.Config;
 
         public UniTask<T> Load<T>(string key = null, IProgress<float> progress = null, CancellationToken cancellationToken = default)
         {
@@ -111,5 +117,7 @@ namespace UniT.Assets
                                .ToUniTask(progress: progress, cancellationToken: cancellationToken)
                                .ContinueWith(_ => this._logger.Debug($"Unloaded scene {key}"));
         }
+
+        #endregion
     }
 }

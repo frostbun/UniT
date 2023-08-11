@@ -2,6 +2,7 @@ namespace UniT.ObjectPool
 {
     using System;
     using System.Collections.Generic;
+    using System.Runtime.CompilerServices;
     using Cysharp.Threading.Tasks;
     using UniT.Assets;
     using UniT.Extensions;
@@ -13,7 +14,7 @@ namespace UniT.ObjectPool
 
     public class ObjectPoolManager : IObjectPoolManager
     {
-        public LogConfig LogConfig => this._logger.Config;
+        #region Constructor
 
         private readonly IAssetsManager                     _assetsManager;
         private readonly Transform                          _poolsContainer;
@@ -33,50 +34,30 @@ namespace UniT.ObjectPool
             this._logger         = logger ?? ILogger.Default(this.GetType().Name);
         }
 
-        public void InstantiatePool(GameObject prefab, int initialCount = 1)
-        {
-            if (this.TryInstantiatePool(prefab, initialCount)) return;
-            this._logger.Warning($"Pool for prefab {prefab.name} already instantiated");
-        }
+        #endregion
 
-        public void InstantiatePool<T>(T component, int initialCount = 1) where T : Component
-        {
-            this.InstantiatePool(component.gameObject, initialCount);
-        }
+        #region Public
 
-        public UniTask InstantiatePool(string key, int initialCount = 1)
-        {
-            return this.TryInstantiatePool(key, initialCount)
-                       .ContinueWith(success =>
-                       {
-                           if (success) return;
-                           this._logger.Warning($"Pool for key {key} already instantiated");
-                       });
-        }
+        public LogConfig LogConfig => this._logger.Config;
 
-        public UniTask InstantiatePool<T>(int initialCount = 1) where T : Component
-        {
-            return this.InstantiatePool(typeof(T).GetKey(), initialCount);
-        }
-
-        public bool TryInstantiatePool(GameObject prefab, int initialCount = 1)
+        public bool InstantiatePool(GameObject prefab, int initialCount = 1)
         {
             return this._prefabToPool.TryAdd(prefab, () => this.InstantiatePool_Internal(prefab, initialCount));
         }
 
-        public bool TryInstantiatePool<T>(T component, int initialCount = 1) where T : Component
+        public bool InstantiatePool<T>(T component, int initialCount = 1) where T : Component
         {
-            return this.TryInstantiatePool(component.gameObject, initialCount);
+            return this.InstantiatePool(component.gameObject, initialCount);
         }
 
-        public UniTask<bool> TryInstantiatePool(string key, int initialCount = 1)
+        public UniTask<bool> InstantiatePool(string key, int initialCount = 1)
         {
             return this._keyToPool.TryAdd(key, () => this._assetsManager.Load<GameObject>(key).ContinueWith(prefab => this.InstantiatePool_Internal(prefab, initialCount)));
         }
 
-        public UniTask<bool> TryInstantiatePool<T>(int initialCount = 1) where T : Component
+        public UniTask<bool> InstantiatePool<T>(int initialCount = 1) where T : Component
         {
-            return this.TryInstantiatePool(typeof(T).GetKey(), initialCount);
+            return this.InstantiatePool(typeof(T).GetKey(), initialCount);
         }
 
         public bool IsPoolReady(GameObject prefab)
@@ -132,29 +113,24 @@ namespace UniT.ObjectPool
             this.DestroyPool(typeof(T).GetKey());
         }
 
-        public GameObject Spawn(GameObject prefab, Vector3? position = null, Quaternion? rotation = null, Transform parent = null)
+        public GameObject Spawn(GameObject prefab, Vector3? position = null, Quaternion? rotation = null, Transform parent = null, bool worldPositionStays = true)
         {
-            return this.Spawn_Internal(this.GetPool(prefab), position, rotation, parent);
+            return this.Spawn_Internal(this.GetPool(prefab), position, rotation, parent, worldPositionStays);
         }
 
-        public T Spawn<T>(T component, Vector3? position = null, Quaternion? rotation = null, Transform parent = null) where T : Component
+        public T Spawn<T>(T component, Vector3? position = null, Quaternion? rotation = null, Transform parent = null, bool worldPositionStays = true) where T : Component
         {
-            return this.Spawn(component.gameObject, position, rotation, parent).GetComponent<T>();
+            return this.Spawn(component.gameObject, position, rotation, parent, worldPositionStays).GetComponent<T>();
         }
 
-        public GameObject Spawn(string key, Vector3? position = null, Quaternion? rotation = null, Transform parent = null)
+        public GameObject Spawn(string key, Vector3? position = null, Quaternion? rotation = null, Transform parent = null, bool worldPositionStays = true)
         {
-            return this.Spawn_Internal(this.GetPool(key), position, rotation, parent);
+            return this.Spawn_Internal(this.GetPool(key), position, rotation, parent, worldPositionStays);
         }
 
-        public T Spawn<T>(string key, Vector3? position = null, Quaternion? rotation = null, Transform parent = null) where T : Component
+        public T Spawn<T>(string key, Vector3? position = null, Quaternion? rotation = null, Transform parent = null, bool worldPositionStays = true) where T : Component
         {
-            return this.Spawn(key, position, rotation, parent).GetComponent<T>();
-        }
-
-        public T Spawn<T>(Vector3? position = null, Quaternion? rotation = null, Transform parent = null) where T : Component
-        {
-            return this.Spawn<T>(typeof(T).GetKey(), position, rotation, parent);
+            return this.Spawn(key ?? typeof(T).GetKey(), position, rotation, parent, worldPositionStays).GetComponent<T>();
         }
 
         public void Recycle(GameObject instance)
@@ -194,6 +170,11 @@ namespace UniT.ObjectPool
             this.RecycleAll(typeof(T).GetKey());
         }
 
+        #endregion
+
+        #region Private
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private ObjectPool GetPool(GameObject prefab)
         {
             if (this._prefabToPool.TryGetValue(prefab, out var pool)) return pool;
@@ -202,6 +183,7 @@ namespace UniT.ObjectPool
             throw exception;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private ObjectPool GetPool(string key)
         {
             if (this._keyToPool.TryGetValue(key, out var pool)) return pool;
@@ -210,6 +192,7 @@ namespace UniT.ObjectPool
             throw exception;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private ObjectPool InstantiatePool_Internal(GameObject prefab, int initialCount)
         {
             var pool = ObjectPool.Instantiate(prefab, initialCount);
@@ -218,6 +201,7 @@ namespace UniT.ObjectPool
             return pool;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void DestroyPool_Internal(ObjectPool pool)
         {
             this.RecycleAll_Internal(pool);
@@ -225,19 +209,23 @@ namespace UniT.ObjectPool
             this._logger.Debug($"Destroyed {pool.gameObject.name}");
         }
 
-        private GameObject Spawn_Internal(ObjectPool pool, Vector3? position = null, Quaternion? rotation = null, Transform parent = null)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private GameObject Spawn_Internal(ObjectPool pool, Vector3? position, Quaternion? rotation, Transform parent, bool worldPositionStays)
         {
-            var instance = pool.Spawn(position, rotation, parent);
+            var instance = pool.Spawn(position, rotation, parent, worldPositionStays);
             this._instanceToPool.Add(instance, pool);
             this._logger.Debug($"Spawned {instance.name}");
             return instance;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void RecycleAll_Internal(ObjectPool pool)
         {
             pool.RecycleAll();
             this._instanceToPool.RemoveAll((_, otherPool) => otherPool == pool);
             this._logger.Debug($"Recycled all {pool.gameObject.name}");
         }
+
+        #endregion
     }
 }

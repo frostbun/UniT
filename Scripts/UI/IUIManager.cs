@@ -22,9 +22,7 @@ namespace UniT.UI
 
         public IActivity GetActivity(IActivity activity);
 
-        public UniTask<IActivity> GetActivity<TActivity>(string key) where TActivity : Component, IActivity;
-
-        public UniTask<IActivity> GetActivity<TActivity>() where TActivity : Component, IActivity;
+        public UniTask<IActivity> GetActivity<TActivity>(string key = null) where TActivity : Component, IActivity;
 
         public void Stack(IActivity activity, bool force = false);
 

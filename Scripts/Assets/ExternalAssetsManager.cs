@@ -13,7 +13,7 @@ namespace UniT.Assets
 
     public class ExternalAssetsManager : IExternalAssetsManager
     {
-        public LogConfig LogConfig => this._logger.Config;
+        #region Constructor
 
         private readonly Dictionary<string, UnityWebRequestAsyncOperation> _loadedAssets;
         private readonly ILogger                                           _logger;
@@ -24,6 +24,12 @@ namespace UniT.Assets
             this._loadedAssets = new();
             this._logger       = logger ?? ILogger.Default(this.GetType().Name);
         }
+
+        #endregion
+
+        #region Public
+
+        public LogConfig LogConfig => this._logger.Config;
 
         public UniTask<Texture2D> DownloadTexture(string url, IProgress<float> progress = null, CancellationToken cancellationToken = default)
         {
@@ -47,5 +53,7 @@ namespace UniT.Assets
             request.webRequest.Dispose();
             this._logger.Debug($"Unloaded asset {key}");
         }
+
+        #endregion
     }
 }

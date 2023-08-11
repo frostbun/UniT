@@ -3,6 +3,7 @@ namespace UniT.ObjectPool
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Runtime.CompilerServices;
     using UniT.Extensions;
     using UnityEngine;
 
@@ -26,19 +27,20 @@ namespace UniT.ObjectPool
             return pool;
         }
 
-        public GameObject Spawn(Vector3? position = null, Quaternion? rotation = null, Transform parent = null)
+        public GameObject Spawn(Vector3? position = null, Quaternion? rotation = null, Transform parent = null, bool worldPositionStays = true)
         {
             var instance = this._pooledObjects.DequeueOrDefault(() => Instantiate(this._prefab, this.transform));
             this._spawnedObjects.Add(instance);
             instance.transform.SetPositionAndRotation(position ?? Vector3.zero, rotation ?? Quaternion.identity);
-            instance.transform.SetParent(parent);
+            instance.transform.SetParent(parent, worldPositionStays);
             instance.SetActive(true);
             return instance;
         }
 
-        public T Spawn<T>(Vector3? position = null, Quaternion? rotation = null, Transform parent = null) where T : Component
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public T Spawn<T>(Vector3? position = null, Quaternion? rotation = null, Transform parent = null, bool worldPositionStays = true) where T : Component
         {
-            return this.Spawn(position, rotation, parent).GetComponent<T>();
+            return this.Spawn(position, rotation, parent, worldPositionStays).GetComponent<T>();
         }
 
         public void Recycle(GameObject instance)

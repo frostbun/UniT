@@ -4,6 +4,7 @@ namespace UniT.DependencyInjection
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using System.Runtime.CompilerServices;
     using UniT.Extensions;
 
     public static class ServiceProvider
@@ -123,11 +124,13 @@ namespace UniT.DependencyInjection
 
         private static readonly Dictionary<Type, List<object>> Cache = new();
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static List<object> GetCache(Type type)
         {
             return Cache.GetOrAdd(type, () => new());
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static object[] ResolveParameters(ParameterInfo[] parameters, string context)
         {
             return parameters.Select(parameter =>

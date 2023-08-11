@@ -2,6 +2,7 @@ namespace UniT.Audio
 {
     using System.Collections.Generic;
     using System.Linq;
+    using System.Runtime.CompilerServices;
     using Cysharp.Threading.Tasks;
     using UniT.Assets;
     using UniT.Extensions;
@@ -12,9 +13,7 @@ namespace UniT.Audio
 
     public class AudioManager : IAudioManager, IInitializable
     {
-        public LogConfig    LogConfig    => this._logger.Config;
-        public IAudioConfig Config       { get; }
-        public string       CurrentMusic { get; private set; }
+        #region Constructor
 
         private readonly IAssetsManager                  _assetsManager;
         private readonly GameObject                      _audioSourcesContainer;
@@ -26,8 +25,9 @@ namespace UniT.Audio
         [Preserve]
         public AudioManager(IAudioConfig config, IAssetsManager assetsManager = null, ILogger logger = null)
         {
-            this.Config                 = config;
-            this._assetsManager         = assetsManager ?? IAssetsManager.Default();
+            this.Config         = config;
+            this._assetsManager = assetsManager ?? IAssetsManager.Default();
+
             this._audioSourcesContainer = new GameObject(this.GetType().Name).DontDestroyOnLoad();
 
             this._musicSource      = this._audioSourcesContainer.AddComponent<AudioSource>();
@@ -39,19 +39,8 @@ namespace UniT.Audio
             this._logger = logger ?? ILogger.Default(this.GetType().Name);
         }
 
-        public void Initialize()
+        void IInitializable.Initialize()
         {
-            void ConfigureAllSoundSources()
-            {
-                this._loadedSoundSources.Values.ForEach(this.ConfigureSoundSource);
-            }
-
-            void ConfigureMusicSource()
-            {
-                this._musicSource.volume = this.Config.MusicVolume.Value * this.Config.MasterVolume.Value;
-                this._musicSource.mute   = this.Config.MuteMusic.Value || this.Config.MuteMaster.Value;
-            }
-
             this.Config.SoundVolume.Subscribe(value =>
             {
                 ConfigureAllSoundSources();
@@ -89,7 +78,30 @@ namespace UniT.Audio
                 ConfigureMusicSource();
                 this._logger.Debug(value ? "Master volume muted" : "Master volume unmuted");
             });
+
+            return;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            void ConfigureAllSoundSources()
+            {
+                this._loadedSoundSources.Values.ForEach(this.ConfigureSoundSource);
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            void ConfigureMusicSource()
+            {
+                this._musicSource.volume = this.Config.MusicVolume.Value * this.Config.MasterVolume.Value;
+                this._musicSource.mute   = this.Config.MuteMusic.Value || this.Config.MuteMaster.Value;
+            }
         }
+
+        #endregion
+
+        #region Public
+
+        public LogConfig    LogConfig    => this._logger.Config;
+        public IAudioConfig Config       { get; }
+        public string       CurrentMusic { get; private set; }
 
         public UniTask LoadSounds(params string[] names)
         {
@@ -189,6 +201,11 @@ namespace UniT.Audio
             this._musicSource.Stop();
         }
 
+        #endregion
+
+        #region Private
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private UniTask<AudioSource> GetSoundSource(string name)
         {
             return this._loadedSoundSources.GetOrAdd(name, () =>
@@ -208,10 +225,13 @@ namespace UniT.Audio
             });
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void ConfigureSoundSource(AudioSource soundSource)
         {
             soundSource.volume = this.Config.SoundVolume.Value * this.Config.MasterVolume.Value;
             soundSource.mute   = this.Config.MuteSound.Value || this.Config.MuteMaster.Value;
         }
+
+        #endregion
     }
 }

@@ -3,23 +3,32 @@ namespace UniT.Signal
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Runtime.CompilerServices;
     using UniT.Extensions;
     using UniT.Logging;
     using UnityEngine.Scripting;
 
     public class SignalBus : ISignalBus
     {
-        public LogConfig LogConfig => this._logger.Config;
+        #region Constructor
 
-        private readonly Dictionary<Type, HashSet<object>> _callbacksWithSignal = new();
-        private readonly Dictionary<Type, HashSet<object>> _callbacksNoSignal   = new();
+        private readonly Dictionary<Type, HashSet<object>> _callbacksWithSignal;
+        private readonly Dictionary<Type, HashSet<object>> _callbacksNoSignal;
         private readonly ILogger                           _logger;
 
         [Preserve]
         public SignalBus(ILogger logger = null)
         {
-            this._logger = logger ?? ILogger.Default(this.GetType().Name);
+            this._callbacksWithSignal = new();
+            this._callbacksNoSignal   = new();
+            this._logger              = logger ?? ILogger.Default(this.GetType().Name);
         }
+
+        #endregion
+
+        #region Public
+
+        public LogConfig LogConfig => this._logger.Config;
 
         public void Fire<T>(T signal)
         {
@@ -62,14 +71,22 @@ namespace UniT.Signal
             this._logger.Warning($"Callback {callback} not subscribed to signal {typeof(T)}");
         }
 
+        #endregion
+
+        #region Private
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private HashSet<object> GetCallbacksWithSignal<T>()
         {
             return this._callbacksWithSignal.GetOrAdd(typeof(T), () => new HashSet<object>());
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private HashSet<object> GetCallbacksNoSignal<T>()
         {
             return this._callbacksNoSignal.GetOrAdd(typeof(T), () => new HashSet<object>());
         }
+
+        #endregion
     }
 }

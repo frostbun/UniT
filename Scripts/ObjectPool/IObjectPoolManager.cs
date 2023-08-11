@@ -8,21 +8,13 @@ namespace UniT.ObjectPool
     {
         public LogConfig LogConfig { get; }
 
-        public void InstantiatePool(GameObject prefab, int initialCount = 1);
+        public bool InstantiatePool(GameObject prefab, int initialCount = 1);
 
-        public void InstantiatePool<T>(T component, int initialCount = 1) where T : Component;
+        public bool InstantiatePool<T>(T component, int initialCount = 1) where T : Component;
 
-        public UniTask InstantiatePool(string key, int initialCount = 1);
+        public UniTask<bool> InstantiatePool(string key, int initialCount = 1);
 
-        public UniTask InstantiatePool<T>(int initialCount = 1) where T : Component;
-
-        public bool TryInstantiatePool(GameObject prefab, int initialCount = 1);
-
-        public bool TryInstantiatePool<T>(T component, int initialCount = 1) where T : Component;
-
-        public UniTask<bool> TryInstantiatePool(string key, int initialCount = 1);
-
-        public UniTask<bool> TryInstantiatePool<T>(int initialCount = 1) where T : Component;
+        public UniTask<bool> InstantiatePool<T>(int initialCount = 1) where T : Component;
 
         public bool IsPoolReady(GameObject prefab);
 
@@ -40,15 +32,13 @@ namespace UniT.ObjectPool
 
         public void DestroyPool<T>() where T : Component;
 
-        public GameObject Spawn(GameObject prefab, Vector3? position = null, Quaternion? rotation = null, Transform parent = null);
+        public GameObject Spawn(GameObject prefab, Vector3? position = null, Quaternion? rotation = null, Transform parent = null, bool worldPositionStays = true);
 
-        public T Spawn<T>(T component, Vector3? position = null, Quaternion? rotation = null, Transform parent = null) where T : Component;
+        public T Spawn<T>(T component, Vector3? position = null, Quaternion? rotation = null, Transform parent = null, bool worldPositionStays = true) where T : Component;
 
-        public GameObject Spawn(string key, Vector3? position = null, Quaternion? rotation = null, Transform parent = null);
+        public GameObject Spawn(string key, Vector3? position = null, Quaternion? rotation = null, Transform parent = null, bool worldPositionStays = true);
 
-        public T Spawn<T>(string key, Vector3? position = null, Quaternion? rotation = null, Transform parent = null) where T : Component;
-
-        public T Spawn<T>(Vector3? position = null, Quaternion? rotation = null, Transform parent = null) where T : Component;
+        public T Spawn<T>(string key = null, Vector3? position = null, Quaternion? rotation = null, Transform parent = null, bool worldPositionStays = true) where T : Component;
 
         public void Recycle(GameObject instance);
 
