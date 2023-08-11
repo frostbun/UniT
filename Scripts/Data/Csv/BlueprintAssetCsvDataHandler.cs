@@ -2,7 +2,7 @@ namespace UniT.Data.Csv
 {
     using System;
     using Cysharp.Threading.Tasks;
-    using UniT.ResourceManager;
+    using UniT.Assets;
     using UnityEngine;
     using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;

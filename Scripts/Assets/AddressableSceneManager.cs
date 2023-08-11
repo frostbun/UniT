@@ -1,4 +1,4 @@
-﻿namespace UniT.ResourceManager
+﻿namespace UniT.Assets
 {
     using System;
     using System.Collections.Generic;

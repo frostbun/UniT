@@ -4,9 +4,9 @@ namespace UniT.ObjectPool
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
     using Cysharp.Threading.Tasks;
+    using UniT.Assets;
     using UniT.Extensions;
     using UniT.Logging;
-    using UniT.ResourceManager;
     using UnityEngine;
     using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;
