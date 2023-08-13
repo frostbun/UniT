@@ -15,6 +15,11 @@ namespace UniT.Logging
             ((ILogger)this).Info("Instantiated");
         }
 
+        ~BaseLogger()
+        {
+            ((ILogger)this).Info("Disposed");
+        }
+
         void ILogger.Debug(string message)
         {
             if (this.Config.Level > LogLevel.Debug) return;

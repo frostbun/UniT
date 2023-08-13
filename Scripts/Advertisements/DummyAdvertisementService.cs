@@ -6,7 +6,7 @@ namespace UniT.Advertisements
 
     public class DummyAdvertisementService : IAdvertisementService
     {
-        public LogConfig LogConfig => this._logger.Config;
+        #region Constructor
 
         private readonly ILogger _logger;
 
@@ -15,6 +15,12 @@ namespace UniT.Advertisements
         {
             this._logger = logger ?? ILogger.Default(this.GetType().Name);
         }
+
+        #endregion
+
+        #region Public
+
+        public LogConfig LogConfig => this._logger.Config;
 
         public void ShowBannerAd()
         {
@@ -50,5 +56,7 @@ namespace UniT.Advertisements
             onSuccess?.Invoke();
             onComplete?.Invoke();
         }
+
+        #endregion
     }
 }

@@ -2,7 +2,6 @@ namespace UniT.Assets
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading;
     using Cysharp.Threading.Tasks;
     using UniT.Extensions;
@@ -34,8 +33,7 @@ namespace UniT.Assets
 
         public void Dispose()
         {
-            this._loadedAssets.Keys.ToList().ForEach(this.Unload);
-            this._logger.Debug("Disposed");
+            this._loadedAssets.Keys.SafeForEach(this.Unload);
         }
 
         #endregion
@@ -53,7 +51,12 @@ namespace UniT.Assets
                            return request.SendWebRequest();
                        })
                        .ToUniTask(progress: progress, cancellationToken: cancellationToken)
-                       .ContinueWith(request => ((DownloadHandlerTexture)request.downloadHandler).texture);
+                       .ContinueWith(request => ((DownloadHandlerTexture)request.downloadHandler).texture)
+                       .Catch(new Func<Exception, Texture2D>(exception =>
+                       {
+                           this._logger.Exception(exception);
+                           throw exception;
+                       }));
         }
 
         public void Unload(string key)

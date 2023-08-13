@@ -2,7 +2,6 @@ namespace UniT.Assets
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading;
     using Cysharp.Threading.Tasks;
     using UniT.Extensions;
@@ -35,8 +34,7 @@ namespace UniT.Assets
 
         public void Dispose()
         {
-            this._loadedAssets.Keys.ToList().ForEach(this.Unload);
-            this._logger.Debug("Disposed");
+            this._loadedAssets.Keys.SafeForEach(this.Unload);
         }
 
         #endregion
@@ -55,23 +53,23 @@ namespace UniT.Assets
                        {
                            this._logger.Debug($"Loaded asset {key}");
                            return asset;
-                       });
+                       })
+                       .Catch(new Func<Exception, T>(exception =>
+                       {
+                           this._logger.Exception(exception);
+                           throw exception;
+                       }));
         }
 
         public UniTask<T> LoadComponent<T>(string key = null, IProgress<float> progress = null, CancellationToken cancellationToken = default) where T : Component
         {
             return this.Load<GameObject>(key ?? typeof(T).GetKey(), progress, cancellationToken)
-                       .ContinueWith(gameObject =>
+                       .ContinueWith(gameObject => gameObject.GetComponent<T>() ?? throw new InvalidOperationException($"Component {typeof(T).Name} not found in GameObject {gameObject.name}"))
+                       .Catch(new Func<Exception, T>(exception =>
                        {
-                           var component = gameObject.GetComponent<T>();
-                           if (component is null)
-                           {
-                               var exception = new InvalidOperationException($"Component {typeof(T).Name} not found in GameObject {gameObject.name}");
-                               this._logger.Exception(exception);
-                               throw exception;
-                           }
-                           return component;
-                       });
+                           this._logger.Exception(exception);
+                           throw exception;
+                       }));
         }
 
         public void Unload(string key)

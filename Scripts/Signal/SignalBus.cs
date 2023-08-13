@@ -35,40 +35,64 @@ namespace UniT.Signal
             var count = this.GetCallbacksWithSignal<T>().Count + this.GetCallbacksNoSignal<T>().Count;
             if (count == 0)
             {
-                this._logger.Warning($"No subscribers for signal {typeof(T)}");
+                this._logger.Warning($"No subscribers found for {typeof(T).Name}");
                 return;
             }
             this.GetCallbacksWithSignal<T>()
                 .Cast<Action<T>>()
-                .ForEach(callback => callback(signal));
+                .SafeForEach(callback => callback(signal));
             this.GetCallbacksNoSignal<T>()
                 .Cast<Action>()
-                .ForEach(callback => callback());
-            this._logger.Debug($"Fired signal {typeof(T)} to {count} subscribers");
+                .SafeForEach(callback => callback());
+            this._logger.Debug($"Fired {typeof(T).Name} to {count} subscribers");
         }
 
         public void Subscribe<T>(Action<T> callback)
         {
-            if (this.GetCallbacksWithSignal<T>().Add(callback)) return;
-            this._logger.Warning($"Callback {callback} already subscribed to signal {typeof(T)}");
+            if (this.GetCallbacksWithSignal<T>().Add(callback))
+            {
+                this._logger.Debug($"Subscribed {callback.Method.Name} to {typeof(T).Name}");
+            }
+            else
+            {
+                this._logger.Warning($"{callback.Method.Name} already subscribed to {typeof(T).Name}");
+            }
         }
 
         public void Subscribe<T>(Action callback)
         {
-            if (this.GetCallbacksNoSignal<T>().Add(callback)) return;
-            this._logger.Warning($"Callback {callback} already subscribed to signal {typeof(T)}");
+            if (this.GetCallbacksNoSignal<T>().Add(callback))
+            {
+                this._logger.Debug($"Subscribed {callback.Method.Name} to {typeof(T).Name}");
+            }
+            else
+            {
+                this._logger.Warning($"{callback.Method.Name} already subscribed to {typeof(T).Name}");
+            }
         }
 
         public void Unsubscribe<T>(Action<T> callback)
         {
-            if (this.GetCallbacksWithSignal<T>().Remove(callback)) return;
-            this._logger.Warning($"Callback {callback} not subscribed to signal {typeof(T)}");
+            if (this.GetCallbacksWithSignal<T>().Remove(callback))
+            {
+                this._logger.Debug($"Unsubscribed {callback.Method.Name} from {typeof(T).Name}");
+            }
+            else
+            {
+                this._logger.Warning($"{callback.Method.Name} not subscribed to {typeof(T).Name}");
+            }
         }
 
         public void Unsubscribe<T>(Action callback)
         {
-            if (this.GetCallbacksNoSignal<T>().Remove(callback)) return;
-            this._logger.Warning($"Callback {callback} not subscribed to signal {typeof(T)}");
+            if (this.GetCallbacksNoSignal<T>().Remove(callback))
+            {
+                this._logger.Debug($"Unsubscribed {callback.Method.Name} from {typeof(T).Name}");
+            }
+            else
+            {
+                this._logger.Warning($"{callback.Method.Name} not subscribed to {typeof(T).Name}");
+            }
         }
 
         #endregion

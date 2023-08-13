@@ -2,33 +2,12 @@ namespace UniT.Reactive
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
+    using UniT.Extensions;
 
     public class ReactiveProperty<T>
     {
-        private class Subscriber : IDisposable
-        {
-            public readonly  Action<T>           _callback;
-            private readonly ReactiveProperty<T> _property;
-            private          bool                _isDisposed;
-
-            public Subscriber(Action<T> callback, ReactiveProperty<T> property)
-            {
-                this._callback   = callback;
-                this._property   = property;
-                this._isDisposed = false;
-            }
-
-            public void Dispose()
-            {
-                if (this._isDisposed) throw new ObjectDisposedException(nameof(Subscriber));
-                this._property._subscribers.Remove(this);
-                this._isDisposed = true;
-            }
-        }
-
-        private          T                _value;
-        private readonly List<Subscriber> _subscribers = new(); // Allowing multiple subscriptions
+        private          T                  _value;
+        private readonly HashSet<Action<T>> _callbacks = new();
 
         public T Value
         {
@@ -36,7 +15,7 @@ namespace UniT.Reactive
             set
             {
                 this._value = value;
-                this._subscribers.ToList().ForEach(subscriber => subscriber._callback(value));
+                this._callbacks.SafeForEach(callback => callback(value));
             }
         }
 
@@ -45,17 +24,15 @@ namespace UniT.Reactive
             this._value = value;
         }
 
-        public IDisposable Subscribe(Action<T> callback, bool invokeImmediately = true)
+        public void Subscribe(Action<T> callback, bool invokeImmediately = true)
         {
-            var subscriber = new Subscriber(callback, this);
-            this._subscribers.Add(subscriber);
+            if (!this._callbacks.Add(callback)) return;
             if (invokeImmediately) callback(this._value);
-            return subscriber;
         }
 
         public void Unsubscribe(Action<T> callback)
         {
-            this._subscribers.Find(subscriber => subscriber._callback == callback)?.Dispose();
+            this._callbacks.Remove(callback);
         }
     }
 }

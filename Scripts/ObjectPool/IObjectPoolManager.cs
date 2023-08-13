@@ -8,13 +8,13 @@ namespace UniT.ObjectPool
     {
         public LogConfig LogConfig { get; }
 
-        public bool InstantiatePool(GameObject prefab, int initialCount = 1);
+        public void InstantiatePool(GameObject prefab, int initialCount = 1);
 
-        public bool InstantiatePool<T>(T component, int initialCount = 1) where T : Component;
+        public void InstantiatePool<T>(T component, int initialCount = 1) where T : Component;
 
-        public UniTask<bool> InstantiatePool(string key, int initialCount = 1);
+        public UniTask InstantiatePool(string key, int initialCount = 1);
 
-        public UniTask<bool> InstantiatePool<T>(int initialCount = 1) where T : Component;
+        public UniTask InstantiatePool<T>(int initialCount = 1) where T : Component;
 
         public bool IsPoolReady(GameObject prefab);
 

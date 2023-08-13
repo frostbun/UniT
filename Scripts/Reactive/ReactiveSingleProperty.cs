@@ -6,7 +6,7 @@ namespace UniT.Reactive
 
     public class ReactiveSingleProperty : ReactiveProperty<float>
     {
-        public ReactiveSingleProperty(float value) : base(value)
+        public ReactiveSingleProperty(float value = default) : base(value)
         {
         }
 

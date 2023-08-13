@@ -2,16 +2,17 @@ namespace UniT.Utilities
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Linq;
     using UniT.Extensions;
 
     public class BigNumber : IComparable, IComparable<BigNumber>, IEquatable<BigNumber>
     {
-        public static int      Mod     { get; set; } = (int)1e3;
-        public static string[] Letters { get; set; } = IterTools.Product(" abcdefghijklmnopqrstuvwxyzx".ToCharArray(), 3).Select(chars => string.Join("", chars).Trim()).ToArray();
+        public static int          Mod     { get; set; } = (int)1e3;
+        public static List<string> Letters { get; set; } = IterTools.Product(" abcdefghijklmnopqrstuvwxyzx".ToCharArray(), 3).Select(chars => string.Join("", chars).Trim()).ToList();
 
-        private readonly int[] _values;
-        private readonly bool  _sign; // false: positive, true: negative
+        private readonly ReadOnlyCollection<int> _values;
+        private readonly bool                    _sign; // false: positive, true: negative
 
         public BigNumber(int value = 0) : this(new[] { Math.Abs(value) }, value < 0)
         {
@@ -33,7 +34,7 @@ namespace UniT.Utilities
             while (carry > 0) normalizedValues.Add(Normalize(0));
             while (normalizedValues.Count > 1 && normalizedValues[^1] == 0) normalizedValues.RemoveAt(normalizedValues.Count - 1);
 
-            this._values = normalizedValues.ToArray();
+            this._values = normalizedValues.AsReadOnly();
             this._sign   = sign;
         }
 
@@ -41,8 +42,8 @@ namespace UniT.Utilities
         {
             var sign         = this._sign ? "-" : "";
             var integerValue = this._values[^1];
-            var decimalValue = this._values.Length > 1 ? $".{this._values[^2] / (Mod / 10)}" : "";
-            var letter       = this._values.Length > 1 ? Letters[this._values.Length - 1] : "";
+            var decimalValue = this._values.Count > 1 ? $".{this._values[^2] / (Mod / 10)}" : "";
+            var letter       = this._values.Count > 1 ? Letters[this._values.Count - 1] : "";
             return sign + integerValue + decimalValue + letter;
         }
 

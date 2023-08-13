@@ -179,9 +179,9 @@ namespace UniT.UI
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void HideUndockedActivities()
         {
-            this._activities.Values.ToArray()
+            this._activities.Values
                 .Where(activity => activity.CurrentStatus is IActivity.Status.Floating or IActivity.Status.Stacking)
-                .ForEach(activity => this.Hide(activity, false, false));
+                .SafeForEach(activity => this.Hide(activity, false, false));
         }
 
         #endregion

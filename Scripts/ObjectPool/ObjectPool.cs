@@ -2,7 +2,6 @@ namespace UniT.ObjectPool
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Runtime.CompilerServices;
     using UniT.Extensions;
     using UnityEngine;
@@ -59,7 +58,7 @@ namespace UniT.ObjectPool
 
         public void RecycleAll()
         {
-            this._spawnedObjects.ToArray().ForEach(this.Recycle);
+            this._spawnedObjects.SafeForEach(this.Recycle);
         }
     }
 }
