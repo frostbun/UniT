@@ -46,7 +46,7 @@ namespace UniT.DependencyInjection
 
         public static object Get(Type type)
         {
-            return GetOrDefault(type) ?? throw new($"Zero or more than one instance found for {type.Name}");
+            return GetOrDefault(type) ?? throw new($"No instance found for {type.Name}");
         }
 
         public static object GetOrDefault(Type type)
@@ -64,8 +64,7 @@ namespace UniT.DependencyInjection
             if (type.IsInterface) throw new($"Cannot instantiate interface {type.Name}");
             if (type.IsAbstract) throw new($"Cannot instantiate abstract class {type.Name}");
             if (type.IsGenericType) throw new($"Cannot instantiate generic type {type.Name}");
-            var ctor = type.GetConstructors().SingleOrDefault()
-                       ?? throw new($"Zero or more than one constructor found for {type.Name}");
+            var ctor = type.GetConstructors().SingleOrDefault() ?? throw new($"No constructor found for {type.Name}");
             return ctor.Invoke(ResolveParameters(ctor.GetParameters(), $"instantiating {type.Name}"));
         }
 

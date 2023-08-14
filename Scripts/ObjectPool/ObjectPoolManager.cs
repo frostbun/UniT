@@ -2,6 +2,7 @@ namespace UniT.ObjectPool
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Runtime.CompilerServices;
     using Cysharp.Threading.Tasks;
     using UniT.Assets;
@@ -16,12 +17,13 @@ namespace UniT.ObjectPool
     {
         #region Constructor
 
-        private readonly IAssetManager                      _assetManager;
-        private readonly Transform                          _poolsContainer;
-        private readonly Dictionary<GameObject, ObjectPool> _prefabToPool;
-        private readonly Dictionary<string, ObjectPool>     _keyToPool;
-        private readonly Dictionary<GameObject, ObjectPool> _instanceToPool;
-        private readonly ILogger                            _logger;
+        private readonly IAssetManager                                           _assetManager;
+        private readonly Transform                                               _poolsContainer;
+        private readonly Dictionary<GameObject, ObjectPool>                      _prefabToPool;
+        private readonly Dictionary<string, ObjectPool>                          _keyToPool;
+        private readonly Dictionary<GameObject, ObjectPool>                      _instanceToPool;
+        private readonly Dictionary<GameObject, ReadOnlyCollection<IRecyclable>> _recyclables;
+        private readonly ILogger                                                 _logger;
 
         [Preserve]
         public ObjectPoolManager(IAssetManager assetManager = null, ILogger logger = null)
@@ -31,6 +33,7 @@ namespace UniT.ObjectPool
             this._prefabToPool   = new();
             this._keyToPool      = new();
             this._instanceToPool = new();
+            this._recyclables    = new();
             this._logger         = logger ?? ILogger.Default(this.GetType().Name);
         }
 
@@ -132,7 +135,7 @@ namespace UniT.ObjectPool
             return this.Spawn_Internal(this.GetPool(key), position, rotation, parent);
         }
 
-        public T Spawn<T>(string key, Vector3? position = null, Quaternion? rotation = null, Transform parent = null) where T : Component
+        public T Spawn<T>(string key = null, Vector3? position = null, Quaternion? rotation = null, Transform parent = null) where T : Component
         {
             return this.Spawn(key ?? typeof(T).GetKey(), position, rotation, parent).GetComponent<T>();
         }
@@ -141,10 +144,11 @@ namespace UniT.ObjectPool
         {
             if (!this._instanceToPool.Remove(instance, out var pool))
             {
-                this._logger.Warning($"Trying to recycle {instance.name} that was not spawned from {this.GetType().Name}");
-                return;
+                var exception = new InvalidOperationException($"{instance.name} does not spawn from {this.GetType().Name}");
+                this._logger.Exception(exception);
+                throw exception;
             }
-            pool.Recycle(instance);
+            this.Recycle_Internal(instance, pool);
             this._logger.Debug($"Recycled {instance.name}");
         }
 
@@ -217,15 +221,34 @@ namespace UniT.ObjectPool
         {
             var instance = pool.Spawn(position, rotation, parent);
             this._instanceToPool.Add(instance, pool);
+            this._recyclables.GetOrAdd(instance, () =>
+            {
+                var recyclables = instance.GetComponentsInChildren<IRecyclable>(true);
+                recyclables.ForEach(recyclable =>
+                {
+                    recyclable.Manager = this;
+                    recyclable.OnInstantiate();
+                });
+                return recyclables.AsReadOnly();
+            }).ForEach(component => component.OnSpawn());
             this._logger.Debug($"Spawned {instance.name}");
             return instance;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void Recycle_Internal(GameObject instance, ObjectPool pool)
+        {
+            pool.Recycle(instance);
+            this._recyclables[instance].ForEach(recyclable => recyclable.OnRecycle());
+            if (instance) return;
+            this._recyclables.Remove(instance);
+            this._logger.Warning($"Trying to recycle {instance.name} that was already destroyed");
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void RecycleAll_Internal(ObjectPool pool)
         {
-            pool.RecycleAll();
-            this._instanceToPool.RemoveAll((_, otherPool) => otherPool == pool);
+            this._instanceToPool.Where((_, otherPool) => otherPool == pool).SafeForEach(this.Recycle_Internal);
             this._logger.Debug($"Recycled all {pool.gameObject.name}");
         }
 

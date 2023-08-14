@@ -8,8 +8,11 @@ namespace UniT.ObjectPool
 
     public class ObjectPool : MonoBehaviour
     {
+        #region Constructor
+
         [SerializeField] private GameObject _prefab;
 
+        private          Transform           _transform;
         private readonly Queue<GameObject>   _pooledObjects  = new();
         private readonly HashSet<GameObject> _spawnedObjects = new();
 
@@ -19,16 +22,25 @@ namespace UniT.ObjectPool
             pool._prefab = prefab;
             IterTools.Repeat(() =>
             {
-                var instance = Instantiate(pool._prefab, pool.transform);
+                var instance = Instantiate(pool._prefab, pool._transform);
                 instance.SetActive(false);
                 pool._pooledObjects.Enqueue(instance);
             }, initialCount);
             return pool;
         }
 
+        private void Awake()
+        {
+            this._transform = this.transform;
+        }
+
+        #endregion
+
+        #region Public
+
         public GameObject Spawn(Vector3? position = null, Quaternion? rotation = null, Transform parent = null)
         {
-            var instance = this._pooledObjects.DequeueOrDefault(() => Instantiate(this._prefab, this.transform));
+            var instance = this._pooledObjects.DequeueOrDefault(() => Instantiate(this._prefab, this._transform));
             this._spawnedObjects.Add(instance);
             instance.transform.SetPositionAndRotation(position ?? Vector3.zero, rotation ?? Quaternion.identity);
             instance.transform.SetParent(parent);
@@ -47,11 +59,11 @@ namespace UniT.ObjectPool
             if (!this._spawnedObjects.Remove(instance)) throw new InvalidOperationException($"{instance.name} does not spawn from {this.gameObject.name}");
             if (!instance) return;
             instance.SetActive(false);
-            instance.transform.SetParent(this.transform);
-            instance.GetComponentsInChildren<IRecyclable>().ForEach(recyclable => recyclable.Recycle());
+            instance.transform.SetParent(this._transform);
             this._pooledObjects.Enqueue(instance);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Recycle<T>(T component) where T : Component
         {
             this.Recycle(component.gameObject);
@@ -61,5 +73,7 @@ namespace UniT.ObjectPool
         {
             this._spawnedObjects.SafeForEach(this.Recycle);
         }
+
+        #endregion
     }
 }
