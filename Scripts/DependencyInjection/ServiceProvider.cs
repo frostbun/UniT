@@ -121,10 +121,10 @@ namespace UniT.DependencyInjection
 
         #region Private
 
-        private static readonly Dictionary<Type, List<object>> Cache = new();
+        private static readonly Dictionary<Type, HashSet<object>> Cache = new();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static List<object> GetCache(Type type)
+        private static HashSet<object> GetCache(Type type)
         {
             return Cache.GetOrAdd(type, () => new());
         }

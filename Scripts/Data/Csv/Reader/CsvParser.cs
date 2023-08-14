@@ -47,7 +47,7 @@ namespace UniT.Data.Csv.Reader
                 }
                 catch (IndexOutOfRangeException)
                 {
-                    throw new InvalidOperationException($"Field {field.Name} - {field.GetCsvFieldName()} not found in {this._data.GetType().Name}. If this is intentional, add the [CsvIgnore] attribute to the field.");
+                    throw new InvalidOperationException($"Field {field.Name} - {field.GetCsvFieldName()} not found in {this._data.GetType().Name}. If this is intentional, add [CsvIgnore] attribute to the field.");
                 }
             }
 

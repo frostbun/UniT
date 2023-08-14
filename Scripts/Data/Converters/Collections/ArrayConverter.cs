@@ -24,7 +24,6 @@ namespace UniT.Data.Converters.Collections
             {
                 array.SetValue(elementConverter.ConvertFromString(elements[i], elementType), i);
             }
-
             return array;
         }
 

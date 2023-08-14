@@ -8,7 +8,7 @@ namespace UniT.DependencyInjection.Slim
 
     public static class ServiceProvider
     {
-        private static readonly Dictionary<Type, List<object>> Cache = new();
+        private static readonly Dictionary<Type, HashSet<object>> Cache = new();
 
         public static void Add<T>(T instance)
         {
@@ -26,7 +26,7 @@ namespace UniT.DependencyInjection.Slim
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static List<object> GetCache<T>()
+        private static HashSet<object> GetCache<T>()
         {
             return Cache.GetOrAdd(typeof(T), () => new());
         }
