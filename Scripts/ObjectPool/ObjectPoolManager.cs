@@ -117,24 +117,24 @@ namespace UniT.ObjectPool
             this.DestroyPool(typeof(T).GetKey());
         }
 
-        public GameObject Spawn(GameObject prefab, Vector3? position = null, Quaternion? rotation = null, Transform parent = null, bool worldPositionStays = true)
+        public GameObject Spawn(GameObject prefab, Vector3? position = null, Quaternion? rotation = null, Transform parent = null)
         {
-            return this.Spawn_Internal(this.GetPool(prefab), position, rotation, parent, worldPositionStays);
+            return this.Spawn_Internal(this.GetPool(prefab), position, rotation, parent);
         }
 
-        public T Spawn<T>(T component, Vector3? position = null, Quaternion? rotation = null, Transform parent = null, bool worldPositionStays = true) where T : Component
+        public T Spawn<T>(T component, Vector3? position = null, Quaternion? rotation = null, Transform parent = null) where T : Component
         {
-            return this.Spawn(component.gameObject, position, rotation, parent, worldPositionStays).GetComponent<T>();
+            return this.Spawn(component.gameObject, position, rotation, parent).GetComponent<T>();
         }
 
-        public GameObject Spawn(string key, Vector3? position = null, Quaternion? rotation = null, Transform parent = null, bool worldPositionStays = true)
+        public GameObject Spawn(string key, Vector3? position = null, Quaternion? rotation = null, Transform parent = null)
         {
-            return this.Spawn_Internal(this.GetPool(key), position, rotation, parent, worldPositionStays);
+            return this.Spawn_Internal(this.GetPool(key), position, rotation, parent);
         }
 
-        public T Spawn<T>(string key, Vector3? position = null, Quaternion? rotation = null, Transform parent = null, bool worldPositionStays = true) where T : Component
+        public T Spawn<T>(string key, Vector3? position = null, Quaternion? rotation = null, Transform parent = null) where T : Component
         {
-            return this.Spawn(key ?? typeof(T).GetKey(), position, rotation, parent, worldPositionStays).GetComponent<T>();
+            return this.Spawn(key ?? typeof(T).GetKey(), position, rotation, parent).GetComponent<T>();
         }
 
         public void Recycle(GameObject instance)
@@ -213,9 +213,9 @@ namespace UniT.ObjectPool
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private GameObject Spawn_Internal(ObjectPool pool, Vector3? position, Quaternion? rotation, Transform parent, bool worldPositionStays)
+        private GameObject Spawn_Internal(ObjectPool pool, Vector3? position, Quaternion? rotation, Transform parent)
         {
-            var instance = pool.Spawn(position, rotation, parent, worldPositionStays);
+            var instance = pool.Spawn(position, rotation, parent);
             this._instanceToPool.Add(instance, pool);
             this._logger.Debug($"Spawned {instance.name}");
             return instance;

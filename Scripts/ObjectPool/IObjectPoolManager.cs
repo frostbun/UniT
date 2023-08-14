@@ -32,13 +32,13 @@ namespace UniT.ObjectPool
 
         public void DestroyPool<T>() where T : Component;
 
-        public GameObject Spawn(GameObject prefab, Vector3? position = null, Quaternion? rotation = null, Transform parent = null, bool worldPositionStays = true);
+        public GameObject Spawn(GameObject prefab, Vector3? position = null, Quaternion? rotation = null, Transform parent = null);
 
-        public T Spawn<T>(T component, Vector3? position = null, Quaternion? rotation = null, Transform parent = null, bool worldPositionStays = true) where T : Component;
+        public T Spawn<T>(T component, Vector3? position = null, Quaternion? rotation = null, Transform parent = null) where T : Component;
 
-        public GameObject Spawn(string key, Vector3? position = null, Quaternion? rotation = null, Transform parent = null, bool worldPositionStays = true);
+        public GameObject Spawn(string key, Vector3? position = null, Quaternion? rotation = null, Transform parent = null);
 
-        public T Spawn<T>(string key = null, Vector3? position = null, Quaternion? rotation = null, Transform parent = null, bool worldPositionStays = true) where T : Component;
+        public T Spawn<T>(string key = null, Vector3? position = null, Quaternion? rotation = null, Transform parent = null) where T : Component;
 
         public void Recycle(GameObject instance);
 

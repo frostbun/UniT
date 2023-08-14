@@ -26,25 +26,26 @@ namespace UniT.ObjectPool
             return pool;
         }
 
-        public GameObject Spawn(Vector3? position = null, Quaternion? rotation = null, Transform parent = null, bool worldPositionStays = true)
+        public GameObject Spawn(Vector3? position = null, Quaternion? rotation = null, Transform parent = null)
         {
             var instance = this._pooledObjects.DequeueOrDefault(() => Instantiate(this._prefab, this.transform));
             this._spawnedObjects.Add(instance);
             instance.transform.SetPositionAndRotation(position ?? Vector3.zero, rotation ?? Quaternion.identity);
-            instance.transform.SetParent(parent, worldPositionStays);
+            instance.transform.SetParent(parent);
             instance.SetActive(true);
             return instance;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T Spawn<T>(Vector3? position = null, Quaternion? rotation = null, Transform parent = null, bool worldPositionStays = true) where T : Component
+        public T Spawn<T>(Vector3? position = null, Quaternion? rotation = null, Transform parent = null) where T : Component
         {
-            return this.Spawn(position, rotation, parent, worldPositionStays).GetComponent<T>();
+            return this.Spawn(position, rotation, parent).GetComponent<T>();
         }
 
         public void Recycle(GameObject instance)
         {
             if (!this._spawnedObjects.Remove(instance)) throw new InvalidOperationException($"{instance.name} does not spawn from {this.gameObject.name}");
+            if (!instance) return;
             instance.SetActive(false);
             instance.transform.SetParent(this.transform);
             instance.GetComponentsInChildren<IRecyclable>().ForEach(recyclable => recyclable.Recycle());
