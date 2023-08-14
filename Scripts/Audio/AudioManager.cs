@@ -2,7 +2,6 @@ namespace UniT.Audio
 {
     using System.Collections.Generic;
     using System.Linq;
-    using System.Runtime.CompilerServices;
     using Cysharp.Threading.Tasks;
     using UniT.Assets;
     using UniT.Extensions;
@@ -81,13 +80,11 @@ namespace UniT.Audio
 
             return;
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             void ConfigureAllSoundSources()
             {
                 this._loadedSoundSources.Values.ForEach(this.ConfigureSoundSource);
             }
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             void ConfigureMusicSource()
             {
                 this._musicSource.volume = this.Config.MusicVolume.Value * this.Config.MasterVolume.Value;
@@ -205,7 +202,6 @@ namespace UniT.Audio
 
         #region Private
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private UniTask<AudioSource> GetSoundSource(string name)
         {
             return this._loadedSoundSources.GetOrAdd(name, () =>
@@ -225,7 +221,6 @@ namespace UniT.Audio
             });
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void ConfigureSoundSource(AudioSource soundSource)
         {
             soundSource.volume = this.Config.SoundVolume.Value * this.Config.MasterVolume.Value;

@@ -2,7 +2,6 @@ namespace UniT.Data.Csv.Attributes
 {
     using System;
     using System.Reflection;
-    using System.Runtime.CompilerServices;
     using UniT.Extensions;
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
@@ -18,7 +17,6 @@ namespace UniT.Data.Csv.Attributes
 
     public static class CsvFieldAttributeExtensions
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string GetCsvFieldName(this FieldInfo fieldInfo)
         {
             return fieldInfo.GetCustomAttribute<CsvFieldAttribute>()?.Name

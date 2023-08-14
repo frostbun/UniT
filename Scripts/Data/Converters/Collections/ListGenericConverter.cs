@@ -4,7 +4,6 @@ namespace UniT.Data.Converters.Collections
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Runtime.CompilerServices;
 
     /// <summary>
     ///     Depends on <see cref="ArrayConverter"/>
@@ -23,7 +22,6 @@ namespace UniT.Data.Converters.Collections
             return ConverterManager.Instance.ConvertToString(((IList)obj).Cast<object>().ToArray(), MakeArrayType(type));
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static Type MakeArrayType(Type type)
         {
             return type.GetGenericArguments()[0].MakeArrayType();

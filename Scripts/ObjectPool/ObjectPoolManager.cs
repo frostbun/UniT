@@ -3,7 +3,6 @@ namespace UniT.ObjectPool
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.Runtime.CompilerServices;
     using Cysharp.Threading.Tasks;
     using UniT.Assets;
     using UniT.Extensions;
@@ -181,7 +180,6 @@ namespace UniT.ObjectPool
 
         #region Private
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private ObjectPool GetPool(GameObject prefab)
         {
             if (this._prefabToPool.TryGetValue(prefab, out var pool)) return pool;
@@ -190,7 +188,6 @@ namespace UniT.ObjectPool
             throw exception;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private ObjectPool GetPool(string key)
         {
             if (this._keyToPool.TryGetValue(key, out var pool)) return pool;
@@ -199,7 +196,6 @@ namespace UniT.ObjectPool
             throw exception;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private ObjectPool InstantiatePool_Internal(GameObject prefab, int initialCount)
         {
             var pool = ObjectPool.Instantiate(prefab, initialCount);
@@ -208,7 +204,6 @@ namespace UniT.ObjectPool
             return pool;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void DestroyPool_Internal(ObjectPool pool)
         {
             this.RecycleAll_Internal(pool);
@@ -216,7 +211,6 @@ namespace UniT.ObjectPool
             this._logger.Debug($"Destroyed {pool.gameObject.name}");
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private GameObject Spawn_Internal(ObjectPool pool, Vector3? position, Quaternion? rotation, Transform parent)
         {
             var instance = pool.Spawn(position, rotation, parent);
@@ -235,7 +229,6 @@ namespace UniT.ObjectPool
             return instance;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void Recycle_Internal(GameObject instance, ObjectPool pool)
         {
             pool.Recycle(instance);
@@ -245,7 +238,6 @@ namespace UniT.ObjectPool
             this._logger.Warning($"Trying to recycle {instance.name} that was already destroyed");
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void RecycleAll_Internal(ObjectPool pool)
         {
             this._instanceToPool.Where((_, otherPool) => otherPool == pool).SafeForEach(this.Recycle_Internal);

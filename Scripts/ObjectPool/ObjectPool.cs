@@ -2,7 +2,6 @@ namespace UniT.ObjectPool
 {
     using System;
     using System.Collections.Generic;
-    using System.Runtime.CompilerServices;
     using UniT.Extensions;
     using UnityEngine;
 
@@ -48,7 +47,6 @@ namespace UniT.ObjectPool
             return instance;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Spawn<T>(Vector3? position = null, Quaternion? rotation = null, Transform parent = null) where T : Component
         {
             return this.Spawn(position, rotation, parent).GetComponent<T>();
@@ -63,7 +61,6 @@ namespace UniT.ObjectPool
             this._pooledObjects.Enqueue(instance);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Recycle<T>(T component) where T : Component
         {
             this.Recycle(component.gameObject);

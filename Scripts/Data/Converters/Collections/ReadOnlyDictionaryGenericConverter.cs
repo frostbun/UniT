@@ -3,7 +3,6 @@ namespace UniT.Data.Converters.Collections
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.Runtime.CompilerServices;
 
     /// <summary>
     ///     Depends on <see cref="DictionaryGenericConverter"/>
@@ -22,7 +21,6 @@ namespace UniT.Data.Converters.Collections
             return ConverterManager.Instance.ConvertToString(obj, MakeDictionaryType(type));
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static Type MakeDictionaryType(Type type)
         {
             return typeof(Dictionary<,>).MakeGenericType(type.GetGenericArguments());

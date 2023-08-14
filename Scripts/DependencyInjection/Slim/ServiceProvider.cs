@@ -3,7 +3,6 @@ namespace UniT.DependencyInjection.Slim
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Runtime.CompilerServices;
     using UniT.Extensions;
 
     public static class ServiceProvider
@@ -25,7 +24,6 @@ namespace UniT.DependencyInjection.Slim
             return GetCache<T>().Cast<T>().ToArray();
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static HashSet<object> GetCache<T>()
         {
             return Cache.GetOrAdd(typeof(T), () => new());

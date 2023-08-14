@@ -3,7 +3,6 @@ namespace UniT.Data.Csv.Attributes
     using System;
     using System.Linq;
     using System.Reflection;
-    using System.Runtime.CompilerServices;
     using UniT.Extensions;
 
     [AttributeUsage(AttributeTargets.Class)]
@@ -19,7 +18,6 @@ namespace UniT.Data.Csv.Attributes
 
     public static class CsvKeyAttributeExtensions
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static FieldInfo GetCsvKeyField(this Type type)
         {
             var csvKey = type.GetCustomAttribute<CsvKeyAttribute>()?.Key;

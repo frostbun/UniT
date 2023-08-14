@@ -3,7 +3,6 @@ namespace UniT.UI
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Runtime.CompilerServices;
     using Cysharp.Threading.Tasks;
     using UniT.Assets;
     using UniT.Extensions;
@@ -117,7 +116,6 @@ namespace UniT.UI
 
         #region Private
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void Show(IActivity activity, bool force, IActivity.Status nextStatus)
         {
             if (!force && activity.CurrentStatus == nextStatus) return;
@@ -147,7 +145,6 @@ namespace UniT.UI
             activity.OnShow();
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void AddToStack(IActivity activity)
         {
             var index = this._activityStack.IndexOf(activity);
@@ -161,13 +158,11 @@ namespace UniT.UI
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void RemoveFromStack(IActivity activity)
         {
             this._activityStack.Remove(activity);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void StackNextActivity()
         {
             if (this.StackingActivity is not null) return;
@@ -176,7 +171,6 @@ namespace UniT.UI
             this.Stack(nextActivity);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void HideUndockedActivities()
         {
             this._activities.Values

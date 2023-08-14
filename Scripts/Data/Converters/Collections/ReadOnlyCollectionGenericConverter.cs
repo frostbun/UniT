@@ -3,7 +3,6 @@ namespace UniT.Data.Converters.Collections
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.Runtime.CompilerServices;
 
     /// <summary>
     ///     Depends on <see cref="ListGenericConverter"/>
@@ -22,7 +21,6 @@ namespace UniT.Data.Converters.Collections
             return ConverterManager.Instance.ConvertToString(obj, MakeListType(type));
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static Type MakeListType(Type type)
         {
             return typeof(List<>).MakeGenericType(type.GetGenericArguments());
