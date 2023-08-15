@@ -29,7 +29,7 @@ namespace UniT.Data.Json
             {
                 if (error is not null)
                 {
-                    this._logger.Critical($"Load {keys.ToJson()} error: {error}");
+                    this._logger.Critical($"Ignoring load {keys.ToJson()} error: {error}");
                 }
                 return rawDatas;
             });
@@ -41,7 +41,7 @@ namespace UniT.Data.Json
             {
                 if (error is not null)
                 {
-                    this._logger.Critical($"Save {keys.ToJson()} error: {error}");
+                    this._logger.Critical($"Ignoring save {keys.ToJson()} error: {error}");
                 }
             });
         }
@@ -52,7 +52,7 @@ namespace UniT.Data.Json
             {
                 if (error is not null)
                 {
-                    this._logger.Critical($"Flush error: {error}");
+                    this._logger.Critical($"Ignoring flush error: {error}");
                 }
             });
         }

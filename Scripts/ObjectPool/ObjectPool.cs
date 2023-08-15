@@ -49,12 +49,13 @@ namespace UniT.ObjectPool
 
         public T Spawn<T>(Vector3? position = null, Quaternion? rotation = null, Transform parent = null) where T : Component
         {
-            return this.Spawn(position, rotation, parent).GetComponent<T>();
+            var instance = this.Spawn(position, rotation, parent);
+            return instance.GetComponent<T>() ?? throw new InvalidOperationException($"Component {typeof(T).Name} not found in GameObject {instance.name}");
         }
 
         public void Recycle(GameObject instance)
         {
-            if (!this._spawnedObjects.Remove(instance)) throw new InvalidOperationException($"{instance.name} does not spawn from {this.gameObject.name}");
+            if (!this._spawnedObjects.Remove(instance)) throw new InvalidOperationException($"{instance.name} was not spawned from {this.gameObject.name}");
             if (!instance) return;
             instance.SetActive(false);
             instance.transform.SetParent(this._transform);

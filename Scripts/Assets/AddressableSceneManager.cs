@@ -24,6 +24,7 @@
         {
             this._loadedScenes = new();
             this._logger       = logger ?? ILogger.Default(this.GetType().Name);
+            this._logger.Info("Constructed");
         }
 
         #endregion
@@ -34,9 +35,7 @@
         {
             if (this._loadedScenes.ContainsKey(key ??= sceneName))
             {
-                var exception = new ArgumentException($"Duplicate key {key} found");
-                this._logger.Exception(exception);
-                throw exception;
+                throw new ArgumentException($"Duplicate key {key} found");
             }
             if (!activateOnLoad)
             {
@@ -46,15 +45,13 @@
                    .ToUniTask(progress: progress, cancellationToken: cancellationToken)
                    .ContinueWith(scene =>
                    {
-                       if (loadMode is LoadSceneMode.Single) this._loadedScenes.RemoveAll((oldKey, _) => oldKey != key);
+                       if (loadMode is LoadSceneMode.Single)
+                       {
+                           this._loadedScenes.RemoveAll((oldKey, _) => oldKey != key);
+                       }
                        this._logger.Debug($"Loaded scene {key}");
                        return scene;
-                   })
-                   .Catch(new Func<Exception, SceneInstance>(exception =>
-                   {
-                       this._logger.Exception(exception);
-                       throw exception;
-                   }));
+                   });
         }
 
         public UniTask UnloadScene(string key, IProgress<float> progress = null, CancellationToken cancellationToken = default)
@@ -66,12 +63,7 @@
             }
             return Addressables.UnloadSceneAsync(scene)
                                .ToUniTask(progress: progress, cancellationToken: cancellationToken)
-                               .ContinueWith(_ => this._logger.Debug($"Unloaded scene {key}"))
-                               .Catch(exception =>
-                               {
-                                   this._logger.Exception(exception);
-                                   throw exception;
-                               });
+                               .ContinueWith(_ => this._logger.Debug($"Unloaded scene {key}"));
         }
 
         #endregion

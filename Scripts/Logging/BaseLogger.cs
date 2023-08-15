@@ -8,16 +8,10 @@ namespace UniT.Logging
 
         public LogConfig Config { get; }
 
-        protected BaseLogger(string name, LogConfig config)
+        protected BaseLogger(string name, LogConfig config = null)
         {
             this.Name   = name;
             this.Config = config ?? new();
-            ((ILogger)this).Info("Instantiated");
-        }
-
-        ~BaseLogger()
-        {
-            ((ILogger)this).Info("Disposed");
         }
 
         void ILogger.Debug(string message)

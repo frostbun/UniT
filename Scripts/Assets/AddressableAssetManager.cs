@@ -24,17 +24,23 @@ namespace UniT.Assets
         {
             this._loadedAssets = new();
             this._logger       = logger ?? ILogger.Default(this.GetType().Name);
+            this._logger.Info("Constructed");
         }
 
         #endregion
 
         #region Finalizer
 
-        ~AddressableAssetManager() => this.Dispose();
+        ~AddressableAssetManager()
+        {
+            this.Dispose();
+            this._logger.Info("Finalized");
+        }
 
         public void Dispose()
         {
             this._loadedAssets.Keys.SafeForEach(this.Unload);
+            this._logger.Debug("Disposed");
         }
 
         #endregion
@@ -53,23 +59,14 @@ namespace UniT.Assets
                        {
                            this._logger.Debug($"Loaded asset {key}");
                            return asset;
-                       })
-                       .Catch(new Func<Exception, T>(exception =>
-                       {
-                           this._logger.Exception(exception);
-                           throw exception;
-                       }));
+                       });
         }
 
         public UniTask<T> LoadComponent<T>(string key = null, IProgress<float> progress = null, CancellationToken cancellationToken = default) where T : Component
         {
-            return this.Load<GameObject>(key ?? typeof(T).GetKey(), progress, cancellationToken)
-                       .ContinueWith(gameObject => gameObject.GetComponent<T>() ?? throw new InvalidOperationException($"Component {typeof(T).Name} not found in GameObject {gameObject.name}"))
-                       .Catch(new Func<Exception, T>(exception =>
-                       {
-                           this._logger.Exception(exception);
-                           throw exception;
-                       }));
+            key ??= typeof(T).GetKey();
+            return this.Load<GameObject>(key, progress, cancellationToken)
+                       .ContinueWith(gameObject => gameObject.GetComponent<T>() ?? throw new InvalidOperationException($"Component {typeof(T).Name} not found in GameObject {key}"));
         }
 
         public void Unload(string key)

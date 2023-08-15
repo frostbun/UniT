@@ -34,6 +34,7 @@ namespace UniT.UI
             this._presenterFactory = presenterFactory ?? IPresenter.Factory.Default();
             this._assetManager     = assetManager ?? IAssetManager.Default();
             this._logger           = logger ?? ILogger.Default(this.GetType().Name);
+            this._logger.Info("Constructed");
             return this.DontDestroyOnLoad();
         }
 

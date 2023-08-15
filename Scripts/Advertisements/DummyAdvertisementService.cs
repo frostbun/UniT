@@ -14,6 +14,7 @@ namespace UniT.Advertisements
         public DummyAdvertisementService(ILogger logger = null)
         {
             this._logger = logger ?? ILogger.Default(this.GetType().Name);
+            this._logger.Info("Constructed");
         }
 
         #endregion

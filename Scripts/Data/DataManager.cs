@@ -28,6 +28,7 @@ namespace UniT.Data
 
             this._logger = logger ?? ILogger.Default(this.GetType().Name);
             this._dataTypeToHandlerType.ForEach((dataType, handlerType) => this._logger.Debug($"Found {dataType.Name} - {handlerType.Name}"));
+            this._logger.Info("Constructed");
         }
 
         public LogConfig LogConfig => this._logger.Config;

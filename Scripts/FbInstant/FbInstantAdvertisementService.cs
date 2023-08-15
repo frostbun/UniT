@@ -24,6 +24,7 @@ namespace UniT.Advertisements
             this._config        = config;
             this._advertisement = advertisement;
             this._logger        = logger ?? ILogger.Default(this.GetType().Name);
+            this._logger.Info("Constructed");
         }
 
         void IInitializable.Initialize()
@@ -31,6 +32,7 @@ namespace UniT.Advertisements
             this.ShowBannerAd();
             this.LoadInterstitialAd();
             this.LoadRewardedAd();
+            this._logger.Debug("Initialized");
         }
 
         #endregion

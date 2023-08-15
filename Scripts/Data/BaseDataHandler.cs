@@ -15,6 +15,7 @@ namespace UniT.Data
         protected BaseDataHandler(ILogger logger = null)
         {
             this._logger = logger ?? ILogger.Default(this.GetType().Name);
+            this._logger.Info("Constructed");
         }
 
         bool IDataHandler.CanHandle(Type type) => this.CanHandle(type);
@@ -24,8 +25,7 @@ namespace UniT.Data
             var keys = datas.Select(data => data.GetType().GetKey()).ToArray();
             return this.LoadRawData(keys)
                        .ContinueWith(rawDatas => IterTools.Zip(rawDatas, datas).Where((rawData, _) => !rawData.IsNullOrWhitespace()).ForEach(this.PopulateData))
-                       .ContinueWith(() => this._logger.Debug($"Loaded {keys.ToJson()}"))
-                       .Catch(this._logger.Exception);
+                       .ContinueWith(() => this._logger.Debug($"Loaded {keys.ToJson()}"));
         }
 
         UniTask IDataHandler.Save(IData[] datas)
@@ -33,11 +33,10 @@ namespace UniT.Data
             var keys     = datas.Select(data => data.GetType().GetKey()).ToArray();
             var rawDatas = datas.Select(this.SerializeData).ToArray();
             return this.SaveRawData(keys, rawDatas)
-                       .ContinueWith(() => this._logger.Debug($"Saved {keys.ToJson()}"))
-                       .Catch(this._logger.Exception);
+                       .ContinueWith(() => this._logger.Debug($"Saved {keys.ToJson()}"));
         }
 
-        UniTask IDataHandler.Flush() => this.Flush().ContinueWith(() => this._logger.Debug("Flushed")).Catch(this._logger.Exception);
+        UniTask IDataHandler.Flush() => this.Flush().ContinueWith(() => this._logger.Debug("Flushed"));
 
         protected virtual bool CanHandle(Type type) => typeof(IData).IsAssignableFrom(type);
 

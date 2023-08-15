@@ -23,17 +23,23 @@ namespace UniT.Assets
         {
             this._loadedAssets = new();
             this._logger       = logger ?? ILogger.Default(this.GetType().Name);
+            this._logger.Info("Constructed");
         }
 
         #endregion
 
         #region Finalizer
 
-        ~ExternalAssetManager() => this.Dispose();
+        ~ExternalAssetManager()
+        {
+            this.Dispose();
+            this._logger.Info("Finalized");
+        }
 
         public void Dispose()
         {
             this._loadedAssets.Keys.SafeForEach(this.Unload);
+            this._logger.Debug("Disposed");
         }
 
         #endregion
@@ -51,12 +57,12 @@ namespace UniT.Assets
                            return request.SendWebRequest();
                        })
                        .ToUniTask(progress: progress, cancellationToken: cancellationToken)
-                       .ContinueWith(request => ((DownloadHandlerTexture)request.downloadHandler).texture)
-                       .Catch(new Func<Exception, Texture2D>(exception =>
+                       .ContinueWith(request =>
                        {
-                           this._logger.Exception(exception);
-                           throw exception;
-                       }));
+                           var texture = ((DownloadHandlerTexture)request.downloadHandler).texture;
+                           this._logger.Debug($"Downloaded texture from {url}");
+                           return texture;
+                       });
         }
 
         public void Unload(string key)

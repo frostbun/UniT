@@ -36,6 +36,7 @@ namespace UniT.Audio
             this._loadedSoundSources = new();
 
             this._logger = logger ?? ILogger.Default(this.GetType().Name);
+            this._logger.Info("Constructed");
         }
 
         void IInitializable.Initialize()
@@ -78,6 +79,7 @@ namespace UniT.Audio
                 this._logger.Debug(value ? "Master volume muted" : "Master volume unmuted");
             });
 
+            this._logger.Debug("Initialized");
             return;
 
             void ConfigureAllSoundSources()

@@ -21,6 +21,7 @@ namespace UniT.Signal
             this._callbacksWithSignal = new();
             this._callbacksNoSignal   = new();
             this._logger              = logger ?? ILogger.Default(this.GetType().Name);
+            this._logger.Info("Constructed");
         }
 
         #endregion
