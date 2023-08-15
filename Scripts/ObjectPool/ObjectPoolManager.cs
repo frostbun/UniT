@@ -122,22 +122,34 @@ namespace UniT.ObjectPool
 
         public GameObject Spawn(GameObject prefab, Vector3? position = null, Quaternion? rotation = null, Transform parent = null)
         {
-            return this.Spawn_Internal(this.GetPool(prefab), position, rotation, parent);
+            var pool     = this.GetPool(prefab);
+            var instance = pool.Spawn(position, rotation, parent);
+            this.Spawn_Internal(instance, pool);
+            return instance;
         }
 
         public T Spawn<T>(T component, Vector3? position = null, Quaternion? rotation = null, Transform parent = null) where T : Component
         {
-            return this.Spawn_Internal<T>(this.GetPool(component.gameObject), position, rotation, parent);
+            var pool     = this.GetPool(component.gameObject);
+            var instance = pool.Spawn<T>(position, rotation, parent);
+            this.Spawn_Internal(instance.gameObject, pool);
+            return instance;
         }
 
         public GameObject Spawn(string key, Vector3? position = null, Quaternion? rotation = null, Transform parent = null)
         {
-            return this.Spawn_Internal(this.GetPool(key), position, rotation, parent);
+            var pool     = this.GetPool(key);
+            var instance = pool.Spawn(position, rotation, parent);
+            this.Spawn_Internal(instance, pool);
+            return instance;
         }
 
         public T Spawn<T>(string key = null, Vector3? position = null, Quaternion? rotation = null, Transform parent = null) where T : Component
         {
-            return this.Spawn_Internal<T>(this.GetPool(key ?? typeof(T).GetKey()), position, rotation, parent);
+            var pool     = this.GetPool(key ?? typeof(T).GetKey());
+            var instance = pool.Spawn<T>(position, rotation, parent);
+            this.Spawn_Internal(instance.gameObject, pool);
+            return instance;
         }
 
         public void Recycle(GameObject instance)
@@ -206,9 +218,8 @@ namespace UniT.ObjectPool
             this._logger.Debug($"Destroyed {pool.gameObject.name}");
         }
 
-        private GameObject Spawn_Internal(ObjectPool pool, Vector3? position, Quaternion? rotation, Transform parent)
+        private void Spawn_Internal(GameObject instance, ObjectPool pool)
         {
-            var instance = pool.Spawn(position, rotation, parent);
             this._instanceToPool.Add(instance, pool);
             this._recyclables.GetOrAdd(instance, () =>
             {
@@ -222,13 +233,6 @@ namespace UniT.ObjectPool
                 return recyclables;
             }).ForEach(component => component.OnSpawn());
             this._logger.Debug($"Spawned {instance.name}");
-            return instance;
-        }
-
-        private T Spawn_Internal<T>(ObjectPool pool, Vector3? position, Quaternion? rotation, Transform parent) where T : Component
-        {
-            var instance = this.Spawn_Internal(pool, position, rotation, parent);
-            return instance.GetComponent<T>() ?? throw new InvalidOperationException($"Component {typeof(T).Name} not found in GameObject {instance.name}");
         }
 
         private void Recycle_Internal(GameObject instance, ObjectPool pool)
