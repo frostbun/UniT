@@ -250,9 +250,12 @@ namespace UniT.ObjectPool
 
         private void RecycleAll_Internal(ObjectPool pool)
         {
-            this._instanceToPool
-                .Where((_, otherPool) => otherPool == pool)
-                .SafeForEach(this.Recycle_Internal);
+            this._instanceToPool.RemoveAll((instance, otherPool) =>
+            {
+                if (otherPool != pool) return false;
+                this.Recycle_Internal(instance, otherPool);
+                return true;
+            });
             this._logger.Debug($"Recycled all {pool.gameObject.name}");
         }
 
