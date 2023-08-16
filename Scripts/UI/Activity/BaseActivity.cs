@@ -7,6 +7,23 @@ namespace UniT.UI.Activity
 
     public abstract class BaseActivity : BaseView, IActivity
     {
+        IActivity.Status IActivity.CurrentStatus { get => this.CurrentStatus; set => this.CurrentStatus = value; }
+
+        void IActivity.OnShow()
+        {
+            this._resultSource = new();
+            this.OnShow();
+        }
+
+        void IActivity.OnHide()
+        {
+            this.OnHide();
+            this._extras.Clear();
+            this._resultSource = null;
+        }
+
+        void IActivity.OnDispose() => this.OnDispose();
+
         public IActivity.Status CurrentStatus { get; private set; } = IActivity.Status.Hidden;
 
         private readonly Dictionary<string, object>      _extras = new();
@@ -25,7 +42,8 @@ namespace UniT.UI.Activity
                 throw new InvalidOperationException("Activity must be shown before wait for result");
             return this._resultSource.Task.ContinueWith(result =>
             {
-                if (result is not T t) throw new ArgumentException($"Wrong result type. Expected {typeof(T).Name}, got {result.GetType().Name}.");
+                if (result is not T t)
+                    throw new ArgumentException($"Wrong result type. Expected {typeof(T).Name}, got {result.GetType().Name}.");
                 return t;
             });
         }
@@ -55,27 +73,6 @@ namespace UniT.UI.Activity
         protected virtual void OnDispose()
         {
         }
-
-        #region Interface Implementation
-
-        IActivity.Status IActivity.CurrentStatus { get => this.CurrentStatus; set => this.CurrentStatus = value; }
-
-        void IActivity.OnShow()
-        {
-            this._resultSource = new();
-            this.OnShow();
-        }
-
-        void IActivity.OnHide()
-        {
-            this.OnHide();
-            this._extras.Clear();
-            this._resultSource = null;
-        }
-
-        void IActivity.OnDispose() => this.OnDispose();
-
-        #endregion
     }
 
     public abstract class BaseActivity<TPresenter> : BaseActivity, IActivityWithPresenter where TPresenter : IPresenter

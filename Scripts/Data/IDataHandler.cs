@@ -8,12 +8,12 @@ namespace UniT.Data
     {
         public LogConfig LogConfig { get; }
 
-        protected internal bool CanHandle(Type type);
+        public bool CanHandle(Type type);
 
-        protected internal UniTask Populate(IData[] datas);
+        public UniTask Populate(IData[] datas);
 
-        protected internal UniTask Save(IData[] datas);
+        public UniTask Save(IData[] datas);
 
-        protected internal UniTask Flush();
+        public UniTask Flush();
     }
 }

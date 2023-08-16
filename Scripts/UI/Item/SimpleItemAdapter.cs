@@ -18,8 +18,8 @@ namespace UniT.UI.Item
             models.ForEach(model =>
             {
                 var item = this._pooledItems.DequeueOrDefault(() => this.Manager.Initialize(Instantiate(this._itemPrefab, this._content)));
-                item.Transform.SetAsLastSibling();
-                item.GameObject.SetActive(true);
+                item.transform.SetAsLastSibling();
+                item.gameObject.SetActive(true);
                 item.Model = model;
                 item.OnShow();
                 this._spawnedItems.Add(item);
@@ -30,7 +30,7 @@ namespace UniT.UI.Item
         {
             this._spawnedItems.ForEach(item =>
             {
-                item.GameObject.SetActive(false);
+                item.gameObject.SetActive(false);
                 item.OnHide();
                 this._pooledItems.Enqueue(item);
             });
@@ -43,7 +43,7 @@ namespace UniT.UI.Item
             this._pooledItems.ForEach(item =>
             {
                 item.OnDispose();
-                Destroy(item.GameObject);
+                Destroy(item.gameObject);
             });
             this._pooledItems.Clear();
         }

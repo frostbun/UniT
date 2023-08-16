@@ -95,7 +95,7 @@ namespace UniT.UI
         public void Hide(IActivity activity, bool removeFromStack = true, bool autoStack = true)
         {
             if (activity.CurrentStatus is IActivity.Status.Hidden) return;
-            activity.Transform.SetParent(this._hiddenActivities, false);
+            activity.transform.SetParent(this._hiddenActivities, false);
             this._logger.Debug($"{activity.GetType().Name} status: {activity.CurrentStatus = IActivity.Status.Hidden}");
             activity.OnHide();
             if (removeFromStack) this.RemoveFromStack(activity);
@@ -108,7 +108,7 @@ namespace UniT.UI
             this._activities.Remove(activity.GetType());
             this._logger.Debug($"{activity.GetType().Name} status: {activity.CurrentStatus = IActivity.Status.Disposed}");
             activity.OnDispose();
-            Destroy(activity.GameObject);
+            Destroy(activity.gameObject);
             if (!this._keys.Remove(activity.GetType(), out var key)) return;
             this._assetManager.Unload(key);
         }
@@ -127,21 +127,21 @@ namespace UniT.UI
                 {
                     this.AddToStack(activity);
                     this.HideUndockedActivities();
-                    activity.Transform.SetParent(this._stackingActivities, false);
+                    activity.transform.SetParent(this._stackingActivities, false);
                     break;
                 }
                 case IActivity.Status.Floating:
                 {
-                    activity.Transform.SetParent(this._floatingActivities, false);
+                    activity.transform.SetParent(this._floatingActivities, false);
                     break;
                 }
                 case IActivity.Status.Docked:
                 {
-                    activity.Transform.SetParent(this._dockedActivities, false);
+                    activity.transform.SetParent(this._dockedActivities, false);
                     break;
                 }
             }
-            activity.Transform.SetAsLastSibling();
+            activity.transform.SetAsLastSibling();
             this._logger.Debug($"{activity.GetType().Name} status: {activity.CurrentStatus = nextStatus}");
             activity.OnShow();
             return activity;

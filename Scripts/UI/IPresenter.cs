@@ -14,6 +14,6 @@ namespace UniT.UI
             }
         }
 
-        protected internal IView View { set; }
+        public IView View { set; }
     }
 }

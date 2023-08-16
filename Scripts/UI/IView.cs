@@ -5,19 +5,19 @@ namespace UniT.UI
 
     public interface IView
     {
-        public IUIManager Manager { get; protected internal set; }
+        public IUIManager Manager { get; set; }
 
-        protected internal void OnInitialize();
+        public void OnInitialize();
 
-        protected internal GameObject GameObject { get; }
+        public GameObject gameObject { get; }
 
-        protected internal Transform Transform { get; }
+        public Transform transform { get; }
     }
 
     public interface IViewWithPresenter : IView
     {
-        protected internal Type PresenterType { get; }
+        public Type PresenterType { get; }
 
-        protected internal IPresenter Presenter { set; }
+        public IPresenter Presenter { set; }
     }
 }

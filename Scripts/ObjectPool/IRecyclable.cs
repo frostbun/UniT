@@ -2,12 +2,12 @@ namespace UniT.ObjectPool
 {
     public interface IRecyclable
     {
-        public IObjectPoolManager Manager { get; protected internal set; }
+        public IObjectPoolManager Manager { get; set; }
 
-        protected internal void OnInstantiate();
+        public void OnInstantiate();
 
-        protected internal void OnSpawn();
+        public void OnSpawn();
 
-        protected internal void OnRecycle();
+        public void OnRecycle();
     }
 }

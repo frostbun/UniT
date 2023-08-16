@@ -13,7 +13,7 @@ namespace UniT.UI.Activity
             Disposed,
         }
 
-        public Status CurrentStatus { get; protected internal set; }
+        public Status CurrentStatus { get; set; }
 
         public IActivity PutExtra<T>(string key, T value);
 
@@ -23,11 +23,11 @@ namespace UniT.UI.Activity
 
         public void SetResult<T>(T result);
 
-        protected internal void OnShow();
+        public void OnShow();
 
-        protected internal void OnHide();
+        public void OnHide();
 
-        protected internal void OnDispose();
+        public void OnDispose();
     }
 
     public interface IActivityWithPresenter : IActivity, IViewWithPresenter
