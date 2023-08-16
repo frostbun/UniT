@@ -17,9 +17,11 @@ namespace UniT.UI.Activity
 
         public IActivity PutExtra<T>(string key, T value);
 
+        public UniTask<T> WaitForResult<T>();
+
         public T GetExtra<T>(string key);
 
-        public UniTask<T> WaitForResult<T>();
+        public void SetResult<T>(T result);
 
         protected internal void OnShow();
 

@@ -12,23 +12,14 @@ namespace UniT.UI.Activity
         private readonly Dictionary<string, object>      _extras = new();
         private          UniTaskCompletionSource<object> _resultSource;
 
-        public IActivity PutExtra<T>(string key, T value)
+        IActivity IActivity.PutExtra<T>(string key, T value)
         {
             if (!this._extras.TryAdd(key, value))
                 throw new ArgumentException($"Duplicate key {key} found");
             return this;
         }
 
-        public T GetExtra<T>(string key)
-        {
-            var extra = this._extras.GetOrDefault(key)
-                ?? throw new ArgumentException($"No extra with key {key} found");
-            if (extra is not T t)
-                throw new ArgumentException($"Found an extra with key {key} but with wrong type. Expected {typeof(T).Name}, got {extra.GetType().Name}.");
-            return t;
-        }
-
-        public UniTask<T> WaitForResult<T>()
+        UniTask<T> IActivity.WaitForResult<T>()
         {
             if (this._resultSource is null)
                 throw new InvalidOperationException("Activity must be shown before wait for result");
@@ -39,7 +30,16 @@ namespace UniT.UI.Activity
             });
         }
 
-        protected void SetResult(object result)
+        public T GetExtra<T>(string key)
+        {
+            var extra = this._extras.GetOrDefault(key)
+                ?? throw new ArgumentException($"No extra with key {key} found");
+            if (extra is not T t)
+                throw new ArgumentException($"Found an extra with key {key} but wrong type. Expected {typeof(T).Name}, got {extra.GetType().Name}.");
+            return t;
+        }
+
+        public void SetResult<T>(T result)
         {
             this._resultSource.TrySetResult(result);
         }
