@@ -1,5 +1,7 @@
 namespace UniT.UI.Activity
 {
+    using Cysharp.Threading.Tasks;
+
     public interface IActivity : IView
     {
         public enum Status
@@ -16,6 +18,8 @@ namespace UniT.UI.Activity
         public IActivity PutExtra<T>(string key, T value);
 
         public T GetExtra<T>(string key);
+
+        public UniTask<T> WaitForResult<T>();
 
         protected internal void OnShow();
 

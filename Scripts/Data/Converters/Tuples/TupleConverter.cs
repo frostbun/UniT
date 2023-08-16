@@ -21,7 +21,7 @@ namespace UniT.Data.Converters.Tuples
         {
             var items     = str.Split(this._separator);
             var itemTypes = type.GetGenericArguments();
-            if (items.Length != itemTypes.Length) throw new ArgumentException($"TupleConverter: Invalid number of items in string. Expected {itemTypes.Length}, got {items.Length}");
+            if (items.Length != itemTypes.Length) throw new ArgumentException($"TupleConverter: Invalid number of items in string. Expected {itemTypes.Length}, got {items.Length}.");
             return Activator.CreateInstance(type, IterTools.Zip(items, itemTypes, ConverterManager.Instance.ConvertFromString).ToArray());
         }
 
@@ -29,7 +29,7 @@ namespace UniT.Data.Converters.Tuples
         {
             var tuple     = (ITuple)obj;
             var itemTypes = type.GetGenericArguments();
-            if (tuple.Length != itemTypes.Length) throw new ArgumentException($"TupleConverter: Invalid number of items in tuple. Expected {itemTypes.Length}, got {tuple.Length}");
+            if (tuple.Length != itemTypes.Length) throw new ArgumentException($"TupleConverter: Invalid number of items in tuple. Expected {itemTypes.Length}, got {tuple.Length}.");
             return string.Join(this._separator, IterTools.Zip(ToEnumerable(tuple), itemTypes, ConverterManager.Instance.ConvertToString));
         }
 

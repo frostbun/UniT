@@ -24,11 +24,11 @@ namespace UniT.UI
 
         public UniTask<IActivity> GetActivity<TActivity>(string key = null) where TActivity : Component, IActivity;
 
-        public void Stack(IActivity activity, bool force = false);
+        public IActivity Stack(IActivity activity, bool force = false);
 
-        public void Float(IActivity activity, bool force = false);
+        public IActivity Float(IActivity activity, bool force = false);
 
-        public void Dock(IActivity activity, bool force = false);
+        public IActivity Dock(IActivity activity, bool force = false);
 
         public void Hide(IActivity activity, bool removeFromStack = true, bool autoStack = true);
 

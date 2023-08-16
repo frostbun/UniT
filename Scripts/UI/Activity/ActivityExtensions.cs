@@ -9,17 +9,22 @@ namespace UniT.UI.Activity
             return task.ContinueWith(activity => activity.PutExtra(key, value));
         }
 
-        public static UniTask Stack(this UniTask<IActivity> task, bool force = false)
+        public static UniTask<T> WaitForResult<T>(this UniTask<IActivity> task)
+        {
+            return task.ContinueWith(activity => activity.WaitForResult<T>());
+        }
+
+        public static UniTask<IActivity> Stack(this UniTask<IActivity> task, bool force = false)
         {
             return task.ContinueWith(activity => activity.Stack(force));
         }
 
-        public static UniTask Float(this UniTask<IActivity> task, bool force = false)
+        public static UniTask<IActivity> Float(this UniTask<IActivity> task, bool force = false)
         {
             return task.ContinueWith(activity => activity.Float(force));
         }
 
-        public static UniTask Dock(this UniTask<IActivity> task, bool force = false)
+        public static UniTask<IActivity> Dock(this UniTask<IActivity> task, bool force = false)
         {
             return task.ContinueWith(activity => activity.Dock(force));
         }
@@ -34,19 +39,19 @@ namespace UniT.UI.Activity
             return task.ContinueWith(activity => activity.Dispose(autoStack));
         }
 
-        public static void Stack(this IActivity activity, bool force = false)
+        public static IActivity Stack(this IActivity activity, bool force = false)
         {
-            activity.Manager.Stack(activity, force);
+            return activity.Manager.Stack(activity, force);
         }
 
-        public static void Float(this IActivity activity, bool force = false)
+        public static IActivity Float(this IActivity activity, bool force = false)
         {
-            activity.Manager.Float(activity, force);
+            return activity.Manager.Float(activity, force);
         }
 
-        public static void Dock(this IActivity activity, bool force = false)
+        public static IActivity Dock(this IActivity activity, bool force = false)
         {
-            activity.Manager.Dock(activity, force);
+            return activity.Manager.Dock(activity, force);
         }
 
         public static void Hide(this IActivity activity, bool removeFromStack = true, bool autoStack = true)

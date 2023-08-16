@@ -2,23 +2,46 @@ namespace UniT.UI.Activity
 {
     using System;
     using System.Collections.Generic;
+    using Cysharp.Threading.Tasks;
     using UniT.Extensions;
 
     public abstract class BaseActivity : BaseView, IActivity
     {
         public IActivity.Status CurrentStatus { get; private set; } = IActivity.Status.Hidden;
 
-        private readonly Dictionary<string, object> _extras = new();
+        private readonly Dictionary<string, object>      _extras = new();
+        private          UniTaskCompletionSource<object> _resultSource;
 
         public IActivity PutExtra<T>(string key, T value)
         {
-            this._extras[key] = value;
+            if (!this._extras.TryAdd(key, value))
+                throw new ArgumentException($"Duplicate key {key} found");
             return this;
         }
 
         public T GetExtra<T>(string key)
         {
-            return (T)this._extras.GetOrDefault(key);
+            var extra = this._extras.GetOrDefault(key)
+                ?? throw new ArgumentException($"No extra with key {key} found");
+            if (extra is not T t)
+                throw new ArgumentException($"Found an extra with key {key} but with wrong type. Expected {typeof(T).Name}, got {extra.GetType().Name}.");
+            return t;
+        }
+
+        public UniTask<T> WaitForResult<T>()
+        {
+            if (this._resultSource is null)
+                throw new InvalidOperationException("Activity must be shown before wait for result");
+            return this._resultSource.Task.ContinueWith(result =>
+            {
+                if (result is not T t) throw new ArgumentException($"Wrong result type. Expected {typeof(T).Name}, got {result.GetType().Name}.");
+                return t;
+            });
+        }
+
+        protected void SetResult(object result)
+        {
+            this._resultSource.TrySetResult(result);
         }
 
         protected virtual void OnShow()
@@ -37,12 +60,17 @@ namespace UniT.UI.Activity
 
         IActivity.Status IActivity.CurrentStatus { get => this.CurrentStatus; set => this.CurrentStatus = value; }
 
-        void IActivity.OnShow() => this.OnShow();
+        void IActivity.OnShow()
+        {
+            this._resultSource = new();
+            this.OnShow();
+        }
 
         void IActivity.OnHide()
         {
-            this._extras.Clear();
             this.OnHide();
+            this._extras.Clear();
+            this._resultSource = null;
         }
 
         void IActivity.OnDispose() => this.OnDispose();

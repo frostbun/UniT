@@ -32,8 +32,8 @@ namespace UniT.UI
         public UIManager Construct(IPresenter.Factory presenterFactory = null, IAssetManager assetManager = null, ILogger logger = null)
         {
             this._presenterFactory = presenterFactory ?? IPresenter.Factory.Default();
-            this._assetManager     = assetManager ?? IAssetManager.Default();
-            this._logger           = logger ?? ILogger.Default(this.GetType().Name);
+            this._assetManager     = assetManager     ?? IAssetManager.Default();
+            this._logger           = logger           ?? ILogger.Default(this.GetType().Name);
             this._logger.Info("Constructed");
             return this.DontDestroyOnLoad();
         }
@@ -86,11 +86,11 @@ namespace UniT.UI
             );
         }
 
-        public void Stack(IActivity activity, bool force = false) => this.Show(activity, force, IActivity.Status.Stacking);
+        public IActivity Stack(IActivity activity, bool force = false) => this.Show(activity, force, IActivity.Status.Stacking);
 
-        public void Float(IActivity activity, bool force = false) => this.Show(activity, force, IActivity.Status.Floating);
+        public IActivity Float(IActivity activity, bool force = false) => this.Show(activity, force, IActivity.Status.Floating);
 
-        public void Dock(IActivity activity, bool force = false) => this.Show(activity, force, IActivity.Status.Docked);
+        public IActivity Dock(IActivity activity, bool force = false) => this.Show(activity, force, IActivity.Status.Docked);
 
         public void Hide(IActivity activity, bool removeFromStack = true, bool autoStack = true)
         {
@@ -117,9 +117,9 @@ namespace UniT.UI
 
         #region Private
 
-        private void Show(IActivity activity, bool force, IActivity.Status nextStatus)
+        private IActivity Show(IActivity activity, bool force, IActivity.Status nextStatus)
         {
-            if (!force && activity.CurrentStatus == nextStatus) return;
+            if (!force && activity.CurrentStatus == nextStatus) return activity;
             this.Hide(activity, false, false);
             switch (nextStatus)
             {
@@ -144,6 +144,7 @@ namespace UniT.UI
             activity.Transform.SetAsLastSibling();
             this._logger.Debug($"{activity.GetType().Name} status: {activity.CurrentStatus = nextStatus}");
             activity.OnShow();
+            return activity;
         }
 
         private void AddToStack(IActivity activity)
