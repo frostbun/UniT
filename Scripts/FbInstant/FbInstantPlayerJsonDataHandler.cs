@@ -28,9 +28,7 @@ namespace UniT.Data.Json
             return this._player.LoadData(keys).ContinueWith((rawDatas, error) =>
             {
                 if (error is not null)
-                {
                     this._logger.Critical($"Ignoring load {keys.ToJson()} error: {error}");
-                }
                 return rawDatas;
             });
         }
@@ -40,9 +38,7 @@ namespace UniT.Data.Json
             return this._player.SaveData(keys, rawDatas).ContinueWith(error =>
             {
                 if (error is not null)
-                {
                     this._logger.Critical($"Ignoring save {keys.ToJson()} error: {error}");
-                }
             });
         }
 
@@ -51,9 +47,7 @@ namespace UniT.Data.Json
             return this._player.FlushData().ContinueWith(error =>
             {
                 if (error is not null)
-                {
                     this._logger.Critical($"Ignoring flush error: {error}");
-                }
             });
         }
     }

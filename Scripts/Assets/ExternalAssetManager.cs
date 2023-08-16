@@ -50,19 +50,20 @@ namespace UniT.Assets
 
         public UniTask<Texture2D> DownloadTexture(string url, IProgress<float> progress = null, CancellationToken cancellationToken = default)
         {
-            return this._loadedAssets.GetOrAdd(url, () =>
-                       {
-                           var request = new UnityWebRequest(url);
-                           request.downloadHandler = new DownloadHandlerTexture();
-                           return request.SendWebRequest();
-                       })
-                       .ToUniTask(progress: progress, cancellationToken: cancellationToken)
-                       .ContinueWith(request =>
-                       {
-                           var texture = ((DownloadHandlerTexture)request.downloadHandler).texture;
-                           this._logger.Debug($"Downloaded texture from {url}");
-                           return texture;
-                       });
+            return this._loadedAssets
+                .GetOrAdd(url, () =>
+                {
+                    var request = new UnityWebRequest(url);
+                    request.downloadHandler = new DownloadHandlerTexture();
+                    return request.SendWebRequest();
+                })
+                .ToUniTask(progress: progress, cancellationToken: cancellationToken)
+                .ContinueWith(request =>
+                {
+                    var texture = ((DownloadHandlerTexture)request.downloadHandler).texture;
+                    this._logger.Debug($"Downloaded texture from {url}");
+                    return texture;
+                });
         }
 
         public void Unload(string key)

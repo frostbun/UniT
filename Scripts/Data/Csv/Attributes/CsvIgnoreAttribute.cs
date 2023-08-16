@@ -14,7 +14,7 @@ namespace UniT.Data.Csv.Attributes
         public static bool IsCsvIgnored(this FieldInfo fieldInfo)
         {
             return fieldInfo.GetCustomAttribute<CsvIgnoreAttribute>() is not null
-                   || fieldInfo.ToPropertyInfo()?.GetCustomAttribute<CsvIgnoreAttribute>() is not null;
+                || fieldInfo.ToPropertyInfo()?.GetCustomAttribute<CsvIgnoreAttribute>() is not null;
         }
     }
 }

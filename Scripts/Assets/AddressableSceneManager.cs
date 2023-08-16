@@ -34,24 +34,19 @@
         public UniTask<SceneInstance> LoadScene(string sceneName, string key = null, LoadSceneMode loadMode = LoadSceneMode.Single, bool activateOnLoad = true, int priority = 100, IProgress<float> progress = null, CancellationToken cancellationToken = default)
         {
             if (this._loadedScenes.ContainsKey(key ??= sceneName))
-            {
                 throw new ArgumentException($"Duplicate key {key} found");
-            }
             if (!activateOnLoad)
-            {
                 this._logger.Warning("Set `activateOnLoad` to false will block all other `AsyncOperationHandle` until the scene is activated");
-            }
-            return (this._loadedScenes[key] = Addressables.LoadSceneAsync(sceneName, loadMode, activateOnLoad, priority))
-                   .ToUniTask(progress: progress, cancellationToken: cancellationToken)
-                   .ContinueWith(scene =>
-                   {
-                       if (loadMode is LoadSceneMode.Single)
-                       {
-                           this._loadedScenes.RemoveAll((oldKey, _) => oldKey != key);
-                       }
-                       this._logger.Debug($"Loaded scene {key}");
-                       return scene;
-                   });
+            return this._loadedScenes
+                .GetOrAdd(key, () => Addressables.LoadSceneAsync(sceneName, loadMode, activateOnLoad, priority))
+                .ToUniTask(progress: progress, cancellationToken: cancellationToken)
+                .ContinueWith(scene =>
+                {
+                    if (loadMode is LoadSceneMode.Single)
+                        this._loadedScenes.RemoveAll((oldKey, _) => oldKey != key);
+                    this._logger.Debug($"Loaded scene {key}");
+                    return scene;
+                });
         }
 
         public UniTask UnloadScene(string key, IProgress<float> progress = null, CancellationToken cancellationToken = default)
@@ -62,8 +57,8 @@
                 return UniTask.CompletedTask;
             }
             return Addressables.UnloadSceneAsync(scene)
-                               .ToUniTask(progress: progress, cancellationToken: cancellationToken)
-                               .ContinueWith(_ => this._logger.Debug($"Unloaded scene {key}"));
+                .ToUniTask(progress: progress, cancellationToken: cancellationToken)
+                .ContinueWith(_ => this._logger.Debug($"Unloaded scene {key}"));
         }
 
         #endregion

@@ -57,11 +57,11 @@ namespace UniT.ObjectPool
         public UniTask InstantiatePool(string key, int initialCount = 1)
         {
             return this._keyToPool.TryAdd(key, () => this._assetManager.Load<GameObject>(key).ContinueWith(prefab => this.InstantiatePool_Internal(prefab, initialCount)))
-                       .ContinueWith(isSuccess =>
-                       {
-                           if (isSuccess) return;
-                           this._logger.Warning($"Pool for {key} already instantiated");
-                       });
+                .ContinueWith(isSuccess =>
+                {
+                    if (isSuccess) return;
+                    this._logger.Warning($"Pool for {key} already instantiated");
+                });
         }
 
         public UniTask InstantiatePool<T>(int initialCount = 1) where T : Component
@@ -194,13 +194,13 @@ namespace UniT.ObjectPool
         private ObjectPool GetPool(GameObject prefab)
         {
             return this._prefabToPool.GetOrDefault(prefab)
-                   ?? throw new InvalidOperationException($"Pool for {prefab.name} was not instantiated");
+                ?? throw new InvalidOperationException($"Pool for {prefab.name} was not instantiated");
         }
 
         private ObjectPool GetPool(string key)
         {
             return this._keyToPool.GetOrDefault(key)
-                   ?? throw new InvalidOperationException($"Pool for {key} was not instantiated");
+                ?? throw new InvalidOperationException($"Pool for {key} was not instantiated");
         }
 
         private ObjectPool InstantiatePool_Internal(GameObject prefab, int initialCount)
@@ -250,7 +250,9 @@ namespace UniT.ObjectPool
 
         private void RecycleAll_Internal(ObjectPool pool)
         {
-            this._instanceToPool.Where((_, otherPool) => otherPool == pool).SafeForEach(this.Recycle_Internal);
+            this._instanceToPool
+                .Where((_, otherPool) => otherPool == pool)
+                .SafeForEach(this.Recycle_Internal);
             this._logger.Debug($"Recycled all {pool.gameObject.name}");
         }
 

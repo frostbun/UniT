@@ -63,14 +63,15 @@ namespace UniT.DependencyInjection
             if (type.IsInterface) throw new($"Cannot instantiate interface {type.Name}");
             if (type.IsAbstract) throw new($"Cannot instantiate abstract class {type.Name}");
             if (type.IsGenericType) throw new($"Cannot instantiate generic type {type.Name}");
-            var ctor = type.GetConstructors().SingleOrDefault() ?? throw new($"No constructor found for {type.Name}");
+            var ctor = type.GetConstructors().SingleOrDefault()
+                ?? throw new($"No constructor found for {type.Name}");
             return ctor.Invoke(ResolveParameters(ctor.GetParameters(), $"instantiating {type.Name}"));
         }
 
         public static object Invoke(object obj, string methodName)
         {
             var method = obj.GetType().GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-                         ?? throw new($"Method {methodName} not found on {obj.GetType().Name}");
+                ?? throw new($"Method {methodName} not found on {obj.GetType().Name}");
             return method.Invoke(obj, ResolveParameters(method.GetParameters(), $"invoking {methodName} on {obj.GetType().Name}"));
         }
 

@@ -71,7 +71,7 @@ namespace UniT.Utilities
         public static BigNumber operator -(BigNumber n1, BigNumber n2)
         {
             if (n1._sign != n2._sign) return n1 + -n2;
-            if (Abs(n1) < Abs(n2)) return -(n2 - n1);
+            if (Abs(n1)  < Abs(n2)) return -(n2 - n1);
             return new(IterTools.ZipLongest(n1._values, n2._values, (v1, v2) => v1 - v2), n1._sign);
         }
 

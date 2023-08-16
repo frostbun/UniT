@@ -52,21 +52,25 @@ namespace UniT.Assets
         public UniTask<T> Load<T>(string key = null, IProgress<float> progress = null, CancellationToken cancellationToken = default)
         {
             key ??= typeof(T).GetKey();
-            return this._loadedAssets.GetOrAdd(key, () => Addressables.LoadAssetAsync<T>(key))
-                       .Convert<T>()
-                       .ToUniTask(progress: progress, cancellationToken: cancellationToken)
-                       .ContinueWith(asset =>
-                       {
-                           this._logger.Debug($"Loaded asset {key}");
-                           return asset;
-                       });
+            return this._loadedAssets
+                .GetOrAdd(key, () => Addressables.LoadAssetAsync<T>(key))
+                .Convert<T>()
+                .ToUniTask(progress: progress, cancellationToken: cancellationToken)
+                .ContinueWith(asset =>
+                {
+                    this._logger.Debug($"Loaded asset {key}");
+                    return asset;
+                });
         }
 
         public UniTask<T> LoadComponent<T>(string key = null, IProgress<float> progress = null, CancellationToken cancellationToken = default) where T : Component
         {
             key ??= typeof(T).GetKey();
             return this.Load<GameObject>(key, progress, cancellationToken)
-                       .ContinueWith(gameObject => gameObject.GetComponent<T>() ?? throw new InvalidOperationException($"Component {typeof(T).Name} not found in GameObject {key}"));
+                .ContinueWith(
+                    gameObject => gameObject.GetComponent<T>()
+                        ?? throw new InvalidOperationException($"Component {typeof(T).Name} not found in GameObject {key}")
+                );
         }
 
         public void Unload(string key)

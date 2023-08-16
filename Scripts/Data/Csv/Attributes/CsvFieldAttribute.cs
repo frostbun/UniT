@@ -20,8 +20,8 @@ namespace UniT.Data.Csv.Attributes
         public static string GetCsvFieldName(this FieldInfo fieldInfo)
         {
             return fieldInfo.GetCustomAttribute<CsvFieldAttribute>()?.Name
-                   ?? fieldInfo.ToPropertyInfo()?.GetCustomAttribute<CsvFieldAttribute>()?.Name
-                   ?? fieldInfo.Name.ToPropertyName();
+                ?? fieldInfo.ToPropertyInfo()?.GetCustomAttribute<CsvFieldAttribute>()?.Name
+                ?? fieldInfo.Name.ToPropertyName();
         }
     }
 }

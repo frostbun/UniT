@@ -25,8 +25,8 @@ namespace UniT.Data.Csv.Attributes
                 ? type.GetAllFields().FirstOrDefault(field => !field.IsCsvIgnored())
                     ?? throw new InvalidOperationException($"Cannot find any csv field in {type.Name}")
                 : type.GetField(csvKey)
-                  ?? type.GetField(csvKey.ToBackingFieldName())
-                  ?? throw new InvalidOperationException($"Cannot find csv key field {csvKey} in {type.Name}");
+                    ?? type.GetField(csvKey.ToBackingFieldName())
+                    ?? throw new InvalidOperationException($"Cannot find csv key field {csvKey} in {type.Name}");
         }
     }
 }

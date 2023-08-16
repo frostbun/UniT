@@ -23,7 +23,7 @@ namespace UniT.Data
             this._dataTypeToHandlerType = dataCache.ToDictionary(
                 data => data.GetType(),
                 data => handlerCache.LastOrDefault(handler => handler.CanHandle(data.GetType()))?.GetType()
-                        ?? throw new ArgumentException($"No handler found for type {data.GetType().Name}")
+                    ?? throw new ArgumentException($"No handler found for type {data.GetType().Name}")
             ).AsReadOnly();
 
             this._logger = logger ?? ILogger.Default(this.GetType().Name);
