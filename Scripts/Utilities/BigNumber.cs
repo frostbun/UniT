@@ -1,4 +1,4 @@
-namespace UniT.Utilities
+﻿namespace UniT.Utilities
 {
     using System;
     using System.Collections.Generic;
@@ -9,10 +9,12 @@ namespace UniT.Utilities
     public class BigNumber : IComparable, IComparable<BigNumber>, IEquatable<BigNumber>
     {
         public static int          Mod     { get; set; } = (int)1e3;
-        public static List<string> Letters { get; set; } = IterTools.Product(" abcdefghijklmnopqrstuvwxyzx".ToCharArray(), 3).Select(chars => string.Join("", chars).Trim()).ToList();
+        public static List<string> Letters { get; set; } = IterTools.Product(" abcdefghijklmnopqrstuvwxyz".ToCharArray(), 3).Select(chars => string.Join("", chars).Trim()).ToList();
 
         private readonly ReadOnlyCollection<int> _values;
         private readonly bool                    _sign; // false: positive, true: negative
+        private          bool                    IsPositive => !this._sign;
+        private          bool                    IsNegative => this._sign;
 
         public BigNumber(int value = 0) : this(new[] { Math.Abs(value) }, value < 0)
         {
@@ -40,7 +42,7 @@ namespace UniT.Utilities
 
         public override string ToString()
         {
-            var sign         = this._sign ? "-" : "";
+            var sign         = this.IsNegative ? "-" : "";
             var integerValue = this._values[^1];
             var decimalValue = this._values.Count > 1 ? $".{this._values[^2] / (Mod / 10)}" : "";
             var letter       = this._values.Count > 1 ? Letters[this._values.Count - 1] : "";
@@ -71,13 +73,13 @@ namespace UniT.Utilities
         public static BigNumber operator -(BigNumber n1, BigNumber n2)
         {
             if (n1._sign != n2._sign) return n1 + -n2;
-            if (Abs(n1)  < Abs(n2)) return -(n2 - n1);
+            if (Abs(n1) < Abs(n2)) return -(n2 - n1);
             return new(IterTools.ZipLongest(n1._values, n2._values, (v1, v2) => v1 - v2), n1._sign);
         }
 
         public static BigNumber operator *(BigNumber n1, int n2)
         {
-            return new(n1._values.Select(value => value * Math.Abs(n2)), n1._sign ^ (n2 < 0));
+            return new(n1._values.Select(value => value * Math.Abs(n2)), n1.IsPositive ^ (n2 >= 0));
         }
 
         public static BigNumber operator *(BigNumber n1, BigNumber n2)
@@ -95,7 +97,7 @@ namespace UniT.Utilities
         public static bool operator ==(BigNumber n1, BigNumber n2)
         {
             if (n1 is null || n2 is null) return n1 is null && n2 is null;
-            return n1._sign == n2._sign && Enumerable.SequenceEqual(n1._values, n2._values);
+            return n1._sign == n2._sign && n1._values.SequenceEqual(n2._values);
         }
 
         public static bool operator !=(BigNumber n1, BigNumber n2)
@@ -105,9 +107,13 @@ namespace UniT.Utilities
 
         public static bool operator <(BigNumber n1, BigNumber n2)
         {
-            if (n1._sign != n2._sign) return n1._sign;
-            if (n1._sign) return -n1 >= -n2;
-            return IterTools.ZipLongest(n1._values, n2._values).Reverse().All((i1, i2) => i1 < i2);
+            if (n1._sign != n2._sign) return n1.IsNegative;
+            foreach (var (v1, v2) in IterTools.ZipLongest(n1._values, n2._values).Reverse())
+            {
+                if (v1 < v2) return n1.IsPositive;
+                if (v1 > v2) return n1.IsNegative;
+            }
+            return false;
         }
 
         public static bool operator <=(BigNumber n1, BigNumber n2)
@@ -117,9 +123,13 @@ namespace UniT.Utilities
 
         public static bool operator >(BigNumber n1, BigNumber n2)
         {
-            if (n1._sign != n2._sign) return n2._sign;
-            if (n1._sign) return -n1 <= -n2;
-            return IterTools.ZipLongest(n1._values, n2._values).Reverse().All((i1, i2) => i1 > i2);
+            if (n1._sign != n2._sign) return n1.IsPositive;
+            foreach (var (v1, v2) in IterTools.ZipLongest(n1._values, n2._values).Reverse())
+            {
+                if (v1 > v2) return n1.IsPositive;
+                if (v1 < v2) return n1.IsNegative;
+            }
+            return false;
         }
 
         public static bool operator >=(BigNumber n1, BigNumber n2)
@@ -144,7 +154,7 @@ namespace UniT.Utilities
 
         public int CompareTo(BigNumber other)
         {
-            if (other is null) return this._sign ? -1 : 1;
+            if (other is null) return this.IsNegative ? -1 : 1;
             if (this == other) return 0;
             return this < other ? -1 : 1;
         }
