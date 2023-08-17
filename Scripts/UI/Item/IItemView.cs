@@ -10,8 +10,4 @@ namespace UniT.UI.Item
 
         public void OnDispose();
     }
-
-    public interface IItemViewWithPresenter : IItemView, IViewWithPresenter
-    {
-    }
 }

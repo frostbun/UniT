@@ -29,8 +29,4 @@ namespace UniT.UI.Activity
 
         public void OnDispose();
     }
-
-    public interface IActivityWithPresenter : IActivity, IViewWithPresenter
-    {
-    }
 }

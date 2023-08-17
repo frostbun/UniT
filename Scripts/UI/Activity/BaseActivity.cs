@@ -75,7 +75,7 @@ namespace UniT.UI.Activity
         }
     }
 
-    public abstract class BaseActivity<TPresenter> : BaseActivity, IActivityWithPresenter where TPresenter : IPresenter
+    public abstract class BaseActivity<TPresenter> : BaseActivity, IViewWithPresenter where TPresenter : IPresenter
     {
         Type IViewWithPresenter.PresenterType => this.PresenterType;
 

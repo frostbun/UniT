@@ -27,7 +27,7 @@ namespace UniT.UI.Item
         }
     }
 
-    public abstract class BaseItemView<TModel, TPresenter> : BaseItemView<TModel>, IItemViewWithPresenter where TPresenter : IPresenter
+    public abstract class BaseItemView<TModel, TPresenter> : BaseItemView<TModel>, IViewWithPresenter where TPresenter : IPresenter
     {
         Type IViewWithPresenter.PresenterType => this.PresenterType;
 
