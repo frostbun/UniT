@@ -3,7 +3,6 @@ namespace UniT.UI.Activity
     using System;
     using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
-    using UniT.Extensions;
 
     public abstract class BaseActivity : BaseView, IActivity
     {
@@ -18,8 +17,9 @@ namespace UniT.UI.Activity
         void IActivity.OnHide()
         {
             this.OnHide();
-            this._extras.Clear();
+            this._resultSource.TrySetResult(null);
             this._resultSource = null;
+            this._extras.Clear();
         }
 
         void IActivity.OnDispose() => this.OnDispose();
@@ -42,16 +42,28 @@ namespace UniT.UI.Activity
                 throw new InvalidOperationException("Activity must be shown before wait for result");
             return this._resultSource.Task.ContinueWith(result =>
             {
+                if (result is null)
+                    return default;
                 if (result is not T t)
                     throw new ArgumentException($"Wrong result type. Expected {typeof(T).Name}, got {result.GetType().Name}.");
                 return t;
             });
         }
 
+        UniTask IActivity.WaitForHide()
+        {
+            if (this._resultSource is null)
+                throw new InvalidOperationException("Activity must be shown before wait for hide");
+            return this._resultSource.Task;
+        }
+
         public T GetExtra<T>(string key)
         {
-            var extra = this._extras.GetOrDefault(key)
-                ?? throw new ArgumentException($"No extra with key {key} found");
+            if (!this._extras.ContainsKey(key))
+                throw new ArgumentException($"No extra with key {key} found");
+            var extra = this._extras[key];
+            if (extra is null)
+                return default;
             if (extra is not T t)
                 throw new ArgumentException($"Found an extra with key {key} but wrong type. Expected {typeof(T).Name}, got {extra.GetType().Name}.");
             return t;
@@ -59,7 +71,10 @@ namespace UniT.UI.Activity
 
         public void SetResult<T>(T result)
         {
-            this._resultSource.TrySetResult(result);
+            if (this._resultSource is null)
+                throw new InvalidOperationException("Activity must be shown before set result");
+            if (!this._resultSource.TrySetResult(result))
+                throw new InvalidOperationException("Result already set");
         }
 
         protected virtual void OnShow()

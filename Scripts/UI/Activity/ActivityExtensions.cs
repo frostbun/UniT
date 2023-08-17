@@ -14,6 +14,11 @@ namespace UniT.UI.Activity
             return task.ContinueWith(activity => activity.WaitForResult<T>());
         }
 
+        public static UniTask WaitForHide(this UniTask<IActivity> task)
+        {
+            return task.ContinueWith(activity => activity.WaitForHide());
+        }
+
         public static UniTask<IActivity> Stack(this UniTask<IActivity> task, bool force = false)
         {
             return task.ContinueWith(activity => activity.Stack(force));

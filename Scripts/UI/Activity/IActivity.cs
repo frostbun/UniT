@@ -19,6 +19,8 @@ namespace UniT.UI.Activity
 
         public UniTask<T> WaitForResult<T>();
 
+        public UniTask WaitForHide();
+
         public T GetExtra<T>(string key);
 
         public void SetResult<T>(T result);
