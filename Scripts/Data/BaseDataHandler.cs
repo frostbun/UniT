@@ -15,7 +15,7 @@ namespace UniT.Data
         protected BaseDataHandler(ILogger logger = null)
         {
             this._logger = logger ?? ILogger.Default(this.GetType().Name);
-            this._logger.Info("Constructed");
+            this._logger.Debug("Constructed");
         }
 
         bool IDataHandler.CanHandle(Type type) => this.CanHandle(type);

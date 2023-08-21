@@ -24,7 +24,7 @@
         {
             this._loadedScenes = new();
             this._logger       = logger ?? ILogger.Default(this.GetType().Name);
-            this._logger.Info("Constructed");
+            this._logger.Debug("Constructed");
         }
 
         #endregion

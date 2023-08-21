@@ -24,7 +24,7 @@ namespace UniT.Assets
         {
             this._loadedAssets = new();
             this._logger       = logger ?? ILogger.Default(this.GetType().Name);
-            this._logger.Info("Constructed");
+            this._logger.Debug("Constructed");
         }
 
         #endregion
@@ -34,7 +34,7 @@ namespace UniT.Assets
         ~AddressableAssetManager()
         {
             this.Dispose();
-            this._logger.Info("Finalized");
+            this._logger.Debug("Finalized");
         }
 
         public void Dispose()

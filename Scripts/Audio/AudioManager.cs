@@ -36,7 +36,7 @@ namespace UniT.Audio
             this._loadedSoundSources = new();
 
             this._logger = logger ?? ILogger.Default(this.GetType().Name);
-            this._logger.Info("Constructed");
+            this._logger.Debug("Constructed");
         }
 
         void IInitializable.Initialize()
