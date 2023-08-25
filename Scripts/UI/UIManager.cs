@@ -32,10 +32,31 @@ namespace UniT.UI
         public UIManager Construct(IPresenter.Factory presenterFactory = null, IAssetManager assetManager = null, ILogger logger = null)
         {
             this._presenterFactory = presenterFactory ?? IPresenter.Factory.Default();
-            this._assetManager     = assetManager     ?? IAssetManager.Default();
-            this._logger           = logger           ?? ILogger.Default(this.GetType().Name);
+            this._assetManager     = assetManager ?? IAssetManager.Default();
+            this._logger           = logger ?? ILogger.Default(this.GetType().Name);
             this._logger.Debug("Constructed");
             return this.DontDestroyOnLoad();
+        }
+
+        #endregion
+
+        #region Finalizer
+
+        ~UIManager()
+        {
+            this.Dispose();
+            this._logger.Debug("Finalized");
+        }
+
+        public void Dispose()
+        {
+            this._activities.Values.SafeForEach(activity => this.Dispose(activity, false));
+            this._logger.Debug("Disposed");
+        }
+
+        private void OnDestroy()
+        {
+            this.Dispose();
         }
 
         #endregion

@@ -1,12 +1,13 @@
 namespace UniT.UI
 {
+    using System;
     using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
     using UniT.Logging;
     using UniT.UI.Activity;
     using UnityEngine;
 
-    public interface IUIManager
+    public interface IUIManager : IDisposable
     {
         public LogConfig LogConfig { get; }
 

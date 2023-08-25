@@ -18,6 +18,7 @@ namespace UniT.UI.Activity
         {
             this.OnHide();
             this._resultSource.TrySetResult(null);
+            this._resultSource.Task.Forget();
             this._resultSource = null;
             this._extras.Clear();
         }
