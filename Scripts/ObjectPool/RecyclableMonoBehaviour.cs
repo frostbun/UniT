@@ -1,5 +1,6 @@
 namespace UniT.ObjectPool
 {
+    using System.Threading;
     using UnityEngine;
 
     public abstract class RecyclableMonoBehaviour : MonoBehaviour, IRecyclable
@@ -10,7 +11,13 @@ namespace UniT.ObjectPool
 
         void IRecyclable.OnSpawn() => this.OnSpawn();
 
-        void IRecyclable.OnRecycle() => this.OnRecycle();
+        void IRecyclable.OnRecycle()
+        {
+            this._recycleCts?.Cancel();
+            this._recycleCts?.Dispose();
+            this._recycleCts = null;
+            this.OnRecycle();
+        }
 
         public IObjectPoolManager Manager { get; private set; }
 
@@ -24,6 +31,13 @@ namespace UniT.ObjectPool
 
         protected virtual void OnRecycle()
         {
+        }
+
+        private CancellationTokenSource _recycleCts;
+
+        public CancellationToken GetCancellationTokenOnRecycle()
+        {
+            return (this._recycleCts ??= new()).Token;
         }
     }
 }
