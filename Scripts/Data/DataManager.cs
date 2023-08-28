@@ -35,7 +35,7 @@ namespace UniT.Data
 
         public T Get<T>() where T : IData
         {
-            return (T)this._dataCache.GetOrDefault(typeof(T));
+            return (T)this._dataCache[typeof(T)];
         }
 
         public UniTask Populate<T>() where T : IData
@@ -55,17 +55,37 @@ namespace UniT.Data
 
         public UniTask Populate(params Type[] dataTypes)
         {
-            return UniTask.WhenAll(dataTypes.GroupBy(dataType => this._dataTypeToHandlerType[dataType]).Select(group => this._handlerCache[group.Key].Populate(group.Select(dataType => this._dataCache[dataType]).ToArray())));
+            return UniTask.WhenAll(
+                dataTypes.GroupBy(dataType => this._dataTypeToHandlerType[dataType])
+                    .Select(group =>
+                        this._handlerCache[group.Key].Populate(
+                            group.Select(dataType => this._dataCache[dataType])
+                                .ToArray()
+                        )
+                    )
+            );
         }
 
         public UniTask Save(params Type[] dataTypes)
         {
-            return UniTask.WhenAll(dataTypes.GroupBy(dataType => this._dataTypeToHandlerType[dataType]).Select(group => this._handlerCache[group.Key].Save(group.Select(dataType => this._dataCache[dataType]).ToArray())));
+            return UniTask.WhenAll(
+                dataTypes.GroupBy(dataType => this._dataTypeToHandlerType[dataType])
+                    .Select(group =>
+                        this._handlerCache[group.Key].Save(
+                            group.Select(dataType => this._dataCache[dataType])
+                                .ToArray()
+                        )
+                    )
+            );
         }
 
         public UniTask Flush(params Type[] dataTypes)
         {
-            return UniTask.WhenAll(dataTypes.Select(dataType => this._dataTypeToHandlerType[dataType]).Distinct().Select(handlerType => this._handlerCache[handlerType].Flush()));
+            return UniTask.WhenAll(
+                dataTypes.Select(dataType => this._dataTypeToHandlerType[dataType])
+                    .Distinct()
+                    .Select(handlerType => this._handlerCache[handlerType].Flush())
+            );
         }
 
         public UniTask PopulateAll()
