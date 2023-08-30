@@ -42,21 +42,16 @@ namespace UniT.UI
 
         #region Finalizer
 
-        ~UIManager()
+        private void OnDestroy()
         {
             this.Dispose();
-            this._logger.Debug("Finalized");
+            this._logger.Debug("Destroyed");
         }
 
         public void Dispose()
         {
             this._activities.Values.SafeForEach(activity => this.Dispose(activity, false));
             this._logger.Debug("Disposed");
-        }
-
-        private void OnDestroy()
-        {
-            this.Dispose();
         }
 
         #endregion
