@@ -10,38 +10,32 @@ namespace UniT.UI.Activity
 
         void IActivity.OnShow()
         {
-            this._resultSource = new();
+            this._currentExtras = this._nextExtras;
+            this._nextExtras    = null;
             this.OnShow();
         }
 
         void IActivity.OnHide()
         {
             this.OnHide();
-            this._resultSource.TrySetResult(null);
-            this._resultSource.Task.Forget();
+            this._currentExtras = null;
+            this._resultSource?.TrySetResult(null);
+            this._resultSource?.Task.Forget();
             this._resultSource = null;
-            this._extras.Clear();
         }
 
         void IActivity.OnDispose() => this.OnDispose();
 
-        public IActivity.Status CurrentStatus { get; private set; } = IActivity.Status.Hidden;
-
-        private readonly Dictionary<string, object>      _extras = new();
-        private          UniTaskCompletionSource<object> _resultSource;
-
         IActivity IActivity.PutExtra<T>(string key, T value)
         {
-            if (!this._extras.TryAdd(key, value))
-                throw new ArgumentException($"Duplicate key {key} found");
+            this._nextExtras      ??= new();
+            this._nextExtras[key] =   value;
             return this;
         }
 
         UniTask<T> IActivity.WaitForResult<T>()
         {
-            if (this._resultSource is null)
-                throw new InvalidOperationException("Activity must be shown before wait for result");
-            return this._resultSource.Task.ContinueWith(result =>
+            return this.GetResultSource().Task.ContinueWith(result =>
             {
                 if (result is null)
                     return default;
@@ -51,18 +45,15 @@ namespace UniT.UI.Activity
             });
         }
 
-        UniTask IActivity.WaitForHide()
-        {
-            if (this._resultSource is null)
-                throw new InvalidOperationException("Activity must be shown before wait for hide");
-            return this._resultSource.Task;
-        }
+        UniTask IActivity.WaitForHide() => this.GetResultSource().Task;
+
+        public IActivity.Status CurrentStatus { get; private set; } = IActivity.Status.Hidden;
 
         public T GetExtra<T>(string key)
         {
-            if (!this._extras.ContainsKey(key))
+            if (this._currentExtras is null || !this._currentExtras.ContainsKey(key))
                 throw new ArgumentException($"No extra with key {key} found");
-            var extra = this._extras[key];
+            var extra = this._currentExtras[key];
             if (extra is null)
                 return default;
             if (extra is not T t)
@@ -72,9 +63,7 @@ namespace UniT.UI.Activity
 
         public void SetResult<T>(T result)
         {
-            if (this._resultSource is null)
-                throw new InvalidOperationException("Activity must be shown before set result");
-            if (!this._resultSource.TrySetResult(result))
+            if (!this.GetResultSource().TrySetResult(result))
                 throw new InvalidOperationException("Result already set");
         }
 
@@ -89,6 +78,24 @@ namespace UniT.UI.Activity
         protected virtual void OnDispose()
         {
         }
+
+        #region Private
+
+        private Dictionary<string, object>      _currentExtras;
+        private Dictionary<string, object>      _nextExtras;
+        private UniTaskCompletionSource<object> _resultSource;
+
+        private UniTaskCompletionSource<object> GetResultSource()
+        {
+            return this.CurrentStatus switch
+            {
+                IActivity.Status.Disposed => throw new ObjectDisposedException("Activity was disposed"),
+                IActivity.Status.Hidden   => throw new InvalidOperationException("Activity was hidden"),
+                _                         => this._resultSource ??= new(),
+            };
+        }
+
+        #endregion
     }
 
     public abstract class BaseActivity<TPresenter> : BaseActivity, IViewWithPresenter where TPresenter : IPresenter
