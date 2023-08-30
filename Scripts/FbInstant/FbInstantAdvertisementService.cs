@@ -5,6 +5,7 @@ namespace UniT.Advertisements
     using System.Linq;
     using System.Runtime.CompilerServices;
     using Cysharp.Threading.Tasks;
+    using FbInstant;
     using FbInstant.Advertisements;
     using UniT.Extensions;
     using UniT.Logging;
@@ -63,16 +64,16 @@ namespace UniT.Advertisements
 
         private static readonly int[] RetryIntervals = { 4, 8, 16, 32, 64 };
 
-        private void Invoke(string[] adIds, Func<string, UniTask<string>> action, [CallerMemberName] string caller = null)
+        private void Invoke(string[] adIds, Func<string, UniTask<Result>> action, [CallerMemberName] string caller = null)
         {
             UniTask.Void(async () =>
             {
                 for (var index = 0;; ++index)
                 {
                     var adId  = adIds[Math.Min(index, adIds.Length - 1)];
-                    var error = await action(adId);
-                    if (error is null) break;
-                    this._logger.Error($"{caller} error {index + 1} time(s): {error}");
+                    var result = await action(adId);
+                    if (result.IsSuccess) break;
+                    this._logger.Error($"{caller} error {index + 1} time(s): {result.Error}");
                     var retryInterval = RetryIntervals[Math.Min(index, RetryIntervals.Length - 1)];
                     await UniTask.WaitForSeconds(retryInterval);
                 }
@@ -80,7 +81,7 @@ namespace UniT.Advertisements
             });
         }
 
-        private void InvokeOnce(string[] adIds, Func<string, bool> check, Func<string, UniTask<string>> action, Action onSuccess = null, Action onComplete = null, [CallerMemberName] string caller = null)
+        private void InvokeOnce(string[] adIds, Func<string, bool> check, Func<string, UniTask<Result>> action, Action onSuccess = null, Action onComplete = null, [CallerMemberName] string caller = null)
         {
             var adId = adIds.FirstOrDefault(check);
             if (adId is null)
@@ -92,18 +93,18 @@ namespace UniT.Advertisements
             this.InvokeOnce(() => action(adId), onSuccess, onComplete, caller);
         }
 
-        private void InvokeOnce(Func<UniTask<string>> action, Action onSuccess = null, Action onComplete = null, [CallerMemberName] string caller = null)
+        private void InvokeOnce(Func<UniTask<Result>> action, Action onSuccess = null, Action onComplete = null, [CallerMemberName] string caller = null)
         {
-            action().ContinueWith(error =>
+            action().ContinueWith(result =>
             {
-                if (error is null)
+                if (result.IsSuccess)
                 {
                     this._logger.Debug($"{caller} success");
                     onSuccess?.Invoke();
                 }
                 else
                 {
-                    this._logger.Error($"{caller} error: {error}");
+                    this._logger.Error($"{caller} error: {result.Error}");
                 }
             }).Finally(() => onComplete?.Invoke()).Forget();
         }

@@ -25,20 +25,20 @@ namespace UniT.Data.Json
 
         protected override UniTask<string[]> LoadRawData(string[] keys)
         {
-            return this._player.LoadData(keys).ContinueWith((rawDatas, error) =>
+            return this._player.LoadData(keys).ContinueWith(result =>
             {
-                if (error is not null)
-                    this._logger.Critical($"Ignoring load {keys.ToJson()} error: {error}");
-                return rawDatas;
+                if (result.IsError)
+                    this._logger.Critical($"Ignoring load {keys.ToJson()} error: {result.Error}");
+                return result.Data;
             });
         }
 
         protected override UniTask SaveRawData(string[] keys, string[] rawDatas)
         {
-            return this._player.SaveData(keys, rawDatas).ContinueWith(error =>
+            return this._player.SaveData(keys, rawDatas).ContinueWith(result =>
             {
-                if (error is not null)
-                    this._logger.Critical($"Ignoring save {keys.ToJson()} error: {error}");
+                if (result.IsError)
+                    this._logger.Critical($"Ignoring save {keys.ToJson()} error: {result.Error}");
             });
         }
 
