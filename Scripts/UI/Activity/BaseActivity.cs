@@ -26,6 +26,10 @@ namespace UniT.UI.Activity
 
         void IActivity.OnDispose() => this.OnDispose();
 
+        private Dictionary<string, object>      _currentExtras;
+        private Dictionary<string, object>      _nextExtras;
+        private UniTaskCompletionSource<object> _resultSource;
+
         IActivity IActivity.PutExtra<T>(string key, T value)
         {
             this._nextExtras      ??= new();
@@ -35,7 +39,7 @@ namespace UniT.UI.Activity
 
         UniTask<T> IActivity.WaitForResult<T>()
         {
-            return this.GetResultSource().Task.ContinueWith(result =>
+            return (this._resultSource ??= new()).Task.ContinueWith(result =>
             {
                 if (result is null)
                     return default;
@@ -45,7 +49,10 @@ namespace UniT.UI.Activity
             });
         }
 
-        UniTask IActivity.WaitForHide() => this.GetResultSource().Task;
+        UniTask IActivity.WaitForHide()
+        {
+            return (this._resultSource ??= new()).Task;
+        }
 
         public IActivity.Status CurrentStatus { get; private set; } = IActivity.Status.Hidden;
 
@@ -61,10 +68,9 @@ namespace UniT.UI.Activity
             return t;
         }
 
-        public void SetResult<T>(T result)
+        public bool TrySetResult<T>(T result)
         {
-            if (!this.GetResultSource().TrySetResult(result))
-                throw new InvalidOperationException("Result already set");
+            return (this._resultSource ??= new()).TrySetResult(result);
         }
 
         protected virtual void OnShow()
@@ -78,24 +84,6 @@ namespace UniT.UI.Activity
         protected virtual void OnDispose()
         {
         }
-
-        #region Private
-
-        private Dictionary<string, object>      _currentExtras;
-        private Dictionary<string, object>      _nextExtras;
-        private UniTaskCompletionSource<object> _resultSource;
-
-        private UniTaskCompletionSource<object> GetResultSource()
-        {
-            return this.CurrentStatus switch
-            {
-                IActivity.Status.Disposed => throw new ObjectDisposedException("Activity was disposed"),
-                IActivity.Status.Hidden   => throw new InvalidOperationException("Activity was hidden"),
-                _                         => this._resultSource ??= new(),
-            };
-        }
-
-        #endregion
     }
 
     public abstract class BaseActivity<TPresenter> : BaseActivity, IViewWithPresenter where TPresenter : IPresenter

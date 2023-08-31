@@ -23,7 +23,7 @@ namespace UniT.UI.Activity
 
         public T GetExtra<T>(string key);
 
-        public void SetResult<T>(T result);
+        public bool TrySetResult<T>(T result);
 
         public void OnShow();
 
