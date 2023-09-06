@@ -12,7 +12,7 @@
     ```
     or add
     ```
-    "com.frostbun.unit": "https://github.com/frostbun/UniT.git"
+    "com.frostbun.unit.core": "https://github.com/frostbun/UniT.git"
     ```
     to your `Packages/manifest.json`
 
