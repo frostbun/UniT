@@ -6,7 +6,6 @@ namespace UniT.Advertisements
     using System.Runtime.CompilerServices;
     using Cysharp.Threading.Tasks;
     using FbInstant;
-    using FbInstant.Advertisements;
     using UniT.Extensions;
     using UniT.Logging;
     using UnityEngine.Scripting;
@@ -16,21 +15,18 @@ namespace UniT.Advertisements
         #region Constructor
 
         private readonly IFbInstantAdvertisementConfig _config;
-        private readonly FbInstantAdvertisement        _advertisement;
         private readonly ILogger                       _logger;
 
         [Preserve]
-        public FbInstantAdvertisementService(IFbInstantAdvertisementConfig config, FbInstantAdvertisement advertisement, ILogger logger = null)
+        public FbInstantAdvertisementService(IFbInstantAdvertisementConfig config, ILogger logger = null)
         {
-            this._config        = config;
-            this._advertisement = advertisement;
-            this._logger        = logger ?? ILogger.Default(this.GetType().Name);
+            this._config = config;
+            this._logger = logger ?? ILogger.Default(this.GetType().Name);
             this._logger.Debug("Constructed");
         }
 
         void IInitializable.Initialize()
         {
-            this.ShowBannerAd();
             this.LoadInterstitialAd();
             this.LoadRewardedAd();
             this._logger.Debug("Initialized");
@@ -42,35 +38,35 @@ namespace UniT.Advertisements
 
         public LogConfig LogConfig => this._logger.Config;
 
-        public void ShowBannerAd() => this.Invoke(this._config.BannerAdIds, this._advertisement.ShowBannerAd);
+        public void ShowBannerAd() => this.InvokeUntilSuccess(this._config.BannerAdIds, FbInstant.Advertisements.ShowBannerAd);
 
-        public void HideBannedAd() => this.InvokeOnce(this._advertisement.HideBannerAd);
+        public void HideBannedAd() => this.InvokeOnce(FbInstant.Advertisements.HideBannerAd);
 
-        public bool IsInterstitialAdReady() => this._config.InterstitialAdIds.Any(this._advertisement.IsInterstitialAdReady);
+        public bool IsInterstitialAdReady() => this._config.InterstitialAdIds.Any(FbInstant.Advertisements.IsInterstitialAdReady);
 
-        public void ShowInterstitialAd(Action onComplete = null) => this.InvokeOnce(this._config.InterstitialAdIds, this._advertisement.IsInterstitialAdReady, this._advertisement.ShowInterstitialAd, this.LoadInterstitialAd, onComplete);
+        public void ShowInterstitialAd(Action onComplete = null) => this.InvokeOnce(this._config.InterstitialAdIds, FbInstant.Advertisements.IsInterstitialAdReady, FbInstant.Advertisements.ShowInterstitialAd, this.LoadInterstitialAd, onComplete);
 
-        public bool IsRewardedAdReady() => this._config.RewardedAdIds.Any(this._advertisement.IsRewardedAdReady);
+        public bool IsRewardedAdReady() => this._config.RewardedAdIds.Any(FbInstant.Advertisements.IsRewardedAdReady);
 
-        public void ShowRewardedAd(Action onSuccess, Action onComplete = null) => this.InvokeOnce(this._config.RewardedAdIds, this._advertisement.IsRewardedAdReady, this._advertisement.ShowRewardedAd, this.LoadRewardedAd + onSuccess, onComplete);
+        public void ShowRewardedAd(Action onSuccess, Action onComplete = null) => this.InvokeOnce(this._config.RewardedAdIds, FbInstant.Advertisements.IsRewardedAdReady, FbInstant.Advertisements.ShowRewardedAd, this.LoadRewardedAd + onSuccess, onComplete);
 
         #endregion
 
         #region Private
 
-        private void LoadInterstitialAd() => this.Invoke(this._config.InterstitialAdIds, this._advertisement.LoadInterstitialAd);
+        private void LoadInterstitialAd() => this.InvokeUntilSuccess(this._config.InterstitialAdIds, FbInstant.Advertisements.LoadInterstitialAd);
 
-        private void LoadRewardedAd() => this.Invoke(this._config.RewardedAdIds, this._advertisement.LoadRewardedAd);
+        private void LoadRewardedAd() => this.InvokeUntilSuccess(this._config.RewardedAdIds, FbInstant.Advertisements.LoadRewardedAd);
 
         private static readonly int[] RetryIntervals = { 4, 8, 16, 32, 64 };
 
-        private void Invoke(string[] adIds, Func<string, UniTask<Result>> action, [CallerMemberName] string caller = null)
+        private void InvokeUntilSuccess(string[] adIds, Func<string, UniTask<Result>> action, [CallerMemberName] string caller = null)
         {
             UniTask.Void(async () =>
             {
                 for (var index = 0;; ++index)
                 {
-                    var adId  = adIds[Math.Min(index, adIds.Length - 1)];
+                    var adId   = adIds[Math.Min(index, adIds.Length - 1)];
                     var result = await action(adId);
                     if (result.IsSuccess) break;
                     this._logger.Error($"{caller} error {index + 1} time(s): {result.Error}");
@@ -106,7 +102,8 @@ namespace UniT.Advertisements
                 {
                     this._logger.Error($"{caller} error: {result.Error}");
                 }
-            }).Finally(() => onComplete?.Invoke()).Forget();
+                onComplete?.Invoke();
+            }).Forget();
         }
 
         #endregion
