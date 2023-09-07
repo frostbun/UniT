@@ -9,7 +9,7 @@
 
         public void ShowBannerAd();
 
-        public void HideBannedAd();
+        public void HideBannerAd();
 
         public bool IsInterstitialAdReady();
 

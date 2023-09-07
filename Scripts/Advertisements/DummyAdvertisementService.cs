@@ -28,7 +28,7 @@ namespace UniT.Advertisements
             this._logger.Debug("ShowBannerAd");
         }
 
-        public void HideBannedAd()
+        public void HideBannerAd()
         {
             this._logger.Debug("HideBannedAd");
         }

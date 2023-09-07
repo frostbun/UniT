@@ -40,7 +40,7 @@ namespace UniT.Advertisements
 
         public void ShowBannerAd() => this.InvokeUntilSuccess(this._config.BannerAdIds, FbInstant.Advertisements.ShowBannerAd);
 
-        public void HideBannedAd() => this.InvokeOnce(FbInstant.Advertisements.HideBannerAd);
+        public void HideBannerAd() => this.InvokeOnce(FbInstant.Advertisements.HideBannerAd);
 
         public bool IsInterstitialAdReady() => this._config.InterstitialAdIds.Any(FbInstant.Advertisements.IsInterstitialAdReady);
 
