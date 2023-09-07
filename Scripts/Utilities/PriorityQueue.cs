@@ -1,5 +1,6 @@
 namespace UniT.Utilities
 {
+    using System;
     using System.Collections.Generic;
 
     public class PriorityQueue<TElement, TPriority>
@@ -10,11 +11,15 @@ namespace UniT.Utilities
         {
         }
 
+        public PriorityQueue(Comparison<TPriority> comparison) : this(Comparer<TPriority>.Create(comparison))
+        {
+        }
+
         public PriorityQueue(IComparer<TPriority> comparer)
         {
             this._items = new(Comparer<TPriority>.Create((i1, i2) =>
             {
-                var result = comparer.Compare(i2, i1);
+                var result = comparer.Compare(i1, i2);
                 return result != 0 ? result : 1;
             }));
         }
@@ -28,14 +33,14 @@ namespace UniT.Utilities
 
         public TElement Dequeue()
         {
-            var result = this.Peek();
-            this._items.RemoveAt(0);
+            var result = this._items.Values[this._items.Count - 1];
+            this._items.RemoveAt(this._items.Count - 1);
             return result;
         }
 
         public TElement Peek()
         {
-            return this._items.Values[0];
+            return this._items.Values[this._items.Count - 1];
         }
     }
 }
