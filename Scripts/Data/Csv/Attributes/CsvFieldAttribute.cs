@@ -17,11 +17,11 @@ namespace UniT.Data.Csv.Attributes
 
     public static class CsvFieldAttributeExtensions
     {
-        public static string GetCsvFieldName(this FieldInfo fieldInfo)
+        public static string GetCsvFieldName(this FieldInfo field)
         {
-            return fieldInfo.GetCustomAttribute<CsvFieldAttribute>()?.Name
-                ?? fieldInfo.ToPropertyInfo()?.GetCustomAttribute<CsvFieldAttribute>()?.Name
-                ?? fieldInfo.Name.ToPropertyName();
+            return field.GetCustomAttribute<CsvFieldAttribute>()?.Name
+                ?? field.ToPropertyInfo()?.GetCustomAttribute<CsvFieldAttribute>()?.Name
+                ?? field.Name.ToPropertyName();
         }
     }
 }

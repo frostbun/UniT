@@ -5,28 +5,24 @@ namespace UniT.Data.Csv.Attributes
     using System.Reflection;
     using UniT.Extensions;
 
-    [AttributeUsage(AttributeTargets.Class)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public class CsvKeyAttribute : Attribute
     {
-        public string Key { get; }
-
-        public CsvKeyAttribute(string key)
-        {
-            this.Key = key;
-        }
     }
 
     public static class CsvKeyAttributeExtensions
     {
+        private static bool IsCsvKeyField(this FieldInfo field)
+        {
+            return field.GetCustomAttribute<CsvKeyAttribute>() is not null
+                || field.ToPropertyInfo()?.GetCustomAttribute<CsvKeyAttribute>() is not null;
+        }
+
         public static FieldInfo GetCsvKeyField(this Type type)
         {
-            var csvKey = type.GetCustomAttribute<CsvKeyAttribute>()?.Key;
-            return csvKey is null
-                ? type.GetAllFields().FirstOrDefault(field => !field.IsCsvIgnored())
-                    ?? throw new InvalidOperationException($"Cannot find any csv field in {type.Name}")
-                : type.GetField(csvKey)
-                    ?? type.GetField(csvKey.ToBackingFieldName())
-                    ?? throw new InvalidOperationException($"Cannot find csv key field {csvKey} in {type.Name}");
+            return type.GetAllFields().FirstOrDefault(field => field.IsCsvKeyField())
+                ?? type.GetCsvFields().FirstOrDefault()
+                ?? throw new InvalidOperationException($"Cannot find csv key field in {type.Name}");
         }
     }
 }

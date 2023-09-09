@@ -2,7 +2,6 @@ namespace UniT.Data.Csv.Reader
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Reflection;
     using Sylvan.Data.Csv;
     using UniT.Data.Converters;
@@ -15,24 +14,24 @@ namespace UniT.Data.Csv.Reader
         private readonly CsvDataReader                    _reader;
         private readonly Type                             _rowType;
         private readonly FieldInfo                        _keyField;
-        private readonly List<FieldInfo>                  _csvFields;
         private readonly List<FieldInfo>                  _normalFields;
+        private readonly List<FieldInfo>                  _nestedFields;
         private readonly Dictionary<FieldInfo, CsvParser> _nestedParsers;
 
         public CsvParser(ICsvData data, CsvDataReader reader)
         {
-            this._data                            = data;
-            this._reader                          = reader;
-            this._rowType                         = data.RowType;
-            this._keyField                        = this._rowType.GetCsvKeyField();
-            (this._csvFields, this._normalFields) = this._rowType.GetAllFields().Where(field => !field.IsCsvIgnored()).Split(field => typeof(ICsvData).IsAssignableFrom(field.FieldType));
-            this._nestedParsers                   = new();
+            this._data                               = data;
+            this._reader                             = reader;
+            this._rowType                            = data.RowType;
+            this._keyField                           = this._rowType.GetCsvKeyField();
+            (this._nestedFields, this._normalFields) = this._rowType.GetCsvFields().Split(field => typeof(ICsvData).IsAssignableFrom(field.FieldType));
+            this._nestedParsers                      = new();
         }
 
         public void Parse()
         {
-            var keyFieldIsSet = false;
-            var row           = Activator.CreateInstance(this._rowType);
+            var keyValue = (object)null;
+            var row      = Activator.CreateInstance(this._rowType);
 
             foreach (var field in this._normalFields)
             {
@@ -43,17 +42,21 @@ namespace UniT.Data.Csv.Reader
                     if (str.IsNullOrWhitespace()) continue;
                     var value = ConverterManager.Instance.ConvertFromString(str, field.FieldType);
                     field.SetValue(row, value);
-                    if (field == this._keyField) keyFieldIsSet = true;
+                    if (this._keyField == field) keyValue = value;
                 }
                 catch (IndexOutOfRangeException)
                 {
-                    throw new InvalidOperationException($"Field {field.Name} - {field.GetCsvFieldName()} not found in {this._data.GetType().Name}. If this is intentional, add [CsvIgnore] attribute to the field.");
+                    throw new InvalidOperationException($"Field {field.Name} - {field.GetCsvFieldName()} not found in {this._rowType.Name}. If this is intentional, add [CsvIgnore] attribute to the field.");
                 }
             }
 
-            if (keyFieldIsSet) this._nestedParsers.Clear();
+            if (keyValue is not null)
+            {
+                this._data.Add(keyValue, row);
+                this._nestedParsers.Clear();
+            }
 
-            foreach (var field in this._csvFields)
+            foreach (var field in this._nestedFields)
             {
                 this._nestedParsers.GetOrAdd(field, () =>
                 {
@@ -63,8 +66,6 @@ namespace UniT.Data.Csv.Reader
                     return nestedParser;
                 }).Parse();
             }
-
-            if (keyFieldIsSet) this._data.Add(this._keyField.GetValue(row), row);
         }
     }
 }

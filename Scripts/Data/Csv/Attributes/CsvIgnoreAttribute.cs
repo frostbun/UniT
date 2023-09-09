@@ -1,6 +1,8 @@
 namespace UniT.Data.Csv.Attributes
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Reflection;
     using UniT.Extensions;
 
@@ -11,10 +13,15 @@ namespace UniT.Data.Csv.Attributes
 
     public static class CsvIgnoreAttributeExtensions
     {
-        public static bool IsCsvIgnored(this FieldInfo fieldInfo)
+        private static bool IsCsvIgnored(this FieldInfo field)
         {
-            return fieldInfo.GetCustomAttribute<CsvIgnoreAttribute>() is not null
-                || fieldInfo.ToPropertyInfo()?.GetCustomAttribute<CsvIgnoreAttribute>() is not null;
+            return field.GetCustomAttribute<CsvIgnoreAttribute>() is not null
+                || field.ToPropertyInfo()?.GetCustomAttribute<CsvIgnoreAttribute>() is not null;
+        }
+
+        public static IEnumerable<FieldInfo> GetCsvFields(this Type type)
+        {
+            return type.GetAllFields().Where(field => !field.IsCsvIgnored());
         }
     }
 }
