@@ -1,5 +1,6 @@
 namespace UniT.UI.Activity
 {
+    using System.Threading;
     using Cysharp.Threading.Tasks;
 
     public interface IActivity : IView
@@ -24,6 +25,8 @@ namespace UniT.UI.Activity
         public T GetExtra<T>(string key);
 
         public bool TrySetResult<T>(T result);
+
+        public CancellationToken GetCancellationTokenOnHide();
 
         public void OnShow();
 

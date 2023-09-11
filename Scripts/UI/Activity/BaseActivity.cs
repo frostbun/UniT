@@ -2,6 +2,7 @@ namespace UniT.UI.Activity
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading;
     using Cysharp.Threading.Tasks;
 
     public abstract class BaseActivity : BaseView, IActivity
@@ -21,7 +22,8 @@ namespace UniT.UI.Activity
             this._currentExtras = null;
             this._resultSource?.TrySetResult(null);
             this._resultSource?.Task.Forget();
-            this._resultSource = null;
+            this._resultSource            = null;
+            this._cancellationTokenOnHide = null;
         }
 
         void IActivity.OnDispose() => this.OnDispose();
@@ -29,6 +31,7 @@ namespace UniT.UI.Activity
         private Dictionary<string, object>      _currentExtras;
         private Dictionary<string, object>      _nextExtras;
         private UniTaskCompletionSource<object> _resultSource;
+        private CancellationToken?              _cancellationTokenOnHide;
 
         IActivity IActivity.PutExtra<T>(string key, T value)
         {
@@ -71,6 +74,11 @@ namespace UniT.UI.Activity
         public bool TrySetResult<T>(T result)
         {
             return (this._resultSource ??= new()).TrySetResult(result);
+        }
+
+        public CancellationToken GetCancellationTokenOnHide()
+        {
+            return this._cancellationTokenOnHide ??= (this._resultSource ??= new()).Task.ToCancellationToken();
         }
 
         protected virtual void OnShow()
