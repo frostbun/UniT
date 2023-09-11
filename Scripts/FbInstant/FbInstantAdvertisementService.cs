@@ -6,7 +6,6 @@ namespace UniT.Advertisements
     using System.Runtime.CompilerServices;
     using Cysharp.Threading.Tasks;
     using FbInstant;
-    using UniT.Extensions;
     using UniT.Logging;
     using UnityEngine.Scripting;
 
