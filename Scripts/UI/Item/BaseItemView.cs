@@ -1,6 +1,7 @@
 namespace UniT.UI.Item
 {
     using System;
+    using System.Threading;
 
     public abstract class BaseItemView<TModel> : BaseView, IItemView
     {
@@ -8,11 +9,24 @@ namespace UniT.UI.Item
 
         void IItemView.OnShow() => this.OnShow();
 
-        void IItemView.OnHide() => this.OnHide();
+        void IItemView.OnHide()
+        {
+            this.OnHide();
+            this._ctsOnHide?.Cancel();
+            this._ctsOnHide?.Dispose();
+            this._ctsOnHide = null;
+        }
 
         void IItemView.OnDispose() => this.OnDispose();
 
         public TModel Model { get; private set; }
+
+        private CancellationTokenSource _ctsOnHide;
+
+        public CancellationToken GetCancellationTokenOnHide()
+        {
+            return (this._ctsOnHide ??= new()).Token;
+        }
 
         protected virtual void OnShow()
         {
