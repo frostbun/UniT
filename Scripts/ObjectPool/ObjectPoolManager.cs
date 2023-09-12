@@ -39,6 +39,23 @@ namespace UniT.ObjectPool
 
         #endregion
 
+        #region Finalizer
+
+        ~ObjectPoolManager()
+        {
+            this.Dispose();
+            this._logger.Debug("Finalized");
+        }
+
+        public void Dispose()
+        {
+            this._prefabToPool.Keys.SafeForEach(this.DestroyPool);
+            this._keyToPool.Keys.SafeForEach(this.DestroyPool);
+            this._logger.Debug("Disposed");
+        }
+
+        #endregion
+
         #region Public
 
         public LogConfig LogConfig => this._logger.Config;
@@ -214,6 +231,7 @@ namespace UniT.ObjectPool
         private void DestroyPool_Internal(ObjectPool pool)
         {
             this.RecycleAll_Internal(pool);
+            pool.GetComponentsInChildren<Transform>().ForEach(transform => this._recyclables.Remove(transform.gameObject));
             Object.Destroy(pool.gameObject);
             this._logger.Debug($"Destroyed {pool.gameObject.name}");
         }
@@ -253,7 +271,7 @@ namespace UniT.ObjectPool
             this._instanceToPool.RemoveAll((instance, otherPool) =>
             {
                 if (otherPool != pool) return false;
-                this.Recycle_Internal(instance, otherPool);
+                this.Recycle_Internal(instance, pool);
                 return true;
             });
             this._logger.Debug($"Recycled all {pool.gameObject.name}");

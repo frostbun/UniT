@@ -1,10 +1,11 @@
 namespace UniT.ObjectPool
 {
+    using System;
     using Cysharp.Threading.Tasks;
     using UniT.Logging;
     using UnityEngine;
 
-    public interface IObjectPoolManager
+    public interface IObjectPoolManager : IDisposable
     {
         public LogConfig LogConfig { get; }
 
