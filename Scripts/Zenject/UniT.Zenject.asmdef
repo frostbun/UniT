@@ -1,0 +1,16 @@
+{
+  "name": "UniT.Zenject",
+  "rootNamespace": "UniT",
+  "references": [
+    "Zenject",
+    "UniT",
+    "UniT.Extensions"
+  ],
+  "versionDefines": [
+    {
+      "name": "com.modesttree.zenject",
+      "expression": "",
+      "define": "UNIT_ZENJECT"
+    }
+  ]
+}
