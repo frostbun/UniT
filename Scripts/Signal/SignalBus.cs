@@ -26,6 +26,23 @@ namespace UniT.Signal
 
         #endregion
 
+        #region Finalizer
+
+        ~SignalBus()
+        {
+            this.Dispose();
+            this._logger.Debug("Finalized");
+        }
+
+        public void Dispose()
+        {
+            this._callbacksWithSignal.Clear();
+            this._callbacksNoSignal.Clear();
+            this._logger.Debug("Disposed");
+        }
+
+        #endregion
+
         #region Public
 
         public LogConfig LogConfig => this._logger.Config;

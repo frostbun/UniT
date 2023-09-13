@@ -42,13 +42,9 @@ namespace UniT.UI
 
         #region Finalizer
 
-        private void OnDestroy()
-        {
-            this.Dispose();
-            this._logger.Debug("Destroyed");
-        }
+        public void Dispose() => Destroy(this);
 
-        public void Dispose()
+        private void OnDestroy()
         {
             this._activities.Values.SafeForEach(activity => this.Dispose(activity, false));
             this._logger.Debug("Disposed");

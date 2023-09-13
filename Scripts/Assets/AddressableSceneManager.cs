@@ -12,7 +12,7 @@
     using UnityEngine.SceneManagement;
     using UnityEngine.Scripting;
 
-    public class AddressableSceneManager
+    public class AddressableSceneManager : ISceneManager
     {
         #region Constructor
 
@@ -30,6 +30,8 @@
         #endregion
 
         #region Public
+
+        public LogConfig LogConfig => this._logger.Config;
 
         public UniTask<SceneInstance> LoadScene(string sceneName, string key = null, LoadSceneMode loadMode = LoadSceneMode.Single, bool activateOnLoad = true, int priority = 100, IProgress<float> progress = null, CancellationToken cancellationToken = default)
         {

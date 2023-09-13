@@ -44,6 +44,7 @@ namespace UniT.ObjectPool
         ~ObjectPoolManager()
         {
             this.Dispose();
+            Object.Destroy(this._poolsContainer.gameObject);
             this._logger.Debug("Finalized");
         }
 

@@ -1,9 +1,10 @@
 namespace UniT.Audio
 {
+    using System;
     using Cysharp.Threading.Tasks;
     using UniT.Logging;
 
-    public interface IAudioManager
+    public interface IAudioManager : IDisposable
     {
         public LogConfig LogConfig { get; }
 

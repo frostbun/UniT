@@ -41,57 +41,40 @@ namespace UniT.Audio
 
         void IInitializable.Initialize()
         {
-            this.Config.SoundVolume.Subscribe(value =>
-            {
-                ConfigureAllSoundSources();
-                this._logger.Debug($"Sound volume set to {value}");
-            });
-
-            this.Config.MuteSound.Subscribe(value =>
-            {
-                ConfigureAllSoundSources();
-                this._logger.Debug(value ? "Sound volume muted" : "Sound volume unmuted");
-            });
-
-            this.Config.MusicVolume.Subscribe(value =>
-            {
-                ConfigureMusicSource();
-                this._logger.Debug($"Music volume set to {value}");
-            });
-
-            this.Config.MuteMusic.Subscribe(value =>
-            {
-                ConfigureMusicSource();
-                this._logger.Debug(value ? "Music volume muted" : "Music volume unmuted");
-            });
-
-            this.Config.MasterVolume.Subscribe(value =>
-            {
-                ConfigureAllSoundSources();
-                ConfigureMusicSource();
-                this._logger.Debug($"Master volume set to {value}");
-            });
-
-            this.Config.MuteMaster.Subscribe(value =>
-            {
-                ConfigureAllSoundSources();
-                ConfigureMusicSource();
-                this._logger.Debug(value ? "Master volume muted" : "Master volume unmuted");
-            });
-
+            this.Config.SoundVolume.Subscribe(this.OnSoundVolumeChanged);
+            this.Config.MuteSound.Subscribe(this.OnMuteSoundChanged);
+            this.Config.MusicVolume.Subscribe(this.OnMusicVolumeChanged);
+            this.Config.MuteMusic.Subscribe(this.OnMuteMusicChanged);
+            this.Config.MasterVolume.Subscribe(this.OnMasterVolumeChanged);
+            this.Config.MuteMaster.Subscribe(this.OnMuteMasterChanged);
             this._logger.Debug("Initialized");
-            return;
+        }
 
-            void ConfigureAllSoundSources()
-            {
-                this._loadedSoundSources.Values.ForEach(this.ConfigureSoundSource);
-            }
+        #endregion
 
-            void ConfigureMusicSource()
-            {
-                this._musicSource.volume = this.Config.MusicVolume.Value * this.Config.MasterVolume.Value;
-                this._musicSource.mute   = this.Config.MuteMusic.Value || this.Config.MuteMaster.Value;
-            }
+        #region Finalizer
+
+        ~AudioManager()
+        {
+            this.Dispose();
+            this.Config.SoundVolume.Unsubscribe(this.OnSoundVolumeChanged);
+            this.Config.MuteSound.Unsubscribe(this.OnMuteSoundChanged);
+            this.Config.MusicVolume.Unsubscribe(this.OnMusicVolumeChanged);
+            this.Config.MuteMusic.Unsubscribe(this.OnMuteMusicChanged);
+            this.Config.MasterVolume.Unsubscribe(this.OnMasterVolumeChanged);
+            this.Config.MuteMaster.Unsubscribe(this.OnMuteMasterChanged);
+            Object.Destroy(this._audioSourcesContainer);
+            this._logger.Debug("Finalized");
+        }
+
+        public void Dispose()
+        {
+            this.UnloadSounds(this._loadedSoundSources.Keys.ToArray());
+            this.StopMusic();
+            this._musicSource.clip = null;
+            this._assetManager.Unload(this.CurrentMusic);
+            this.CurrentMusic = null;
+            this._logger.Debug("Disposed");
         }
 
         #endregion
@@ -227,6 +210,59 @@ namespace UniT.Audio
         {
             soundSource.volume = this.Config.SoundVolume.Value * this.Config.MasterVolume.Value;
             soundSource.mute   = this.Config.MuteSound.Value || this.Config.MuteMaster.Value;
+        }
+
+        private void ConfigureAllSoundSources()
+        {
+            this._loadedSoundSources.Values.ForEach(this.ConfigureSoundSource);
+        }
+
+        private void ConfigureMusicSource()
+        {
+            this._musicSource.volume = this.Config.MusicVolume.Value * this.Config.MasterVolume.Value;
+            this._musicSource.mute   = this.Config.MuteMusic.Value || this.Config.MuteMaster.Value;
+        }
+
+        #endregion
+
+        #region Events
+
+        private void OnSoundVolumeChanged(float value)
+        {
+            this.ConfigureAllSoundSources();
+            this._logger.Debug($"Sound volume set to {value}");
+        }
+
+        private void OnMuteSoundChanged(bool value)
+        {
+            this.ConfigureAllSoundSources();
+            this._logger.Debug(value ? "Sound volume muted" : "Sound volume unmuted");
+        }
+
+        private void OnMusicVolumeChanged(float value)
+        {
+            this.ConfigureMusicSource();
+            this._logger.Debug($"Music volume set to {value}");
+        }
+
+        private void OnMuteMusicChanged(bool value)
+        {
+            this.ConfigureMusicSource();
+            this._logger.Debug(value ? "Music volume muted" : "Music volume unmuted");
+        }
+
+        private void OnMasterVolumeChanged(float value)
+        {
+            this.ConfigureAllSoundSources();
+            this.ConfigureMusicSource();
+            this._logger.Debug($"Master volume set to {value}");
+        }
+
+        private void OnMuteMasterChanged(bool value)
+        {
+            this.ConfigureAllSoundSources();
+            this.ConfigureMusicSource();
+            this._logger.Debug(value ? "Master volume muted" : "Master volume unmuted");
         }
 
         #endregion

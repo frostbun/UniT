@@ -3,7 +3,7 @@ namespace UniT.Signal
     using System;
     using UniT.Logging;
 
-    public interface ISignalBus
+    public interface ISignalBus : IDisposable
     {
         public LogConfig LogConfig { get; }
 
