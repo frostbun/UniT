@@ -2,6 +2,7 @@
 namespace UniT
 {
     using System.Linq;
+    using UniT.Advertisements;
     using UniT.Assets;
     using UniT.Audio;
     using UniT.Data;
@@ -32,7 +33,7 @@ namespace UniT
 
             this.Container.BindInterfacesTo<UnityLogger>()
                 .FromMethod(context => new UnityLogger(
-                    context.ObjectType.Name,
+                    context.ObjectType?.Name,
                     this.Container.HasBinding<LogConfig>()
                         ? this.Container.Resolve<LogConfig>()
                         : null
@@ -105,6 +106,14 @@ namespace UniT
                 .Lazy();
 
             this.Container.BindInterfacesTo<SignalBus>()
+                .AsSingle()
+                .Lazy();
+
+            #endregion
+
+            #region Third Party
+
+            this.Container.BindInterfacesTo<DummyAdvertisementService>()
                 .AsSingle()
                 .Lazy();
 

@@ -69,11 +69,8 @@ namespace UniT.Audio
 
         public void Dispose()
         {
-            this.UnloadSounds(this._loadedSoundSources.Keys.ToArray());
-            this.StopMusic();
-            this._musicSource.clip = null;
-            this._assetManager.Unload(this.CurrentMusic);
-            this.CurrentMusic = null;
+            this.UnloadAllSounds();
+            this.UnloadMusic();
             this._logger.Debug("Disposed");
         }
 
@@ -105,6 +102,11 @@ namespace UniT.Audio
                 this._pooledSoundSources.Enqueue(soundSource);
                 this._logger.Debug($"Unloaded sound {name}");
             });
+        }
+
+        public void UnloadAllSounds()
+        {
+            this.UnloadSounds(this._loadedSoundSources.Keys.ToArray());
         }
 
         public void PlaySoundOneShot(string name)
@@ -156,6 +158,15 @@ namespace UniT.Audio
                 this.CurrentMusic      = name;
                 this._musicSource.clip = audioClip;
             });
+        }
+
+        public void UnloadMusic()
+        {
+            if (this.CurrentMusic == null) return;
+            this.StopMusic();
+            this._musicSource.clip = null;
+            this._assetManager.Unload(this.CurrentMusic);
+            this.CurrentMusic = null;
         }
 
         public void PlayMusic(string name, bool force = false)

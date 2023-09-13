@@ -4,6 +4,7 @@
   "references": [
     "Zenject",
     "UniT",
+    "UniT.FbInstant",
     "UniT.Extensions"
   ],
   "versionDefines": [
@@ -11,6 +12,11 @@
       "name": "com.modesttree.zenject",
       "expression": "",
       "define": "UNIT_ZENJECT"
+    },
+    {
+      "name": "com.frostbun.fbinstant",
+      "expression": "",
+      "define": "UNIT_FBINSTANT"
     }
   ]
 }

@@ -16,6 +16,8 @@ namespace UniT.Audio
 
         public void UnloadSounds(params string[] names);
 
+        public void UnloadAllSounds();
+
         public void PlaySoundOneShot(string name);
 
         public void PlaySound(string name, bool loop = false, bool force = false);
@@ -25,6 +27,8 @@ namespace UniT.Audio
         public void StopAllSounds();
 
         public UniTask LoadMusic(string name);
+
+        public void UnloadMusic();
 
         public void PlayMusic(string name, bool force = false);
 
