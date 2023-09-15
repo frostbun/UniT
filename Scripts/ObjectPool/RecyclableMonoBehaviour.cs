@@ -21,6 +21,13 @@ namespace UniT.ObjectPool
 
         public IObjectPoolManager Manager { get; private set; }
 
+        private CancellationTokenSource _recycleCts;
+
+        public CancellationToken GetCancellationTokenOnRecycle()
+        {
+            return (this._recycleCts ??= new()).Token;
+        }
+
         protected virtual void OnInstantiate()
         {
         }
@@ -31,13 +38,6 @@ namespace UniT.ObjectPool
 
         protected virtual void OnRecycle()
         {
-        }
-
-        private CancellationTokenSource _recycleCts;
-
-        public CancellationToken GetCancellationTokenOnRecycle()
-        {
-            return (this._recycleCts ??= new()).Token;
         }
     }
 }

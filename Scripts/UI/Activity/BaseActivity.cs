@@ -18,12 +18,14 @@ namespace UniT.UI.Activity
 
         void IActivity.OnHide()
         {
+            this._hideCts?.Cancel();
+            this._hideCts?.Dispose();
+            this._hideCts = null;
             this.OnHide();
             this._currentExtras = null;
             this._resultSource?.TrySetResult(null);
             this._resultSource?.Task.Forget();
-            this._resultSource            = null;
-            this._cancellationTokenOnHide = null;
+            this._resultSource = null;
         }
 
         void IActivity.OnDispose() => this.OnDispose();
@@ -31,7 +33,7 @@ namespace UniT.UI.Activity
         private Dictionary<string, object>      _currentExtras;
         private Dictionary<string, object>      _nextExtras;
         private UniTaskCompletionSource<object> _resultSource;
-        private CancellationToken?              _cancellationTokenOnHide;
+        private CancellationTokenSource         _hideCts;
 
         IActivity IActivity.PutExtra<T>(string key, T value)
         {
@@ -78,7 +80,7 @@ namespace UniT.UI.Activity
 
         public CancellationToken GetCancellationTokenOnHide()
         {
-            return this._cancellationTokenOnHide ??= (this._resultSource ??= new()).Task.ToCancellationToken();
+            return (this._hideCts ??= new()).Token;
         }
 
         protected virtual void OnShow()

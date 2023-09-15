@@ -6,12 +6,12 @@ namespace UniT.ObjectPool
     {
         public IObjectPoolManager Manager { get; set; }
 
+        public CancellationToken GetCancellationTokenOnRecycle();
+
         public void OnInstantiate();
 
         public void OnSpawn();
 
         public void OnRecycle();
-
-        public CancellationToken GetCancellationTokenOnRecycle();
     }
 }

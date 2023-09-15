@@ -11,21 +11,21 @@ namespace UniT.UI.Item
 
         void IItemView.OnHide()
         {
+            this._hideCts?.Cancel();
+            this._hideCts?.Dispose();
+            this._hideCts = null;
             this.OnHide();
-            this._ctsOnHide?.Cancel();
-            this._ctsOnHide?.Dispose();
-            this._ctsOnHide = null;
         }
 
         void IItemView.OnDispose() => this.OnDispose();
 
         public TModel Model { get; private set; }
 
-        private CancellationTokenSource _ctsOnHide;
+        private CancellationTokenSource _hideCts;
 
         public CancellationToken GetCancellationTokenOnHide()
         {
-            return (this._ctsOnHide ??= new()).Token;
+            return (this._hideCts ??= new()).Token;
         }
 
         protected virtual void OnShow()
