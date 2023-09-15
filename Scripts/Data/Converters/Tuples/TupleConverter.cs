@@ -6,7 +6,7 @@ namespace UniT.Data.Converters.Tuples
     using System.Runtime.CompilerServices;
     using UniT.Extensions;
 
-    public class TupleConverter : BaseConverter
+    public sealed class TupleConverter : BaseConverter
     {
         private readonly string _separator;
 

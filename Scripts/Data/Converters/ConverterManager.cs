@@ -10,7 +10,7 @@ namespace UniT.Data.Converters
     using UniT.Data.Converters.Primitives;
     using UniT.Data.Converters.Tuples;
 
-    public class ConverterManager
+    public sealed class ConverterManager
     {
         public static ConverterManager Instance { get; }
 

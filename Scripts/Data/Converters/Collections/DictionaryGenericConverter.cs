@@ -8,7 +8,7 @@ namespace UniT.Data.Converters.Collections
     /// <summary>
     ///     Depends on <see cref="ArrayConverter"/>
     /// </summary>
-    public class DictionaryGenericConverter : BaseGenericConverter
+    public sealed class DictionaryGenericConverter : BaseGenericConverter
     {
         private readonly string _separator;
 

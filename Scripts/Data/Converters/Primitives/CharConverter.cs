@@ -2,7 +2,7 @@ namespace UniT.Data.Converters.Primitives
 {
     using System;
 
-    public class CharConverter : BaseConverter
+    public sealed class CharConverter : BaseConverter
     {
         protected override Type ConvertibleType => typeof(char);
 

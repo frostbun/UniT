@@ -12,7 +12,7 @@ namespace UniT.UI
     using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;
 
-    public class UIManager : MonoBehaviour, IUIManager
+    public sealed class UIManager : MonoBehaviour, IUIManager
     {
         #region Constructor
 

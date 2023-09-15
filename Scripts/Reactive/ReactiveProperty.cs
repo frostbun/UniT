@@ -24,15 +24,16 @@ namespace UniT.Reactive
             this._value = value;
         }
 
-        public void Subscribe(Action<T> callback, bool invokeImmediately = true)
+        public bool Subscribe(Action<T> callback, bool invokeImmediately = true)
         {
-            if (!this._callbacks.Add(callback)) return;
+            if (!this._callbacks.Add(callback)) return false;
             if (invokeImmediately) callback(this._value);
+            return true;
         }
 
-        public void Unsubscribe(Action<T> callback)
+        public bool Unsubscribe(Action<T> callback)
         {
-            this._callbacks.Remove(callback);
+            return this._callbacks.Remove(callback);
         }
     }
 }

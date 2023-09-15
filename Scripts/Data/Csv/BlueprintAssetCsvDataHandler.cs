@@ -7,7 +7,7 @@ namespace UniT.Data.Csv
     using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;
 
-    public class BlueprintAssetCsvDataHandler : BaseCsvDataHandler
+    public sealed class BlueprintAssetCsvDataHandler : BaseCsvDataHandler
     {
         private readonly IAssetManager _assetManager;
 

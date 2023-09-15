@@ -5,7 +5,7 @@ namespace UniT.Data.Csv.Attributes
     using UniT.Extensions;
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-    public class CsvFieldAttribute : Attribute
+    public sealed class CsvFieldAttribute : Attribute
     {
         public string Name { get; }
 

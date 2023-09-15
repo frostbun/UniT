@@ -9,7 +9,7 @@ namespace UniT.Advertisements
     using UniT.Logging;
     using UnityEngine.Scripting;
 
-    public class FbInstantAdvertisementService : IInitializable, IAdvertisementService
+    public sealed class FbInstantAdvertisementService : IInitializable, IAdvertisementService
     {
         #region Constructor
 

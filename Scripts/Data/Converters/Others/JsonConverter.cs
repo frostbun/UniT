@@ -3,7 +3,7 @@ namespace UniT.Data.Converters.Others
     using System;
     using Newtonsoft.Json;
 
-    public class JsonConverter : BaseConverter
+    public sealed class JsonConverter : BaseConverter
     {
         protected override Type ConvertibleType => typeof(object);
 

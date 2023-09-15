@@ -2,7 +2,7 @@
 
 namespace UniT.Reactive
 {
-    public class ReactiveInt32Property : ReactiveProperty<int>
+    public sealed class ReactiveInt32Property : ReactiveProperty<int>
     {
         public ReactiveInt32Property(int value = default) : base(value)
         {

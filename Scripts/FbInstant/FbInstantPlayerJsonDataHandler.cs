@@ -8,7 +8,7 @@ namespace UniT.Data.Json
     using UniT.Logging;
     using UnityEngine.Scripting;
 
-    public class FbInstantPlayerJsonDataHandler : BaseJsonDataHandler
+    public sealed class FbInstantPlayerJsonDataHandler : BaseJsonDataHandler
     {
         [Preserve]
         public FbInstantPlayerJsonDataHandler(ILogger logger = null) : base(logger)

@@ -2,7 +2,7 @@ namespace UniT.Data.Converters.Primitives
 {
     using System;
 
-    public class SingleConverter : BaseConverter
+    public sealed class SingleConverter : BaseConverter
     {
         protected override Type ConvertibleType => typeof(float);
 

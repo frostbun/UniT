@@ -7,7 +7,7 @@ namespace UniT.Signal
     using UniT.Logging;
     using UnityEngine.Scripting;
 
-    public class SignalBus : ISignalBus
+    public sealed class SignalBus : ISignalBus
     {
         #region Constructor
 

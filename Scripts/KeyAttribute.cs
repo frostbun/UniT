@@ -5,7 +5,7 @@ namespace UniT
     using System.Reflection;
 
     [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
-    public class KeyAttribute : Attribute
+    public sealed class KeyAttribute : Attribute
     {
         public string Key { get; }
 

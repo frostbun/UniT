@@ -7,7 +7,7 @@ namespace UniT.Data.Json
     using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;
 
-    public class BlueprintAssetJsonDataHandler : BaseJsonDataHandler
+    public sealed class BlueprintAssetJsonDataHandler : BaseJsonDataHandler
     {
         private readonly IAssetManager _assetManager;
 

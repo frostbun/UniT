@@ -8,7 +8,7 @@ namespace UniT.Data.Json
     using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;
 
-    public class PlayerPrefsJsonDataHandler : BaseJsonDataHandler
+    public sealed class PlayerPrefsJsonDataHandler : BaseJsonDataHandler
     {
         [Preserve]
         public PlayerPrefsJsonDataHandler(ILogger logger = null) : base(logger)

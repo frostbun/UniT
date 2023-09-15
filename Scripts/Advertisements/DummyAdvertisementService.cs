@@ -4,7 +4,7 @@ namespace UniT.Advertisements
     using UniT.Logging;
     using UnityEngine.Scripting;
 
-    public class DummyAdvertisementService : IAdvertisementService
+    public sealed class DummyAdvertisementService : IAdvertisementService
     {
         #region Constructor
 

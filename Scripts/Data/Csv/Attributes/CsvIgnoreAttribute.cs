@@ -7,7 +7,7 @@ namespace UniT.Data.Csv.Attributes
     using UniT.Extensions;
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-    public class CsvIgnoreAttribute : Attribute
+    public sealed class CsvIgnoreAttribute : Attribute
     {
     }
 

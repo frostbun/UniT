@@ -6,7 +6,7 @@
     using System.Linq;
     using UniT.Extensions;
 
-    public class BigNumber : IComparable, IComparable<BigNumber>, IEquatable<BigNumber>
+    public sealed class BigNumber : IComparable, IComparable<BigNumber>, IEquatable<BigNumber>
     {
         public static int          Mod     { get; set; } = (int)1e3;
         public static List<string> Letters { get; set; } = IterTools.Product(" abcdefghijklmnopqrstuvwxyz".ToCharArray(), 3).Select(chars => string.Join("", chars).Trim()).ToList();

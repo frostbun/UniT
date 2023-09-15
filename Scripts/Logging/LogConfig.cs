@@ -1,6 +1,6 @@
 namespace UniT.Logging
 {
-    public class LogConfig
+    public sealed class LogConfig
     {
         public LogLevel Level { get; set; } = LogLevel.Info;
     }

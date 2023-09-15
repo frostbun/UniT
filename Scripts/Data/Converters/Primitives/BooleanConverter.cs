@@ -2,7 +2,7 @@ namespace UniT.Data.Converters.Primitives
 {
     using System;
 
-    public class BooleanConverter : BaseConverter
+    public sealed class BooleanConverter : BaseConverter
     {
         protected override Type ConvertibleType => typeof(bool);
 

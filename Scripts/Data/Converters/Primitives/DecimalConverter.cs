@@ -2,7 +2,7 @@ namespace UniT.Data.Converters.Primitives
 {
     using System;
 
-    public class DecimalConverter : BaseConverter
+    public sealed class DecimalConverter : BaseConverter
     {
         protected override Type ConvertibleType => typeof(decimal);
 

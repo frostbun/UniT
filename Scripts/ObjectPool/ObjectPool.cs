@@ -5,7 +5,7 @@ namespace UniT.ObjectPool
     using UniT.Extensions;
     using UnityEngine;
 
-    public class ObjectPool : MonoBehaviour
+    public sealed class ObjectPool : MonoBehaviour
     {
         #region Constructor
 

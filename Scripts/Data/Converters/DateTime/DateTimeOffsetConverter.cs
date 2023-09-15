@@ -3,7 +3,7 @@ namespace UniT.Data.Converters.DateTime
     using System;
     using System.Globalization;
 
-    public class DateTimeOffsetConverter : BaseConverter
+    public sealed class DateTimeOffsetConverter : BaseConverter
     {
         private readonly string      _format;
         private readonly CultureInfo _cultureInfo;

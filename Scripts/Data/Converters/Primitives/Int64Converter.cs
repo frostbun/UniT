@@ -2,7 +2,7 @@ namespace UniT.Data.Converters.Primitives
 {
     using System;
 
-    public class Int64Converter : BaseConverter
+    public sealed class Int64Converter : BaseConverter
     {
         protected override Type ConvertibleType => typeof(long);
 

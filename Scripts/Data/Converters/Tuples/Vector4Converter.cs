@@ -7,7 +7,7 @@ namespace UniT.Data.Converters.Tuples
     /// <summary>
     ///     Depends on <see cref="TupleConverter"/>
     /// </summary>
-    public class Vector4Converter : BaseConverter
+    public sealed class Vector4Converter : BaseConverter
     {
         protected override Type ConvertibleType => typeof(Vector4);
 

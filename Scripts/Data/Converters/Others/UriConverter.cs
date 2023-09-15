@@ -2,7 +2,7 @@ namespace UniT.Data.Converters.Others
 {
     using System;
 
-    public class UriConverter : BaseConverter
+    public sealed class UriConverter : BaseConverter
     {
         protected override Type ConvertibleType => typeof(Uri);
 

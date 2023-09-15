@@ -2,7 +2,7 @@ namespace UniT.Data.Converters.Others
 {
     using System;
 
-    public class GuidConverter : BaseConverter
+    public sealed class GuidConverter : BaseConverter
     {
         protected override Type ConvertibleType => typeof(Guid);
 

@@ -8,7 +8,7 @@ namespace UniT.Data.Csv.Reader
     using UniT.Data.Csv.Attributes;
     using UniT.Extensions;
 
-    public class CsvParser
+    public sealed class CsvParser
     {
         private readonly ICsvData                         _data;
         private readonly CsvDataReader                    _reader;

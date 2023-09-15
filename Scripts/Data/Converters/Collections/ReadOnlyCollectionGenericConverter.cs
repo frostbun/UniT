@@ -7,7 +7,7 @@ namespace UniT.Data.Converters.Collections
     /// <summary>
     ///     Depends on <see cref="ListGenericConverter"/>
     /// </summary>
-    public class ReadOnlyCollectionGenericConverter : BaseGenericConverter
+    public sealed class ReadOnlyCollectionGenericConverter : BaseGenericConverter
     {
         protected override Type ConvertibleType => typeof(ReadOnlyCollection<>);
 

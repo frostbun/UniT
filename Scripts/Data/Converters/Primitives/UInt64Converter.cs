@@ -2,7 +2,7 @@ namespace UniT.Data.Converters.Primitives
 {
     using System;
 
-    public class UInt64Converter : BaseConverter
+    public sealed class UInt64Converter : BaseConverter
     {
         protected override Type ConvertibleType => typeof(ulong);
 

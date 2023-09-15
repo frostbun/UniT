@@ -4,7 +4,7 @@ namespace UniT.Reactive
 {
     using System;
 
-    public class ReactiveSingleProperty : ReactiveProperty<float>
+    public sealed class ReactiveSingleProperty : ReactiveProperty<float>
     {
         public ReactiveSingleProperty(float value = default) : base(value)
         {

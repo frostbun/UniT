@@ -8,7 +8,7 @@ namespace UniT.Data
     using UniT.Logging;
     using UnityEngine.Scripting;
 
-    public class DataManager : IDataManager
+    public sealed class DataManager : IDataManager
     {
         private readonly ReadOnlyDictionary<Type, IData>        _dataCache;
         private readonly ReadOnlyDictionary<Type, IDataHandler> _handlerCache;

@@ -3,7 +3,7 @@ namespace UniT.Data.Converters.Collections
     using System;
     using System.Linq;
 
-    public class ArrayConverter : BaseConverter
+    public sealed class ArrayConverter : BaseConverter
     {
         private readonly string _separator;
 

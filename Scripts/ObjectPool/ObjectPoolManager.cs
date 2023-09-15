@@ -12,7 +12,7 @@ namespace UniT.ObjectPool
     using ILogger = UniT.Logging.ILogger;
     using Object = UnityEngine.Object;
 
-    public class ObjectPoolManager : IObjectPoolManager
+    public sealed class ObjectPoolManager : IObjectPoolManager
     {
         #region Constructor
 
@@ -44,7 +44,6 @@ namespace UniT.ObjectPool
         ~ObjectPoolManager()
         {
             this.Dispose();
-            Object.Destroy(this._poolsContainer.gameObject);
             this._logger.Debug("Finalized");
         }
 
@@ -52,6 +51,7 @@ namespace UniT.ObjectPool
         {
             this._prefabToPool.Keys.SafeForEach(this.DestroyPool);
             this._keyToPool.Keys.SafeForEach(this.DestroyPool);
+            Object.Destroy(this._poolsContainer.gameObject);
             this._logger.Debug("Disposed");
         }
 

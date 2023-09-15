@@ -10,7 +10,7 @@ namespace UniT.Audio
     using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;
 
-    public class AudioManager : IAudioManager, IInitializable
+    public sealed class AudioManager : IAudioManager, IInitializable
     {
         #region Constructor
 
@@ -57,20 +57,20 @@ namespace UniT.Audio
         ~AudioManager()
         {
             this.Dispose();
+            this._logger.Debug("Finalized");
+        }
+
+        public void Dispose()
+        {
             this.Config.SoundVolume.Unsubscribe(this.OnSoundVolumeChanged);
             this.Config.MuteSound.Unsubscribe(this.OnMuteSoundChanged);
             this.Config.MusicVolume.Unsubscribe(this.OnMusicVolumeChanged);
             this.Config.MuteMusic.Unsubscribe(this.OnMuteMusicChanged);
             this.Config.MasterVolume.Unsubscribe(this.OnMasterVolumeChanged);
             this.Config.MuteMaster.Unsubscribe(this.OnMuteMasterChanged);
-            Object.Destroy(this._audioSourcesContainer);
-            this._logger.Debug("Finalized");
-        }
-
-        public void Dispose()
-        {
             this.UnloadAllSounds();
             this.UnloadMusic();
+            Object.Destroy(this._audioSourcesContainer);
             this._logger.Debug("Disposed");
         }
 

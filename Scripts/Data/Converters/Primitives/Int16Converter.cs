@@ -2,7 +2,7 @@ namespace UniT.Data.Converters.Primitives
 {
     using System;
 
-    public class Int16Converter : BaseConverter
+    public sealed class Int16Converter : BaseConverter
     {
         protected override Type ConvertibleType => typeof(short);
 

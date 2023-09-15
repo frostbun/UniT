@@ -2,7 +2,7 @@ namespace UniT.Data.Converters.Primitives
 {
     using System;
 
-    public class EnumConverter : BaseConverter
+    public sealed class EnumConverter : BaseConverter
     {
         protected override Type ConvertibleType => typeof(Enum);
 

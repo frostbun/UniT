@@ -2,7 +2,7 @@ namespace UniT.Data.Converters.Primitives
 {
     using System;
 
-    public class DoubleConverter : BaseConverter
+    public sealed class DoubleConverter : BaseConverter
     {
         protected override Type ConvertibleType => typeof(double);
 
