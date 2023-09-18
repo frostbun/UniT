@@ -43,11 +43,25 @@ namespace UniT.Advertisements
 
         public bool IsInterstitialAdReady() => this._config.InterstitialAdIds.Any(FbInstant.Advertisements.IsInterstitialAdReady);
 
-        public void ShowInterstitialAd(Action onComplete = null) => this.InvokeOnce(this._config.InterstitialAdIds, FbInstant.Advertisements.IsInterstitialAdReady, FbInstant.Advertisements.ShowInterstitialAd, null, this.LoadInterstitialAd + onComplete);
+        public void ShowInterstitialAd(Action onComplete = null) => this.ShowAd(
+            adIds: this._config.InterstitialAdIds,
+            isAdReady: FbInstant.Advertisements.IsInterstitialAdReady,
+            showAction: FbInstant.Advertisements.ShowInterstitialAd,
+            reloadAction: this.LoadInterstitialAd,
+            onSuccess: null,
+            onComplete: onComplete
+        );
 
         public bool IsRewardedAdReady() => this._config.RewardedAdIds.Any(FbInstant.Advertisements.IsRewardedAdReady);
 
-        public void ShowRewardedAd(Action onSuccess, Action onComplete = null) => this.InvokeOnce(this._config.RewardedAdIds, FbInstant.Advertisements.IsRewardedAdReady, FbInstant.Advertisements.ShowRewardedAd, onSuccess, this.LoadRewardedAd + onComplete);
+        public void ShowRewardedAd(Action onSuccess, Action onComplete = null) => this.ShowAd(
+            adIds: this._config.RewardedAdIds,
+            isAdReady: FbInstant.Advertisements.IsRewardedAdReady,
+            showAction: FbInstant.Advertisements.ShowRewardedAd,
+            reloadAction: this.LoadRewardedAd,
+            onSuccess: onSuccess,
+            onComplete: onComplete
+        );
 
         #endregion
 
@@ -76,16 +90,16 @@ namespace UniT.Advertisements
             });
         }
 
-        private void InvokeOnce(string[] adIds, Func<string, bool> check, Func<string, UniTask<Result>> action, Action onSuccess, Action onComplete, [CallerMemberName] string caller = null)
+        private void ShowAd(string[] adIds, Func<string, bool> isAdReady, Func<string, UniTask<Result>> showAction, Action reloadAction, Action onSuccess, Action onComplete, [CallerMemberName] string caller = null)
         {
-            var adId = adIds.FirstOrDefault(check);
+            var adId = adIds.FirstOrDefault(isAdReady);
             if (adId is null)
             {
                 this._logger.Error($"{caller} error: No ad ready");
                 onComplete?.Invoke();
                 return;
             }
-            this.InvokeOnce(() => action(adId), onSuccess, onComplete, caller);
+            this.InvokeOnce(() => showAction(adId), onSuccess, reloadAction + onComplete, caller);
         }
 
         private void InvokeOnce(Func<UniTask<Result>> action, Action onSuccess = null, Action onComplete = null, [CallerMemberName] string caller = null)
