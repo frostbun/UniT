@@ -25,12 +25,12 @@ namespace UniT.Advertisements
 
         public void ShowBannerAd()
         {
-            this._logger.Debug("ShowBannerAd");
+            this._logger.Info("ShowBannerAd");
         }
 
         public void HideBannerAd()
         {
-            this._logger.Debug("HideBannedAd");
+            this._logger.Info("HideBannedAd");
         }
 
         public bool IsInterstitialAdReady()
@@ -41,7 +41,7 @@ namespace UniT.Advertisements
 
         public void ShowInterstitialAd(Action onComplete = null)
         {
-            this._logger.Debug("ShowInterstitialAd");
+            this._logger.Info("ShowInterstitialAd");
             onComplete?.Invoke();
         }
 
@@ -53,7 +53,7 @@ namespace UniT.Advertisements
 
         public void ShowRewardedAd(Action onSuccess, Action onComplete = null)
         {
-            this._logger.Debug("ShowRewardedAd");
+            this._logger.Info("ShowRewardedAd");
             onSuccess?.Invoke();
             onComplete?.Invoke();
         }
