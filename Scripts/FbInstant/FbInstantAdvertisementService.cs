@@ -43,11 +43,11 @@ namespace UniT.Advertisements
 
         public bool IsInterstitialAdReady() => this._config.InterstitialAdIds.Any(FbInstant.Advertisements.IsInterstitialAdReady);
 
-        public void ShowInterstitialAd(Action onComplete = null) => this.InvokeOnce(this._config.InterstitialAdIds, FbInstant.Advertisements.IsInterstitialAdReady, FbInstant.Advertisements.ShowInterstitialAd, this.LoadInterstitialAd, onComplete);
+        public void ShowInterstitialAd(Action onComplete = null) => this.InvokeOnce(this._config.InterstitialAdIds, FbInstant.Advertisements.IsInterstitialAdReady, FbInstant.Advertisements.ShowInterstitialAd, null, this.LoadInterstitialAd + onComplete);
 
         public bool IsRewardedAdReady() => this._config.RewardedAdIds.Any(FbInstant.Advertisements.IsRewardedAdReady);
 
-        public void ShowRewardedAd(Action onSuccess, Action onComplete = null) => this.InvokeOnce(this._config.RewardedAdIds, FbInstant.Advertisements.IsRewardedAdReady, FbInstant.Advertisements.ShowRewardedAd, this.LoadRewardedAd + onSuccess, onComplete);
+        public void ShowRewardedAd(Action onSuccess, Action onComplete = null) => this.InvokeOnce(this._config.RewardedAdIds, FbInstant.Advertisements.IsRewardedAdReady, FbInstant.Advertisements.ShowRewardedAd, onSuccess, this.LoadRewardedAd + onComplete);
 
         #endregion
 
@@ -76,7 +76,7 @@ namespace UniT.Advertisements
             });
         }
 
-        private void InvokeOnce(string[] adIds, Func<string, bool> check, Func<string, UniTask<Result>> action, Action onSuccess = null, Action onComplete = null, [CallerMemberName] string caller = null)
+        private void InvokeOnce(string[] adIds, Func<string, bool> check, Func<string, UniTask<Result>> action, Action onSuccess, Action onComplete, [CallerMemberName] string caller = null)
         {
             var adId = adIds.FirstOrDefault(check);
             if (adId is null)
