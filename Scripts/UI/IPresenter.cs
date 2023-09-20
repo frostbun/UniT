@@ -13,6 +13,6 @@ namespace UniT.UI
             }
         }
 
-        public IView View { set; }
+        public IViewWithPresenter View { set; }
     }
 }

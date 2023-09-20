@@ -61,7 +61,7 @@ namespace UniT.UI
             if (view is IViewWithPresenter viewWithPresenter)
             {
                 var presenter = this._presenterFactory.Create(viewWithPresenter.PresenterType);
-                presenter.View              = view;
+                presenter.View              = viewWithPresenter;
                 viewWithPresenter.Presenter = presenter;
             }
             view.Manager = this;
