@@ -4,7 +4,7 @@ namespace UniT.UI.Item
 
     public interface IItemView : IView
     {
-        public object Model { set; }
+        public object Item { set; }
 
         public CancellationToken GetCancellationTokenOnHide();
 

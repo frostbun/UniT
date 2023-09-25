@@ -16,10 +16,10 @@ namespace UniT.UI
     {
         #region Constructor
 
-        [SerializeField] private RectTransform _hiddenActivities;
-        [SerializeField] private RectTransform _stackingActivities;
-        [SerializeField] private RectTransform _floatingActivities;
-        [SerializeField] private RectTransform _dockedActivities;
+        [SerializeField] private Transform _hiddenActivities;
+        [SerializeField] private Transform _stackingActivities;
+        [SerializeField] private Transform _floatingActivities;
+        [SerializeField] private Transform _dockedActivities;
 
         private          IPresenter.Factory          _presenterFactory;
         private          IAssetManager               _assetManager;

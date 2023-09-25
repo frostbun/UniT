@@ -3,9 +3,9 @@ namespace UniT.UI.Item
     using System;
     using System.Threading;
 
-    public abstract class BaseItemView<TModel> : BaseView, IItemView
+    public abstract class BaseItemView<TItem> : BaseView, IItemView
     {
-        object IItemView.Model { set => this.Model = (TModel)value; }
+        object IItemView.Item { set => this.Item = (TItem)value; }
 
         void IItemView.OnShow() => this.OnShow();
 
@@ -19,7 +19,7 @@ namespace UniT.UI.Item
 
         void IItemView.OnDispose() => this.OnDispose();
 
-        public TModel Model { get; private set; }
+        public TItem Item { get; private set; }
 
         private CancellationTokenSource _hideCts;
 
