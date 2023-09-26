@@ -34,8 +34,8 @@ namespace UniT
             this.Container.BindInterfacesTo<UnityLogger>()
                 .FromMethod(context => new UnityLogger(
                     context.ObjectType?.Name,
-                    this.Container.HasBinding<LogConfig>()
-                        ? this.Container.Resolve<LogConfig>()
+                    context.Container.HasBinding<LogConfig>()
+                        ? context.Container.Resolve<LogConfig>()
                         : null
                 ))
                 .AsTransient()
