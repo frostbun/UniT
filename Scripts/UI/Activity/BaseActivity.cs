@@ -35,10 +35,12 @@ namespace UniT.UI.Activity
         private UniTaskCompletionSource<object> _resultSource;
         private CancellationTokenSource         _hideCts;
 
-        IActivity IActivity.PutExtra<T>(string key, T value)
+        IActivity IActivity.AddExtra<T>(string key, T value)
         {
-            this._nextExtras      ??= new();
-            this._nextExtras[key] =   value;
+            this._nextExtras ??= new();
+            if (this._nextExtras.ContainsKey(key))
+                throw new ArgumentException($"Extra with key {key} already exists");
+            this._nextExtras[key] = value;
             return this;
         }
 

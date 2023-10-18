@@ -16,7 +16,7 @@ namespace UniT.UI.Activity
 
         public Status CurrentStatus { get; set; }
 
-        public IActivity PutExtra<T>(string key, T value);
+        public IActivity AddExtra<T>(string key, T value);
 
         public UniTask<T> WaitForResult<T>();
 
@@ -39,7 +39,7 @@ namespace UniT.UI.Activity
     {
         public static UniTask<IActivity> PutExtra<T>(this UniTask<IActivity> task, string key, T value)
         {
-            return task.ContinueWith(activity => activity.PutExtra(key, value));
+            return task.ContinueWith(activity => activity.AddExtra(key, value));
         }
 
         public static UniTask<T> WaitForResult<T>(this UniTask<IActivity> task)
