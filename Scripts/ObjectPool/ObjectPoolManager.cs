@@ -2,7 +2,6 @@ namespace UniT.ObjectPool
 {
     using System;
     using System.Collections.Generic;
-    using System.Collections.ObjectModel;
     using Cysharp.Threading.Tasks;
     using UniT.Assets;
     using UniT.Extensions;
@@ -16,13 +15,13 @@ namespace UniT.ObjectPool
     {
         #region Constructor
 
-        private readonly IAssetManager                                           _assetManager;
-        private readonly Transform                                               _poolsContainer;
-        private readonly Dictionary<GameObject, ObjectPool>                      _prefabToPool;
-        private readonly Dictionary<string, ObjectPool>                          _keyToPool;
-        private readonly Dictionary<GameObject, ObjectPool>                      _instanceToPool;
-        private readonly Dictionary<GameObject, ReadOnlyCollection<IRecyclable>> _recyclables;
-        private readonly ILogger                                                 _logger;
+        private readonly IAssetManager                         _assetManager;
+        private readonly Transform                             _poolsContainer;
+        private readonly Dictionary<GameObject, ObjectPool>    _prefabToPool;
+        private readonly Dictionary<string, ObjectPool>        _keyToPool;
+        private readonly Dictionary<GameObject, ObjectPool>    _instanceToPool;
+        private readonly Dictionary<GameObject, IRecyclable[]> _recyclables;
+        private readonly ILogger                               _logger;
 
         [Preserve]
         public ObjectPoolManager(IAssetManager assetManager = null, ILogger logger = null)
@@ -138,7 +137,7 @@ namespace UniT.ObjectPool
             this.DestroyPool(typeof(T).GetKey());
         }
 
-        public GameObject Spawn(GameObject prefab, Vector3? position = null, Quaternion? rotation = null, Transform parent = null)
+        public GameObject Spawn(GameObject prefab, Vector3 position = default, Quaternion rotation = default, Transform parent = null)
         {
             var pool     = this.GetPool(prefab);
             var instance = pool.Spawn(position, rotation, parent);
@@ -146,7 +145,7 @@ namespace UniT.ObjectPool
             return instance;
         }
 
-        public T Spawn<T>(T component, Vector3? position = null, Quaternion? rotation = null, Transform parent = null) where T : Component
+        public T Spawn<T>(T component, Vector3 position = default, Quaternion rotation = default, Transform parent = null) where T : Component
         {
             var pool     = this.GetPool(component.gameObject);
             var instance = pool.Spawn<T>(position, rotation, parent);
@@ -154,7 +153,7 @@ namespace UniT.ObjectPool
             return instance;
         }
 
-        public GameObject Spawn(string key, Vector3? position = null, Quaternion? rotation = null, Transform parent = null)
+        public GameObject Spawn(string key, Vector3 position = default, Quaternion rotation = default, Transform parent = null)
         {
             var pool     = this.GetPool(key);
             var instance = pool.Spawn(position, rotation, parent);
@@ -162,7 +161,7 @@ namespace UniT.ObjectPool
             return instance;
         }
 
-        public T Spawn<T>(string key = null, Vector3? position = null, Quaternion? rotation = null, Transform parent = null) where T : Component
+        public T Spawn<T>(string key = null, Vector3 position = default, Quaternion rotation = default, Transform parent = null) where T : Component
         {
             var pool     = this.GetPool(key ?? typeof(T).GetKey());
             var instance = pool.Spawn<T>(position, rotation, parent);
@@ -242,7 +241,7 @@ namespace UniT.ObjectPool
             this._instanceToPool.Add(instance, pool);
             this._recyclables.GetOrAdd(instance, () =>
             {
-                var recyclables = instance.GetComponentsInChildren<IRecyclable>(true).AsReadOnly();
+                var recyclables = instance.GetComponentsInChildren<IRecyclable>(true);
                 recyclables.ForEach(recyclable =>
                 {
                     recyclable.Manager = this;

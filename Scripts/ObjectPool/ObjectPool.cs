@@ -37,17 +37,17 @@ namespace UniT.ObjectPool
 
         #region Public
 
-        public GameObject Spawn(Vector3? position = null, Quaternion? rotation = null, Transform parent = null)
+        public GameObject Spawn(Vector3 position = default, Quaternion rotation = default, Transform parent = null)
         {
             var instance = this._pooledObjects.DequeueOrDefault(() => Instantiate(this._prefab, this._transform));
             this._spawnedObjects.Add(instance);
-            instance.transform.SetPositionAndRotation(position ?? Vector3.zero, rotation ?? Quaternion.identity);
+            instance.transform.SetPositionAndRotation(position, rotation);
             instance.transform.SetParent(parent);
             instance.SetActive(true);
             return instance;
         }
 
-        public T Spawn<T>(Vector3? position = null, Quaternion? rotation = null, Transform parent = null) where T : Component
+        public T Spawn<T>(Vector3 position, Quaternion rotation, Transform parent = null) where T : Component
         {
             var instance = this.Spawn(position, rotation, parent);
             return instance.GetComponent<T>() ?? throw new InvalidOperationException($"Component {typeof(T).Name} not found in GameObject {instance.name}");
@@ -57,9 +57,9 @@ namespace UniT.ObjectPool
         {
             if (!this._spawnedObjects.Remove(instance)) throw new InvalidOperationException($"{instance.name} was not spawned from {this.gameObject.name}");
             if (!instance) return;
+            this._pooledObjects.Enqueue(instance);
             instance.SetActive(false);
             instance.transform.SetParent(this._transform);
-            this._pooledObjects.Enqueue(instance);
         }
 
         public void Recycle<T>(T component) where T : Component
