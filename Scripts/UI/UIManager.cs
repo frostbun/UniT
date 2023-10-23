@@ -58,16 +58,22 @@ namespace UniT.UI
 
         public TView Initialize<TView>(TView view) where TView : IView
         {
-            if (view is IViewWithPresenter viewWithPresenter)
-            {
-                var presenter = this._presenterFactory.Create(viewWithPresenter.PresenterType);
-                presenter.View              = viewWithPresenter;
-                viewWithPresenter.Presenter = presenter;
-            }
-            view.Manager = this;
+            Initialize(view);
+            (view as Component)?.GetComponentsInChildren<IView>().ForEach(Initialize);
             this._logger.Debug($"Initialized {view.GetType().Name}");
-            view.OnInitialize();
             return view;
+
+            void Initialize(IView view)
+            {
+                view.Manager = this;
+                if (view is IViewWithPresenter viewWithPresenter)
+                {
+                    var presenter = this._presenterFactory.Create(viewWithPresenter.PresenterType);
+                    presenter.View              = viewWithPresenter;
+                    viewWithPresenter.Presenter = presenter;
+                }
+                view.OnInitialize();
+            }
         }
 
         public IActivity StackingActivity => this._activityStack.LastOrDefault(activity => activity.CurrentStatus is IActivity.Status.Stacking);
@@ -110,8 +116,14 @@ namespace UniT.UI
             activity.transform.SetParent(this._hiddenActivities, false);
             this._logger.Debug($"{activity.GetType().Name} status: {activity.CurrentStatus = IActivity.Status.Hidden}");
             activity.OnHide();
-            if (removeFromStack) this.RemoveFromStack(activity);
-            if (autoStack) this.StackNextActivity();
+            if (removeFromStack)
+            {
+                this._activityStack.Remove(activity);
+            }
+            if (autoStack && this.StackingActivity is null && this.NextActivityInStack is { } nextActivity)
+            {
+                this.Stack(nextActivity);
+            }
         }
 
         public void Dispose(IActivity activity, bool autoStack = true)
@@ -137,8 +149,18 @@ namespace UniT.UI
             {
                 case IActivity.Status.Stacking:
                 {
-                    this.AddToStack(activity);
-                    this.HideUndockedActivities();
+                    var index = this._activityStack.IndexOf(activity);
+                    if (index == -1)
+                    {
+                        this._activityStack.Add(activity);
+                    }
+                    else
+                    {
+                        this._activityStack.RemoveRange(index + 1, this._activityStack.Count - index - 1);
+                    }
+                    this._activities.Values
+                        .Where(other => other.CurrentStatus is IActivity.Status.Floating or IActivity.Status.Stacking)
+                        .SafeForEach(other => this.Hide(other, false, false));
                     activity.transform.SetParent(this._stackingActivities, false);
                     break;
                 }
@@ -157,39 +179,6 @@ namespace UniT.UI
             this._logger.Debug($"{activity.GetType().Name} status: {activity.CurrentStatus = nextStatus}");
             activity.OnShow();
             return activity;
-        }
-
-        private void AddToStack(IActivity activity)
-        {
-            var index = this._activityStack.IndexOf(activity);
-            if (index == -1)
-            {
-                this._activityStack.Add(activity);
-            }
-            else
-            {
-                this._activityStack.RemoveRange(index + 1, this._activityStack.Count - index - 1);
-            }
-        }
-
-        private void RemoveFromStack(IActivity activity)
-        {
-            this._activityStack.Remove(activity);
-        }
-
-        private void StackNextActivity()
-        {
-            if (this.StackingActivity is not null) return;
-            var nextActivity = this.NextActivityInStack;
-            if (nextActivity is null) return;
-            this.Stack(nextActivity);
-        }
-
-        private void HideUndockedActivities()
-        {
-            this._activities.Values
-                .Where(activity => activity.CurrentStatus is IActivity.Status.Floating or IActivity.Status.Stacking)
-                .SafeForEach(activity => this.Hide(activity, false, false));
         }
 
         #endregion
