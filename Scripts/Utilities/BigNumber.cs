@@ -5,6 +5,7 @@
     using System.Collections.ObjectModel;
     using System.Linq;
     using UniT.Extensions;
+    using UnityEngine;
 
     public sealed class BigNumber : IComparable, IComparable<BigNumber>, IEquatable<BigNumber>
     {
@@ -16,7 +17,7 @@
         private          bool                    IsPositive => !this._sign;
         private          bool                    IsNegative => this._sign;
 
-        public BigNumber(int value = 0) : this(new[] { Math.Abs(value) }, value < 0)
+        public BigNumber(int value = 0) : this(new[] { Mathf.Abs(value) }, value < 0)
         {
         }
 
@@ -79,7 +80,7 @@
 
         public static BigNumber operator *(BigNumber n1, int n2)
         {
-            return new(n1._values.Select(value => value * Math.Abs(n2)), n1.IsPositive ^ (n2 >= 0));
+            return new(n1._values.Select(value => value * Mathf.Abs(n2)), n1.IsPositive ^ (n2 >= 0));
         }
 
         public static BigNumber operator *(BigNumber n1, BigNumber n2)

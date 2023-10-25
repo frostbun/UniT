@@ -2,7 +2,7 @@
 
 namespace UniT.Reactive
 {
-    using System;
+    using UnityEngine;
 
     public sealed class ReactiveSingleProperty : ReactiveProperty<float>
     {
@@ -32,12 +32,12 @@ namespace UniT.Reactive
 
         public static bool operator ==(ReactiveSingleProperty property, float value)
         {
-            return Math.Abs(property!.Value - value) < float.Epsilon;
+            return Mathf.Abs(property!.Value - value) < float.Epsilon;
         }
 
         public static bool operator !=(ReactiveSingleProperty property, float value)
         {
-            return Math.Abs(property!.Value - value) > float.Epsilon;
+            return Mathf.Abs(property!.Value - value) > float.Epsilon;
         }
     }
 }

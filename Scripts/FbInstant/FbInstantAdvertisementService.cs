@@ -7,7 +7,9 @@ namespace UniT.Advertisements
     using Cysharp.Threading.Tasks;
     using FbInstant;
     using UniT.Logging;
+    using UnityEngine;
     using UnityEngine.Scripting;
+    using ILogger = UniT.Logging.ILogger;
 
     public sealed class FbInstantAdvertisementService : IInitializable, IAdvertisementService
     {
@@ -79,11 +81,11 @@ namespace UniT.Advertisements
             {
                 for (var index = 0;; ++index)
                 {
-                    var adId   = adIds[Math.Min(index, adIds.Length - 1)];
+                    var adId   = adIds[Mathf.Min(index, adIds.Length - 1)];
                     var result = await action(adId);
                     if (result.IsSuccess) break;
                     this._logger.Error($"{caller} error {index + 1} time(s): {result.Error}");
-                    var retryInterval = RetryIntervals[Math.Min(index, RetryIntervals.Length - 1)];
+                    var retryInterval = RetryIntervals[Mathf.Min(index, RetryIntervals.Length - 1)];
                     await UniTask.WaitForSeconds(retryInterval);
                 }
                 this._logger.Debug($"{caller} success");

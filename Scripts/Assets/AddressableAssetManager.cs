@@ -12,7 +12,7 @@ namespace UniT.Assets
     using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;
 
-    public class AddressableAssetManager : IAssetManager
+    public sealed class AddressableAssetManager : IAssetManager
     {
         #region Constructor
 

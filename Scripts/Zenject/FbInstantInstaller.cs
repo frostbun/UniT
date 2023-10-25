@@ -5,7 +5,7 @@ namespace UniT
     using UniT.Data.Json;
     using Zenject;
 
-    public class FbInstantInstaller : Installer<FbInstantInstaller>
+    public sealed class FbInstantInstaller : Installer<FbInstantInstaller>
     {
         public override void InstallBindings()
         {

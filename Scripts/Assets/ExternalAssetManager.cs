@@ -11,7 +11,7 @@ namespace UniT.Assets
     using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;
 
-    public class ExternalAssetManager : IExternalAssetManager
+    public sealed class ExternalAssetManager : IExternalAssetManager
     {
         #region Constructor
 

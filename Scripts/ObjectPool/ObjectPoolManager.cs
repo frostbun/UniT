@@ -73,7 +73,7 @@ namespace UniT.ObjectPool
 
         public UniTask InstantiatePool(string key, int initialCount = 1)
         {
-            return this._keyToPool.TryAdd(key, () => this._assetManager.Load<GameObject>(key).ContinueWith(prefab => this.InstantiatePool_Internal(prefab, initialCount)))
+            return this._keyToPool.TryAddAsync(key, () => this._assetManager.Load<GameObject>(key).ContinueWith(prefab => this.InstantiatePool_Internal(prefab, initialCount)))
                 .ContinueWith(isSuccess =>
                 {
                     if (isSuccess) return;

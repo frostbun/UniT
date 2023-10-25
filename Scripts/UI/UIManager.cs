@@ -94,7 +94,7 @@ namespace UniT.UI
         public UniTask<IActivity> GetActivity<TActivity>(string key = null) where TActivity : Component, IActivity
         {
             key ??= typeof(TActivity).GetKey();
-            return this._activities.GetOrAdd(
+            return this._activities.GetOrAddAsync(
                 typeof(TActivity),
                 () => this._assetManager.LoadComponent<TActivity>(key).ContinueWith(activityPrefab =>
                 {

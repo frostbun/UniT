@@ -118,12 +118,12 @@ namespace UniT.Signal
 
         private HashSet<object> GetCallbacksWithSignal<T>()
         {
-            return this._callbacksWithSignal.GetOrAdd(typeof(T), () => new HashSet<object>());
+            return this._callbacksWithSignal.GetOrAdd(typeof(T), () => new());
         }
 
         private HashSet<object> GetCallbacksNoSignal<T>()
         {
-            return this._callbacksNoSignal.GetOrAdd(typeof(T), () => new HashSet<object>());
+            return this._callbacksNoSignal.GetOrAdd(typeof(T), () => new());
         }
 
         #endregion

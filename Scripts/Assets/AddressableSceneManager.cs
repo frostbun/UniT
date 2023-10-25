@@ -12,7 +12,7 @@
     using UnityEngine.SceneManagement;
     using UnityEngine.Scripting;
 
-    public class AddressableSceneManager : ISceneManager
+    public sealed class AddressableSceneManager : ISceneManager
     {
         #region Constructor
 

@@ -16,7 +16,7 @@ namespace UniT
     using ILogger = UniT.Logging.ILogger;
     using SignalBus = UniT.Signal.SignalBus;
 
-    public class UniTInstaller : Installer<UniTInstaller>
+    public sealed class UniTInstaller : Installer<UniTInstaller>
     {
         public override void InstallBindings()
         {

@@ -200,7 +200,7 @@ namespace UniT.Audio
 
         private UniTask<AudioSource> GetSoundSource(string name)
         {
-            return this._loadedSoundSources.GetOrAdd(name, () =>
+            return this._loadedSoundSources.GetOrAddAsync(name, () =>
             {
                 return this._assetManager.Load<AudioClip>(name).ContinueWith(audioClip =>
                 {
