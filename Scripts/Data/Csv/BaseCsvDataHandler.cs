@@ -19,8 +19,15 @@ namespace UniT.Data.Csv
 
         protected override void PopulateData(string rawData, IData data)
         {
-            using var reader = CsvDataReader.Create(new StringReader(rawData), new() { Delimiter = ',' });
-            var       parser = new CsvParser((ICsvData)data, reader);
+            using var reader = CsvDataReader.Create(
+                new StringReader(rawData),
+                new()
+                {
+                    Delimiter      = ',',
+                    HeaderComparer = StringComparer.OrdinalIgnoreCase,
+                }
+            );
+            var parser = new CsvParser((ICsvData)data, reader);
             while (reader.Read()) parser.Parse();
         }
 
