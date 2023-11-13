@@ -8,11 +8,11 @@ namespace UniT.Data.Converters.Collections
     /// <summary>
     ///     Depends on <see cref="ArrayConverter"/>
     /// </summary>
-    public sealed class DictionaryGenericConverter : BaseGenericConverter
+    public sealed class DictionaryConverter : BaseConverter
     {
         private readonly string _separator;
 
-        public DictionaryGenericConverter(string separator = ":")
+        public DictionaryConverter(string separator = ":")
         {
             this._separator = separator;
         }

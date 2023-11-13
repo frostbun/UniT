@@ -1,10 +1,11 @@
 namespace UniT.Data.Converters
 {
     using System;
+    using UniT.Extensions;
 
     public abstract class BaseConverter : IConverter
     {
-        bool IConverter.CanConvert(Type type) => this.CanConvert(type);
+        bool IConverter.CanConvert(Type type) => type.DeriveFrom(this.ConvertibleType);
 
         object IConverter.ConvertFromString(string str, Type type)
         {
@@ -29,8 +30,6 @@ namespace UniT.Data.Converters
                 throw new InvalidOperationException($"Cannot convert '{type.Name}' '{obj}' to string with '{this.GetType().Name}'", e);
             }
         }
-
-        protected virtual bool CanConvert(Type type) => this.ConvertibleType.IsAssignableFrom(type);
 
         protected abstract Type ConvertibleType { get; }
 

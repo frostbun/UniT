@@ -56,10 +56,10 @@ namespace UniT.Data.Converters
             #region Collections
 
             this.AddConverter(new ArrayConverter());
-            this.AddConverter(new ListGenericConverter()); // Depend on ArrayConverter
-            this.AddConverter(new DictionaryGenericConverter()); // Depend on ArrayConverter
-            this.AddConverter(new ReadOnlyCollectionGenericConverter()); // Depend on ListGenericConverter
-            this.AddConverter(new ReadOnlyDictionaryGenericConverter()); // Depend on DictionaryGenericConverter
+            this.AddConverter(new ListConverter()); // Depend on ArrayConverter
+            this.AddConverter(new DictionaryConverter()); // Depend on ArrayConverter
+            this.AddConverter(new ReadOnlyCollectionConverter()); // Depend on ListConverter
+            this.AddConverter(new ReadOnlyDictionaryConverter()); // Depend on DictionaryConverter
 
             #endregion
 

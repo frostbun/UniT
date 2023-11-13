@@ -5,9 +5,9 @@ namespace UniT.Data.Converters.Collections
     using System.Collections.ObjectModel;
 
     /// <summary>
-    ///     Depends on <see cref="ListGenericConverter"/>
+    ///     Depends on <see cref="ListConverter"/>
     /// </summary>
-    public sealed class ReadOnlyCollectionGenericConverter : BaseGenericConverter
+    public sealed class ReadOnlyCollectionConverter : BaseConverter
     {
         protected override Type ConvertibleType => typeof(ReadOnlyCollection<>);
 
