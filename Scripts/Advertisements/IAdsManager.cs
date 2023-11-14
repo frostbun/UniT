@@ -3,7 +3,7 @@
     using System;
     using UniT.Logging;
 
-    public interface IAdvertisementService
+    public interface IAdsManager
     {
         public LogConfig LogConfig { get; }
 

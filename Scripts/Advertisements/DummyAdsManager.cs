@@ -4,14 +4,14 @@ namespace UniT.Advertisements
     using UniT.Logging;
     using UnityEngine.Scripting;
 
-    public sealed class DummyAdvertisementService : IAdvertisementService
+    public sealed class DummyAdsManager : IAdsManager
     {
         #region Constructor
 
         private readonly ILogger _logger;
 
         [Preserve]
-        public DummyAdvertisementService(ILogger logger = null)
+        public DummyAdsManager(ILogger logger = null)
         {
             this._logger = logger ?? ILogger.Default(this.GetType().Name);
             this._logger.Debug("Constructed");

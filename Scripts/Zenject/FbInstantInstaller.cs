@@ -13,8 +13,8 @@ namespace UniT
                 .AsSingle()
                 .Lazy();
 
-            this.Container.UnbindInterfacesTo<DummyAdvertisementService>();
-            this.Container.BindInterfacesTo<FbInstantAdvertisementService>()
+            this.Container.UnbindInterfacesTo<DummyAdsManager>();
+            this.Container.BindInterfacesTo<FbInstantAdsManager>()
                 .AsSingle()
                 .Lazy();
         }

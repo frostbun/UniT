@@ -113,7 +113,7 @@ namespace UniT
 
             #region Third Party
 
-            this.Container.BindInterfacesTo<DummyAdvertisementService>()
+            this.Container.BindInterfacesTo<DummyAdsManager>()
                 .AsSingle()
                 .Lazy();
 

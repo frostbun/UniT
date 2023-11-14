@@ -11,7 +11,7 @@ namespace UniT.Advertisements
     using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;
 
-    public sealed class FbInstantAdvertisementService : IInitializable, IAdvertisementService
+    public sealed class FbInstantAdsManager : IInitializable, IAdsManager
     {
         #region Constructor
 
@@ -19,7 +19,7 @@ namespace UniT.Advertisements
         private readonly ILogger                       _logger;
 
         [Preserve]
-        public FbInstantAdvertisementService(IFbInstantAdvertisementConfig config, ILogger logger = null)
+        public FbInstantAdsManager(IFbInstantAdvertisementConfig config, ILogger logger = null)
         {
             this._config = config;
             this._logger = logger ?? ILogger.Default(this.GetType().Name);
