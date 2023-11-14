@@ -16,25 +16,25 @@ namespace UniT.UI
     {
         #region Constructor
 
-        [SerializeField] private Transform _hiddenActivities;
-        [SerializeField] private Transform _stackingActivities;
-        [SerializeField] private Transform _floatingActivities;
-        [SerializeField] private Transform _dockedActivities;
+        [SerializeField] private Transform hiddenActivities;
+        [SerializeField] private Transform stackingActivities;
+        [SerializeField] private Transform floatingActivities;
+        [SerializeField] private Transform dockedActivities;
 
-        private          IPresenter.Factory          _presenterFactory;
-        private          IAssetsManager              _assetsManager;
-        private          ILogger                     _logger;
-        private readonly Dictionary<Type, IActivity> _activities    = new();
-        private readonly List<IActivity>             _activityStack = new();
-        private readonly Dictionary<Type, string>    _keys          = new();
+        private          IPresenter.Factory          presenterFactory;
+        private          IAssetsManager              assetsManager;
+        private          ILogger                     logger;
+        private readonly Dictionary<Type, IActivity> activities    = new();
+        private readonly List<IActivity>             activityStack = new();
+        private readonly Dictionary<Type, string>    keys          = new();
 
         [Preserve]
         public UIManager Construct(IPresenter.Factory presenterFactory = null, IAssetsManager assetsManager = null, ILogger logger = null)
         {
-            this._presenterFactory = presenterFactory ?? IPresenter.Factory.Default();
-            this._assetsManager    = assetsManager ?? IAssetsManager.Default();
-            this._logger           = logger ?? ILogger.Default(this.GetType().Name);
-            this._logger.Debug("Constructed");
+            this.presenterFactory = presenterFactory ?? IPresenter.Factory.Default();
+            this.assetsManager    = assetsManager ?? IAssetsManager.Default();
+            this.logger           = logger ?? ILogger.Default(this.GetType().Name);
+            this.logger.Debug("Constructed");
             return this.DontDestroyOnLoad();
         }
 
@@ -46,21 +46,21 @@ namespace UniT.UI
 
         private void OnDestroy()
         {
-            this._activities.Values.SafeForEach(activity => this.Dispose(activity, false));
-            this._logger.Debug("Disposed");
+            this.activities.Values.SafeForEach(activity => this.Dispose(activity, false));
+            this.logger.Debug("Disposed");
         }
 
         #endregion
 
         #region Public
 
-        public LogConfig LogConfig => this._logger.Config;
+        public LogConfig LogConfig => this.logger.Config;
 
         public TView Initialize<TView>(TView view) where TView : IView
         {
             Initialize(view);
             (view as Component)?.GetComponentsInChildren<IView>().ForEach(Initialize);
-            this._logger.Debug($"Initialized {view.GetType().Name}");
+            this.logger.Debug($"Initialized {view.GetType().Name}");
             return view;
 
             void Initialize(IView view)
@@ -68,7 +68,7 @@ namespace UniT.UI
                 view.Manager = this;
                 if (view is IViewWithPresenter viewWithPresenter)
                 {
-                    var presenter = this._presenterFactory.Create(viewWithPresenter.PresenterType);
+                    var presenter = this.presenterFactory.Create(viewWithPresenter.PresenterType);
                     presenter.View              = viewWithPresenter;
                     viewWithPresenter.Presenter = presenter;
                 }
@@ -76,30 +76,30 @@ namespace UniT.UI
             }
         }
 
-        public IActivity StackingActivity => this._activityStack.LastOrDefault(activity => activity.CurrentStatus is IActivity.Status.Stacking);
+        public IActivity StackingActivity => this.activityStack.LastOrDefault(activity => activity.CurrentStatus is IActivity.Status.Stacking);
 
-        public IActivity NextActivityInStack => this._activityStack.LastOrDefault(activity => activity.CurrentStatus is not IActivity.Status.Stacking);
+        public IActivity NextActivityInStack => this.activityStack.LastOrDefault(activity => activity.CurrentStatus is not IActivity.Status.Stacking);
 
-        public IEnumerable<IActivity> FloatingActivities => this._activities.Values.Where(activity => activity.CurrentStatus is IActivity.Status.Floating);
+        public IEnumerable<IActivity> FloatingActivities => this.activities.Values.Where(activity => activity.CurrentStatus is IActivity.Status.Floating);
 
-        public IEnumerable<IActivity> DockedActivities => this._activities.Values.Where(activity => activity.CurrentStatus is IActivity.Status.Docked);
+        public IEnumerable<IActivity> DockedActivities => this.activities.Values.Where(activity => activity.CurrentStatus is IActivity.Status.Docked);
 
         public IActivity GetActivity(IActivity activity)
         {
-            var initializedActivity = this._activities.GetOrAdd(activity.GetType(), () => this.Initialize(activity));
-            if (initializedActivity != activity) this._logger.Warning($"Found another instance of {activity.GetType().Name} in the manager. Using the cached instance.");
+            var initializedActivity = this.activities.GetOrAdd(activity.GetType(), () => this.Initialize(activity));
+            if (initializedActivity != activity) this.logger.Warning($"Found another instance of {activity.GetType().Name} in the manager. Using the cached instance.");
             return initializedActivity;
         }
 
         public UniTask<IActivity> GetActivity<TActivity>(string key = null) where TActivity : Component, IActivity
         {
             key ??= typeof(TActivity).GetKey();
-            return this._activities.GetOrAddAsync(
+            return this.activities.GetOrAddAsync(
                 typeof(TActivity),
-                () => this._assetsManager.LoadComponent<TActivity>(key).ContinueWith(activityPrefab =>
+                () => this.assetsManager.LoadComponent<TActivity>(key).ContinueWith(activityPrefab =>
                 {
-                    this._keys.Add(typeof(TActivity), key);
-                    return (IActivity)this.Initialize(Instantiate(activityPrefab, this._hiddenActivities, false));
+                    this.keys.Add(typeof(TActivity), key);
+                    return (IActivity)this.Initialize(Instantiate(activityPrefab, this.hiddenActivities, false));
                 })
             );
         }
@@ -113,12 +113,12 @@ namespace UniT.UI
         public void Hide(IActivity activity, bool removeFromStack = true, bool autoStack = true)
         {
             if (activity.CurrentStatus is IActivity.Status.Hidden) return;
-            activity.transform.SetParent(this._hiddenActivities, false);
-            this._logger.Debug($"{activity.GetType().Name} status: {activity.CurrentStatus = IActivity.Status.Hidden}");
+            activity.transform.SetParent(this.hiddenActivities, false);
+            this.logger.Debug($"{activity.GetType().Name} status: {activity.CurrentStatus = IActivity.Status.Hidden}");
             activity.OnHide();
             if (removeFromStack)
             {
-                this._activityStack.Remove(activity);
+                this.activityStack.Remove(activity);
             }
             if (autoStack && this.StackingActivity is null && this.NextActivityInStack is { } nextActivity)
             {
@@ -129,12 +129,12 @@ namespace UniT.UI
         public void Dispose(IActivity activity, bool autoStack = true)
         {
             this.Hide(activity, true, autoStack);
-            this._activities.Remove(activity.GetType());
-            this._logger.Debug($"{activity.GetType().Name} status: {activity.CurrentStatus = IActivity.Status.Disposed}");
+            this.activities.Remove(activity.GetType());
+            this.logger.Debug($"{activity.GetType().Name} status: {activity.CurrentStatus = IActivity.Status.Disposed}");
             activity.OnDispose();
             Destroy(activity.gameObject);
-            if (!this._keys.Remove(activity.GetType(), out var key)) return;
-            this._assetsManager.Unload(key);
+            if (!this.keys.Remove(activity.GetType(), out var key)) return;
+            this.assetsManager.Unload(key);
         }
 
         #endregion
@@ -149,34 +149,34 @@ namespace UniT.UI
             {
                 case IActivity.Status.Stacking:
                 {
-                    var index = this._activityStack.IndexOf(activity);
+                    var index = this.activityStack.IndexOf(activity);
                     if (index == -1)
                     {
-                        this._activityStack.Add(activity);
+                        this.activityStack.Add(activity);
                     }
                     else
                     {
-                        this._activityStack.RemoveRange(index + 1, this._activityStack.Count - index - 1);
+                        this.activityStack.RemoveRange(index + 1, this.activityStack.Count - index - 1);
                     }
-                    this._activities.Values
+                    this.activities.Values
                         .Where(other => other.CurrentStatus is IActivity.Status.Floating or IActivity.Status.Stacking)
                         .SafeForEach(other => this.Hide(other, false, false));
-                    activity.transform.SetParent(this._stackingActivities, false);
+                    activity.transform.SetParent(this.stackingActivities, false);
                     break;
                 }
                 case IActivity.Status.Floating:
                 {
-                    activity.transform.SetParent(this._floatingActivities, false);
+                    activity.transform.SetParent(this.floatingActivities, false);
                     break;
                 }
                 case IActivity.Status.Docked:
                 {
-                    activity.transform.SetParent(this._dockedActivities, false);
+                    activity.transform.SetParent(this.dockedActivities, false);
                     break;
                 }
             }
             activity.transform.SetAsLastSibling();
-            this._logger.Debug($"{activity.GetType().Name} status: {activity.CurrentStatus = nextStatus}");
+            this.logger.Debug($"{activity.GetType().Name} status: {activity.CurrentStatus = nextStatus}");
             activity.OnShow();
             return activity;
         }

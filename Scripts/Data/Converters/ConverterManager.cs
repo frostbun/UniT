@@ -15,7 +15,7 @@ namespace UniT.Data.Converters
             Instance                                = new();
         }
 
-        private readonly List<IConverter> _converters = new();
+        private readonly List<IConverter> converters = new();
 
         private ConverterManager()
         {
@@ -75,13 +75,13 @@ namespace UniT.Data.Converters
 
         public IConverter GetConverter(Type type)
         {
-            return this._converters.LastOrDefault(converter => converter.CanConvert(type))
+            return this.converters.LastOrDefault(converter => converter.CanConvert(type))
                 ?? throw new($"No converter found for type {type.Name}");
         }
 
         public void AddConverter(IConverter converter)
         {
-            this._converters.Add(converter);
+            this.converters.Add(converter);
         }
 
         public object ConvertFromString(string str, Type type)

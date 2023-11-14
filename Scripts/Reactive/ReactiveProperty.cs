@@ -6,34 +6,34 @@ namespace UniT.Reactive
 
     public class ReactiveProperty<T>
     {
-        private          T                  _value;
-        private readonly HashSet<Action<T>> _callbacks = new();
+        private          T                  value;
+        private readonly HashSet<Action<T>> callbacks = new();
 
         public T Value
         {
-            get => this._value;
+            get => this.value;
             set
             {
-                this._value = value;
-                this._callbacks.SafeForEach(callback => callback(value));
+                this.value = value;
+                this.callbacks.SafeForEach(callback => callback(value));
             }
         }
 
         public ReactiveProperty(T value = default)
         {
-            this._value = value;
+            this.value = value;
         }
 
         public bool Subscribe(Action<T> callback, bool invokeImmediately = true)
         {
-            if (!this._callbacks.Add(callback)) return false;
-            if (invokeImmediately) callback(this._value);
+            if (!this.callbacks.Add(callback)) return false;
+            if (invokeImmediately) callback(this.value);
             return true;
         }
 
         public bool Unsubscribe(Action<T> callback)
         {
-            return this._callbacks.Remove(callback);
+            return this.callbacks.Remove(callback);
         }
     }
 }

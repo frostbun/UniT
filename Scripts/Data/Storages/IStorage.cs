@@ -1,6 +1,5 @@
 namespace UniT.Data.Storages
 {
-    using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
 
     public interface IStorage : IReadOnlyStorage

@@ -11,17 +11,17 @@ namespace UniT.Signal
     {
         #region Constructor
 
-        private readonly Dictionary<Type, HashSet<object>> _callbacksWithSignal;
-        private readonly Dictionary<Type, HashSet<object>> _callbacksNoSignal;
-        private readonly ILogger                           _logger;
+        private readonly Dictionary<Type, HashSet<object>> callbacksWithSignal;
+        private readonly Dictionary<Type, HashSet<object>> callbacksNoSignal;
+        private readonly ILogger                           logger;
 
         [Preserve]
         public SignalBus(ILogger logger = null)
         {
-            this._callbacksWithSignal = new();
-            this._callbacksNoSignal   = new();
-            this._logger              = logger ?? ILogger.Default(this.GetType().Name);
-            this._logger.Debug("Constructed");
+            this.callbacksWithSignal = new();
+            this.callbacksNoSignal   = new();
+            this.logger              = logger ?? ILogger.Default(this.GetType().Name);
+            this.logger.Debug("Constructed");
         }
 
         #endregion
@@ -31,28 +31,28 @@ namespace UniT.Signal
         ~SignalBus()
         {
             this.Dispose();
-            this._logger.Debug("Finalized");
+            this.logger.Debug("Finalized");
         }
 
         public void Dispose()
         {
-            this._callbacksWithSignal.Clear();
-            this._callbacksNoSignal.Clear();
-            this._logger.Debug("Disposed");
+            this.callbacksWithSignal.Clear();
+            this.callbacksNoSignal.Clear();
+            this.logger.Debug("Disposed");
         }
 
         #endregion
 
         #region Public
 
-        public LogConfig LogConfig => this._logger.Config;
+        public LogConfig LogConfig => this.logger.Config;
 
         public void Fire<T>(T signal)
         {
             var count = this.GetCallbacksWithSignal<T>().Count + this.GetCallbacksNoSignal<T>().Count;
             if (count == 0)
             {
-                this._logger.Warning($"No subscribers found for {typeof(T).Name}");
+                this.logger.Warning($"No subscribers found for {typeof(T).Name}");
                 return;
             }
             this.GetCallbacksWithSignal<T>()
@@ -61,18 +61,18 @@ namespace UniT.Signal
             this.GetCallbacksNoSignal<T>()
                 .Cast<Action>()
                 .SafeForEach(callback => callback());
-            this._logger.Debug($"Fired {typeof(T).Name} to {count} subscribers");
+            this.logger.Debug($"Fired {typeof(T).Name} to {count} subscribers");
         }
 
         public void Subscribe<T>(Action<T> callback)
         {
             if (this.GetCallbacksWithSignal<T>().Add(callback))
             {
-                this._logger.Debug($"Subscribed {callback.Method.Name} to {typeof(T).Name}");
+                this.logger.Debug($"Subscribed {callback.Method.Name} to {typeof(T).Name}");
             }
             else
             {
-                this._logger.Warning($"{callback.Method.Name} already subscribed to {typeof(T).Name}");
+                this.logger.Warning($"{callback.Method.Name} already subscribed to {typeof(T).Name}");
             }
         }
 
@@ -80,11 +80,11 @@ namespace UniT.Signal
         {
             if (this.GetCallbacksNoSignal<T>().Add(callback))
             {
-                this._logger.Debug($"Subscribed {callback.Method.Name} to {typeof(T).Name}");
+                this.logger.Debug($"Subscribed {callback.Method.Name} to {typeof(T).Name}");
             }
             else
             {
-                this._logger.Warning($"{callback.Method.Name} already subscribed to {typeof(T).Name}");
+                this.logger.Warning($"{callback.Method.Name} already subscribed to {typeof(T).Name}");
             }
         }
 
@@ -92,11 +92,11 @@ namespace UniT.Signal
         {
             if (this.GetCallbacksWithSignal<T>().Remove(callback))
             {
-                this._logger.Debug($"Unsubscribed {callback.Method.Name} from {typeof(T).Name}");
+                this.logger.Debug($"Unsubscribed {callback.Method.Name} from {typeof(T).Name}");
             }
             else
             {
-                this._logger.Warning($"{callback.Method.Name} not subscribed to {typeof(T).Name}");
+                this.logger.Warning($"{callback.Method.Name} not subscribed to {typeof(T).Name}");
             }
         }
 
@@ -104,11 +104,11 @@ namespace UniT.Signal
         {
             if (this.GetCallbacksNoSignal<T>().Remove(callback))
             {
-                this._logger.Debug($"Unsubscribed {callback.Method.Name} from {typeof(T).Name}");
+                this.logger.Debug($"Unsubscribed {callback.Method.Name} from {typeof(T).Name}");
             }
             else
             {
-                this._logger.Warning($"{callback.Method.Name} not subscribed to {typeof(T).Name}");
+                this.logger.Warning($"{callback.Method.Name} not subscribed to {typeof(T).Name}");
             }
         }
 
@@ -118,12 +118,12 @@ namespace UniT.Signal
 
         private HashSet<object> GetCallbacksWithSignal<T>()
         {
-            return this._callbacksWithSignal.GetOrAdd(typeof(T), () => new());
+            return this.callbacksWithSignal.GetOrAdd(typeof(T), () => new());
         }
 
         private HashSet<object> GetCallbacksNoSignal<T>()
         {
-            return this._callbacksNoSignal.GetOrAdd(typeof(T), () => new());
+            return this.callbacksNoSignal.GetOrAdd(typeof(T), () => new());
         }
 
         #endregion

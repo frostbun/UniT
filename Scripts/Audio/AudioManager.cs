@@ -14,29 +14,29 @@ namespace UniT.Audio
     {
         #region Constructor
 
-        private readonly IAssetsManager                  _assetsManager;
-        private readonly GameObject                      _audioSourcesContainer;
-        private readonly AudioSource                     _musicSource;
-        private readonly Queue<AudioSource>              _pooledSoundSources;
-        private readonly Dictionary<string, AudioSource> _loadedSoundSources;
-        private readonly ILogger                         _logger;
+        private readonly IAssetsManager                  assetsManager;
+        private readonly GameObject                      audioSourcesContainer;
+        private readonly AudioSource                     musicSource;
+        private readonly Queue<AudioSource>              pooledSoundSources;
+        private readonly Dictionary<string, AudioSource> loadedSoundSources;
+        private readonly ILogger                         logger;
 
         [Preserve]
         public AudioManager(IAudioConfig config, IAssetsManager assetsManager = null, ILogger logger = null)
         {
-            this.Config         = config;
-            this._assetsManager = assetsManager ?? IAssetsManager.Default();
+            this.Config        = config;
+            this.assetsManager = assetsManager ?? IAssetsManager.Default();
 
-            this._audioSourcesContainer = new GameObject(this.GetType().Name).DontDestroyOnLoad();
+            this.audioSourcesContainer = new GameObject(this.GetType().Name).DontDestroyOnLoad();
 
-            this._musicSource      = this._audioSourcesContainer.AddComponent<AudioSource>();
-            this._musicSource.loop = true;
+            this.musicSource      = this.audioSourcesContainer.AddComponent<AudioSource>();
+            this.musicSource.loop = true;
 
-            this._pooledSoundSources = new();
-            this._loadedSoundSources = new();
+            this.pooledSoundSources = new();
+            this.loadedSoundSources = new();
 
-            this._logger = logger ?? ILogger.Default(this.GetType().Name);
-            this._logger.Debug("Constructed");
+            this.logger = logger ?? ILogger.Default(this.GetType().Name);
+            this.logger.Debug("Constructed");
         }
 
         void IInitializable.Initialize()
@@ -47,7 +47,7 @@ namespace UniT.Audio
             this.Config.MuteMusic.Subscribe(this.OnMuteMusicChanged);
             this.Config.MasterVolume.Subscribe(this.OnMasterVolumeChanged);
             this.Config.MuteMaster.Subscribe(this.OnMuteMasterChanged);
-            this._logger.Debug("Initialized");
+            this.logger.Debug("Initialized");
         }
 
         #endregion
@@ -57,7 +57,7 @@ namespace UniT.Audio
         ~AudioManager()
         {
             this.Dispose();
-            this._logger.Debug("Finalized");
+            this.logger.Debug("Finalized");
         }
 
         public void Dispose()
@@ -70,15 +70,15 @@ namespace UniT.Audio
             this.Config.MuteMaster.Unsubscribe(this.OnMuteMasterChanged);
             this.UnloadAllSounds();
             this.UnloadMusic();
-            Object.Destroy(this._audioSourcesContainer);
-            this._logger.Debug("Disposed");
+            Object.Destroy(this.audioSourcesContainer);
+            this.logger.Debug("Disposed");
         }
 
         #endregion
 
         #region Public
 
-        public LogConfig    LogConfig    => this._logger.Config;
+        public LogConfig    LogConfig    => this.logger.Config;
         public IAudioConfig Config       { get; }
         public string       CurrentMusic { get; private set; }
 
@@ -91,22 +91,22 @@ namespace UniT.Audio
         {
             names.ForEach(name =>
             {
-                if (!this._loadedSoundSources.Remove(name, out var soundSource))
+                if (!this.loadedSoundSources.Remove(name, out var soundSource))
                 {
-                    this._logger.Warning($"Trying to unload sound {name} that was not loaded");
+                    this.logger.Warning($"Trying to unload sound {name} that was not loaded");
                     return;
                 }
                 soundSource.Stop();
                 soundSource.clip = null;
-                this._assetsManager.Unload(name);
-                this._pooledSoundSources.Enqueue(soundSource);
-                this._logger.Debug($"Unloaded sound {name}");
+                this.assetsManager.Unload(name);
+                this.pooledSoundSources.Enqueue(soundSource);
+                this.logger.Debug($"Unloaded sound {name}");
             });
         }
 
         public void UnloadAllSounds()
         {
-            this.UnloadSounds(this._loadedSoundSources.Keys.ToArray());
+            this.UnloadSounds(this.loadedSoundSources.Keys.ToArray());
         }
 
         public void PlaySoundOneShot(string name)
@@ -114,7 +114,7 @@ namespace UniT.Audio
             this.GetSoundSource(name).ContinueWith(soundSource =>
             {
                 soundSource.PlayOneShot(soundSource.clip);
-                this._logger.Debug($"Playing sound one shot {name}");
+                this.logger.Debug($"Playing sound one shot {name}");
             }).Forget();
         }
 
@@ -125,7 +125,7 @@ namespace UniT.Audio
                 soundSource.loop = loop;
                 if (!force && soundSource.isPlaying) return;
                 soundSource.Play();
-                this._logger.Debug($"Playing sound {name}, loop: {loop}");
+                this.logger.Debug($"Playing sound {name}, loop: {loop}");
             }).Forget();
         }
 
@@ -133,30 +133,30 @@ namespace UniT.Audio
         {
             names.ForEach(name =>
             {
-                if (!this._loadedSoundSources.TryGetValue(name, out var soundSource))
+                if (!this.loadedSoundSources.TryGetValue(name, out var soundSource))
                 {
-                    this._logger.Warning($"Trying to stop sound {name} that was not loaded");
+                    this.logger.Warning($"Trying to stop sound {name} that was not loaded");
                     return;
                 }
                 soundSource.Stop();
-                this._logger.Debug($"Stopped sound {name}");
+                this.logger.Debug($"Stopped sound {name}");
             });
         }
 
         public void StopAllSounds()
         {
-            this.StopSounds(this._loadedSoundSources.Keys.ToArray());
+            this.StopSounds(this.loadedSoundSources.Keys.ToArray());
         }
 
         public UniTask LoadMusic(string name)
         {
             if (this.CurrentMusic == name) return UniTask.CompletedTask;
-            return this._assetsManager.Load<AudioClip>(name).ContinueWith(audioClip =>
+            return this.assetsManager.Load<AudioClip>(name).ContinueWith(audioClip =>
             {
                 if (this.CurrentMusic == name) return; // Another load request was made while this one was loading
-                if (this.CurrentMusic != null) this._assetsManager.Unload(this.CurrentMusic);
-                this.CurrentMusic      = name;
-                this._musicSource.clip = audioClip;
+                if (this.CurrentMusic != null) this.assetsManager.Unload(this.CurrentMusic);
+                this.CurrentMusic     = name;
+                this.musicSource.clip = audioClip;
             });
         }
 
@@ -164,8 +164,8 @@ namespace UniT.Audio
         {
             if (this.CurrentMusic == null) return;
             this.StopMusic();
-            this._musicSource.clip = null;
-            this._assetsManager.Unload(this.CurrentMusic);
+            this.musicSource.clip = null;
+            this.assetsManager.Unload(this.CurrentMusic);
             this.CurrentMusic = null;
         }
 
@@ -173,25 +173,25 @@ namespace UniT.Audio
         {
             this.LoadMusic(name).ContinueWith(() =>
             {
-                if (!force && this._musicSource.isPlaying) return;
-                this._musicSource.Play();
-                this._logger.Debug($"Playing music {name}");
+                if (!force && this.musicSource.isPlaying) return;
+                this.musicSource.Play();
+                this.logger.Debug($"Playing music {name}");
             }).Forget();
         }
 
         public void PauseMusic()
         {
-            this._musicSource.Pause();
+            this.musicSource.Pause();
         }
 
         public void ResumeMusic()
         {
-            this._musicSource.UnPause();
+            this.musicSource.UnPause();
         }
 
         public void StopMusic()
         {
-            this._musicSource.Stop();
+            this.musicSource.Stop();
         }
 
         #endregion
@@ -200,18 +200,18 @@ namespace UniT.Audio
 
         private UniTask<AudioSource> GetSoundSource(string name)
         {
-            return this._loadedSoundSources.GetOrAddAsync(name, () =>
+            return this.loadedSoundSources.GetOrAddAsync(name, () =>
             {
-                return this._assetsManager.Load<AudioClip>(name).ContinueWith(audioClip =>
+                return this.assetsManager.Load<AudioClip>(name).ContinueWith(audioClip =>
                 {
-                    var soundSource = this._pooledSoundSources.DequeueOrDefault(() =>
+                    var soundSource = this.pooledSoundSources.DequeueOrDefault(() =>
                     {
-                        var soundSource = this._audioSourcesContainer.AddComponent<AudioSource>();
+                        var soundSource = this.audioSourcesContainer.AddComponent<AudioSource>();
                         this.ConfigureSoundSource(soundSource);
                         return soundSource;
                     });
                     soundSource.clip = audioClip;
-                    this._logger.Debug($"Loaded sound {name}");
+                    this.logger.Debug($"Loaded sound {name}");
                     return soundSource;
                 });
             });
@@ -225,13 +225,13 @@ namespace UniT.Audio
 
         private void ConfigureAllSoundSources()
         {
-            this._loadedSoundSources.Values.ForEach(this.ConfigureSoundSource);
+            this.loadedSoundSources.Values.ForEach(this.ConfigureSoundSource);
         }
 
         private void ConfigureMusicSource()
         {
-            this._musicSource.volume = this.Config.MusicVolume.Value * this.Config.MasterVolume.Value;
-            this._musicSource.mute   = this.Config.MuteMusic.Value || this.Config.MuteMaster.Value;
+            this.musicSource.volume = this.Config.MusicVolume.Value * this.Config.MasterVolume.Value;
+            this.musicSource.mute   = this.Config.MuteMusic.Value || this.Config.MuteMaster.Value;
         }
 
         #endregion
@@ -241,39 +241,39 @@ namespace UniT.Audio
         private void OnSoundVolumeChanged(float value)
         {
             this.ConfigureAllSoundSources();
-            this._logger.Debug($"Sound volume set to {value}");
+            this.logger.Debug($"Sound volume set to {value}");
         }
 
         private void OnMuteSoundChanged(bool value)
         {
             this.ConfigureAllSoundSources();
-            this._logger.Debug(value ? "Sound volume muted" : "Sound volume unmuted");
+            this.logger.Debug(value ? "Sound volume muted" : "Sound volume unmuted");
         }
 
         private void OnMusicVolumeChanged(float value)
         {
             this.ConfigureMusicSource();
-            this._logger.Debug($"Music volume set to {value}");
+            this.logger.Debug($"Music volume set to {value}");
         }
 
         private void OnMuteMusicChanged(bool value)
         {
             this.ConfigureMusicSource();
-            this._logger.Debug(value ? "Music volume muted" : "Music volume unmuted");
+            this.logger.Debug(value ? "Music volume muted" : "Music volume unmuted");
         }
 
         private void OnMasterVolumeChanged(float value)
         {
             this.ConfigureAllSoundSources();
             this.ConfigureMusicSource();
-            this._logger.Debug($"Master volume set to {value}");
+            this.logger.Debug($"Master volume set to {value}");
         }
 
         private void OnMuteMasterChanged(bool value)
         {
             this.ConfigureAllSoundSources();
             this.ConfigureMusicSource();
-            this._logger.Debug(value ? "Master volume muted" : "Master volume unmuted");
+            this.logger.Debug(value ? "Master volume muted" : "Master volume unmuted");
         }
 
         #endregion

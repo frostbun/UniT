@@ -13,19 +13,19 @@ namespace UniT.ObjectPool
 
         void IRecyclable.OnRecycle()
         {
-            this._recycleCts?.Cancel();
-            this._recycleCts?.Dispose();
-            this._recycleCts = null;
+            this.recycleCts?.Cancel();
+            this.recycleCts?.Dispose();
+            this.recycleCts = null;
             this.OnRecycle();
         }
 
         public IObjectPoolManager Manager { get; private set; }
 
-        private CancellationTokenSource _recycleCts;
+        private CancellationTokenSource recycleCts;
 
         public CancellationToken GetCancellationTokenOnRecycle()
         {
-            return (this._recycleCts ??= new()).Token;
+            return (this.recycleCts ??= new()).Token;
         }
 
         protected virtual void OnInstantiate()

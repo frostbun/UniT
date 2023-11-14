@@ -6,46 +6,46 @@ namespace UniT.UI.Item
 
     public abstract class SimpleItemAdapter<TItem, TView> : BaseView where TView : Component, IItemView
     {
-        [SerializeField] private Transform _content;
-        [SerializeField] private TView     _viewPrefab;
+        [SerializeField] private Transform content;
+        [SerializeField] private TView     viewPrefab;
 
-        private readonly Queue<IItemView>   _pooledViews  = new();
-        private readonly HashSet<IItemView> _spawnedViews = new();
+        private readonly Queue<IItemView>   pooledViews  = new();
+        private readonly HashSet<IItemView> spawnedViews = new();
 
         public void Show(IEnumerable<TItem> items)
         {
             this.Hide();
             items.ForEach(item =>
             {
-                var view = this._pooledViews.DequeueOrDefault(() => this.Manager.Initialize(Instantiate(this._viewPrefab, this._content)));
+                var view = this.pooledViews.DequeueOrDefault(() => this.Manager.Initialize(Instantiate(this.viewPrefab, this.content)));
                 view.transform.SetAsLastSibling();
                 view.gameObject.SetActive(true);
                 view.Item = item;
                 view.OnShow();
-                this._spawnedViews.Add(view);
+                this.spawnedViews.Add(view);
             });
         }
 
         public void Hide()
         {
-            this._spawnedViews.ForEach(item =>
+            this.spawnedViews.ForEach(item =>
             {
                 item.gameObject.SetActive(false);
                 item.OnHide();
-                this._pooledViews.Enqueue(item);
+                this.pooledViews.Enqueue(item);
             });
-            this._spawnedViews.Clear();
+            this.spawnedViews.Clear();
         }
 
         public void Dispose()
         {
             this.Hide();
-            this._pooledViews.ForEach(item =>
+            this.pooledViews.ForEach(item =>
             {
                 item.OnDispose();
                 Destroy(item.gameObject);
             });
-            this._pooledViews.Clear();
+            this.pooledViews.Clear();
         }
     }
 }

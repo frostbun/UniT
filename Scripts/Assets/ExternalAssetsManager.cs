@@ -15,15 +15,15 @@ namespace UniT.Assets
     {
         #region Constructor
 
-        private readonly Dictionary<string, UnityWebRequestAsyncOperation> _loadedAssets;
-        private readonly ILogger                                           _logger;
+        private readonly Dictionary<string, UnityWebRequestAsyncOperation> loadedAssets;
+        private readonly ILogger                                           logger;
 
         [Preserve]
         public ExternalAssetsManager(ILogger logger = null)
         {
-            this._loadedAssets = new();
-            this._logger       = logger ?? ILogger.Default(this.GetType().Name);
-            this._logger.Debug("Constructed");
+            this.loadedAssets = new();
+            this.logger       = logger ?? ILogger.Default(this.GetType().Name);
+            this.logger.Debug("Constructed");
         }
 
         #endregion
@@ -33,24 +33,24 @@ namespace UniT.Assets
         ~ExternalAssetsManager()
         {
             this.Dispose();
-            this._logger.Debug("Finalized");
+            this.logger.Debug("Finalized");
         }
 
         public void Dispose()
         {
-            this._loadedAssets.Keys.SafeForEach(this.Unload);
-            this._logger.Debug("Disposed");
+            this.loadedAssets.Keys.SafeForEach(this.Unload);
+            this.logger.Debug("Disposed");
         }
 
         #endregion
 
         #region Public
 
-        public LogConfig LogConfig => this._logger.Config;
+        public LogConfig LogConfig => this.logger.Config;
 
         public UniTask<Texture2D> DownloadTexture(string url, IProgress<float> progress = null, CancellationToken cancellationToken = default)
         {
-            return this._loadedAssets
+            return this.loadedAssets
                 .GetOrAdd(url, () =>
                 {
                     var request = new UnityWebRequest(url);
@@ -61,20 +61,20 @@ namespace UniT.Assets
                 .ContinueWith(request =>
                 {
                     var texture = ((DownloadHandlerTexture)request.downloadHandler).texture;
-                    this._logger.Debug($"Downloaded texture from {url}");
+                    this.logger.Debug($"Downloaded texture from {url}");
                     return texture;
                 });
         }
 
         public void Unload(string key)
         {
-            if (!this._loadedAssets.Remove(key, out var request))
+            if (!this.loadedAssets.Remove(key, out var request))
             {
-                this._logger.Warning($"Trying to unload asset {key} that was not loaded");
+                this.logger.Warning($"Trying to unload asset {key} that was not loaded");
                 return;
             }
             request.webRequest.Dispose();
-            this._logger.Debug($"Unloaded asset {key}");
+            this.logger.Debug($"Unloaded asset {key}");
         }
 
         #endregion

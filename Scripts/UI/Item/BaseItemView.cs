@@ -11,9 +11,9 @@ namespace UniT.UI.Item
 
         void IItemView.OnHide()
         {
-            this._hideCts?.Cancel();
-            this._hideCts?.Dispose();
-            this._hideCts = null;
+            this.hideCts?.Cancel();
+            this.hideCts?.Dispose();
+            this.hideCts = null;
             this.OnHide();
         }
 
@@ -21,11 +21,11 @@ namespace UniT.UI.Item
 
         public TItem Item { get; private set; }
 
-        private CancellationTokenSource _hideCts;
+        private CancellationTokenSource hideCts;
 
         public CancellationToken GetCancellationTokenOnHide()
         {
-            return (this._hideCts ??= new()).Token;
+            return (this.hideCts ??= new()).Token;
         }
 
         protected virtual void OnShow()

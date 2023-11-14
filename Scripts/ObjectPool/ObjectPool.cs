@@ -9,28 +9,28 @@ namespace UniT.ObjectPool
     {
         #region Constructor
 
-        [SerializeField] private GameObject _prefab;
+        [SerializeField] private GameObject prefab;
 
-        private          Transform           _transform;
-        private readonly Queue<GameObject>   _pooledObjects  = new();
-        private readonly HashSet<GameObject> _spawnedObjects = new();
+        private new      Transform           transform;
+        private readonly Queue<GameObject>   pooledObjects  = new();
+        private readonly HashSet<GameObject> spawnedObjects = new();
 
         public static ObjectPool Instantiate(GameObject prefab, int initialCount)
         {
             var pool = new GameObject($"{prefab.name} Pool").AddComponent<ObjectPool>();
-            pool._prefab = prefab;
+            pool.prefab = prefab;
             IterTools.Repeat(() =>
             {
-                var instance = Instantiate(pool._prefab, pool._transform);
+                var instance = Instantiate(pool.prefab, pool.transform);
                 instance.SetActive(false);
-                pool._pooledObjects.Enqueue(instance);
+                pool.pooledObjects.Enqueue(instance);
             }, initialCount);
             return pool;
         }
 
         private void Awake()
         {
-            this._transform = this.transform;
+            this.transform = ((Component)this).transform;
         }
 
         #endregion
@@ -39,8 +39,8 @@ namespace UniT.ObjectPool
 
         public GameObject Spawn(Vector3 position = default, Quaternion rotation = default, Transform parent = null)
         {
-            var instance = this._pooledObjects.DequeueOrDefault(() => Instantiate(this._prefab, this._transform));
-            this._spawnedObjects.Add(instance);
+            var instance = this.pooledObjects.DequeueOrDefault(() => Instantiate(this.prefab, this.transform));
+            this.spawnedObjects.Add(instance);
             instance.transform.SetPositionAndRotation(position, rotation);
             instance.transform.SetParent(parent);
             instance.SetActive(true);
@@ -55,11 +55,11 @@ namespace UniT.ObjectPool
 
         public void Recycle(GameObject instance)
         {
-            if (!this._spawnedObjects.Remove(instance)) throw new InvalidOperationException($"{instance.name} was not spawned from {this.gameObject.name}");
+            if (!this.spawnedObjects.Remove(instance)) throw new InvalidOperationException($"{instance.name} was not spawned from {this.gameObject.name}");
             if (!instance) return;
-            this._pooledObjects.Enqueue(instance);
+            this.pooledObjects.Enqueue(instance);
             instance.SetActive(false);
-            instance.transform.SetParent(this._transform);
+            instance.transform.SetParent(this.transform);
         }
 
         public void Recycle<T>(T component) where T : Component
@@ -69,7 +69,7 @@ namespace UniT.ObjectPool
 
         public void RecycleAll()
         {
-            this._spawnedObjects.SafeForEach(this.Recycle);
+            this.spawnedObjects.SafeForEach(this.Recycle);
         }
 
         #endregion

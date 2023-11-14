@@ -10,11 +10,11 @@ namespace UniT.Data.Converters
     /// </summary>
     public sealed class DictionaryConverter : BaseConverter
     {
-        private readonly string _separator;
+        private readonly string separator;
 
         public DictionaryConverter(string separator = ":")
         {
-            this._separator = separator;
+            this.separator = separator;
         }
 
         protected override Type ConvertibleType => typeof(Dictionary<,>);
@@ -30,7 +30,7 @@ namespace UniT.Data.Converters
             var dictionary     = (IDictionary)Activator.CreateInstance(type);
             foreach (var item in (string[])ConverterManager.Instance.ConvertFromString(str, ArrayType))
             {
-                var kv = item.Split(this._separator);
+                var kv = item.Split(this.separator);
                 dictionary.Add(keyConverter.ConvertFromString(kv[0], keyType), valueConverter.ConvertFromString(kv[1], valueType));
             }
             return dictionary;
@@ -42,7 +42,7 @@ namespace UniT.Data.Converters
             var valueType      = type.GetGenericArguments()[1];
             var keyConverter   = ConverterManager.Instance.GetConverter(keyType);
             var valueConverter = ConverterManager.Instance.GetConverter(valueType);
-            return ConverterManager.Instance.ConvertToString(((IDictionary)obj).Cast<DictionaryEntry>().Select(kv => $"{keyConverter.ConvertToString(kv.Key, keyType)}{this._separator}{valueConverter.ConvertToString(kv.Value, valueType)}").ToArray(), ArrayType);
+            return ConverterManager.Instance.ConvertToString(((IDictionary)obj).Cast<DictionaryEntry>().Select(kv => $"{keyConverter.ConvertToString(kv.Key, keyType)}{this.separator}{valueConverter.ConvertToString(kv.Value, valueType)}").ToArray(), ArrayType);
         }
     }
 }

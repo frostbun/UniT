@@ -23,20 +23,20 @@ namespace UniT
 
     public abstract class DelegateFactory<TProduct> : IFactory<TProduct>
     {
-        private readonly Func<TProduct> _factory;
+        private readonly Func<TProduct> factory;
 
-        protected DelegateFactory(Func<TProduct> factory) => this._factory = factory;
+        protected DelegateFactory(Func<TProduct> factory) => this.factory = factory;
 
-        public TProduct Create() => this._factory();
+        public TProduct Create() => this.factory();
     }
 
     public abstract class DelegateFactory<TProduct, TModel> : IFactory<TProduct, TModel>
     {
-        private readonly Func<TModel, TProduct> _factory;
+        private readonly Func<TModel, TProduct> factory;
 
-        protected DelegateFactory(Func<TModel, TProduct> factory) => this._factory = factory;
+        protected DelegateFactory(Func<TModel, TProduct> factory) => this.factory = factory;
 
-        public TProduct Create(TModel model) => this._factory(model);
+        public TProduct Create(TModel model) => this.factory(model);
     }
 
     public abstract class AsyncDelegateFactory<TProduct> : DelegateFactory<UniTask<TProduct>>, IAsyncFactory<TProduct>

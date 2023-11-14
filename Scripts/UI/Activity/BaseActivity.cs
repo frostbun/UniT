@@ -11,42 +11,42 @@ namespace UniT.UI.Activity
 
         void IActivity.OnShow()
         {
-            this._currentExtras = this._nextExtras;
-            this._nextExtras    = null;
+            this.currentExtras = this.nextExtras;
+            this.nextExtras    = null;
             this.OnShow();
         }
 
         void IActivity.OnHide()
         {
-            this._hideCts?.Cancel();
-            this._hideCts?.Dispose();
-            this._hideCts = null;
+            this.hideCts?.Cancel();
+            this.hideCts?.Dispose();
+            this.hideCts = null;
             this.OnHide();
-            this._currentExtras = null;
-            this._resultSource?.TrySetResult(null);
-            this._resultSource?.Task.Forget();
-            this._resultSource = null;
+            this.currentExtras = null;
+            this.resultSource?.TrySetResult(null);
+            this.resultSource?.Task.Forget();
+            this.resultSource = null;
         }
 
         void IActivity.OnDispose() => this.OnDispose();
 
-        private Dictionary<string, object>      _currentExtras;
-        private Dictionary<string, object>      _nextExtras;
-        private UniTaskCompletionSource<object> _resultSource;
-        private CancellationTokenSource         _hideCts;
+        private Dictionary<string, object>      currentExtras;
+        private Dictionary<string, object>      nextExtras;
+        private UniTaskCompletionSource<object> resultSource;
+        private CancellationTokenSource         hideCts;
 
         IActivity IActivity.AddExtra<T>(string key, T value)
         {
-            this._nextExtras ??= new();
-            if (this._nextExtras.ContainsKey(key))
+            this.nextExtras ??= new();
+            if (this.nextExtras.ContainsKey(key))
                 throw new ArgumentException($"Extra with key {key} already exists");
-            this._nextExtras[key] = value;
+            this.nextExtras[key] = value;
             return this;
         }
 
         UniTask<T> IActivity.WaitForResult<T>()
         {
-            return (this._resultSource ??= new()).Task.ContinueWith(result =>
+            return (this.resultSource ??= new()).Task.ContinueWith(result =>
             {
                 if (result is null)
                     return default;
@@ -58,16 +58,16 @@ namespace UniT.UI.Activity
 
         UniTask IActivity.WaitForHide()
         {
-            return (this._resultSource ??= new()).Task;
+            return (this.resultSource ??= new()).Task;
         }
 
         public IActivity.Status CurrentStatus { get; private set; } = IActivity.Status.Hidden;
 
         public T GetExtra<T>(string key)
         {
-            if (this._currentExtras is null || !this._currentExtras.ContainsKey(key))
+            if (this.currentExtras is null || !this.currentExtras.ContainsKey(key))
                 throw new ArgumentException($"No extra with key {key} found");
-            var extra = this._currentExtras[key];
+            var extra = this.currentExtras[key];
             if (extra is null)
                 return default;
             if (extra is not T t)
@@ -77,12 +77,12 @@ namespace UniT.UI.Activity
 
         public bool TrySetResult<T>(T result)
         {
-            return (this._resultSource ??= new()).TrySetResult(result);
+            return (this.resultSource ??= new()).TrySetResult(result);
         }
 
         public CancellationToken GetCancellationTokenOnHide()
         {
-            return (this._hideCts ??= new()).Token;
+            return (this.hideCts ??= new()).Token;
         }
 
         protected virtual void OnShow()
