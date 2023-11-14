@@ -4,11 +4,6 @@ namespace UniT.Data.Converters
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
-    using UniT.Data.Converters.Collections;
-    using UniT.Data.Converters.DateTime;
-    using UniT.Data.Converters.Others;
-    using UniT.Data.Converters.Primitives;
-    using UniT.Data.Converters.Tuples;
 
     public sealed class ConverterManager
     {
@@ -56,8 +51,8 @@ namespace UniT.Data.Converters
             #region Collections
 
             this.AddConverter(new ArrayConverter());
-            this.AddConverter(new ListConverter()); // Depend on ArrayConverter
-            this.AddConverter(new DictionaryConverter()); // Depend on ArrayConverter
+            this.AddConverter(new ListConverter());               // Depend on ArrayConverter
+            this.AddConverter(new DictionaryConverter());         // Depend on ArrayConverter
             this.AddConverter(new ReadOnlyCollectionConverter()); // Depend on ListConverter
             this.AddConverter(new ReadOnlyDictionaryConverter()); // Depend on DictionaryConverter
 
@@ -81,7 +76,7 @@ namespace UniT.Data.Converters
         public IConverter GetConverter(Type type)
         {
             return this._converters.LastOrDefault(converter => converter.CanConvert(type))
-                   ?? throw new($"No converter found for type {type.Name}");
+                ?? throw new($"No converter found for type {type.Name}");
         }
 
         public void AddConverter(IConverter converter)

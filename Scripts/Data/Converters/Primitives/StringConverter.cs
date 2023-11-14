@@ -1,4 +1,4 @@
-namespace UniT.Data.Converters.Primitives
+namespace UniT.Data.Converters
 {
     using System;
 

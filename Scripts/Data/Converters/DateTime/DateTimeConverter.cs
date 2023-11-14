@@ -1,4 +1,4 @@
-namespace UniT.Data.Converters.DateTime
+namespace UniT.Data.Converters
 {
     using System;
     using System.Globalization;

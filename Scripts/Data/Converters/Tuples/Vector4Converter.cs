@@ -1,4 +1,4 @@
-namespace UniT.Data.Converters.Tuples
+namespace UniT.Data.Converters
 {
     using System;
     using System.Runtime.CompilerServices;

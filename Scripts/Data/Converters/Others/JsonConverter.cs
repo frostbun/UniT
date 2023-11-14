@@ -1,4 +1,4 @@
-namespace UniT.Data.Converters.Others
+namespace UniT.Data.Converters
 {
     using System;
     using Newtonsoft.Json;
