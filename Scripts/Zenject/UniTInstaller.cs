@@ -34,9 +34,7 @@ namespace UniT
             this.Container.BindInterfacesTo<UnityLogger>()
                 .FromMethod(context => new UnityLogger(
                     context.ObjectType?.Name,
-                    context.Container.HasBinding<LogConfig>()
-                        ? context.Container.Resolve<LogConfig>()
-                        : null
+                    context.Container.TryResolve<LogConfig>()
                 ))
                 .AsTransient()
                 .Lazy();
@@ -92,12 +90,8 @@ namespace UniT
             this.Container.BindInterfacesTo<UIManager>()
                 .FromMethod(_ => Object.FindObjectsOfType<UIManager>().Single().Construct(
                     new(type => (IPresenter)CurrentContext.Container.Instantiate(type)),
-                    this.Container.HasBinding<IAssetsManager>()
-                        ? this.Container.Resolve<IAssetsManager>()
-                        : null,
-                    this.Container.HasBinding<ILogger>()
-                        ? this.Container.Resolve<ILogger>()
-                        : null
+                    this.Container.TryResolve<IAssetsManager>(),
+                    this.Container.TryResolve<ILogger>()
                 ))
                 .AsSingle()
                 .Lazy();
