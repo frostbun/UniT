@@ -5,7 +5,7 @@ namespace UniT.Data.Converters
 
     public abstract class BaseConverter : IConverter
     {
-        bool IConverter.CanConvert(Type type) => type.DeriveFrom(this.ConvertibleType);
+        bool IConverter.CanConvert(Type type) => type.DerivesFrom(this.ConvertibleType);
 
         object IConverter.ConvertFromString(string str, Type type)
         {
