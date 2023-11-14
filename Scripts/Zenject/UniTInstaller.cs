@@ -6,8 +6,8 @@ namespace UniT
     using UniT.Assets;
     using UniT.Audio;
     using UniT.Data;
-    using UniT.Data.Csv;
-    using UniT.Data.Json;
+    using UniT.Data.Serializers;
+    using UniT.Data.Storages;
     using UniT.Logging;
     using UniT.ObjectPool;
     using UniT.UI;
@@ -49,11 +49,11 @@ namespace UniT
                 .AsSingle()
                 .Lazy();
 
-            this.Container.BindInterfacesTo<AddressableAssetManager>()
+            this.Container.BindInterfacesTo<AddressableAssetsManager>()
                 .AsTransient()
                 .Lazy();
 
-            this.Container.BindInterfacesTo<ExternalAssetManager>()
+            this.Container.BindInterfacesTo<ExternalAssetsManager>()
                 .AsTransient()
                 .Lazy();
 
@@ -61,17 +61,22 @@ namespace UniT
 
             #region Data
 
-            this.Container.BindInterfacesTo<PlayerPrefsJsonDataHandler>()
+            this.Container.BindInterfacesTo<JsonSerializer>()
                 .AsSingle()
                 .WhenInjectedInto<IDataManager>()
                 .Lazy();
 
-            this.Container.BindInterfacesTo<BlueprintAssetCsvDataHandler>()
+            this.Container.BindInterfacesTo<CsvSerializer>()
                 .AsSingle()
                 .WhenInjectedInto<IDataManager>()
                 .Lazy();
 
-            this.Container.BindInterfacesTo<BlueprintAssetJsonDataHandler>()
+            this.Container.BindInterfacesTo<AssetsStorage>()
+                .AsSingle()
+                .WhenInjectedInto<IDataManager>()
+                .Lazy();
+
+            this.Container.BindInterfacesTo<PlayerPrefsStorage>()
                 .AsSingle()
                 .WhenInjectedInto<IDataManager>()
                 .Lazy();
@@ -87,8 +92,8 @@ namespace UniT
             this.Container.BindInterfacesTo<UIManager>()
                 .FromMethod(_ => Object.FindObjectsOfType<UIManager>().Single().Construct(
                     new(type => (IPresenter)CurrentContext.Container.Instantiate(type)),
-                    this.Container.HasBinding<IAssetManager>()
-                        ? this.Container.Resolve<IAssetManager>()
+                    this.Container.HasBinding<IAssetsManager>()
+                        ? this.Container.Resolve<IAssetsManager>()
                         : null,
                     this.Container.HasBinding<ILogger>()
                         ? this.Container.Resolve<ILogger>()

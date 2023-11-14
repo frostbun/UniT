@@ -22,17 +22,17 @@ namespace UniT.UI
         [SerializeField] private Transform _dockedActivities;
 
         private          IPresenter.Factory          _presenterFactory;
-        private          IAssetManager               _assetManager;
+        private          IAssetsManager              _assetsManager;
         private          ILogger                     _logger;
         private readonly Dictionary<Type, IActivity> _activities    = new();
         private readonly List<IActivity>             _activityStack = new();
         private readonly Dictionary<Type, string>    _keys          = new();
 
         [Preserve]
-        public UIManager Construct(IPresenter.Factory presenterFactory = null, IAssetManager assetManager = null, ILogger logger = null)
+        public UIManager Construct(IPresenter.Factory presenterFactory = null, IAssetsManager assetsManager = null, ILogger logger = null)
         {
             this._presenterFactory = presenterFactory ?? IPresenter.Factory.Default();
-            this._assetManager     = assetManager ?? IAssetManager.Default();
+            this._assetsManager    = assetsManager ?? IAssetsManager.Default();
             this._logger           = logger ?? ILogger.Default(this.GetType().Name);
             this._logger.Debug("Constructed");
             return this.DontDestroyOnLoad();
@@ -96,7 +96,7 @@ namespace UniT.UI
             key ??= typeof(TActivity).GetKey();
             return this._activities.GetOrAddAsync(
                 typeof(TActivity),
-                () => this._assetManager.LoadComponent<TActivity>(key).ContinueWith(activityPrefab =>
+                () => this._assetsManager.LoadComponent<TActivity>(key).ContinueWith(activityPrefab =>
                 {
                     this._keys.Add(typeof(TActivity), key);
                     return (IActivity)this.Initialize(Instantiate(activityPrefab, this._hiddenActivities, false));
@@ -134,7 +134,7 @@ namespace UniT.UI
             activity.OnDispose();
             Destroy(activity.gameObject);
             if (!this._keys.Remove(activity.GetType(), out var key)) return;
-            this._assetManager.Unload(key);
+            this._assetsManager.Unload(key);
         }
 
         #endregion

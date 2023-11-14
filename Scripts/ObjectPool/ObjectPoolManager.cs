@@ -15,7 +15,7 @@ namespace UniT.ObjectPool
     {
         #region Constructor
 
-        private readonly IAssetManager                         _assetManager;
+        private readonly IAssetsManager                        _assetsManager;
         private readonly Transform                             _poolsContainer;
         private readonly Dictionary<GameObject, ObjectPool>    _prefabToPool;
         private readonly Dictionary<string, ObjectPool>        _keyToPool;
@@ -24,9 +24,9 @@ namespace UniT.ObjectPool
         private readonly ILogger                               _logger;
 
         [Preserve]
-        public ObjectPoolManager(IAssetManager assetManager = null, ILogger logger = null)
+        public ObjectPoolManager(IAssetsManager assetsManager = null, ILogger logger = null)
         {
-            this._assetManager   = assetManager ?? IAssetManager.Default();
+            this._assetsManager  = assetsManager ?? IAssetsManager.Default();
             this._poolsContainer = new GameObject(this.GetType().Name).DontDestroyOnLoad().transform;
             this._prefabToPool   = new();
             this._keyToPool      = new();
@@ -73,7 +73,7 @@ namespace UniT.ObjectPool
 
         public UniTask InstantiatePool(string key, int initialCount = 1)
         {
-            return this._keyToPool.TryAddAsync(key, () => this._assetManager.Load<GameObject>(key).ContinueWith(prefab => this.InstantiatePool_Internal(prefab, initialCount)))
+            return this._keyToPool.TryAddAsync(key, () => this._assetsManager.Load<GameObject>(key).ContinueWith(prefab => this.InstantiatePool_Internal(prefab, initialCount)))
                 .ContinueWith(isSuccess =>
                 {
                     if (isSuccess) return;
@@ -129,7 +129,7 @@ namespace UniT.ObjectPool
                 return;
             }
             this.DestroyPool_Internal(pool);
-            this._assetManager.Unload(key);
+            this._assetsManager.Unload(key);
         }
 
         public void DestroyPool<T>() where T : Component

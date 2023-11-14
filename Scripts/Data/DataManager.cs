@@ -1,106 +1,108 @@
 namespace UniT.Data
 {
     using System;
+    using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
     using Cysharp.Threading.Tasks;
+    using UniT.Data.Serializers;
+    using UniT.Data.Storages;
     using UniT.Extensions;
     using UniT.Logging;
     using UnityEngine.Scripting;
 
     public sealed class DataManager : IDataManager
     {
-        private readonly ReadOnlyDictionary<Type, IData>        _dataCache;
-        private readonly ReadOnlyDictionary<Type, IDataHandler> _handlerCache;
-        private readonly ReadOnlyDictionary<Type, Type>         _dataTypeToHandlerType;
-        private readonly ILogger                                _logger;
+        #region Constructor
+
+        private readonly ReadOnlyDictionary<Type, IReadOnlyData>    _datas;
+        private readonly ReadOnlyDictionary<Type, IReadOnlyStorage> _storages;
+        private readonly ReadOnlyDictionary<Type, ISerializer>      _serializers;
+        private readonly ILogger                                    _logger;
 
         [Preserve]
-        public DataManager(IData[] dataCache, IDataHandler[] handlerCache, ILogger logger = null)
+        public DataManager(
+            IReadOnlyData[]    datas,
+            IReadOnlyStorage[] storages,
+            ISerializer[]      serializers,
+            ILogger            logger = null
+        )
         {
-            this._dataCache    = dataCache.ToDictionary(data => data.GetType(), data => data).AsReadOnly();
-            this._handlerCache = handlerCache.ToDictionary(handler => handler.GetType(), handler => handler).AsReadOnly();
-            this._dataTypeToHandlerType = dataCache.ToDictionary(
+            this._datas = datas.ToDictionary(data => data.GetType()).AsReadOnly();
+            this._storages = datas.ToDictionary(
                 data => data.GetType(),
-                data => handlerCache.LastOrDefault(handler => handler.CanHandle(data.GetType()))?.GetType()
-                    ?? throw new ArgumentException($"No handler found for type {data.GetType().Name}")
+                data => storages.LastOrDefault(storage => storage.CanStore(data.GetType())) ?? throw new InvalidOperationException($"No storage found for {data.GetType().Name}")
+            ).AsReadOnly();
+            this._serializers = datas.ToDictionary(
+                data => data.GetType(),
+                data => serializers.LastOrDefault(serializer => serializer.CanSerialize(data.GetType())) ?? throw new InvalidOperationException($"No serializer found for {data.GetType().Name}")
             ).AsReadOnly();
 
             this._logger = logger ?? ILogger.Default(this.GetType().Name);
-            this._dataTypeToHandlerType.ForEach((dataType, handlerType) => this._logger.Debug($"Found {dataType.Name} - {handlerType.Name}"));
+            this._datas.Keys.ForEach(type => this._logger.Debug($"Found {type.Name} - {this._storages[type].GetType().Name} - {this._serializers[type].GetType().Name}"));
             this._logger.Debug("Constructed");
         }
 
-        public LogConfig LogConfig => this._logger.Config;
+        #endregion
 
-        public T Get<T>() where T : IData
-        {
-            return (T)this._dataCache[typeof(T)];
-        }
+        #region Interface Implementations
 
-        public UniTask Populate<T>() where T : IData
-        {
-            return this.Populate(typeof(T));
-        }
+        LogConfig IDataManager.LogConfig => this._logger.Config;
 
-        public UniTask Save<T>() where T : IData
-        {
-            return this.Save(typeof(T));
-        }
+        IReadOnlyData IDataManager.Get(Type type) => this._datas[type];
 
-        public UniTask Flush<T>() where T : IData
-        {
-            return this.Flush(typeof(T));
-        }
+        UniTask IDataManager.Populate(params Type[] types) => this.Populate(types);
 
-        public UniTask Populate(params Type[] dataTypes)
-        {
-            return UniTask.WhenAll(
-                dataTypes.GroupBy(dataType => this._dataTypeToHandlerType[dataType])
-                    .Select(group =>
-                        this._handlerCache[group.Key].Populate(
-                            group.Select(dataType => this._dataCache[dataType])
-                                .ToArray()
-                        )
-                    )
-            );
-        }
+        UniTask IDataManager.Save(params Type[] types) => this.Save(types);
 
-        public UniTask Save(params Type[] dataTypes)
-        {
-            return UniTask.WhenAll(
-                dataTypes.GroupBy(dataType => this._dataTypeToHandlerType[dataType])
-                    .Select(group =>
-                        this._handlerCache[group.Key].Save(
-                            group.Select(dataType => this._dataCache[dataType])
-                                .ToArray()
-                        )
-                    )
-            );
-        }
+        UniTask IDataManager.Flush(params Type[] types) => this.Flush(types);
 
-        public UniTask Flush(params Type[] dataTypes)
-        {
-            return UniTask.WhenAll(
-                dataTypes.Select(dataType => this._dataTypeToHandlerType[dataType])
-                    .Distinct()
-                    .Select(handlerType => this._handlerCache[handlerType].Flush())
-            );
-        }
+        UniTask IDataManager.PopulateAll() => this.Populate(this._datas.Keys);
 
-        public UniTask PopulateAll()
-        {
-            return this.Populate(this._dataCache.Keys!.ToArray());
-        }
+        UniTask IDataManager.SaveAll() => this.Save(this._datas.Keys);
 
-        public UniTask SaveAll()
-        {
-            return this.Save(this._dataCache.Keys!.ToArray());
-        }
+        UniTask IDataManager.FlushAll() => this.Flush(this._datas.Keys);
 
-        public UniTask FlushAll()
-        {
-            return this.Flush(this._dataCache.Keys!.ToArray());
-        }
+        #endregion
+
+        #region Private
+
+        private UniTask Populate(IEnumerable<Type> types) => UniTask.WhenAll(
+            types.GroupBy(type => this._storages[type])
+                .Select(group =>
+                {
+                    var keys    = group.Select(type => type.GetKey()).ToArray();
+                    var storage = group.Key;
+                    return storage.Load(keys).ContinueWith(rawDatas =>
+                    {
+                        this._logger.Debug($"Loaded {keys.ToJson()}");
+                        IterTools.Zip(group, rawDatas).ForEach((type, rawData) => this._serializers[type].Populate(this._datas[type], rawData));
+                        this._logger.Debug($"Populated {keys.ToJson()}");
+                    });
+                })
+        );
+
+        private UniTask Save(IEnumerable<Type> types) => UniTask.WhenAll(
+            types.GroupBy(type => this._storages[type])
+                .Select(group =>
+                {
+                    var keys     = group.Select(type => type.GetKey()).ToArray();
+                    var rawDatas = group.Select(type => this._serializers[type].Serialize(this._datas[type])).ToArray();
+                    this._logger.Debug($"Serialized {keys.ToJson()}");
+                    var storage = (IStorage)group.Key;
+                    return storage.Save(keys, rawDatas)
+                        .ContinueWith(() => this._logger.Debug($"Saved {keys.ToJson()}"));
+                })
+        );
+
+        private UniTask Flush(IEnumerable<Type> types) => UniTask.WhenAll(
+            types.Select(type => (IStorage)this._storages[type])
+                .Distinct()
+                .Select(storage => storage.Flush()
+                    .ContinueWith(() => this._logger.Debug($"Flushed {storage.GetType().Name}"))
+                )
+        );
+
+        #endregion
     }
 }

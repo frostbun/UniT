@@ -2,18 +2,19 @@
 namespace UniT
 {
     using UniT.Advertisements;
-    using UniT.Data.Json;
+    using UniT.Data;
+    using UniT.Data.Storages;
     using Zenject;
 
     public sealed class FbInstantInstaller : Installer<FbInstantInstaller>
     {
         public override void InstallBindings()
         {
-            this.Container.BindInterfacesTo<FbInstantPlayerJsonDataHandler>()
+            this.Container.BindInterfacesTo<FbInstantStorage>()
                 .AsSingle()
+                .WhenInjectedInto<IDataManager>()
                 .Lazy();
 
-            this.Container.UnbindInterfacesTo<DummyAdsManager>();
             this.Container.BindInterfacesTo<FbInstantAdsManager>()
                 .AsSingle()
                 .Lazy();

@@ -6,12 +6,18 @@
     "Unity.Addressables",
     "UniTask",
     "UniTask.Addressables",
+    "Zenject",
     "UniT.FbInstant",
     "UniT.Extensions"
   ],
   "versionDefines": [
     {
-      "name": "com.frostbun.fbinstant",
+      "name": "com.modesttree.zenject",
+      "expression": "",
+      "define": "UNIT_ZENJECT"
+    },
+    {
+      "name": "com.frostbun.unit.fbinstant",
       "expression": "",
       "define": "UNIT_FBINSTANT"
     }
