@@ -1,28 +1,21 @@
 namespace UniT.Data.Storages
 {
-    using System;
     using Cysharp.Threading.Tasks;
     using UniT.Assets;
     using UnityEngine;
     using UnityEngine.Scripting;
 
-    public sealed class AssetsStorage : IReadOnlyStorage
+    public sealed class AssetsStorage : BaseReadOnlyStorage
     {
         private readonly IAssetsManager assetsManager;
 
         [Preserve]
-        public AssetsStorage(IAssetsManager assetsManager)
+        public AssetsStorage(IAssetsManager assetsManager = null)
         {
-            this.assetsManager = assetsManager;
+            this.assetsManager = assetsManager ?? IAssetsManager.Default();
         }
 
-        public bool CanStore(Type type)
-        {
-            return typeof(IReadOnlyData).IsAssignableFrom(type)
-                && !typeof(IData).IsAssignableFrom(type);
-        }
-
-        public UniTask<string[]> Load(string[] keys)
+        protected override UniTask<string[]> Load(string[] keys)
         {
             return UniTask.WhenAll(keys.Select(key =>
                 this.assetsManager.Load<TextAsset>(key).ContinueWith(asset =>
