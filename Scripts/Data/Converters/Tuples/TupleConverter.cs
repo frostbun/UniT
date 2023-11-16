@@ -21,16 +21,14 @@ namespace UniT.Data.Converters
         {
             var items     = str.Split(this.separator);
             var itemTypes = type.GetGenericArguments();
-            if (items.Length != itemTypes.Length) throw new ArgumentException($"TupleConverter: Invalid number of items in string. Expected {itemTypes.Length}, got {items.Length}.");
-            return Activator.CreateInstance(type, IterTools.Zip(items, itemTypes, ConverterManager.Instance.ConvertFromString).ToArray());
+            return Activator.CreateInstance(type, IterTools.StrictZip(items, itemTypes, ConverterManager.Instance.ConvertFromString).ToArray());
         }
 
         protected override string ConvertToString(object obj, Type type)
         {
             var tuple     = (ITuple)obj;
             var itemTypes = type.GetGenericArguments();
-            if (tuple.Length != itemTypes.Length) throw new ArgumentException($"TupleConverter: Invalid number of items in tuple. Expected {itemTypes.Length}, got {tuple.Length}.");
-            return string.Join(this.separator, IterTools.Zip(ToEnumerable(tuple), itemTypes, ConverterManager.Instance.ConvertToString));
+            return string.Join(this.separator, IterTools.StrictZip(ToEnumerable(tuple), itemTypes, ConverterManager.Instance.ConvertToString));
         }
 
         private static IEnumerable<object> ToEnumerable(ITuple tuple)

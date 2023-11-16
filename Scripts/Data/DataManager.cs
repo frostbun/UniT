@@ -76,7 +76,7 @@ namespace UniT.Data
                     return storage.Load(keys).ContinueWith(rawDatas =>
                     {
                         this.logger.Debug($"Loaded {keys.ToJson()}");
-                        IterTools.Zip(group, rawDatas).ForEach((type, rawData) => this.serializers[type].Populate(this.datas[type], rawData));
+                        IterTools.StrictZip(group, rawDatas).ForEach((type, rawData) => this.serializers[type].Populate(this.datas[type], rawData));
                         this.logger.Debug($"Populated {keys.ToJson()}");
                     });
                 })

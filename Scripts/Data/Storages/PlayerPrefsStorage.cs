@@ -20,7 +20,7 @@ namespace UniT.Data.Storages
 
         protected override UniTask Save(string[] keys, string[] values)
         {
-            IterTools.Zip(keys, values).ForEach(PlayerPrefs.SetString);
+            IterTools.StrictZip(keys, values).ForEach(PlayerPrefs.SetString);
             return UniTask.CompletedTask;
         }
 
