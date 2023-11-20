@@ -13,7 +13,7 @@ namespace UniT.Data.Serializers
 
         public bool CanSerialize(Type type)
         {
-            return true;
+            return typeof(IJsonData).IsAssignableFrom(type);
         }
 
         public void Populate(object data, string rawData)
