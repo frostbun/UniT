@@ -33,7 +33,7 @@ namespace UniT.UI
         {
             this.presenterFactory = presenterFactory ?? IPresenter.Factory.Default();
             this.assetsManager    = assetsManager ?? IAssetsManager.Default();
-            this.logger           = logger ?? ILogger.Default(this.GetType().Name);
+            this.logger           = logger ?? ILogger.Default(this);
             this.logger.Debug("Constructed");
             return this.DontDestroyOnLoad();
         }

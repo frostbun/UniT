@@ -20,7 +20,7 @@ namespace UniT.Signal
         {
             this.callbacksWithSignal = new();
             this.callbacksNoSignal   = new();
-            this.logger              = logger ?? ILogger.Default(this.GetType().Name);
+            this.logger              = logger ?? ILogger.Default(this);
             this.logger.Debug("Constructed");
         }
 

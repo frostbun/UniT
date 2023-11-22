@@ -5,6 +5,7 @@ namespace UniT.Audio
     using Cysharp.Threading.Tasks;
     using UniT.Assets;
     using UniT.Extensions;
+    using UniT.Initializables;
     using UniT.Logging;
     using UnityEngine;
     using UnityEngine.Scripting;
@@ -35,7 +36,7 @@ namespace UniT.Audio
             this.pooledSoundSources = new();
             this.loadedSoundSources = new();
 
-            this.logger = logger ?? ILogger.Default(this.GetType().Name);
+            this.logger = logger ?? ILogger.Default(this);
             this.logger.Debug("Constructed");
         }
 

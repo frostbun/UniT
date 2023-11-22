@@ -1,5 +1,5 @@
 #if UNIT_ZENJECT
-namespace UniT
+namespace Zenject
 {
     using System.Linq;
     using UniT.Advertisements;
@@ -12,9 +12,7 @@ namespace UniT
     using UniT.ObjectPool;
     using UniT.UI;
     using UnityEngine;
-    using Zenject;
     using ILogger = UniT.Logging.ILogger;
-    using SignalBus = UniT.Signal.SignalBus;
 
     public sealed class UniTInstaller : Installer<UniTInstaller>
     {

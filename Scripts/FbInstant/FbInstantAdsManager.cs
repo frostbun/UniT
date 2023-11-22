@@ -6,6 +6,7 @@ namespace UniT.Advertisements
     using System.Runtime.CompilerServices;
     using Cysharp.Threading.Tasks;
     using UniT.FbInstant;
+    using UniT.Initializables;
     using UniT.Logging;
     using UnityEngine;
     using UnityEngine.Scripting;
@@ -22,7 +23,7 @@ namespace UniT.Advertisements
         public FbInstantAdsManager(IFbInstantAdvertisementConfig config, ILogger logger = null)
         {
             this.config = config;
-            this.logger = logger ?? ILogger.Default(this.GetType().Name);
+            this.logger = logger ?? ILogger.Default(this);
             this.logger.Debug("Constructed");
         }
 

@@ -38,7 +38,7 @@ namespace UniT.Data
                 data => serializers.LastOrDefault(serializer => serializer.CanSerialize(data.GetType())) ?? throw new InvalidOperationException($"No serializer found for {data.GetType().Name}")
             ).AsReadOnly();
 
-            this.logger = logger ?? ILogger.Default(this.GetType().Name);
+            this.logger = logger ?? ILogger.Default(this);
             this.datas.Keys.ForEach(type => this.logger.Debug($"Found {type.Name} - {this.storages[type].GetType().Name} - {this.serializers[type].GetType().Name}"));
             this.logger.Debug("Constructed");
         }

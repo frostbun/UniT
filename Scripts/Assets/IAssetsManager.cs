@@ -4,7 +4,6 @@ namespace UniT.Assets
     using System.Threading;
     using Cysharp.Threading.Tasks;
     using UniT.Logging;
-    using UnityEngine;
 
     public interface IAssetsManager : IDisposable
     {
@@ -14,7 +13,7 @@ namespace UniT.Assets
 
         public UniTask<T> Load<T>(string key = null, IProgress<float> progress = null, CancellationToken cancellationToken = default);
 
-        public UniTask<T> LoadComponent<T>(string key = null, IProgress<float> progress = null, CancellationToken cancellationToken = default) where T : Component;
+        public UniTask<T> LoadComponent<T>(string key = null, IProgress<float> progress = null, CancellationToken cancellationToken = default);
 
         public void Unload(string key);
 

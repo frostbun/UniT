@@ -22,7 +22,7 @@ namespace UniT.Assets
         public ExternalAssetsManager(ILogger logger = null)
         {
             this.loadedAssets = new();
-            this.logger       = logger ?? ILogger.Default(this.GetType().Name);
+            this.logger       = logger ?? ILogger.Default(this);
             this.logger.Debug("Constructed");
         }
 

@@ -1,8 +1,7 @@
 #if UNIT_ZENJECT
-namespace UniT
+namespace Zenject
 {
     using UnityEngine;
-    using Zenject;
 
     public static class CurrentContext
     {

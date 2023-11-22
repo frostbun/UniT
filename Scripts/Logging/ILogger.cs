@@ -4,7 +4,7 @@ namespace UniT.Logging
 
     public interface ILogger
     {
-        public static Func<string, ILogger> Default { get; set; } = name => new UnityLogger(name);
+        public static Func<object, ILogger> Default { get; set; } = owner => new UnityLogger(owner.GetType().Name);
 
         public string Name { get; }
 

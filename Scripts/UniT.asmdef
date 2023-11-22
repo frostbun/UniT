@@ -8,6 +8,7 @@
     "UniTask.Addressables",
     "Zenject",
     "UniT.FbInstant",
+    "UniT.DI",
     "UniT.Extensions"
   ],
   "versionDefines": [
@@ -20,6 +21,11 @@
       "name": "com.frostbun.unit.fbinstant",
       "expression": "",
       "define": "UNIT_FBINSTANT"
+    },
+    {
+      "name": "com.frostbun.unit.di",
+      "expression": "",
+      "define": "UNIT_DI"
     }
   ]
 }

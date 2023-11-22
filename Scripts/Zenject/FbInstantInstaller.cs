@@ -1,10 +1,9 @@
 #if UNIT_ZENJECT && UNIT_FBINSTANT
-namespace UniT
+namespace Zenject
 {
     using UniT.Advertisements;
     using UniT.Data;
     using UniT.Data.Storages;
-    using Zenject;
 
     public sealed class FbInstantInstaller : Installer<FbInstantInstaller>
     {

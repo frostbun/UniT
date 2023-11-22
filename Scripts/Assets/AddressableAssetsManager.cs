@@ -23,7 +23,7 @@ namespace UniT.Assets
         public AddressableAssetsManager(ILogger logger = null)
         {
             this.loadedAssets = new();
-            this.logger       = logger ?? ILogger.Default(this.GetType().Name);
+            this.logger       = logger ?? ILogger.Default(this);
             this.logger.Debug("Constructed");
         }
 
@@ -63,7 +63,7 @@ namespace UniT.Assets
                 });
         }
 
-        public UniTask<T> LoadComponent<T>(string key = null, IProgress<float> progress = null, CancellationToken cancellationToken = default) where T : Component
+        public UniTask<T> LoadComponent<T>(string key = null, IProgress<float> progress = null, CancellationToken cancellationToken = default)
         {
             key ??= typeof(T).GetKey();
             return this.Load<GameObject>(key, progress, cancellationToken)

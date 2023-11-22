@@ -13,7 +13,7 @@ namespace UniT.Advertisements
         [Preserve]
         public DummyAdsManager(ILogger logger = null)
         {
-            this.logger = logger ?? ILogger.Default(this.GetType().Name);
+            this.logger = logger ?? ILogger.Default(this);
             this.logger.Debug("Constructed");
         }
 

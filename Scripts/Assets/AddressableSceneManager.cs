@@ -23,7 +23,7 @@
         public AddressableSceneManager(ILogger logger = null)
         {
             this.loadedScenes = new();
-            this.logger       = logger ?? ILogger.Default(this.GetType().Name);
+            this.logger       = logger ?? ILogger.Default(this);
             this.logger.Debug("Constructed");
         }
 
