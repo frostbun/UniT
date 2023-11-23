@@ -4,7 +4,7 @@ namespace UniT.Data.Converters
 
     public sealed class EnumConverter : BaseConverter
     {
-        protected override Type ConvertibleType => typeof(Enum);
+        protected override Type ConvertibleType { get; } = typeof(Enum);
 
         protected override object ConvertFromString(string str, Type type)
         {

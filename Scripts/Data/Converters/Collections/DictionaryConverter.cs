@@ -17,7 +17,7 @@ namespace UniT.Data.Converters
             this.separator = separator;
         }
 
-        protected override Type ConvertibleType => typeof(Dictionary<,>);
+        protected override Type ConvertibleType { get; } = typeof(Dictionary<,>);
 
         private static readonly Type ArrayType = typeof(string[]);
 

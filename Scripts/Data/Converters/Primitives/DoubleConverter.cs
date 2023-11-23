@@ -4,7 +4,7 @@ namespace UniT.Data.Converters
 
     public sealed class DoubleConverter : BaseConverter
     {
-        protected override Type ConvertibleType => typeof(double);
+        protected override Type ConvertibleType { get; } = typeof(double);
 
         protected override object ConvertFromString(string str, Type type)
         {

@@ -4,7 +4,7 @@ namespace UniT.Data.Converters
 
     public sealed class UInt64Converter : BaseConverter
     {
-        protected override Type ConvertibleType => typeof(ulong);
+        protected override Type ConvertibleType { get; } = typeof(ulong);
 
         protected override object ConvertFromString(string str, Type type)
         {

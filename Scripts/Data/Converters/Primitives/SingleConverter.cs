@@ -4,7 +4,7 @@ namespace UniT.Data.Converters
 
     public sealed class SingleConverter : BaseConverter
     {
-        protected override Type ConvertibleType => typeof(float);
+        protected override Type ConvertibleType { get; } = typeof(float);
 
         protected override object ConvertFromString(string str, Type type)
         {

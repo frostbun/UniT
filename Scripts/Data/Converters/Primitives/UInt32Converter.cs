@@ -4,7 +4,7 @@ namespace UniT.Data.Converters
 
     public sealed class UInt32Converter : BaseConverter
     {
-        protected override Type ConvertibleType => typeof(uint);
+        protected override Type ConvertibleType { get; } = typeof(uint);
 
         protected override object ConvertFromString(string str, Type type)
         {

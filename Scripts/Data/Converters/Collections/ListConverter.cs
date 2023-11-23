@@ -10,7 +10,7 @@ namespace UniT.Data.Converters
     /// </summary>
     public sealed class ListConverter : BaseConverter
     {
-        protected override Type ConvertibleType => typeof(List<>);
+        protected override Type ConvertibleType { get; } = typeof(List<>);
 
         protected override object ConvertFromString(string str, Type type)
         {

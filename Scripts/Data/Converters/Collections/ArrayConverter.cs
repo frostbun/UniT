@@ -12,7 +12,7 @@ namespace UniT.Data.Converters
             this.separator = separator;
         }
 
-        protected override Type ConvertibleType => typeof(Array);
+        protected override Type ConvertibleType { get; } = typeof(Array);
 
         protected override object ConvertFromString(string str, Type type)
         {

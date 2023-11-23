@@ -5,7 +5,7 @@ namespace UniT.Data.Converters
 
     public sealed class JsonConverter : BaseConverter
     {
-        protected override Type ConvertibleType => typeof(object);
+        protected override Type ConvertibleType { get; } = typeof(object);
 
         protected override object ConvertFromString(string str, Type type)
         {

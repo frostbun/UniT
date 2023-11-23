@@ -4,7 +4,7 @@ namespace UniT.Data.Converters
 
     public sealed class UriConverter : BaseConverter
     {
-        protected override Type ConvertibleType => typeof(Uri);
+        protected override Type ConvertibleType { get; } = typeof(Uri);
 
         protected override object ConvertFromString(string str, Type type)
         {

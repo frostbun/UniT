@@ -47,7 +47,7 @@ namespace UniT.UI.Item
 
         IPresenter IViewWithPresenter.Presenter { set => this.Presenter = (TPresenter)value; }
 
-        protected virtual Type PresenterType => typeof(TPresenter);
+        protected virtual Type PresenterType { get; } = typeof(TPresenter);
 
         protected TPresenter Presenter { get; private set; }
     }

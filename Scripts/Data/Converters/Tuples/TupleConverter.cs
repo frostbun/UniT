@@ -1,7 +1,6 @@
 namespace UniT.Data.Converters
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Runtime.CompilerServices;
     using UniT.Extensions;
@@ -15,7 +14,7 @@ namespace UniT.Data.Converters
             this.separator = separator;
         }
 
-        protected override Type ConvertibleType => typeof(ITuple);
+        protected override Type ConvertibleType { get; } = typeof(ITuple);
 
         protected override object ConvertFromString(string str, Type type)
         {
@@ -28,12 +27,7 @@ namespace UniT.Data.Converters
         {
             var tuple     = (ITuple)obj;
             var itemTypes = type.GetGenericArguments();
-            return string.Join(this.separator, IterTools.StrictZip(ToEnumerable(tuple), itemTypes, ConverterManager.Instance.ConvertToString));
-        }
-
-        private static IEnumerable<object> ToEnumerable(ITuple tuple)
-        {
-            for (var i = 0; i < tuple.Length; ++i) yield return tuple[i];
+            return string.Join(this.separator, IterTools.StrictZip(tuple.ToEnumerable(), itemTypes, ConverterManager.Instance.ConvertToString));
         }
     }
 }

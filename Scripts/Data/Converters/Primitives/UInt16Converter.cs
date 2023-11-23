@@ -4,7 +4,7 @@ namespace UniT.Data.Converters
 
     public sealed class UInt16Converter : BaseConverter
     {
-        protected override Type ConvertibleType => typeof(ushort);
+        protected override Type ConvertibleType { get; } = typeof(ushort);
 
         protected override object ConvertFromString(string str, Type type)
         {

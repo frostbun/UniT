@@ -4,7 +4,7 @@ namespace UniT.Data.Converters
 
     public sealed class BooleanConverter : BaseConverter
     {
-        protected override Type ConvertibleType => typeof(bool);
+        protected override Type ConvertibleType { get; } = typeof(bool);
 
         protected override object ConvertFromString(string str, Type type)
         {

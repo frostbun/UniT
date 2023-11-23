@@ -1,7 +1,6 @@
 namespace UniT.Data.Converters
 {
     using System;
-    using System.Runtime.CompilerServices;
     using UnityEngine;
 
     /// <summary>
@@ -9,14 +8,14 @@ namespace UniT.Data.Converters
     /// </summary>
     public sealed class Vector3Converter : BaseConverter
     {
-        protected override Type ConvertibleType => typeof(Vector3);
+        private static readonly Type TupleType = typeof((float, float, float));
 
-        private static readonly Type TupleType = typeof(ValueTuple<float, float, float>);
+        protected override Type ConvertibleType { get; } = typeof(Vector3);
 
         protected override object ConvertFromString(string str, Type type)
         {
-            var tuple = (ITuple)ConverterManager.Instance.ConvertFromString(str, TupleType);
-            return new Vector3((float)tuple[0], (float)tuple[1], (float)tuple[2]);
+            var tuple = ((float, float, float))ConverterManager.Instance.ConvertFromString(str, TupleType);
+            return new Vector3(tuple.Item1, tuple.Item2, tuple.Item3);
         }
 
         protected override string ConvertToString(object obj, Type type)

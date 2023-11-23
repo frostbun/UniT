@@ -53,7 +53,7 @@ namespace UniT.Data.Converters
             this.AddConverter(new ArrayConverter());
             this.AddConverter(new ListConverter());               // Depend on ArrayConverter
             this.AddConverter(new DictionaryConverter());         // Depend on ArrayConverter
-            this.AddConverter(new ReadOnlyCollectionConverter()); // Depend on ListConverter
+            this.AddConverter(new ReadOnlyCollectionConverter()); // Depend on ArrayConverter
             this.AddConverter(new ReadOnlyDictionaryConverter()); // Depend on DictionaryConverter
 
             #endregion

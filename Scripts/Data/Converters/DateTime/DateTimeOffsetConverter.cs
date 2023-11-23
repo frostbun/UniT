@@ -14,7 +14,7 @@ namespace UniT.Data.Converters
             this.cultureInfo = cultureInfo ?? CultureInfo.InvariantCulture;
         }
 
-        protected override Type ConvertibleType => typeof(DateTime);
+        protected override Type ConvertibleType { get; } = typeof(DateTime);
 
         protected override object ConvertFromString(string str, Type type)
         {

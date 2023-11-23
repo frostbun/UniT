@@ -9,10 +9,11 @@ namespace UniT.EMC
     using UniT.EMC.Controller;
     using UniT.Extensions;
     using UnityEngine;
+    using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;
     using Object = UnityEngine.Object;
 
-    public class EntityManager : IEntityManager
+    public sealed class EntityManager : IEntityManager
     {
         #region Constructor
 
@@ -24,6 +25,7 @@ namespace UniT.EMC
         private readonly Dictionary<IEntity, EntityPool>    entityToPool;
         private readonly Dictionary<Type, HashSet<IEntity>> interfaceToEntities;
 
+        [Preserve]
         public EntityManager(IController.IFactory controllerFactory = null, IAssetsManager assetsManager = null, ILogger logger = null)
         {
             this.controllerFactory = controllerFactory ?? IController.IFactory.Default();

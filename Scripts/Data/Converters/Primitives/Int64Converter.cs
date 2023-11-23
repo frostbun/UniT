@@ -4,7 +4,7 @@ namespace UniT.Data.Converters
 
     public sealed class Int64Converter : BaseConverter
     {
-        protected override Type ConvertibleType => typeof(long);
+        protected override Type ConvertibleType { get; } = typeof(long);
 
         protected override object ConvertFromString(string str, Type type)
         {

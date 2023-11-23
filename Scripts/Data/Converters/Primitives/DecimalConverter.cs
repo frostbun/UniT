@@ -4,7 +4,7 @@ namespace UniT.Data.Converters
 
     public sealed class DecimalConverter : BaseConverter
     {
-        protected override Type ConvertibleType => typeof(decimal);
+        protected override Type ConvertibleType { get; } = typeof(decimal);
 
         protected override object ConvertFromString(string str, Type type)
         {

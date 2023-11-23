@@ -9,7 +9,7 @@ namespace UniT.Data.Converters
     /// </summary>
     public sealed class ReadOnlyDictionaryConverter : BaseConverter
     {
-        protected override Type ConvertibleType => typeof(ReadOnlyDictionary<,>);
+        protected override Type ConvertibleType { get; } = typeof(ReadOnlyDictionary<,>);
 
         protected override object ConvertFromString(string str, Type type)
         {
