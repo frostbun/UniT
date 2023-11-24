@@ -19,7 +19,7 @@
         protected AssetsManager(ILogger logger = null)
         {
             this.cache  = new();
-            this.logger = logger ?? ILogger.Default(this);
+            this.logger = logger ?? ILogger.Default(this.GetType().Name);
             this.logger.Debug("Constructed");
         }
 

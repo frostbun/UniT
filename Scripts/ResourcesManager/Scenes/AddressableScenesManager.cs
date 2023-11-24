@@ -1,4 +1,5 @@
-﻿namespace UniT.ResourcesManager
+﻿#if UNIT_ADDRESSABLES
+namespace UniT.ResourcesManager
 {
     using System;
     using System.Collections.Generic;
@@ -21,7 +22,7 @@
         [Preserve]
         public AddressableScenesManager(ILogger logger = null)
         {
-            this.logger = logger ?? ILogger.Default(this);
+            this.logger = logger ?? ILogger.Default(nameof(AddressableScenesManager));
             this.logger.Debug("Constructed");
         }
 
@@ -43,3 +44,4 @@
         }
     }
 }
+#endif

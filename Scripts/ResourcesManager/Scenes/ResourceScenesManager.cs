@@ -16,7 +16,7 @@
         [Preserve]
         public ResourceScenesManager(ILogger logger = null)
         {
-            this.logger = logger ?? ILogger.Default(this);
+            this.logger = logger ?? ILogger.Default(nameof(ResourceScenesManager));
             this.logger.Debug("Constructed");
         }
 

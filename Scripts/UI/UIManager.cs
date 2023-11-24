@@ -33,7 +33,7 @@ namespace UniT.UI
         {
             this.presenterFactory = presenterFactory ?? IPresenter.Factory.Default();
             this.assetsManager    = assetsManager ?? IAssetsManager.Default();
-            this.logger           = logger ?? ILogger.Default(this);
+            this.logger           = logger ?? ILogger.Default(nameof(UIManager));
             this.logger.Debug("Constructed");
             return this.DontDestroyOnLoad();
         }
@@ -96,7 +96,7 @@ namespace UniT.UI
             key ??= typeof(TActivity).GetKey();
             return this.activities.GetOrAddAsync(
                 typeof(TActivity),
-                () => this.assetsManager.LoadComponent<TActivity>(key).ContinueWith(activityPrefab =>
+                () => this.assetsManager.LoadComponentAsync<TActivity>(key).ContinueWith(activityPrefab =>
                 {
                     this.keys.Add(typeof(TActivity), key);
                     return (IActivity)this.Initialize(Instantiate(activityPrefab, this.hiddenActivities, false));

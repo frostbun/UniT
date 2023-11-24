@@ -13,6 +13,16 @@
   ],
   "versionDefines": [
     {
+      "name": "com.cysharp.unitask",
+      "expression": "",
+      "define": "UNIT_UNITASK"
+    },
+    {
+      "name": "com.unity.addressables",
+      "expression": "",
+      "define": "UNIT_ADDRESSABLES"
+    },
+    {
       "name": "com.modesttree.zenject",
       "expression": "",
       "define": "UNIT_ZENJECT"

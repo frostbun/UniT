@@ -6,9 +6,17 @@ namespace UniT.Data.Serializers
 
     public sealed class JsonSerializer : ISerializer
     {
+        private readonly JsonSerializerSettings settings;
+
         [Preserve]
-        public JsonSerializer()
+        public JsonSerializer(JsonSerializerSettings settings = null)
         {
+            this.settings = settings
+                ?? new JsonSerializerSettings
+                {
+                    TypeNameHandling      = TypeNameHandling.Auto,
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                };
         }
 
         public bool CanSerialize(Type type)
@@ -18,12 +26,12 @@ namespace UniT.Data.Serializers
 
         public void Populate(object data, string rawData)
         {
-            JsonConvert.PopulateObject(rawData, data);
+            JsonConvert.PopulateObject(rawData, data, this.settings);
         }
 
         public string Serialize(object data)
         {
-            return JsonConvert.SerializeObject(data);
+            return JsonConvert.SerializeObject(data, this.settings);
         }
     }
 }

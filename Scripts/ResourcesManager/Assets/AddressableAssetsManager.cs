@@ -1,3 +1,4 @@
+#if UNIT_ADDRESSABLES
 namespace UniT.ResourcesManager
 {
     using System;
@@ -31,3 +32,4 @@ namespace UniT.ResourcesManager
         }
     }
 }
+#endif

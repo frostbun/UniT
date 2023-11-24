@@ -11,11 +11,9 @@
     "url": "https://github.com/frostbun"
   },
   "dependencies": {
-    "com.unity.addressables": "1.21.17",
     "com.unity.nuget.newtonsoft-json": "3.2.1"
   },
   "gitDependencies": {
-    "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
     "com.frostbun.unit.extensions": "https://github.com/frostbun/UniT.Extensions.git"
   }
 }

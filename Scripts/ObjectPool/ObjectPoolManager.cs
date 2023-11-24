@@ -32,7 +32,7 @@ namespace UniT.ObjectPool
             this.keyToPool      = new();
             this.instanceToPool = new();
             this.recyclables    = new();
-            this.logger         = logger ?? ILogger.Default(this);
+            this.logger         = logger ?? ILogger.Default(nameof(ObjectPoolManager));
             this.logger.Debug("Constructed");
         }
 

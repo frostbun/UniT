@@ -46,7 +46,7 @@ namespace UniT.EMC
             return this.keyToPool
                 .GetOrAddAsync(key, () =>
                     this.assetsManager
-                        .LoadComponent<IEntity>(key)
+                        .LoadComponentAsync<IEntity>(key)
                         .ContinueWith(prefab => new EntityPool(prefab, this))
                 )
                 .ContinueWith(pool => pool.Load(count));

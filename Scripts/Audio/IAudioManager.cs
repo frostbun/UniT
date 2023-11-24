@@ -12,7 +12,11 @@ namespace UniT.Audio
 
         public string CurrentMusic { get; }
 
-        public UniTask LoadSounds(params string[] names);
+        #region Sound
+
+        public void LoadSounds(params string[] names);
+
+        public UniTask LoadSoundsAsync(params string[] names);
 
         public void UnloadSounds(params string[] names);
 
@@ -26,7 +30,13 @@ namespace UniT.Audio
 
         public void StopAllSounds();
 
-        public UniTask LoadMusic(string name);
+        #endregion
+
+        #region Music
+
+        public void LoadMusic(string name);
+
+        public UniTask LoadMusicAsync(string name);
 
         public void UnloadMusic();
 
@@ -37,5 +47,7 @@ namespace UniT.Audio
         public void ResumeMusic();
 
         public void StopMusic();
+
+        #endregion
     }
 }

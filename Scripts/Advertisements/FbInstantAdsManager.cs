@@ -23,7 +23,7 @@ namespace UniT.Advertisements
         public FbInstantAdsManager(IFbInstantAdvertisementConfig config, ILogger logger = null)
         {
             this.config = config;
-            this.logger = logger ?? ILogger.Default(this);
+            this.logger = logger ?? ILogger.Default(nameof(FbInstantAdsManager));
             this.logger.Debug("Constructed");
         }
 
