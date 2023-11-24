@@ -5,7 +5,7 @@ namespace UniT.Data.Converters
     using System.Runtime.CompilerServices;
     using UniT.Extensions;
 
-    public sealed class TupleConverter : BaseConverter
+    public sealed class TupleConverter : Converter<ITuple>
     {
         private readonly string separator;
 
@@ -13,8 +13,6 @@ namespace UniT.Data.Converters
         {
             this.separator = separator;
         }
-
-        protected override Type ConvertibleType { get; } = typeof(ITuple);
 
         protected override object ConvertFromString(string str, Type type)
         {

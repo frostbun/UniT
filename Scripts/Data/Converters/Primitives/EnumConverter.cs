@@ -2,18 +2,11 @@ namespace UniT.Data.Converters
 {
     using System;
 
-    public sealed class EnumConverter : BaseConverter
+    public sealed class EnumConverter : PrimitiveConverter<Enum>
     {
-        protected override Type ConvertibleType { get; } = typeof(Enum);
-
         protected override object ConvertFromString(string str, Type type)
         {
             return Enum.Parse(type, str);
-        }
-
-        protected override string ConvertToString(object obj, Type type)
-        {
-            return obj.ToString();
         }
     }
 }

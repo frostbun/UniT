@@ -7,7 +7,7 @@ namespace UniT.Data.Converters
     /// <summary>
     ///     Depends on <see cref="DictionaryConverter"/>
     /// </summary>
-    public sealed class ReadOnlyDictionaryConverter : BaseConverter
+    public sealed class ReadOnlyDictionaryConverter : Converter
     {
         protected override Type ConvertibleType { get; } = typeof(ReadOnlyDictionary<,>);
 

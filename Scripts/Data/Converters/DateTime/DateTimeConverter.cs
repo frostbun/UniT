@@ -3,7 +3,7 @@ namespace UniT.Data.Converters
     using System;
     using System.Globalization;
 
-    public sealed class DateTimeConverter : BaseConverter
+    public sealed class DateTimeConverter : Converter<DateTime>
     {
         private readonly string      format;
         private readonly CultureInfo cultureInfo;
@@ -13,8 +13,6 @@ namespace UniT.Data.Converters
             this.format      = format;
             this.cultureInfo = cultureInfo ?? CultureInfo.InvariantCulture;
         }
-
-        protected override Type ConvertibleType { get; } = typeof(DateTime);
 
         protected override object ConvertFromString(string str, Type type)
         {

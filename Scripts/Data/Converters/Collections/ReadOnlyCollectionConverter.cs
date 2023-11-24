@@ -7,7 +7,7 @@ namespace UniT.Data.Converters
     /// <summary>
     ///     Depends on <see cref="ArrayConverter"/>
     /// </summary>
-    public sealed class ReadOnlyCollectionConverter : BaseConverter
+    public sealed class ReadOnlyCollectionConverter : Converter
     {
         protected override Type ConvertibleType { get; } = typeof(ReadOnlyCollection<>);
 

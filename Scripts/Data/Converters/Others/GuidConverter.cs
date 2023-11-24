@@ -2,10 +2,8 @@ namespace UniT.Data.Converters
 {
     using System;
 
-    public sealed class GuidConverter : BaseConverter
+    public sealed class GuidConverter : Converter<Guid>
     {
-        protected override Type ConvertibleType { get; } = typeof(Guid);
-
         protected override object ConvertFromString(string str, Type type)
         {
             return new Guid(str);

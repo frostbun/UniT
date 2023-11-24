@@ -6,11 +6,9 @@ namespace UniT.Data.Converters
     /// <summary>
     ///     Depends on <see cref="TupleConverter"/>
     /// </summary>
-    public sealed class Vector2Converter : BaseConverter
+    public sealed class Vector2Converter : Converter<Vector2>
     {
         private static readonly Type TupleType = typeof((float, float));
-
-        protected override Type ConvertibleType { get; } = typeof(Vector2);
 
         protected override object ConvertFromString(string str, Type type)
         {

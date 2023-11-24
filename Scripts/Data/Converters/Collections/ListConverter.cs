@@ -8,7 +8,7 @@ namespace UniT.Data.Converters
     /// <summary>
     ///     Depends on <see cref="ArrayConverter"/>
     /// </summary>
-    public sealed class ListConverter : BaseConverter
+    public sealed class ListConverter : Converter
     {
         protected override Type ConvertibleType { get; } = typeof(List<>);
 

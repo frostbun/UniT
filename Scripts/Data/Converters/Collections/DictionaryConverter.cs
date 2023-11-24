@@ -8,7 +8,7 @@ namespace UniT.Data.Converters
     /// <summary>
     ///     Depends on <see cref="ArrayConverter"/>
     /// </summary>
-    public sealed class DictionaryConverter : BaseConverter
+    public sealed class DictionaryConverter : Converter
     {
         private readonly string separator;
 

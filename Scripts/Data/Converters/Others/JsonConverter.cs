@@ -3,10 +3,8 @@ namespace UniT.Data.Converters
     using System;
     using Newtonsoft.Json;
 
-    public sealed class JsonConverter : BaseConverter
+    public sealed class JsonConverter : Converter<object>
     {
-        protected override Type ConvertibleType { get; } = typeof(object);
-
         protected override object ConvertFromString(string str, Type type)
         {
             return JsonConvert.DeserializeObject(str, type);

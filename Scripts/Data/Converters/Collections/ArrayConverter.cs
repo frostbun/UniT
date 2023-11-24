@@ -3,7 +3,7 @@ namespace UniT.Data.Converters
     using System;
     using System.Linq;
 
-    public sealed class ArrayConverter : BaseConverter
+    public sealed class ArrayConverter : Converter<Array>
     {
         private readonly string separator;
 
@@ -12,11 +12,9 @@ namespace UniT.Data.Converters
             this.separator = separator;
         }
 
-        protected override Type ConvertibleType { get; } = typeof(Array);
-
         protected override object ConvertFromString(string str, Type type)
         {
-            var elementType      = type.GetElementType();
+            var elementType      = type.GetElementType()!;
             var elementConverter = ConverterManager.Instance.GetConverter(elementType);
             var elements         = str.Split(this.separator);
             var array            = Array.CreateInstance(elementType, elements.Length);

@@ -3,7 +3,7 @@ namespace UniT.Data.Converters
     using System;
     using UniT.Extensions;
 
-    public abstract class BaseConverter : IConverter
+    public abstract class Converter : IConverter
     {
         bool IConverter.CanConvert(Type type) => type.DerivesFrom(this.ConvertibleType);
 
@@ -36,5 +36,10 @@ namespace UniT.Data.Converters
         protected abstract object ConvertFromString(string str, Type type);
 
         protected abstract string ConvertToString(object obj, Type type);
+    }
+
+    public abstract class Converter<T> : Converter
+    {
+        protected sealed override Type ConvertibleType { get; } = typeof(T);
     }
 }
