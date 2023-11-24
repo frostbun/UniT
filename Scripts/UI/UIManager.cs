@@ -4,9 +4,9 @@ namespace UniT.UI
     using System.Collections.Generic;
     using System.Linq;
     using Cysharp.Threading.Tasks;
-    using UniT.Assets;
     using UniT.Extensions;
     using UniT.Logging;
+    using UniT.ResourcesManager;
     using UniT.UI.Activity;
     using UnityEngine;
     using UnityEngine.Scripting;

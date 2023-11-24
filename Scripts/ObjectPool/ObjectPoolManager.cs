@@ -3,9 +3,9 @@ namespace UniT.ObjectPool
     using System;
     using System.Collections.Generic;
     using Cysharp.Threading.Tasks;
-    using UniT.Assets;
     using UniT.Extensions;
     using UniT.Logging;
+    using UniT.ResourcesManager;
     using UnityEngine;
     using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;
@@ -73,7 +73,7 @@ namespace UniT.ObjectPool
 
         public UniTask InstantiatePool(string key, int initialCount = 1)
         {
-            return this.keyToPool.TryAddAsync(key, () => this.assetsManager.Load<GameObject>(key).ContinueWith(prefab => this.InstantiatePool_Internal(prefab, initialCount)))
+            return this.keyToPool.TryAddAsync(key, () => this.assetsManager.LoadAsync<GameObject>(key).ContinueWith(prefab => this.InstantiatePool_Internal(prefab, initialCount)))
                 .ContinueWith(isSuccess =>
                 {
                     if (isSuccess) return;

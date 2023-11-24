@@ -3,10 +3,10 @@ namespace UniT.Audio
     using System.Collections.Generic;
     using System.Linq;
     using Cysharp.Threading.Tasks;
-    using UniT.Assets;
     using UniT.Extensions;
     using UniT.Initializables;
     using UniT.Logging;
+    using UniT.ResourcesManager;
     using UnityEngine;
     using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;
@@ -152,7 +152,7 @@ namespace UniT.Audio
         public UniTask LoadMusic(string name)
         {
             if (this.CurrentMusic == name) return UniTask.CompletedTask;
-            return this.assetsManager.Load<AudioClip>(name).ContinueWith(audioClip =>
+            return this.assetsManager.LoadAsync<AudioClip>(name).ContinueWith(audioClip =>
             {
                 if (this.CurrentMusic == name) return; // Another load request was made while this one was loading
                 if (this.CurrentMusic != null) this.assetsManager.Unload(this.CurrentMusic);
@@ -203,7 +203,7 @@ namespace UniT.Audio
         {
             return this.loadedSoundSources.GetOrAddAsync(name, () =>
             {
-                return this.assetsManager.Load<AudioClip>(name).ContinueWith(audioClip =>
+                return this.assetsManager.LoadAsync<AudioClip>(name).ContinueWith(audioClip =>
                 {
                     var soundSource = this.pooledSoundSources.DequeueOrDefault(() =>
                     {

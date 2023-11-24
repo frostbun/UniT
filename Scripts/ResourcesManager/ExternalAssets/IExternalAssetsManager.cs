@@ -1,4 +1,4 @@
-namespace UniT.Assets
+namespace UniT.ResourcesManager
 {
     using System;
     using System.Threading;

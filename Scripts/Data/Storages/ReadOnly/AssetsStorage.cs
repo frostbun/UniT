@@ -1,7 +1,7 @@
 namespace UniT.Data.Storages
 {
     using Cysharp.Threading.Tasks;
-    using UniT.Assets;
+    using UniT.ResourcesManager;
     using UnityEngine;
     using UnityEngine.Scripting;
 
@@ -18,7 +18,7 @@ namespace UniT.Data.Storages
         protected override UniTask<string[]> Load(string[] keys)
         {
             return UniTask.WhenAll(keys.Select(key =>
-                this.assetsManager.Load<TextAsset>(key).ContinueWith(asset =>
+                this.assetsManager.LoadAsync<TextAsset>(key).ContinueWith(asset =>
                 {
                     var text = asset.text;
                     this.assetsManager.Unload(key);

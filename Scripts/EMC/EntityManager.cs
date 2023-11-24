@@ -5,9 +5,9 @@ namespace UniT.EMC
     using System.Collections.ObjectModel;
     using System.Linq;
     using Cysharp.Threading.Tasks;
-    using UniT.Assets;
     using UniT.EMC.Controller;
     using UniT.Extensions;
+    using UniT.ResourcesManager;
     using UnityEngine;
     using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;
