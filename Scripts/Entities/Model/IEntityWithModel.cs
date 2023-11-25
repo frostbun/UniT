@@ -1,4 +1,4 @@
-namespace UniT.EMC.Model
+namespace UniT.Entities.Model
 {
     public interface IEntityWithModel<in TModel> : IEntity
     {

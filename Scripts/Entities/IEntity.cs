@@ -1,4 +1,4 @@
-namespace UniT.EMC
+namespace UniT.Entities
 {
     using System.Threading;
     using UnityEngine;
@@ -8,8 +8,6 @@ namespace UniT.EMC
         public IEntityManager Manager { get; set; }
 
         public bool IsDestroyed { get; }
-
-        public CancellationToken GetCancellationTokenOnRecycle();
 
         public void OnInstantiate();
 
@@ -29,6 +27,11 @@ namespace UniT.EMC
         public static void Recycle(this IEntity entity)
         {
             entity.Manager.Recycle(entity);
+        }
+
+        public static CancellationToken GetCancellationTokenOnRecycle(this IEntity entity)
+        {
+            return entity.Manager.GetCancellationTokenOnRecycle(entity);
         }
     }
 }

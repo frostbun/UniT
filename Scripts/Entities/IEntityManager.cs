@@ -1,20 +1,30 @@
-namespace UniT.EMC
+namespace UniT.Entities
 {
     using System;
     using System.Collections.Generic;
-    using Cysharp.Threading.Tasks;
-    using UniT.EMC.Model;
-    using UniT;
+    using UniT.Entities.Model;
     using UniT.Extensions;
     using UnityEngine;
+    #if UNIT_UNITASK
+    using System.Threading;
+    using Cysharp.Threading.Tasks;
+    #endif
 
     public interface IEntityManager : IDisposable
     {
-        public UniTask Load(string key, int count = 1);
+        public void Load(string key, int count = 1);
+
+        #if UNIT_UNITASK
+        public UniTask LoadAsync(string key, int count = 1, IProgress<float> progress = null, CancellationToken cancellationToken = default);
+        #endif
 
         public TEntity Spawn<TEntity>(string key, Vector3 position = default, Quaternion rotation = default, Transform parent = null) where TEntity : IEntityWithoutModel;
 
         public TEntity Spawn<TEntity, TModel>(string key, TModel model, Vector3 position = default, Quaternion rotation = default, Transform parent = null) where TEntity : IEntityWithModel<TModel>;
+
+        #if UNIT_UNITASK
+        public CancellationToken GetCancellationTokenOnRecycle(IEntity entity);
+        #endif
 
         public void Recycle(IEntity entity);
 
@@ -26,7 +36,11 @@ namespace UniT.EMC
 
         #region Implicit Key
 
-        public UniTask Load<TEntity>(int count = 1) where TEntity : IEntity => this.Load(typeof(TEntity).GetKey(), count);
+        public void Load<TEntity>(int count = 1) where TEntity : IEntity => this.Load(typeof(TEntity).GetKey(), count);
+
+        #if UNIT_UNITASK
+        public UniTask LoadAsync<TEntity>(int count = 1, IProgress<float> progress = null, CancellationToken cancellationToken = default) where TEntity : IEntity => this.LoadAsync(typeof(TEntity).GetKey(), count, progress, cancellationToken);
+        #endif
 
         public TEntity Spawn<TEntity>(Vector3 position = default, Quaternion rotation = default, Transform parent = null) where TEntity : IEntityWithoutModel => this.Spawn<TEntity>(typeof(TEntity).GetKey(), position, rotation, parent);
 

@@ -1,4 +1,4 @@
-namespace UniT.EMC.Controller
+namespace UniT.Entities.Controller
 {
     using System;
     using UniT.Factories;
@@ -10,6 +10,6 @@ namespace UniT.EMC.Controller
             public static Func<IFactory> Default { get; set; } = () => new ControllerFactory();
         }
 
-        public IHasController Component { set; }
+        public IHasController Owner { set; }
     }
 }

@@ -1,17 +1,20 @@
-namespace UniT.EMC
+namespace UniT.Entities
 {
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
-    using Cysharp.Threading.Tasks;
-    using UniT.EMC.Controller;
+    using UniT.Entities.Controller;
     using UniT.Extensions;
     using UniT.ResourcesManager;
     using UnityEngine;
     using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;
     using Object = UnityEngine.Object;
+    #if UNIT_UNITASK
+    using System.Threading;
+    using Cysharp.Threading.Tasks;
+    #endif
 
     public sealed class EntityManager : IEntityManager
     {
@@ -21,36 +24,49 @@ namespace UniT.EMC
         private readonly IAssetsManager       assetsManager;
         private readonly ILogger              logger;
 
-        private readonly Dictionary<string, EntityPool>     keyToPool;
-        private readonly Dictionary<IEntity, EntityPool>    entityToPool;
-        private readonly Dictionary<Type, HashSet<IEntity>> interfaceToEntities;
+        private readonly Dictionary<string, EntityPool>               keyToPool;
+        private readonly Dictionary<IEntity, EntityPool>              entityToPool;
+        private readonly Dictionary<IEntity, CancellationTokenSource> entityToCts;
+        private readonly Dictionary<Type, HashSet<IEntity>>           interfaceToEntities;
 
         [Preserve]
         public EntityManager(IController.IFactory controllerFactory = null, IAssetsManager assetsManager = null, ILogger logger = null)
         {
             this.controllerFactory = controllerFactory ?? IController.IFactory.Default();
             this.assetsManager     = assetsManager ?? IAssetsManager.Default();
-            this.logger            = logger ?? ILogger.Default(this);
 
             this.keyToPool           = new();
             this.entityToPool        = new();
+            this.entityToCts         = new();
             this.interfaceToEntities = new();
+
+            this.logger = logger ?? ILogger.Default(nameof(EntityManager));
+            this.logger.Debug("Constructed");
         }
 
         #endregion
 
         #region Pooling
 
-        UniTask IEntityManager.Load(string key, int count)
+        void IEntityManager.Load(string key, int count)
+        {
+            this.keyToPool
+                .GetOrAdd(key, () => new(this.assetsManager.LoadComponent<IEntity>(key), this))
+                .Load(count);
+        }
+
+        #if UNIT_UNITASK
+        UniTask IEntityManager.LoadAsync(string key, int count, IProgress<float> progress, CancellationToken cancellationToken)
         {
             return this.keyToPool
                 .GetOrAddAsync(key, () =>
                     this.assetsManager
-                        .LoadComponentAsync<IEntity>(key)
+                        .LoadComponentAsync<IEntity>(key, progress, cancellationToken)
                         .ContinueWith(prefab => new EntityPool(prefab, this))
                 )
                 .ContinueWith(pool => pool.Load(count));
         }
+        #endif
 
         TEntity IEntityManager.Spawn<TEntity>(string key, Vector3 position, Quaternion rotation, Transform parent)
         {
@@ -65,6 +81,11 @@ namespace UniT.EMC
             entity.Model = model;
             entity.OnSpawn();
             return entity;
+        }
+
+        CancellationToken IEntityManager.GetCancellationTokenOnRecycle(IEntity entity)
+        {
+            return this.entityToCts.GetOrAdd(entity, () => new()).Token;
         }
 
         void IEntityManager.Recycle(IEntity entity)
@@ -120,6 +141,11 @@ namespace UniT.EMC
 
             public void Recycle(IEntity entity)
             {
+                if (this.manager.entityToCts.Remove(entity, out var cts))
+                {
+                    cts.Cancel();
+                    cts.Dispose();
+                }
                 entity.OnRecycle();
                 this.interfaces.ForEach(@interface => this.manager.Unregister(@interface, entity));
                 this.manager.entityToPool.Remove(entity);
@@ -186,15 +212,26 @@ namespace UniT.EMC
 
         private void Unload(string key)
         {
-            this.keyToPool.RemoveOrDefault(key)?.Dispose();
+            this.keyToPool.RemoveOrDefault(key).Dispose();
             this.assetsManager.Unload(key);
         }
 
-        private void Dispose() => this.keyToPool.Keys.SafeForEach(this.Unload);
+        private void Dispose()
+        {
+            this.keyToPool.Keys.SafeForEach(this.Unload);
+        }
 
-        void IDisposable.Dispose() => this.Dispose();
+        void IDisposable.Dispose()
+        {
+            this.Dispose();
+            this.logger.Debug("Disposed");
+        }
 
-        ~EntityManager() => this.Dispose();
+        ~EntityManager()
+        {
+            this.Dispose();
+            this.logger.Debug("Finalized");
+        }
 
         #endregion
     }

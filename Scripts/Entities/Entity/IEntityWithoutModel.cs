@@ -1,4 +1,4 @@
-namespace UniT.EMC
+namespace UniT.Entities
 {
     public interface IEntityWithoutModel : IEntity
     {

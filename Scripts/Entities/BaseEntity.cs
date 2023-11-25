@@ -1,9 +1,8 @@
-namespace UniT.EMC
+﻿namespace UniT.Entities
 {
-    using System.Threading;
     using UnityEngine;
 
-    public abstract class Entity : MonoBehaviour, IEntityWithoutModel
+    public abstract class BaseEntity : MonoBehaviour, IEntity
     {
         IEntityManager IEntity.Manager { get => this.Manager; set => this.Manager = value; }
 
@@ -17,24 +16,11 @@ namespace UniT.EMC
 
         void IEntity.OnSpawn() => this.OnSpawn();
 
-        void IEntity.OnRecycle()
-        {
-            this.recycleCts?.Cancel();
-            this.recycleCts?.Dispose();
-            this.recycleCts = null;
-            this.OnRecycle();
-        }
+        void IEntity.OnRecycle() => this.OnRecycle();
 
-        public IEntityManager Manager { get; private set; }
+        protected IEntityManager Manager { get; private set; }
 
         public new Transform transform { get; private set; }
-
-        private CancellationTokenSource recycleCts;
-
-        public CancellationToken GetCancellationTokenOnRecycle()
-        {
-            return (this.recycleCts ??= new()).Token;
-        }
 
         protected virtual void OnInstantiate()
         {

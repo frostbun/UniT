@@ -1,4 +1,4 @@
-namespace UniT.EMC.Controller
+namespace UniT.Entities.Controller
 {
     using System;
 
