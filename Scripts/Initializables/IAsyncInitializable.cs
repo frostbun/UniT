@@ -1,3 +1,4 @@
+#if UNIT_UNITASK
 namespace UniT.Initializables
 {
     using Cysharp.Threading.Tasks;
@@ -17,3 +18,4 @@ namespace UniT.Initializables
         public UniTask InitializeAsync();
     }
 }
+#endif

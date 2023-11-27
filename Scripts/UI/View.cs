@@ -3,7 +3,7 @@ namespace UniT.UI
     using System;
     using UnityEngine;
 
-    public abstract class BaseView : MonoBehaviour, IView
+    public abstract class View : MonoBehaviour, IView
     {
         IUIManager IView.Manager { get => this.Manager; set => this.Manager = value; }
 
@@ -16,11 +16,11 @@ namespace UniT.UI
         }
     }
 
-    public abstract class BaseView<TPresenter> : BaseView, IViewWithPresenter where TPresenter : IPresenter
+    public abstract class View<TPresenter> : View, IHasPresenter where TPresenter : IPresenter
     {
-        Type IViewWithPresenter.PresenterType => this.PresenterType;
+        Type IHasPresenter.PresenterType => this.PresenterType;
 
-        IPresenter IViewWithPresenter.Presenter { set => this.Presenter = (TPresenter)value; }
+        IPresenter IHasPresenter.Presenter { set => this.Presenter = (TPresenter)value; }
 
         protected virtual Type PresenterType { get; } = typeof(TPresenter);
 

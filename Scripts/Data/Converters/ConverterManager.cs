@@ -19,7 +19,9 @@ namespace UniT.Data.Converters
 
         private ConverterManager()
         {
+            #if UNIT_NEWTONSOFT_JSON
             this.AddConverter(new JsonConverter()); // Default converter
+            #endif
 
             #region Primitives
 

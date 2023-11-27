@@ -1,17 +1,15 @@
 ﻿#if UNIT_ADDRESSABLES
 namespace UniT.ResourcesManager
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading;
-    using Cysharp.Threading.Tasks;
-    using UniT.Extensions;
     using UniT.Logging;
     using UnityEngine.AddressableAssets;
-    using UnityEngine.ResourceManagement.AsyncOperations;
-    using UnityEngine.ResourceManagement.ResourceProviders;
     using UnityEngine.SceneManagement;
     using UnityEngine.Scripting;
+    #if UNIT_UNITASK
+    using System;
+    using System.Threading;
+    using Cysharp.Threading.Tasks;
+    #endif
 
     public sealed class AddressableScenesManager : IScenesManager
     {
@@ -20,9 +18,9 @@ namespace UniT.ResourcesManager
         private readonly ILogger logger;
 
         [Preserve]
-        public AddressableScenesManager(ILogger logger = null)
+        public AddressableScenesManager(ILogger logger)
         {
-            this.logger = logger ?? ILogger.Default(nameof(AddressableScenesManager));
+            this.logger = logger;
             this.logger.Debug("Constructed");
         }
 
@@ -36,12 +34,14 @@ namespace UniT.ResourcesManager
             this.logger.Debug($"Loaded {sceneName}");
         }
 
+        #if UNIT_UNITASK
         UniTask IScenesManager.LoadSceneAsync(string sceneName, LoadSceneMode loadMode, IProgress<float> progress, CancellationToken cancellationToken)
         {
             return Addressables.LoadSceneAsync(sceneName, loadMode)
                 .ToUniTask(progress: progress, cancellationToken: cancellationToken)
                 .ContinueWith(_ => this.logger.Debug($"Loaded {sceneName}"));
         }
+        #endif
     }
 }
 #endif

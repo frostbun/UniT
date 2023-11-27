@@ -1,3 +1,4 @@
+#if UNIT_NEWTONSOFT_JSON
 namespace UniT.Data.Serializers
 {
     using System;
@@ -35,3 +36,4 @@ namespace UniT.Data.Serializers
         }
     }
 }
+#endif

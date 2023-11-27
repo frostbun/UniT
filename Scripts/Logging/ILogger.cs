@@ -4,8 +4,6 @@ namespace UniT.Logging
 
     public interface ILogger
     {
-        public static Func<string, ILogger> Default { get; set; } = name => new UnityLogger(name);
-
         public string Name { get; }
 
         public LogConfig Config { get; }

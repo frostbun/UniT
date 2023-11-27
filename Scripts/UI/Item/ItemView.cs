@@ -1,9 +1,11 @@
 namespace UniT.UI.Item
 {
     using System;
+    #if UNIT_UNITASK
     using System.Threading;
+    #endif
 
-    public abstract class BaseItemView<TItem> : BaseView, IItemView
+    public abstract class ItemView<TItem> : View, IItemView
     {
         object IItemView.Item { set => this.Item = (TItem)value; }
 
@@ -11,9 +13,11 @@ namespace UniT.UI.Item
 
         void IItemView.OnHide()
         {
+            #if UNIT_UNITASK
             this.hideCts?.Cancel();
             this.hideCts?.Dispose();
             this.hideCts = null;
+            #endif
             this.OnHide();
         }
 
@@ -21,12 +25,14 @@ namespace UniT.UI.Item
 
         public TItem Item { get; private set; }
 
+        #if UNIT_UNITASK
         private CancellationTokenSource hideCts;
 
-        public CancellationToken GetCancellationTokenOnHide()
+        protected CancellationToken GetCancellationTokenOnHide()
         {
             return (this.hideCts ??= new()).Token;
         }
+        #endif
 
         protected virtual void OnShow()
         {
@@ -41,11 +47,11 @@ namespace UniT.UI.Item
         }
     }
 
-    public abstract class BaseItemView<TItem, TPresenter> : BaseItemView<TItem>, IViewWithPresenter where TPresenter : IPresenter
+    public abstract class ItemView<TItem, TPresenter> : ItemView<TItem>, IHasPresenter where TPresenter : IPresenter
     {
-        Type IViewWithPresenter.PresenterType => this.PresenterType;
+        Type IHasPresenter.PresenterType => this.PresenterType;
 
-        IPresenter IViewWithPresenter.Presenter { set => this.Presenter = (TPresenter)value; }
+        IPresenter IHasPresenter.Presenter { set => this.Presenter = (TPresenter)value; }
 
         protected virtual Type PresenterType { get; } = typeof(TPresenter);
 

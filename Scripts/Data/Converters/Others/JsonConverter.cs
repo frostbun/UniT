@@ -1,3 +1,4 @@
+#if UNIT_NEWTONSOFT_JSON
 namespace UniT.Data.Converters
 {
     using System;
@@ -16,3 +17,4 @@ namespace UniT.Data.Converters
         }
     }
 }
+#endif

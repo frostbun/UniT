@@ -2,7 +2,6 @@ namespace UniT.Audio
 {
     using System.Collections.Generic;
     using System.Linq;
-    using Cysharp.Threading.Tasks;
     using UniT.Extensions;
     using UniT.Initializables;
     using UniT.Logging;
@@ -10,6 +9,11 @@ namespace UniT.Audio
     using UnityEngine;
     using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;
+    #if UNIT_UNITASK
+    using System;
+    using System.Threading;
+    using Cysharp.Threading.Tasks;
+    #endif
 
     public sealed class AudioManager : IAudioManager, IInitializable
     {
@@ -23,10 +27,10 @@ namespace UniT.Audio
         private readonly ILogger                         logger;
 
         [Preserve]
-        public AudioManager(IAudioConfig config, IAssetsManager assetsManager = null, ILogger logger = null)
+        public AudioManager(IAudioConfig config, IAssetsManager assetsManager, ILogger logger)
         {
             this.Config        = config;
-            this.assetsManager = assetsManager ?? IAssetsManager.Default();
+            this.assetsManager = assetsManager;
 
             this.audioSourcesContainer = new GameObject(this.GetType().Name).DontDestroyOnLoad();
 
@@ -36,7 +40,7 @@ namespace UniT.Audio
             this.pooledSoundSources = new();
             this.loadedSoundSources = new();
 
-            this.logger = logger ?? ILogger.Default(nameof(AudioManager));
+            this.logger = logger;
             this.logger.Debug("Constructed");
         }
 
@@ -64,10 +68,21 @@ namespace UniT.Audio
             names.ForEach(name => this.GetSoundSource(name));
         }
 
-        public UniTask LoadSoundsAsync(params string[] names)
+        #if UNIT_UNITASK
+        public UniTask LoadSoundsAsync(string name, IProgress<float> progress = null, CancellationToken cancellationToken = default)
         {
-            return names.ForEachAsync(name => this.GetSoundSourceAsync(name));
+            return this.GetSoundSourceAsync(name, progress, cancellationToken);
         }
+
+        public UniTask LoadSoundsAsync(string[] names, IProgress<float> progress = null, CancellationToken cancellationToken = default)
+        {
+            return names.ForEachAsync(
+                (name, progress, cancellationToken) => this.GetSoundSourceAsync(name, progress, cancellationToken),
+                progress,
+                cancellationToken
+            );
+        }
+        #endif
 
         public void UnloadSounds(params string[] names)
         {
@@ -93,22 +108,34 @@ namespace UniT.Audio
 
         public void PlaySoundOneShot(string name)
         {
-            this.GetSoundSourceAsync(name).ContinueWith(soundSource =>
+            #if UNIT_UNITASK
+            this.GetSoundSourceAsync(name).ContinueWith(Play).Forget();
+            #else
+            Play(this.GetSoundSource(name));
+            #endif
+
+            void Play(AudioSource soundSource)
             {
                 soundSource.PlayOneShot(soundSource.clip);
                 this.logger.Debug($"Playing sound one shot {name}");
-            }).Forget();
+            }
         }
 
         public void PlaySound(string name, bool loop = false, bool force = false)
         {
-            this.GetSoundSourceAsync(name).ContinueWith(soundSource =>
+            #if UNIT_UNITASK
+            this.GetSoundSourceAsync(name).ContinueWith(Play).Forget();
+            #else
+            Play(this.GetSoundSource(name));
+            #endif
+
+            void Play(AudioSource soundSource)
             {
                 soundSource.loop = loop;
                 if (!force && soundSource.isPlaying) return;
                 soundSource.Play();
                 this.logger.Debug($"Playing sound {name}, loop: {loop}");
-            }).Forget();
+            }
         }
 
         public void StopSounds(params string[] names)
@@ -138,17 +165,21 @@ namespace UniT.Audio
             this.CurrentMusic = name;
         }
 
-        public UniTask LoadMusicAsync(string name)
+        #if UNIT_UNITASK
+        public UniTask LoadMusicAsync(string name, IProgress<float> progress = null, CancellationToken cancellationToken = default)
         {
             if (this.CurrentMusic == name) return UniTask.CompletedTask;
-            return this.assetsManager.LoadAsync<AudioClip>(name).ContinueWith(audioClip =>
-            {
-                if (this.CurrentMusic == name) return; // Another load request was made while this one was loading
-                if (this.CurrentMusic != null) this.assetsManager.Unload(this.CurrentMusic);
-                this.CurrentMusic     = name;
-                this.musicSource.clip = audioClip;
-            });
+            return this.assetsManager
+                .LoadAsync<AudioClip>(name, progress, cancellationToken)
+                .ContinueWith(audioClip =>
+                {
+                    if (this.CurrentMusic == name) return; // Another load request was made while this one was loading
+                    if (this.CurrentMusic != null) this.assetsManager.Unload(this.CurrentMusic);
+                    this.CurrentMusic     = name;
+                    this.musicSource.clip = audioClip;
+                });
         }
+        #endif
 
         public void UnloadMusic()
         {
@@ -161,12 +192,19 @@ namespace UniT.Audio
 
         public void PlayMusic(string name, bool force = false)
         {
-            this.LoadMusicAsync(name).ContinueWith(() =>
+            #if UNIT_UNITASK
+            this.LoadMusicAsync(name).ContinueWith(Play).Forget();
+            #else
+            this.LoadMusic(name);
+            Play();
+            #endif
+
+            void Play()
             {
                 if (!force && this.musicSource.isPlaying) return;
                 this.musicSource.Play();
                 this.logger.Debug($"Playing music {name}");
-            }).Forget();
+            }
         }
 
         public void PauseMusic()
@@ -204,24 +242,27 @@ namespace UniT.Audio
             });
         }
 
-        private UniTask<AudioSource> GetSoundSourceAsync(string name)
+        #if UNIT_UNITASK
+        private UniTask<AudioSource> GetSoundSourceAsync(string name, IProgress<float> progress = null, CancellationToken cancellationToken = default)
         {
             return this.loadedSoundSources.GetOrAddAsync(name, () =>
-            {
-                return this.assetsManager.LoadAsync<AudioClip>(name).ContinueWith(audioClip =>
-                {
-                    var soundSource = this.pooledSoundSources.DequeueOrDefault(() =>
+                this.assetsManager
+                    .LoadAsync<AudioClip>(name, progress, cancellationToken)
+                    .ContinueWith(audioClip =>
                     {
-                        var soundSource = this.audioSourcesContainer.AddComponent<AudioSource>();
-                        this.ConfigureSoundSource(soundSource);
+                        var soundSource = this.pooledSoundSources.DequeueOrDefault(() =>
+                        {
+                            var soundSource = this.audioSourcesContainer.AddComponent<AudioSource>();
+                            this.ConfigureSoundSource(soundSource);
+                            return soundSource;
+                        });
+                        soundSource.clip = audioClip;
+                        this.logger.Debug($"Loaded sound {name}");
                         return soundSource;
-                    });
-                    soundSource.clip = audioClip;
-                    this.logger.Debug($"Loaded sound {name}");
-                    return soundSource;
-                });
-            });
+                    })
+            );
         }
+        #endif
 
         private void ConfigureSoundSource(AudioSource soundSource)
         {
@@ -280,30 +321,6 @@ namespace UniT.Audio
             this.ConfigureAllSoundSources();
             this.ConfigureMusicSource();
             this.logger.Debug(value ? "Master volume muted" : "Master volume unmuted");
-        }
-
-        #endregion
-
-        #region Finalizer
-
-        public void Dispose()
-        {
-            this.Config.SoundVolume.Unsubscribe(this.OnSoundVolumeChanged);
-            this.Config.MuteSound.Unsubscribe(this.OnMuteSoundChanged);
-            this.Config.MusicVolume.Unsubscribe(this.OnMusicVolumeChanged);
-            this.Config.MuteMusic.Unsubscribe(this.OnMuteMusicChanged);
-            this.Config.MasterVolume.Unsubscribe(this.OnMasterVolumeChanged);
-            this.Config.MuteMaster.Unsubscribe(this.OnMuteMasterChanged);
-            this.UnloadAllSounds();
-            this.UnloadMusic();
-            Object.Destroy(this.audioSourcesContainer);
-            this.logger.Debug("Disposed");
-        }
-
-        ~AudioManager()
-        {
-            this.Dispose();
-            this.logger.Debug("Finalized");
         }
 
         #endregion

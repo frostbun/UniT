@@ -11,43 +11,25 @@ namespace UniT.Signal
     {
         #region Constructor
 
-        private readonly Dictionary<Type, HashSet<object>> callbacksWithSignal;
-        private readonly Dictionary<Type, HashSet<object>> callbacksNoSignal;
-        private readonly ILogger                           logger;
+        private readonly ILogger logger;
+
+        private readonly Dictionary<Type, HashSet<object>> callbacksWithSignal = new();
+        private readonly Dictionary<Type, HashSet<object>> callbacksNoSignal   = new();
 
         [Preserve]
-        public SignalBus(ILogger logger = null)
+        public SignalBus(ILogger logger)
         {
-            this.callbacksWithSignal = new();
-            this.callbacksNoSignal   = new();
-            this.logger              = logger ?? ILogger.Default(nameof(SignalBus));
+            this.logger = logger;
             this.logger.Debug("Constructed");
-        }
-
-        #endregion
-
-        #region Finalizer
-
-        ~SignalBus()
-        {
-            this.Dispose();
-            this.logger.Debug("Finalized");
-        }
-
-        public void Dispose()
-        {
-            this.callbacksWithSignal.Clear();
-            this.callbacksNoSignal.Clear();
-            this.logger.Debug("Disposed");
         }
 
         #endregion
 
         #region Public
 
-        public LogConfig LogConfig => this.logger.Config;
+        LogConfig ISignalBus.LogConfig => this.logger.Config;
 
-        public void Fire<T>(T signal)
+        void ISignalBus.Fire<T>(T signal)
         {
             var count = this.GetCallbacksWithSignal<T>().Count + this.GetCallbacksNoSignal<T>().Count;
             if (count == 0)
@@ -64,7 +46,7 @@ namespace UniT.Signal
             this.logger.Debug($"Fired {typeof(T).Name} to {count} subscribers");
         }
 
-        public void Subscribe<T>(Action<T> callback)
+        void ISignalBus.Subscribe<T>(Action<T> callback)
         {
             if (this.GetCallbacksWithSignal<T>().Add(callback))
             {
@@ -76,7 +58,7 @@ namespace UniT.Signal
             }
         }
 
-        public void Subscribe<T>(Action callback)
+        void ISignalBus.Subscribe<T>(Action callback)
         {
             if (this.GetCallbacksNoSignal<T>().Add(callback))
             {
@@ -88,7 +70,7 @@ namespace UniT.Signal
             }
         }
 
-        public void Unsubscribe<T>(Action<T> callback)
+        void ISignalBus.Unsubscribe<T>(Action<T> callback)
         {
             if (this.GetCallbacksWithSignal<T>().Remove(callback))
             {
@@ -100,7 +82,7 @@ namespace UniT.Signal
             }
         }
 
-        public void Unsubscribe<T>(Action callback)
+        void ISignalBus.Unsubscribe<T>(Action callback)
         {
             if (this.GetCallbacksNoSignal<T>().Remove(callback))
             {

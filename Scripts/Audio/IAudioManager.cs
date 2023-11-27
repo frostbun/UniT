@@ -1,10 +1,13 @@
 namespace UniT.Audio
 {
     using System;
-    using Cysharp.Threading.Tasks;
     using UniT.Logging;
+    #if UNIT_UNITASK
+    using System.Threading;
+    using Cysharp.Threading.Tasks;
+    #endif
 
-    public interface IAudioManager : IDisposable
+    public interface IAudioManager
     {
         public LogConfig LogConfig { get; }
 
@@ -16,7 +19,11 @@ namespace UniT.Audio
 
         public void LoadSounds(params string[] names);
 
-        public UniTask LoadSoundsAsync(params string[] names);
+        #if UNIT_UNITASK
+        public UniTask LoadSoundsAsync(string name, IProgress<float> progress = null, CancellationToken cancellationToken = default);
+
+        public UniTask LoadSoundsAsync(string[] names, IProgress<float> progress = null, CancellationToken cancellationToken = default);
+        #endif
 
         public void UnloadSounds(params string[] names);
 
@@ -36,7 +43,9 @@ namespace UniT.Audio
 
         public void LoadMusic(string name);
 
-        public UniTask LoadMusicAsync(string name);
+        #if UNIT_UNITASK
+        public UniTask LoadMusicAsync(string name, IProgress<float> progress = null, CancellationToken cancellationToken = default);
+        #endif
 
         public void UnloadMusic();
 

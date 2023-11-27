@@ -24,23 +24,16 @@ namespace UniT.Entities
         private readonly IAssetsManager       assetsManager;
         private readonly ILogger              logger;
 
-        private readonly Dictionary<string, EntityPool>               keyToPool;
-        private readonly Dictionary<IEntity, EntityPool>              entityToPool;
-        private readonly Dictionary<IEntity, CancellationTokenSource> entityToCts;
-        private readonly Dictionary<Type, HashSet<IEntity>>           interfaceToEntities;
+        private readonly Dictionary<string, EntityPool>     keyToPool           = new();
+        private readonly Dictionary<IEntity, EntityPool>    entityToPool        = new();
+        private readonly Dictionary<Type, HashSet<IEntity>> interfaceToEntities = new();
 
         [Preserve]
-        public EntityManager(IController.IFactory controllerFactory = null, IAssetsManager assetsManager = null, ILogger logger = null)
+        public EntityManager(IController.IFactory controllerFactory, IAssetsManager assetsManager, ILogger logger)
         {
-            this.controllerFactory = controllerFactory ?? IController.IFactory.Default();
-            this.assetsManager     = assetsManager ?? IAssetsManager.Default();
-
-            this.keyToPool           = new();
-            this.entityToPool        = new();
-            this.entityToCts         = new();
-            this.interfaceToEntities = new();
-
-            this.logger = logger ?? ILogger.Default(nameof(EntityManager));
+            this.controllerFactory = controllerFactory;
+            this.assetsManager     = assetsManager;
+            this.logger            = logger;
             this.logger.Debug("Constructed");
         }
 
@@ -83,11 +76,6 @@ namespace UniT.Entities
             return entity;
         }
 
-        CancellationToken IEntityManager.GetCancellationTokenOnRecycle(IEntity entity)
-        {
-            return this.entityToCts.GetOrAdd(entity, () => new()).Token;
-        }
-
         void IEntityManager.Recycle(IEntity entity)
         {
             this.entityToPool[entity].Recycle(entity);
@@ -98,27 +86,28 @@ namespace UniT.Entities
             this.keyToPool.GetOrDefault(key)?.RecycleAll();
         }
 
-        void IEntityManager.Unload(string key) => this.Unload(key);
+        void IEntityManager.Unload(string key)
+        {
+            this.keyToPool.RemoveOrDefault(key).Dispose();
+            this.assetsManager.Unload(key);
+        }
 
         private class EntityPool
         {
-            private readonly IEntity       prefab;
-            private readonly EntityManager manager;
-
+            private readonly IEntity                  prefab;
+            private readonly EntityManager            manager;
             private readonly Transform                entitiesContainer;
-            private readonly Queue<IEntity>           pooledEntities;
-            private readonly HashSet<IEntity>         spawnedEntities;
             private readonly ReadOnlyCollection<Type> interfaces;
+
+            private readonly Queue<IEntity>   pooledEntities  = new();
+            private readonly HashSet<IEntity> spawnedEntities = new();
 
             public EntityPool(IEntity prefab, EntityManager manager)
             {
                 this.prefab  = prefab;
                 this.manager = manager;
-
                 prefab.gameObject.SetActive(false);
                 this.entitiesContainer = new GameObject($"{prefab.gameObject.name} pool").DontDestroyOnLoad().transform;
-                this.pooledEntities    = new();
-                this.spawnedEntities   = new();
                 this.interfaces        = prefab.GetType().GetInterfaces().AsReadOnly();
             }
 
@@ -141,11 +130,6 @@ namespace UniT.Entities
 
             public void Recycle(IEntity entity)
             {
-                if (this.manager.entityToCts.Remove(entity, out var cts))
-                {
-                    cts.Cancel();
-                    cts.Dispose();
-                }
                 entity.OnRecycle();
                 this.interfaces.ForEach(@interface => this.manager.Unregister(@interface, entity));
                 this.manager.entityToPool.Remove(entity);
@@ -204,33 +188,6 @@ namespace UniT.Entities
         private HashSet<IEntity> GetCache(Type @interface)
         {
             return this.interfaceToEntities.GetOrAdd(@interface, () => new());
-        }
-
-        #endregion
-
-        #region Finalizer
-
-        private void Unload(string key)
-        {
-            this.keyToPool.RemoveOrDefault(key).Dispose();
-            this.assetsManager.Unload(key);
-        }
-
-        private void Dispose()
-        {
-            this.keyToPool.Keys.SafeForEach(this.Unload);
-        }
-
-        void IDisposable.Dispose()
-        {
-            this.Dispose();
-            this.logger.Debug("Disposed");
-        }
-
-        ~EntityManager()
-        {
-            this.Dispose();
-            this.logger.Debug("Finalized");
         }
 
         #endregion

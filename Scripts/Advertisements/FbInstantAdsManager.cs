@@ -20,10 +20,10 @@ namespace UniT.Advertisements
         private readonly ILogger                       logger;
 
         [Preserve]
-        public FbInstantAdsManager(IFbInstantAdvertisementConfig config, ILogger logger = null)
+        public FbInstantAdsManager(IFbInstantAdvertisementConfig config, ILogger logger)
         {
             this.config = config;
-            this.logger = logger ?? ILogger.Default(nameof(FbInstantAdsManager));
+            this.logger = logger;
             this.logger.Debug("Constructed");
         }
 

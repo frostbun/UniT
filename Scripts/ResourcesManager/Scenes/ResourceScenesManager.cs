@@ -1,11 +1,13 @@
 ﻿namespace UniT.ResourcesManager
 {
-    using System;
-    using System.Threading;
-    using Cysharp.Threading.Tasks;
     using UniT.Logging;
     using UnityEngine.SceneManagement;
     using UnityEngine.Scripting;
+    #if UNIT_UNITASK
+    using System;
+    using System.Threading;
+    using Cysharp.Threading.Tasks;
+    #endif
 
     public class ResourceScenesManager : IScenesManager
     {
@@ -14,9 +16,9 @@
         private readonly ILogger logger;
 
         [Preserve]
-        public ResourceScenesManager(ILogger logger = null)
+        public ResourceScenesManager(ILogger logger)
         {
-            this.logger = logger ?? ILogger.Default(nameof(ResourceScenesManager));
+            this.logger = logger;
             this.logger.Debug("Constructed");
         }
 
@@ -30,11 +32,13 @@
             this.logger.Debug($"Loaded {sceneName}");
         }
 
+        #if UNIT_UNITASK
         UniTask IScenesManager.LoadSceneAsync(string sceneName, LoadSceneMode loadMode, IProgress<float> progress, CancellationToken cancellationToken)
         {
             return SceneManager.LoadSceneAsync(sceneName, loadMode)
                 .ToUniTask(progress: progress, cancellationToken: cancellationToken)
                 .ContinueWith(() => this.logger.Debug($"Loaded {sceneName}"));
         }
+        #endif
     }
 }

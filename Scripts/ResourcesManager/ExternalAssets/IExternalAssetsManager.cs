@@ -1,3 +1,4 @@
+#if UNIT_UNITASK
 namespace UniT.ResourcesManager
 {
     using System;
@@ -15,3 +16,4 @@ namespace UniT.ResourcesManager
         public void Unload(string key);
     }
 }
+#endif

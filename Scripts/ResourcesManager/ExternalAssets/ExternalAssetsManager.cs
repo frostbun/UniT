@@ -1,3 +1,4 @@
+#if UNIT_UNITASK
 namespace UniT.ResourcesManager
 {
     using System;
@@ -15,14 +16,14 @@ namespace UniT.ResourcesManager
     {
         #region Constructor
 
-        private readonly Dictionary<string, Texture2D> cache;
-        private readonly ILogger                       logger;
+        private readonly ILogger logger;
+
+        private readonly Dictionary<string, Texture2D> cache = new();
 
         [Preserve]
-        public ExternalAssetsManager(ILogger logger = null)
+        public ExternalAssetsManager(ILogger logger)
         {
-            this.cache  = new();
-            this.logger = logger ?? ILogger.Default(nameof(ExternalAssetsManager));
+            this.logger = logger;
             this.logger.Debug("Constructed");
         }
 
@@ -95,3 +96,4 @@ namespace UniT.ResourcesManager
         #endregion
     }
 }
+#endif

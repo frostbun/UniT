@@ -1,13 +1,16 @@
 namespace UniT.UI
 {
-    using System;
     using System.Collections.Generic;
-    using Cysharp.Threading.Tasks;
+    using UniT.Extensions;
     using UniT.Logging;
     using UniT.UI.Activity;
-    using UnityEngine;
+    #if UNIT_UNITASK
+    using System;
+    using System.Threading;
+    using Cysharp.Threading.Tasks;
+    #endif
 
-    public interface IUIManager : IDisposable
+    public interface IUIManager
     {
         public LogConfig LogConfig { get; }
 
@@ -23,7 +26,9 @@ namespace UniT.UI
 
         public IActivity GetActivity(IActivity activity);
 
-        public UniTask<IActivity> GetActivity<TActivity>(string key = null) where TActivity : Component, IActivity;
+        public IActivity GetActivity(string key);
+
+        public IActivity GetActivity<TActivity>() where TActivity : IActivity => this.GetActivity(typeof(TActivity).GetKey());
 
         public IActivity Stack(IActivity activity, bool force = false);
 
@@ -34,5 +39,15 @@ namespace UniT.UI
         public void Hide(IActivity activity, bool removeFromStack = true, bool autoStack = true);
 
         public void Dispose(IActivity activity, bool autoStack = true);
+
+        #region Async
+
+        #if UNIT_UNITASK
+        public UniTask<IActivity> GetActivityAsync(string key, IProgress<float> progress = null, CancellationToken cancellationToken = default);
+
+        public UniTask<IActivity> GetActivityAsync<TActivity>() where TActivity : IActivity => this.GetActivityAsync(typeof(TActivity).GetKey());
+        #endif
+
+        #endregion
     }
 }

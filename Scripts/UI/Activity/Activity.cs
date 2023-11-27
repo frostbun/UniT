@@ -2,10 +2,12 @@ namespace UniT.UI.Activity
 {
     using System;
     using System.Collections.Generic;
+    #if UNIT_UNITASK
     using System.Threading;
     using Cysharp.Threading.Tasks;
+    #endif
 
-    public abstract class BaseActivity : BaseView, IActivity
+    public abstract class Activity : View, IActivity
     {
         IActivity.Status IActivity.CurrentStatus { get => this.CurrentStatus; set => this.CurrentStatus = value; }
 
@@ -18,22 +20,26 @@ namespace UniT.UI.Activity
 
         void IActivity.OnHide()
         {
+            #if UNIT_UNITASK
             this.hideCts?.Cancel();
             this.hideCts?.Dispose();
             this.hideCts = null;
+            #endif
             this.OnHide();
             this.currentExtras = null;
+            #if UNIT_UNITASK
             this.resultSource?.TrySetResult(null);
             this.resultSource?.Task.Forget();
             this.resultSource = null;
+            #endif
         }
 
         void IActivity.OnDispose() => this.OnDispose();
 
-        private Dictionary<string, object>      currentExtras;
-        private Dictionary<string, object>      nextExtras;
-        private UniTaskCompletionSource<object> resultSource;
-        private CancellationTokenSource         hideCts;
+        protected IActivity.Status CurrentStatus { get; private set; } = IActivity.Status.Hidden;
+
+        private Dictionary<string, object> currentExtras;
+        private Dictionary<string, object> nextExtras;
 
         IActivity IActivity.AddExtra<T>(string key, T value)
         {
@@ -43,6 +49,21 @@ namespace UniT.UI.Activity
             this.nextExtras[key] = value;
             return this;
         }
+
+        protected T GetExtra<T>(string key)
+        {
+            if (this.currentExtras is null || !this.currentExtras.ContainsKey(key))
+                throw new ArgumentException($"No extra with key {key} found");
+            var extra = this.currentExtras[key];
+            if (extra is null)
+                return default;
+            if (extra is not T t)
+                throw new ArgumentException($"Found an extra with key {key} but wrong type. Expected {typeof(T).Name}, got {extra.GetType().Name}.");
+            return t;
+        }
+
+        #if UNIT_UNITASK
+        private UniTaskCompletionSource<object> resultSource;
 
         UniTask<T> IActivity.WaitForResult<T>()
         {
@@ -61,29 +82,18 @@ namespace UniT.UI.Activity
             return (this.resultSource ??= new()).Task;
         }
 
-        public IActivity.Status CurrentStatus { get; private set; } = IActivity.Status.Hidden;
-
-        public T GetExtra<T>(string key)
-        {
-            if (this.currentExtras is null || !this.currentExtras.ContainsKey(key))
-                throw new ArgumentException($"No extra with key {key} found");
-            var extra = this.currentExtras[key];
-            if (extra is null)
-                return default;
-            if (extra is not T t)
-                throw new ArgumentException($"Found an extra with key {key} but wrong type. Expected {typeof(T).Name}, got {extra.GetType().Name}.");
-            return t;
-        }
-
-        public bool TrySetResult<T>(T result)
+        protected bool TrySetResult<T>(T result)
         {
             return (this.resultSource ??= new()).TrySetResult(result);
         }
 
-        public CancellationToken GetCancellationTokenOnHide()
+        private CancellationTokenSource hideCts;
+
+        protected CancellationToken GetCancellationTokenOnHide()
         {
             return (this.hideCts ??= new()).Token;
         }
+        #endif
 
         protected virtual void OnShow()
         {
@@ -98,11 +108,11 @@ namespace UniT.UI.Activity
         }
     }
 
-    public abstract class BaseActivity<TPresenter> : BaseActivity, IViewWithPresenter where TPresenter : IPresenter
+    public abstract class Activity<TPresenter> : Activity, IHasPresenter where TPresenter : IPresenter
     {
-        Type IViewWithPresenter.PresenterType => this.PresenterType;
+        Type IHasPresenter.PresenterType => this.PresenterType;
 
-        IPresenter IViewWithPresenter.Presenter { set => this.Presenter = (TPresenter)value; }
+        IPresenter IHasPresenter.Presenter { set => this.Presenter = (TPresenter)value; }
 
         protected virtual Type PresenterType { get; } = typeof(TPresenter);
 

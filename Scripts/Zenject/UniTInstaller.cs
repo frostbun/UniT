@@ -49,18 +49,22 @@ namespace Zenject
                 .AsTransient()
                 .Lazy();
 
+            #if UNIT_UNITASK
             this.Container.BindInterfacesTo<ExternalAssetsManager>()
                 .AsTransient()
                 .Lazy();
+            #endif
 
             #endregion
 
             #region Data
 
+            #if UNIT_NEWTONSOFT_JSON
             this.Container.BindInterfacesTo<JsonSerializer>()
                 .AsSingle()
                 .WhenInjectedInto<IDataManager>()
                 .Lazy();
+            #endif
 
             this.Container.BindInterfacesTo<CsvSerializer>()
                 .AsSingle()

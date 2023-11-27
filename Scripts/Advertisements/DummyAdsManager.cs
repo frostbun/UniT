@@ -11,9 +11,9 @@ namespace UniT.Advertisements
         private readonly ILogger logger;
 
         [Preserve]
-        public DummyAdsManager(ILogger logger = null)
+        public DummyAdsManager(ILogger logger)
         {
-            this.logger = logger ?? ILogger.Default(nameof(DummyAdsManager));
+            this.logger = logger;
             this.logger.Debug("Constructed");
         }
 

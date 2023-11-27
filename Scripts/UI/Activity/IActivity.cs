@@ -1,7 +1,8 @@
 namespace UniT.UI.Activity
 {
-    using System.Threading;
+    #if UNIT_UNITASK
     using Cysharp.Threading.Tasks;
+    #endif
 
     public interface IActivity : IView
     {
@@ -18,15 +19,11 @@ namespace UniT.UI.Activity
 
         public IActivity AddExtra<T>(string key, T value);
 
+        #if UNIT_UNITASK
         public UniTask<T> WaitForResult<T>();
 
         public UniTask WaitForHide();
-
-        public T GetExtra<T>(string key);
-
-        public bool TrySetResult<T>(T result);
-
-        public CancellationToken GetCancellationTokenOnHide();
+        #endif
 
         public void OnShow();
 
@@ -37,6 +34,32 @@ namespace UniT.UI.Activity
 
     public static class ActivityExtensions
     {
+        public static IActivity Stack(this IActivity activity, bool force = false)
+        {
+            return activity.Manager.Stack(activity, force);
+        }
+
+        public static IActivity Float(this IActivity activity, bool force = false)
+        {
+            return activity.Manager.Float(activity, force);
+        }
+
+        public static IActivity Dock(this IActivity activity, bool force = false)
+        {
+            return activity.Manager.Dock(activity, force);
+        }
+
+        public static void Hide(this IActivity activity, bool removeFromStack = true, bool autoStack = true)
+        {
+            activity.Manager.Hide(activity, removeFromStack, autoStack);
+        }
+
+        public static void Dispose(this IActivity activity, bool autoStack = true)
+        {
+            activity.Manager.Dispose(activity, autoStack);
+        }
+
+        #if UNIT_UNITASK
         public static UniTask<IActivity> PutExtra<T>(this UniTask<IActivity> task, string key, T value)
         {
             return task.ContinueWith(activity => activity.AddExtra(key, value));
@@ -76,30 +99,6 @@ namespace UniT.UI.Activity
         {
             return task.ContinueWith(activity => activity.Dispose(autoStack));
         }
-
-        public static IActivity Stack(this IActivity activity, bool force = false)
-        {
-            return activity.Manager.Stack(activity, force);
-        }
-
-        public static IActivity Float(this IActivity activity, bool force = false)
-        {
-            return activity.Manager.Float(activity, force);
-        }
-
-        public static IActivity Dock(this IActivity activity, bool force = false)
-        {
-            return activity.Manager.Dock(activity, force);
-        }
-
-        public static void Hide(this IActivity activity, bool removeFromStack = true, bool autoStack = true)
-        {
-            activity.Manager.Hide(activity, removeFromStack, autoStack);
-        }
-
-        public static void Dispose(this IActivity activity, bool autoStack = true)
-        {
-            activity.Manager.Dispose(activity, autoStack);
-        }
+        #endif
     }
 }

@@ -1,56 +1,72 @@
 namespace UniT.ObjectPool
 {
     using System;
-    using Cysharp.Threading.Tasks;
+    using UniT.Extensions;
     using UniT.Logging;
     using UnityEngine;
+    #if UNIT_UNITASK
+    using System.Threading;
+    using Cysharp.Threading.Tasks;
+    #endif
 
-    public interface IObjectPoolManager : IDisposable
+    public interface IObjectPoolManager
     {
         public LogConfig LogConfig { get; }
 
-        public void InstantiatePool(GameObject prefab, int initialCount = 1);
+        public void Load(GameObject prefab, int count = 1);
 
-        public void InstantiatePool<T>(T component, int initialCount = 1) where T : Component;
-
-        public UniTask InstantiatePool(string key, int initialCount = 1);
-
-        public UniTask InstantiatePool<T>(int initialCount = 1) where T : Component;
-
-        public bool IsPoolReady(GameObject prefab);
-
-        public bool IsPoolReady<T>(T component) where T : Component;
-
-        public bool IsPoolReady(string key);
-
-        public bool IsPoolReady<T>() where T : Component;
-
-        public void DestroyPool(GameObject prefab);
-
-        public void DestroyPool<T>(T component) where T : Component;
-
-        public void DestroyPool(string key);
-
-        public void DestroyPool<T>() where T : Component;
+        public void Load(string key, int count = 1);
 
         public GameObject Spawn(GameObject prefab, Vector3 position = default, Quaternion rotation = default, Transform parent = null);
 
-        public T Spawn<T>(T component, Vector3 position = default, Quaternion rotation = default, Transform parent = null) where T : Component;
-
         public GameObject Spawn(string key, Vector3 position = default, Quaternion rotation = default, Transform parent = null);
-
-        public T Spawn<T>(string key = null, Vector3 position = default, Quaternion rotation = default, Transform parent = null) where T : Component;
 
         public void Recycle(GameObject instance);
 
-        public void Recycle<T>(T component) where T : Component;
-
         public void RecycleAll(GameObject prefab);
-
-        public void RecycleAll<T>(T component) where T : Component;
 
         public void RecycleAll(string key);
 
-        public void RecycleAll<T>() where T : Component;
+        public void Unload(GameObject prefab);
+
+        public void Unload(string key);
+
+        #region Component
+
+        public void Load(Component component, int count = 1) => this.Load(component.gameObject, count);
+
+        public T Spawn<T>(T component, Vector3 position = default, Quaternion rotation = default, Transform parent = null) where T : Component => this.Spawn(component.gameObject, position, rotation, parent).GetComponent<T>();
+
+        public T Spawn<T>(string key, Vector3 position = default, Quaternion rotation = default, Transform parent = null) => this.Spawn(key, position, rotation, parent).GetComponent<T>();
+
+        public void Recycle(Component component) => this.Recycle(component.gameObject);
+
+        public void RecycleAll(Component component) => this.RecycleAll(component.gameObject);
+
+        public void Unload(Component component) => this.Unload(component.gameObject);
+
+        #endregion
+
+        #region Implicit Key
+
+        public void Load<T>(int count = 1) => this.Load(typeof(T).GetKey(), count);
+
+        public T Spawn<T>(Vector3 position = default, Quaternion rotation = default, Transform parent = null) => this.Spawn<T>(typeof(T).GetKey(), position, rotation, parent);
+
+        public void RecycleAll<T>() => this.RecycleAll(typeof(T).GetKey());
+
+        public void Unload<T>() => this.Unload(typeof(T).GetKey());
+
+        #endregion
+
+        #region Async
+
+        #if UNIT_UNITASK
+        public UniTask LoadAsync(string key, int count = 1, IProgress<float> progress = null, CancellationToken cancellationToken = default);
+
+        public UniTask LoadAsync<T>(int count = 1, IProgress<float> progress = null, CancellationToken cancellationToken = default) => this.LoadAsync(typeof(T).GetKey(), count, progress, cancellationToken);
+        #endif
+
+        #endregion
     }
 }

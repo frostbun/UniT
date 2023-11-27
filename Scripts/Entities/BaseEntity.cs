@@ -1,6 +1,9 @@
 ﻿namespace UniT.Entities
 {
     using UnityEngine;
+    #if UNIT_UNITASK
+    using System.Threading;
+    #endif
 
     public abstract class BaseEntity : MonoBehaviour, IEntity
     {
@@ -16,11 +19,28 @@
 
         void IEntity.OnSpawn() => this.OnSpawn();
 
-        void IEntity.OnRecycle() => this.OnRecycle();
+        void IEntity.OnRecycle()
+        {
+            #if UNIT_UNITASK
+            this.hideCts?.Cancel();
+            this.hideCts?.Dispose();
+            this.hideCts = null;
+            #endif
+            this.OnRecycle();
+        }
 
         protected IEntityManager Manager { get; private set; }
 
         public new Transform transform { get; private set; }
+
+        #if UNIT_UNITASK
+        private CancellationTokenSource hideCts;
+
+        protected CancellationToken GetCancellationTokenOnHide()
+        {
+            return (this.hideCts ??= new()).Token;
+        }
+        #endif
 
         protected virtual void OnInstantiate()
         {

@@ -1,6 +1,6 @@
 namespace UniT.Data.Storages
 {
-    public interface IData : IReadOnlyData
+    public interface IReadWriteData : IData
     {
     }
 }

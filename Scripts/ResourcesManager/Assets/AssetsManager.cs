@@ -2,56 +2,40 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Threading;
-    using Cysharp.Threading.Tasks;
     using UniT.Extensions;
     using UniT.Logging;
     using ILogger = UniT.Logging.ILogger;
     using Object = UnityEngine.Object;
+    #if UNIT_UNITASK
+    using System.Threading;
+    using Cysharp.Threading.Tasks;
+    #endif
 
     public abstract class AssetsManager : IAssetsManager
     {
         #region Constructor
 
-        private readonly Dictionary<string, Object> cache;
-        private readonly ILogger                    logger;
+        private readonly ILogger logger;
 
-        protected AssetsManager(ILogger logger = null)
+        private readonly Dictionary<string, Object> cache = new();
+
+        protected AssetsManager(ILogger logger)
         {
-            this.cache  = new();
-            this.logger = logger ?? ILogger.Default(this.GetType().Name);
+            this.logger = logger;
             this.logger.Debug("Constructed");
         }
 
         #endregion
 
-        #region Public
-
         LogConfig IAssetsManager.LogConfig => this.logger.Config;
+
+        #region Sync
 
         T IAssetsManager.Load<T>(string key)
         {
-            if (this.cache.ContainsKey(key))
-            {
-                this.logger.Debug($"Using cached {key}");
-            }
-            else
-            {
-                this.cache.Add(key, this.Load(key));
-                this.logger.Debug($"Loaded {key}");
-            }
+            var isLoaded = this.cache.TryAdd(key, () => this.Load(key));
+            this.logger.Debug(isLoaded ? $"Using cached {key}" : $"Loaded {key}");
             return (T)this.cache[key];
-        }
-
-        UniTask<T> IAssetsManager.LoadAsync<T>(string key, IProgress<float> progress, CancellationToken cancellationToken)
-        {
-            return this.cache
-                .TryAddAsync(key, () => this.LoadAsync(key, progress, cancellationToken))
-                .ContinueWith(isLoaded =>
-                {
-                    this.logger.Debug(isLoaded ? $"Loaded {key}" : $"Using cached {key}");
-                    return (T)this.cache[key];
-                });
         }
 
         void IAssetsManager.Unload(string key)
@@ -67,15 +51,28 @@
             }
         }
 
-        #endregion
-
-        #region Private
-
         protected abstract Object Load(string key);
 
-        protected abstract UniTask<Object> LoadAsync(string key, IProgress<float> progress, CancellationToken cancellationToken);
-
         protected abstract void Unload(Object @object);
+
+        #endregion
+
+        #region Async
+
+        #if UNIT_UNITASK
+        UniTask<T> IAssetsManager.LoadAsync<T>(string key, IProgress<float> progress, CancellationToken cancellationToken)
+        {
+            return this.cache
+                .TryAddAsync(key, () => this.LoadAsync(key, progress, cancellationToken))
+                .ContinueWith(isLoaded =>
+                {
+                    this.logger.Debug(isLoaded ? $"Loaded {key}" : $"Using cached {key}");
+                    return (T)this.cache[key];
+                });
+        }
+
+        protected abstract UniTask<Object> LoadAsync(string key, IProgress<float> progress, CancellationToken cancellationToken);
+        #endif
 
         #endregion
 

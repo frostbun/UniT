@@ -10,9 +10,6 @@
     "email": "manhnb1911@gmail.com",
     "url": "https://github.com/frostbun"
   },
-  "dependencies": {
-    "com.unity.nuget.newtonsoft-json": "3.2.1"
-  },
   "gitDependencies": {
     "com.frostbun.unit.extensions": "https://github.com/frostbun/UniT.Extensions.git"
   }

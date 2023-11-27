@@ -1,3 +1,4 @@
+#if UNIT_UNITASK
 namespace UniT.Factories
 {
     using Cysharp.Threading.Tasks;
@@ -57,3 +58,4 @@ namespace UniT.Factories
         public UniTask<TProduct> CreateAsync(TParam0 param0, TParam1 param1, TParam2 param2, TParam3 param3, TParam4 param4, TParam5 param5, TParam6 param6, TParam7 param7, TParam8 param8, TParam9 param9);
     }
 }
+#endif
