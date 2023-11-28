@@ -1,4 +1,4 @@
-namespace UniT.ObjectPool
+namespace UniT.Pooling
 {
     using UnityEngine;
 
