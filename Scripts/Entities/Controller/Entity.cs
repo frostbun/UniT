@@ -13,7 +13,7 @@ namespace UniT.Entities.Controller
         protected TController Controller { get; private set; }
     }
 
-    public abstract class Entity<TModel, TController> : Model.Entity<TModel>, IHasController where TController : IController
+    public abstract class Entity<TModel, TController> : Entities.Entity<TModel>, IHasController where TController : IController
     {
         Type IHasController.ControllerType => this.ControllerType;
 

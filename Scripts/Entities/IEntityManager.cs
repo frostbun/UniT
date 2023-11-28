@@ -2,7 +2,6 @@ namespace UniT.Entities
 {
     using System;
     using System.Collections.Generic;
-    using UniT.Entities.Model;
     using UniT.Extensions;
     using UniT.Logging;
     using UnityEngine;
