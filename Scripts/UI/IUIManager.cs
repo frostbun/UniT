@@ -10,10 +10,8 @@ namespace UniT.UI
     using Cysharp.Threading.Tasks;
     #endif
 
-    public interface IUIManager
+    public interface IUIManager : IHasLogger
     {
-        public LogConfig LogConfig { get; }
-
         public TView Initialize<TView>(TView view) where TView : IView;
 
         public IActivity StackingActivity { get; }

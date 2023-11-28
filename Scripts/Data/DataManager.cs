@@ -24,7 +24,7 @@ namespace UniT.Data
         private readonly ILogger                               logger;
 
         [Preserve]
-        public DataManager(IData[] datas, IStorage[] storages, ISerializer[] serializers, ILogger logger)
+        public DataManager(IData[] datas, IStorage[] storages, ISerializer[] serializers, ILogger.IFactory loggerFactory)
         {
             this.datas = datas.ToDictionary(data => data.GetType()).AsReadOnly();
             this.storages = datas.ToDictionary(
@@ -36,14 +36,14 @@ namespace UniT.Data
                 data => serializers.LastOrDefault(serializer => serializer.CanSerialize(data.GetType())) ?? throw new InvalidOperationException($"No serializer found for {data.GetType().Name}")
             ).AsReadOnly();
 
-            this.logger = logger;
+            this.logger = loggerFactory.Create(this);
             this.datas.Keys.ForEach(type => this.logger.Debug($"Found {type.Name} - {this.storages[type].GetType().Name} - {this.serializers[type].GetType().Name}"));
             this.logger.Debug("Constructed");
         }
 
         #endregion
 
-        LogConfig IDataManager.LogConfig => this.logger.Config;
+        LogConfig IHasLogger.LogConfig => this.logger.Config;
 
         IData IDataManager.Get(Type type) => this.datas.GetOrDefault(type);
 
@@ -108,12 +108,6 @@ namespace UniT.Data
         #region Async
 
         #if UNIT_UNITASK
-        UniTask IDataManager.PopulateAsync(Type type, IProgress<float> progress, CancellationToken cancellationToken) => this.PopulateAsync(new[] { type }, progress, cancellationToken);
-
-        UniTask IDataManager.SaveAsync(Type type, IProgress<float> progress, CancellationToken cancellationToken) => this.SaveAsync(new[] { type }, progress, cancellationToken);
-
-        UniTask IDataManager.FlushAsync(Type type, IProgress<float> progress, CancellationToken cancellationToken) => this.FlushAsync(new[] { type }, progress, cancellationToken);
-
         UniTask IDataManager.PopulateAsync(Type[] types, IProgress<float> progress, CancellationToken cancellationToken) => this.PopulateAsync(types, progress, cancellationToken);
 
         UniTask IDataManager.SaveAsync(Type[] types, IProgress<float> progress, CancellationToken cancellationToken) => this.SaveAsync(types, progress, cancellationToken);
@@ -130,17 +124,14 @@ namespace UniT.Data
         {
             return types.GroupBy(type => this.storages.GetOrDefault(type) ?? throw new InvalidOperationException($"{type.Name} not found"))
                 .ForEachAsync(
-                    (group, progress, cancellationToken) =>
+                    async (group, progress, cancellationToken) =>
                     {
-                        var keys    = group.Select(type => type.GetKey()).ToArray();
-                        var storage = group.Key;
-                        return storage.LoadAsync(keys, progress, cancellationToken)
-                            .ContinueWith(rawDatas =>
-                            {
-                                this.logger.Debug($"Loaded {keys.ToArrayString()}");
-                                IterTools.StrictZip(group, rawDatas).ForEach((type, rawData) => this.serializers[type].Populate(this.datas[type], rawData));
-                                this.logger.Debug($"Populated {keys.ToArrayString()}");
-                            });
+                        var keys     = group.Select(type => type.GetKey()).ToArray();
+                        var storage  = group.Key;
+                        var rawDatas = await storage.LoadAsync(keys, progress, cancellationToken);
+                        this.logger.Debug($"Loaded {keys.ToArrayString()}");
+                        IterTools.StrictZip(group, rawDatas).ForEach((type, rawData) => this.serializers[type].Populate(this.datas[type], rawData));
+                        this.logger.Debug($"Populated {keys.ToArrayString()}");
                     },
                     progress,
                     cancellationToken
@@ -152,14 +143,14 @@ namespace UniT.Data
             return types.GroupBy(type => this.storages.GetOrDefault(type) ?? throw new InvalidOperationException($"{type.Name} not found"))
                 .Where(group => group.Key is IReadWriteStorage)
                 .ForEachAsync(
-                    (group, progress, cancellationToken) =>
+                    async (group, progress, cancellationToken) =>
                     {
                         var keys     = group.Select(type => type.GetKey()).ToArray();
                         var rawDatas = group.Select(type => this.serializers[type].Serialize(this.datas[type])).ToArray();
                         this.logger.Debug($"Serialized {keys.ToArrayString()}");
                         var storage = (IReadWriteStorage)group.Key;
-                        return storage.SaveAsync(keys, rawDatas, progress, cancellationToken)
-                            .ContinueWith(() => this.logger.Debug($"Saved {keys.ToArrayString()}"));
+                        await storage.SaveAsync(keys, rawDatas, progress, cancellationToken);
+                        this.logger.Debug($"Saved {keys.ToArrayString()}");
                     },
                     progress,
                     cancellationToken
@@ -171,12 +162,12 @@ namespace UniT.Data
             return types.GroupBy(type => this.storages.GetOrDefault(type) ?? throw new InvalidOperationException($"{type.Name} not found"))
                     .Where(group => group.Key is IReadWriteStorage)
                     .ForEachAsync(
-                        (group, progress, cancellationToken) =>
+                        async (group, progress, cancellationToken) =>
                         {
                             var keys    = group.Select(type => type.GetKey()).ToArray();
                             var storage = (IReadWriteStorage)group.Key;
-                            return storage.FlushAsync(progress, cancellationToken)
-                                .ContinueWith(() => this.logger.Debug($"Flushed {keys.ToArrayString()}"));
+                            await storage.FlushAsync(progress, cancellationToken);
+                            this.logger.Debug($"Flushed {keys.ToArrayString()}");
                         },
                         progress,
                         cancellationToken

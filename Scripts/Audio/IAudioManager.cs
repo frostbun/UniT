@@ -1,53 +1,36 @@
 namespace UniT.Audio
 {
     using System;
+    using UniT.Initializables;
     using UniT.Logging;
     #if UNIT_UNITASK
     using System.Threading;
     using Cysharp.Threading.Tasks;
     #endif
 
-    public interface IAudioManager
+    public interface IAudioManager : IInitializable, IHasLogger
     {
-        public LogConfig LogConfig { get; }
-
         public IAudioConfig Config { get; }
-
-        public string CurrentMusic { get; }
 
         #region Sound
 
-        public void LoadSounds(params string[] names);
-
-        #if UNIT_UNITASK
-        public UniTask LoadSoundsAsync(string name, IProgress<float> progress = null, CancellationToken cancellationToken = default);
-
-        public UniTask LoadSoundsAsync(string[] names, IProgress<float> progress = null, CancellationToken cancellationToken = default);
-        #endif
-
-        public void UnloadSounds(params string[] names);
-
-        public void UnloadAllSounds();
+        public void LoadSound(string name);
 
         public void PlaySoundOneShot(string name);
 
         public void PlaySound(string name, bool loop = false, bool force = false);
 
-        public void StopSounds(params string[] names);
+        public void StopSound(string name);
 
-        public void StopAllSounds();
+        public void UnloadSound(string name);
 
         #endregion
 
         #region Music
 
+        public string CurrentMusic { get; }
+
         public void LoadMusic(string name);
-
-        #if UNIT_UNITASK
-        public UniTask LoadMusicAsync(string name, IProgress<float> progress = null, CancellationToken cancellationToken = default);
-        #endif
-
-        public void UnloadMusic();
 
         public void PlayMusic(string name, bool force = false);
 
@@ -56,6 +39,18 @@ namespace UniT.Audio
         public void ResumeMusic();
 
         public void StopMusic();
+
+        public void UnloadMusic();
+
+        #endregion
+
+        #region Async
+
+        #if UNIT_UNITASK
+        public UniTask LoadSoundAsync(string name, IProgress<float> progress = null, CancellationToken cancellationToken = default);
+
+        public UniTask LoadMusicAsync(string name, IProgress<float> progress = null, CancellationToken cancellationToken = default);
+        #endif
 
         #endregion
     }

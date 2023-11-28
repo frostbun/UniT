@@ -2,13 +2,13 @@ namespace UniT.Logging
 {
     using System;
 
-    public abstract class BaseLogger : ILogger
+    public abstract class Logger : ILogger
     {
         public string Name { get; }
 
         public LogConfig Config { get; }
 
-        protected BaseLogger(string name, LogConfig config = null)
+        protected Logger(string name, LogConfig config = null)
         {
             this.Name   = name;
             this.Config = config ?? new();

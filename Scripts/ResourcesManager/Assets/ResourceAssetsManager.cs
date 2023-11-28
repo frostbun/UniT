@@ -13,7 +13,7 @@
     public sealed class ResourceAssetsManager : AssetsManager
     {
         [Preserve]
-        public ResourceAssetsManager(ILogger logger = null) : base(logger)
+        public ResourceAssetsManager(ILogger.IFactory loggerFactory) : base(loggerFactory)
         {
         }
 

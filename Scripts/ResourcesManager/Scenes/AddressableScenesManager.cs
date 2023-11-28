@@ -18,15 +18,15 @@ namespace UniT.ResourcesManager
         private readonly ILogger logger;
 
         [Preserve]
-        public AddressableScenesManager(ILogger logger)
+        public AddressableScenesManager(ILogger.IFactory loggerFactory)
         {
-            this.logger = logger;
+            this.logger = loggerFactory.Create(this);
             this.logger.Debug("Constructed");
         }
 
         #endregion
 
-        LogConfig IScenesManager.LogConfig => this.logger.Config;
+        LogConfig IHasLogger.LogConfig => this.logger.Config;
 
         void IScenesManager.LoadScene(string sceneName, LoadSceneMode loadMode)
         {

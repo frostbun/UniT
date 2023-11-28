@@ -12,7 +12,7 @@ namespace UniT.Advertisements
     using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;
 
-    public sealed class FbInstantAdsManager : IInitializable, IAdsManager
+    public sealed class FbInstantAdsManager : IAdsManager
     {
         #region Constructor
 
@@ -20,10 +20,10 @@ namespace UniT.Advertisements
         private readonly ILogger                       logger;
 
         [Preserve]
-        public FbInstantAdsManager(IFbInstantAdvertisementConfig config, ILogger logger)
+        public FbInstantAdsManager(IFbInstantAdvertisementConfig config, ILogger.IFactory loggerFactory)
         {
             this.config = config;
-            this.logger = logger;
+            this.logger = loggerFactory.Create(this);
             this.logger.Debug("Constructed");
         }
 
@@ -38,15 +38,15 @@ namespace UniT.Advertisements
 
         #region Public
 
-        public LogConfig LogConfig => this.logger.Config;
+        LogConfig IHasLogger.LogConfig => this.logger.Config;
 
-        public void ShowBannerAd() => this.InvokeUntilSuccess(this.config.BannerAdIds, FbInstant.Advertisements.ShowBannerAd);
+        void IAdsManager.ShowBannerAd() => this.InvokeUntilSuccess(this.config.BannerAdIds, FbInstant.Advertisements.ShowBannerAd);
 
-        public void HideBannerAd() => this.InvokeOnce(FbInstant.Advertisements.HideBannerAd);
+        void IAdsManager.HideBannerAd() => this.InvokeOnce(FbInstant.Advertisements.HideBannerAd);
 
-        public bool IsInterstitialAdReady() => this.config.InterstitialAdIds.Any(FbInstant.Advertisements.IsInterstitialAdReady);
+        bool IAdsManager.IsInterstitialAdReady() => this.config.InterstitialAdIds.Any(FbInstant.Advertisements.IsInterstitialAdReady);
 
-        public void ShowInterstitialAd(Action onComplete = null) => this.ShowAd(
+        void IAdsManager.ShowInterstitialAd(Action onComplete) => this.ShowAd(
             adIds: this.config.InterstitialAdIds,
             isAdReady: FbInstant.Advertisements.IsInterstitialAdReady,
             showAction: FbInstant.Advertisements.ShowInterstitialAd,
@@ -55,9 +55,9 @@ namespace UniT.Advertisements
             onComplete: onComplete
         );
 
-        public bool IsRewardedAdReady() => this.config.RewardedAdIds.Any(FbInstant.Advertisements.IsRewardedAdReady);
+        bool IAdsManager.IsRewardedAdReady() => this.config.RewardedAdIds.Any(FbInstant.Advertisements.IsRewardedAdReady);
 
-        public void ShowRewardedAd(Action onSuccess, Action onComplete = null) => this.ShowAd(
+        void IAdsManager.ShowRewardedAd(Action onSuccess, Action onComplete) => this.ShowAd(
             adIds: this.config.RewardedAdIds,
             isAdReady: FbInstant.Advertisements.IsRewardedAdReady,
             showAction: FbInstant.Advertisements.ShowRewardedAd,

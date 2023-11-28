@@ -1,32 +1,44 @@
 namespace UniT.ObjectPool
 {
-    using System.Threading;
     using UnityEngine;
+    #if UNIT_UNITASK
+    using System.Threading;
+    #endif
 
     public abstract class RecyclableMonoBehaviour : MonoBehaviour, IRecyclable
     {
         IObjectPoolManager IRecyclable.Manager { get => this.Manager; set => this.Manager = value; }
 
-        void IRecyclable.OnInstantiate() => this.OnInstantiate();
+        void IRecyclable.OnInstantiate()
+        {
+            this.transform = base.transform;
+            this.OnInstantiate();
+        }
 
         void IRecyclable.OnSpawn() => this.OnSpawn();
 
         void IRecyclable.OnRecycle()
         {
+            #if UNIT_UNITASK
             this.recycleCts?.Cancel();
             this.recycleCts?.Dispose();
             this.recycleCts = null;
+            #endif
             this.OnRecycle();
         }
 
-        public IObjectPoolManager Manager { get; private set; }
+        protected IObjectPoolManager Manager { get; private set; }
 
+        public new Transform transform { get; private set; }
+
+        #if UNIT_UNITASK
         private CancellationTokenSource recycleCts;
 
-        public CancellationToken GetCancellationTokenOnRecycle()
+        protected CancellationToken GetCancellationTokenOnRecycle()
         {
             return (this.recycleCts ??= new()).Token;
         }
+        #endif
 
         protected virtual void OnInstantiate()
         {

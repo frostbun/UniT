@@ -1,6 +1,7 @@
 namespace UniT.Advertisements
 {
     using System;
+    using UniT.Initializables;
     using UniT.Logging;
     using UnityEngine.Scripting;
 
@@ -11,9 +12,9 @@ namespace UniT.Advertisements
         private readonly ILogger logger;
 
         [Preserve]
-        public DummyAdsManager(ILogger logger)
+        public DummyAdsManager(ILogger.IFactory loggerFactory)
         {
-            this.logger = logger;
+            this.logger = loggerFactory.Create(this);
             this.logger.Debug("Constructed");
         }
 
@@ -21,37 +22,42 @@ namespace UniT.Advertisements
 
         #region Public
 
-        public LogConfig LogConfig => this.logger.Config;
+        LogConfig IHasLogger.LogConfig => this.logger.Config;
 
-        public void ShowBannerAd()
+        void IInitializable.Initialize()
+        {
+            this.logger.Debug("Initialized");
+        }
+
+        void IAdsManager.ShowBannerAd()
         {
             this.logger.Info("ShowBannerAd");
         }
 
-        public void HideBannerAd()
+        void IAdsManager.HideBannerAd()
         {
             this.logger.Info("HideBannedAd");
         }
 
-        public bool IsInterstitialAdReady()
+        bool IAdsManager.IsInterstitialAdReady()
         {
             this.logger.Debug("IsInterstitialAdReady");
             return true;
         }
 
-        public void ShowInterstitialAd(Action onComplete = null)
+        void IAdsManager.ShowInterstitialAd(Action onComplete)
         {
             this.logger.Info("ShowInterstitialAd");
             onComplete?.Invoke();
         }
 
-        public bool IsRewardedAdReady()
+        bool IAdsManager.IsRewardedAdReady()
         {
             this.logger.Debug("IsRewardedAdReady");
             return true;
         }
 
-        public void ShowRewardedAd(Action onSuccess, Action onComplete = null)
+        void IAdsManager.ShowRewardedAd(Action onSuccess, Action onComplete)
         {
             this.logger.Info("ShowRewardedAd");
             onSuccess?.Invoke();

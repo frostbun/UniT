@@ -8,10 +8,8 @@
     using Cysharp.Threading.Tasks;
     #endif
 
-    public interface IScenesManager
+    public interface IScenesManager : IHasLogger
     {
-        public LogConfig LogConfig { get; }
-
         public void LoadScene(string sceneName, LoadSceneMode loadMode = LoadSceneMode.Single);
 
         #if UNIT_UNITASK

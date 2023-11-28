@@ -6,6 +6,7 @@ namespace UniT.Entities
     using System.Linq;
     using UniT.Entities.Controller;
     using UniT.Extensions;
+    using UniT.Logging;
     using UniT.ResourcesManager;
     using UnityEngine;
     using UnityEngine.Scripting;
@@ -24,42 +25,64 @@ namespace UniT.Entities
         private readonly IAssetsManager       assetsManager;
         private readonly ILogger              logger;
 
+        private readonly Transform                          poolsContainer      = new GameObject(nameof(EntityManager)).DontDestroyOnLoad().transform;
+        private readonly Dictionary<IEntity, EntityPool>    prefabToPool        = new();
         private readonly Dictionary<string, EntityPool>     keyToPool           = new();
         private readonly Dictionary<IEntity, EntityPool>    entityToPool        = new();
         private readonly Dictionary<Type, HashSet<IEntity>> interfaceToEntities = new();
 
         [Preserve]
-        public EntityManager(IController.IFactory controllerFactory, IAssetsManager assetsManager, ILogger logger)
+        public EntityManager(IController.IFactory controllerFactory, IAssetsManager assetsManager, ILogger.IFactory loggerFactory)
         {
             this.controllerFactory = controllerFactory;
             this.assetsManager     = assetsManager;
-            this.logger            = logger;
+            this.logger            = loggerFactory.Create(this);
             this.logger.Debug("Constructed");
         }
 
         #endregion
 
+        LogConfig IHasLogger.LogConfig => this.logger.Config;
+
         #region Pooling
+
+        void IEntityManager.Load(IEntity prefab, int count)
+        {
+            var isLoaded = this.prefabToPool.TryAdd(prefab, () => new(prefab, this));
+            this.logger.Debug(isLoaded ? $"Loaded {prefab.gameObject.name} pool" : $"Using cached {prefab.gameObject.name} pool");
+            this.prefabToPool[prefab].Load(count);
+        }
 
         void IEntityManager.Load(string key, int count)
         {
-            this.keyToPool
-                .GetOrAdd(key, () => new(this.assetsManager.LoadComponent<IEntity>(key), this))
-                .Load(count);
+            var isLoaded = this.keyToPool.TryAdd(key, () => new(this.assetsManager.LoadComponent<IEntity>(key), this));
+            this.logger.Debug(isLoaded ? $"Loaded {key} pool" : $"Using cached {key} pool");
+            this.keyToPool[key].Load(count);
         }
 
         #if UNIT_UNITASK
-        UniTask IEntityManager.LoadAsync(string key, int count, IProgress<float> progress, CancellationToken cancellationToken)
+        async UniTask IEntityManager.LoadAsync(string key, int count, IProgress<float> progress, CancellationToken cancellationToken)
         {
-            return this.keyToPool
-                .GetOrAddAsync(key, () =>
-                    this.assetsManager
-                        .LoadComponentAsync<IEntity>(key, progress, cancellationToken)
-                        .ContinueWith(prefab => new EntityPool(prefab, this))
-                )
-                .ContinueWith(pool => pool.Load(count));
+            var isLoaded = await this.keyToPool.TryAddAsync(key, async () => new(await this.assetsManager.LoadComponentAsync<IEntity>(key, progress, cancellationToken), this));
+            this.logger.Debug(isLoaded ? $"Loaded {key} pool" : $"Using cached {key} pool");
+            this.keyToPool[key].Load(count);
         }
         #endif
+
+        TEntity IEntityManager.Spawn<TEntity>(TEntity prefab, Vector3 position, Quaternion rotation, Transform parent)
+        {
+            var entity = (TEntity)this.prefabToPool[prefab].Spawn(position, rotation, parent);
+            entity.OnSpawn();
+            return entity;
+        }
+
+        TEntity IEntityManager.Spawn<TEntity, TModel>(TEntity prefab, TModel model, Vector3 position, Quaternion rotation, Transform parent)
+        {
+            var entity = (TEntity)this.prefabToPool[prefab].Spawn(position, rotation, parent);
+            entity.Model = model;
+            entity.OnSpawn();
+            return entity;
+        }
 
         TEntity IEntityManager.Spawn<TEntity>(string key, Vector3 position, Quaternion rotation, Transform parent)
         {
@@ -81,9 +104,19 @@ namespace UniT.Entities
             this.entityToPool[entity].Recycle(entity);
         }
 
+        void IEntityManager.RecycleAll(IEntity prefab)
+        {
+            this.prefabToPool.GetOrDefault(prefab)?.RecycleAll();
+        }
+
         void IEntityManager.RecycleAll(string key)
         {
             this.keyToPool.GetOrDefault(key)?.RecycleAll();
+        }
+
+        void IEntityManager.Unload(IEntity prefab)
+        {
+            this.prefabToPool.RemoveOrDefault(prefab).Dispose();
         }
 
         void IEntityManager.Unload(string key)
@@ -107,8 +140,9 @@ namespace UniT.Entities
                 this.prefab  = prefab;
                 this.manager = manager;
                 prefab.gameObject.SetActive(false);
-                this.entitiesContainer = new GameObject($"{prefab.gameObject.name} pool").DontDestroyOnLoad().transform;
-                this.interfaces        = prefab.GetType().GetInterfaces().AsReadOnly();
+                this.entitiesContainer = new GameObject($"{prefab.gameObject.name} pool").transform;
+                this.entitiesContainer.SetParent(manager.poolsContainer);
+                this.interfaces = prefab.GetType().GetInterfaces().AsReadOnly();
             }
 
             public void Load(int count)

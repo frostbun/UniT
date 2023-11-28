@@ -16,15 +16,15 @@
         private readonly ILogger logger;
 
         [Preserve]
-        public ResourceScenesManager(ILogger logger)
+        public ResourceScenesManager(ILogger.IFactory loggerFactory)
         {
-            this.logger = logger;
+            this.logger = loggerFactory.Create(this);
             this.logger.Debug("Constructed");
         }
 
         #endregion
 
-        LogConfig IScenesManager.LogConfig => this.logger.Config;
+        LogConfig IHasLogger.LogConfig => this.logger.Config;
 
         void IScenesManager.LoadScene(string sceneName, LoadSceneMode loadMode)
         {

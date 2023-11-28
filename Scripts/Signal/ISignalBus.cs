@@ -3,10 +3,8 @@ namespace UniT.Signal
     using System;
     using UniT.Logging;
 
-    public interface ISignalBus
+    public interface ISignalBus : IHasLogger
     {
-        public LogConfig LogConfig { get; }
-
         public void Fire<T>(T signal);
 
         public void Subscribe<T>(Action<T> callback);

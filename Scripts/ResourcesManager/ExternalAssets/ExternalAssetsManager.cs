@@ -21,9 +21,9 @@ namespace UniT.ResourcesManager
         private readonly Dictionary<string, Texture2D> cache = new();
 
         [Preserve]
-        public ExternalAssetsManager(ILogger logger)
+        public ExternalAssetsManager(ILogger.IFactory loggerFactory)
         {
-            this.logger = logger;
+            this.logger = loggerFactory.Create(this);
             this.logger.Debug("Constructed");
         }
 
@@ -31,7 +31,7 @@ namespace UniT.ResourcesManager
 
         #region Public
 
-        LogConfig IExternalAssetsManager.LogConfig => this.logger.Config;
+        LogConfig IHasLogger.LogConfig => this.logger.Config;
 
         UniTask<Texture2D> IExternalAssetsManager.DownloadTexture(string url, IProgress<float> progress, CancellationToken cancellationToken)
         {

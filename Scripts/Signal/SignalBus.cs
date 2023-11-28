@@ -17,9 +17,9 @@ namespace UniT.Signal
         private readonly Dictionary<Type, HashSet<object>> callbacksNoSignal   = new();
 
         [Preserve]
-        public SignalBus(ILogger logger)
+        public SignalBus(ILogger.IFactory loggerFactory)
         {
-            this.logger = logger;
+            this.logger = loggerFactory.Create(this);
             this.logger.Debug("Constructed");
         }
 
@@ -27,7 +27,7 @@ namespace UniT.Signal
 
         #region Public
 
-        LogConfig ISignalBus.LogConfig => this.logger.Config;
+        LogConfig IHasLogger.LogConfig => this.logger.Config;
 
         void ISignalBus.Fire<T>(T signal)
         {

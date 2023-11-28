@@ -10,10 +10,8 @@ namespace UniT.ResourcesManager
     using Cysharp.Threading.Tasks;
     #endif
 
-    public interface IAssetsManager : IDisposable
+    public interface IAssetsManager : IHasLogger, IDisposable
     {
-        public LogConfig LogConfig { get; }
-
         #region Sync
 
         public T Load<T>(string key) where T : Object;

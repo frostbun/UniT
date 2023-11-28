@@ -3,7 +3,7 @@ namespace UniT.Logging
     using System;
     using UnityEngine.Scripting;
 
-    public sealed class UnityLogger : BaseLogger
+    public sealed class UnityLogger : Logger
     {
         [Preserve]
         public UnityLogger(string name, LogConfig config = null) : base(name, config)

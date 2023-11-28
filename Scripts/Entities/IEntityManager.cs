@@ -4,23 +4,34 @@ namespace UniT.Entities
     using System.Collections.Generic;
     using UniT.Entities.Model;
     using UniT.Extensions;
+    using UniT.Logging;
     using UnityEngine;
     #if UNIT_UNITASK
     using System.Threading;
     using Cysharp.Threading.Tasks;
     #endif
 
-    public interface IEntityManager
+    public interface IEntityManager : IHasLogger
     {
+        public void Load(IEntity prefab, int count = 1);
+
         public void Load(string key, int count = 1);
+
+        public TEntity Spawn<TEntity>(TEntity prefab, Vector3 position = default, Quaternion rotation = default, Transform parent = null) where TEntity : IEntityWithoutModel;
+
+        public TEntity Spawn<TEntity, TModel>(TEntity prefab, TModel model, Vector3 position = default, Quaternion rotation = default, Transform parent = null) where TEntity : IEntityWithModel<TModel>;
 
         public TEntity Spawn<TEntity>(string key, Vector3 position = default, Quaternion rotation = default, Transform parent = null) where TEntity : IEntityWithoutModel;
 
         public TEntity Spawn<TEntity, TModel>(string key, TModel model, Vector3 position = default, Quaternion rotation = default, Transform parent = null) where TEntity : IEntityWithModel<TModel>;
 
-        public void Recycle(IEntity entity);
+        public void Recycle(IEntity instance);
+
+        public void RecycleAll(IEntity prefab);
 
         public void RecycleAll(string key);
+
+        public void Unload(IEntity prefab);
 
         public void Unload(string key);
 

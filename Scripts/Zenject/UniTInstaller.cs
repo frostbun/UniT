@@ -3,13 +3,14 @@ namespace Zenject
 {
     using System.Linq;
     using UniT.Advertisements;
-    using UniT.Assets;
     using UniT.Audio;
     using UniT.Data;
     using UniT.Data.Serializers;
     using UniT.Data.Storages;
+    using UniT.Entities;
     using UniT.Logging;
     using UniT.ObjectPool;
+    using UniT.ResourcesManager;
     using UniT.UI;
     using UnityEngine;
     using ILogger = UniT.Logging.ILogger;
@@ -20,27 +21,16 @@ namespace Zenject
         {
             #region Logging
 
-            this.Container.Bind<LogConfig>()
-                .FromMethod(_ => new()
-                {
-                    Level = LogLevel.Info,
-                })
-                .AsTransient()
-                .WhenInjectedInto<ILogger>()
-                .Lazy();
-
-            this.Container.BindInterfacesTo<UnityLogger>()
-                .FromMethod(context => new UnityLogger(
-                    context.ObjectType?.Name,
-                    context.Container.TryResolve<LogConfig>()
-                ))
-                .AsTransient()
+            this.Container.BindInterfacesTo<LoggerFactory>()
+                .AsSingle()
+                .WhenInjectedInto<IHasLogger>()
                 .Lazy();
 
             #endregion
 
-            #region Assets
+            #region ResourcesManager
 
+            #if UNIT_ADDRESSABLES
             this.Container.BindInterfacesTo<AddressableSceneManager>()
                 .AsSingle()
                 .Lazy();
@@ -48,6 +38,15 @@ namespace Zenject
             this.Container.BindInterfacesTo<AddressableAssetsManager>()
                 .AsTransient()
                 .Lazy();
+            #else
+            this.Container.BindInterfacesTo<ResourceScenesManager>()
+                .AsSingle()
+                .Lazy();
+
+            this.Container.BindInterfacesTo<ResourceAssetsManager>()
+                .AsTransient()
+                .Lazy();
+            #endif
 
             #if UNIT_UNITASK
             this.Container.BindInterfacesTo<ExternalAssetsManager>()
@@ -58,6 +57,8 @@ namespace Zenject
             #endregion
 
             #region Data
+
+            #region Serializers
 
             #if UNIT_NEWTONSOFT_JSON
             this.Container.BindInterfacesTo<JsonSerializer>()
@@ -71,6 +72,10 @@ namespace Zenject
                 .WhenInjectedInto<IDataManager>()
                 .Lazy();
 
+            #endregion
+
+            #region Storages
+
             this.Container.BindInterfacesTo<AssetsStorage>()
                 .AsSingle()
                 .WhenInjectedInto<IDataManager>()
@@ -81,6 +86,15 @@ namespace Zenject
                 .WhenInjectedInto<IDataManager>()
                 .Lazy();
 
+            #if UNIT_FBINSTANT
+            this.Container.BindInterfacesTo<FbInstantStorage>()
+                .AsSingle()
+                .WhenInjectedInto<IDataManager>()
+                .Lazy();
+            #endif
+
+            #endregion
+
             this.Container.BindInterfacesTo<DataManager>()
                 .AsSingle()
                 .Lazy();
@@ -89,16 +103,20 @@ namespace Zenject
 
             #region Utilities
 
-            this.Container.BindInterfacesTo<UIManager>()
-                .FromMethod(_ => Object.FindObjectsOfType<UIManager>().Single().Construct(
-                    new(type => (IPresenter)CurrentContext.Container.Instantiate(type)),
-                    this.Container.TryResolve<IAssetsManager>(),
-                    this.Container.TryResolve<ILogger>()
-                ))
+            // this.Container.BindInterfacesTo<UIManager>()
+            //     .FromMethod(_ => Object.FindObjectsOfType<UIManager>().Single().Construct(
+            //         new(type => (IPresenter)CurrentContext.Container.Instantiate(type)),
+            //         this.Container.TryResolve<IAssetsManager>(),
+            //         this.Container.TryResolve<ILogger>()
+            //     ))
+            //     .AsSingle()
+            //     .Lazy();
+
+            this.Container.BindInterfacesTo<AudioManager>()
                 .AsSingle()
                 .Lazy();
 
-            this.Container.BindInterfacesTo<AudioManager>()
+            this.Container.BindInterfacesTo<EntityManager>()
                 .AsSingle()
                 .Lazy();
 
@@ -112,11 +130,17 @@ namespace Zenject
 
             #endregion
 
-            #region Third Party
+            #region Ads
 
+            #if UNIT_FBINSTANT
+            this.Container.BindInterfacesTo<FbInstantAdsManager>()
+                .AsSingle()
+                .Lazy();
+            #else
             this.Container.BindInterfacesTo<DummyAdsManager>()
                 .AsSingle()
                 .Lazy();
+            #endif
 
             #endregion
         }

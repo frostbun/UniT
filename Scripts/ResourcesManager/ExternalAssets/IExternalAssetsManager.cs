@@ -7,10 +7,8 @@ namespace UniT.ResourcesManager
     using UniT.Logging;
     using UnityEngine;
 
-    public interface IExternalAssetsManager : IDisposable
+    public interface IExternalAssetsManager : IHasLogger, IDisposable
     {
-        public LogConfig LogConfig { get; }
-
         public UniTask<Texture2D> DownloadTexture(string url, IProgress<float> progress = null, CancellationToken cancellationToken = default);
 
         public void Unload(string key);

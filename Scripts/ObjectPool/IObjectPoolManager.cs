@@ -9,10 +9,8 @@ namespace UniT.ObjectPool
     using Cysharp.Threading.Tasks;
     #endif
 
-    public interface IObjectPoolManager
+    public interface IObjectPoolManager : IHasLogger
     {
-        public LogConfig LogConfig { get; }
-
         public void Load(GameObject prefab, int count = 1);
 
         public void Load(string key, int count = 1);

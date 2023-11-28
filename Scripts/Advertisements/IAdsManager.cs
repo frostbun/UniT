@@ -1,12 +1,11 @@
 ﻿namespace UniT.Advertisements
 {
     using System;
+    using UniT.Initializables;
     using UniT.Logging;
 
-    public interface IAdsManager
+    public interface IAdsManager : IInitializable, IHasLogger
     {
-        public LogConfig LogConfig { get; }
-
         public void ShowBannerAd();
 
         public void HideBannerAd();
