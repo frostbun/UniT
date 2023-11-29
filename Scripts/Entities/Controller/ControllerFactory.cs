@@ -1,5 +1,6 @@
 namespace UniT.Entities.Controller
 {
+    using UnityEngine.Scripting;
     #if UNIT_ZENJECT
     using Zenject;
     #elif UNIT_DI
@@ -8,8 +9,13 @@ namespace UniT.Entities.Controller
     using System;
     #endif
 
-    public class ControllerFactory : IController.IFactory
+    public sealed class ControllerFactory : IController.IFactory
     {
+        [Preserve]
+        public ControllerFactory()
+        {
+        }
+
         public IController Create(IHasController owner)
         {
             #if UNIT_ZENJECT
