@@ -3,7 +3,6 @@
 ## Getting Started
 
 1. Install [Git Dependency Resolver](https://github.com/mob-sakai/GitDependencyResolverForUnity) or install these packages manually:
-    - [UniTask](https://github.com/Cysharp/UniTask)
     - [UniT Extensions](https://github.com/frostbun/UniT.Extensions)
 
 2. Install via git url
