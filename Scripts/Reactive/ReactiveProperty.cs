@@ -7,7 +7,7 @@ namespace UniT.Reactive
     public class ReactiveProperty<T>
     {
         private          T                  value;
-        private readonly HashSet<Action<T>> callbacks = new();
+        private readonly HashSet<Action<T>> callbacks = new HashSet<Action<T>>();
 
         public T Value
         {

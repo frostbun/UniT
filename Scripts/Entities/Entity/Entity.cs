@@ -38,7 +38,7 @@
 
         protected CancellationToken GetCancellationTokenOnHide()
         {
-            return (this.hideCts ??= new()).Token;
+            return (this.hideCts ??= new CancellationTokenSource()).Token;
         }
         #endif
 

@@ -23,10 +23,10 @@ namespace UniT.Pooling
         private readonly ILogger        logger;
 
         private readonly Transform                                               poolsContainer = new GameObject(nameof(ObjectPoolManager)).DontDestroyOnLoad().transform;
-        private readonly Dictionary<GameObject, ObjectPool>                      prefabToPool   = new();
-        private readonly Dictionary<string, ObjectPool>                          keyToPool      = new();
-        private readonly Dictionary<GameObject, ObjectPool>                      instanceToPool = new();
-        private readonly Dictionary<GameObject, ReadOnlyCollection<IRecyclable>> recyclables    = new();
+        private readonly Dictionary<GameObject, ObjectPool>                      prefabToPool   = new Dictionary<GameObject, ObjectPool>();
+        private readonly Dictionary<string, ObjectPool>                          keyToPool      = new Dictionary<string, ObjectPool>();
+        private readonly Dictionary<GameObject, ObjectPool>                      instanceToPool = new Dictionary<GameObject, ObjectPool>();
+        private readonly Dictionary<GameObject, ReadOnlyCollection<IRecyclable>> recyclables    = new Dictionary<GameObject, ReadOnlyCollection<IRecyclable>>();
 
         [Preserve]
         public ObjectPoolManager(IAssetsManager assetsManager, ILogger.IFactory loggerFactory)
@@ -83,7 +83,7 @@ namespace UniT.Pooling
 
         void IObjectPoolManager.Recycle(GameObject instance)
         {
-            if (!this.instanceToPool.Remove(instance, out var pool))
+            if (!this.instanceToPool.TryRemove(instance, out var pool))
             {
                 this.logger.Warning($"Trying to recycle {instance.name} that was not spawned from {this.GetType().Name}");
                 return;
@@ -103,7 +103,7 @@ namespace UniT.Pooling
 
         void IObjectPoolManager.Unload(GameObject prefab)
         {
-            if (!this.prefabToPool.Remove(prefab, out var pool))
+            if (!this.prefabToPool.TryRemove(prefab, out var pool))
             {
                 this.logger.Warning($"Trying to unload {prefab.name} pool that was not instantiated");
                 return;
@@ -113,7 +113,7 @@ namespace UniT.Pooling
 
         void IObjectPoolManager.Unload(string key)
         {
-            if (!this.keyToPool.Remove(key, out var pool))
+            if (!this.keyToPool.TryRemove(key, out var pool))
             {
                 this.logger.Warning($"Trying to unload {key} pool that was not instantiated");
                 return;

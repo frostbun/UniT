@@ -30,7 +30,7 @@ namespace UniT.Data.Converters
             var dictionary     = (IDictionary)Activator.CreateInstance(type);
             foreach (var item in (string[])ConverterManager.Instance.ConvertFromString(str, ArrayType))
             {
-                var kv = item.Split(this.separator);
+                var kv = item.Split(new[] { this.separator }, StringSplitOptions.None);
                 dictionary.Add(keyConverter.ConvertFromString(kv[0], keyType), valueConverter.ConvertFromString(kv[1], valueType));
             }
             return dictionary;

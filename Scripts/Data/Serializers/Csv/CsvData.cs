@@ -24,7 +24,7 @@ namespace UniT.Data.Serializers
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator() => this.list.GetEnumerator();
 
-        private readonly List<T> list = new();
+        private readonly List<T> list = new List<T>();
 
         public int Count => this.list.Count;
 
@@ -42,7 +42,7 @@ namespace UniT.Data.Serializers
 
         IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator() => this.dictionary.GetEnumerator();
 
-        private readonly Dictionary<TKey, TValue> dictionary = new();
+        private readonly Dictionary<TKey, TValue> dictionary = new Dictionary<TKey, TValue>();
 
         public int Count => this.dictionary.Count;
 

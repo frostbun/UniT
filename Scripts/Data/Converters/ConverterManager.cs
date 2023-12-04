@@ -12,10 +12,10 @@ namespace UniT.Data.Converters
         static ConverterManager()
         {
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
-            Instance                                = new();
+            Instance                                = new ConverterManager();
         }
 
-        private readonly List<IConverter> converters = new();
+        private readonly List<IConverter> converters = new List<IConverter>();
 
         private ConverterManager()
         {
@@ -78,7 +78,7 @@ namespace UniT.Data.Converters
         public IConverter GetConverter(Type type)
         {
             return this.converters.LastOrDefault(converter => converter.CanConvert(type))
-                ?? throw new($"No converter found for type {type.Name}");
+                ?? throw new ArgumentOutOfRangeException(nameof(type), type, $"No converter found for type {type.Name}");
         }
 
         public void AddConverter(IConverter converter)

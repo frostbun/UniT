@@ -14,8 +14,8 @@ namespace UniT.Data.Serializers
     {
         private static bool IsCsvKeyField(this FieldInfo field)
         {
-            return field.GetCustomAttribute<CsvKeyAttribute>() is not null
-                || field.ToPropertyInfo()?.GetCustomAttribute<CsvKeyAttribute>() is not null;
+            return field.GetCustomAttribute<CsvKeyAttribute>() is { }
+                || field.ToPropertyInfo()?.GetCustomAttribute<CsvKeyAttribute>() is { };
         }
 
         public static FieldInfo GetCsvKeyField(this Type type)

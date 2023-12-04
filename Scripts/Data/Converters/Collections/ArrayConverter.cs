@@ -16,7 +16,7 @@ namespace UniT.Data.Converters
         {
             var elementType      = type.GetElementType()!;
             var elementConverter = ConverterManager.Instance.GetConverter(elementType);
-            var elements         = str.Split(this.separator);
+            var elements         = str.Split(new[] { this.separator }, StringSplitOptions.None);
             var array            = Array.CreateInstance(elementType, elements.Length);
             for (var i = 0; i < elements.Length; ++i)
             {

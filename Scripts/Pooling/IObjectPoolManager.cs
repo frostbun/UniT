@@ -1,7 +1,6 @@
 namespace UniT.Pooling
 {
     using System;
-    using UniT.Extensions;
     using UniT.Logging;
     using UnityEngine;
     #if UNIT_UNITASK
@@ -31,6 +30,7 @@ namespace UniT.Pooling
 
         #region Component
 
+        #if NET_STANDARD_2_1
         public void Load(Component component, int count = 1) => this.Load(component.gameObject, count);
 
         public T Spawn<T>(T component, Vector3 position = default, Quaternion rotation = default, Transform parent = null) where T : Component => this.Spawn(component.gameObject, position, rotation, parent).GetComponent<T>();
@@ -42,11 +42,13 @@ namespace UniT.Pooling
         public void RecycleAll(Component component) => this.RecycleAll(component.gameObject);
 
         public void Unload(Component component) => this.Unload(component.gameObject);
+        #endif
 
         #endregion
 
         #region Implicit Key
 
+        #if NET_STANDARD_2_1
         public void Load<T>(int count = 1) => this.Load(typeof(T).GetKey(), count);
 
         public T Spawn<T>(Vector3 position = default, Quaternion rotation = default, Transform parent = null) => this.Spawn<T>(typeof(T).GetKey(), position, rotation, parent);
@@ -54,6 +56,7 @@ namespace UniT.Pooling
         public void RecycleAll<T>() => this.RecycleAll(typeof(T).GetKey());
 
         public void Unload<T>() => this.Unload(typeof(T).GetKey());
+        #endif
 
         #endregion
 
@@ -62,7 +65,10 @@ namespace UniT.Pooling
         #if UNIT_UNITASK
         public UniTask LoadAsync(string key, int count = 1, IProgress<float> progress = null, CancellationToken cancellationToken = default);
 
+        #if NET_STANDARD_2_1
         public UniTask LoadAsync<T>(int count = 1, IProgress<float> progress = null, CancellationToken cancellationToken = default) => this.LoadAsync(typeof(T).GetKey(), count, progress, cancellationToken);
+        #endif
+
         #endif
 
         #endregion

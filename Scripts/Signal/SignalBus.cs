@@ -13,8 +13,8 @@ namespace UniT.Signal
 
         private readonly ILogger logger;
 
-        private readonly Dictionary<Type, HashSet<object>> callbacksWithSignal = new();
-        private readonly Dictionary<Type, HashSet<object>> callbacksNoSignal   = new();
+        private readonly Dictionary<Type, HashSet<object>> callbacksWithSignal = new Dictionary<Type, HashSet<object>>();
+        private readonly Dictionary<Type, HashSet<object>> callbacksNoSignal   = new Dictionary<Type, HashSet<object>>();
 
         [Preserve]
         public SignalBus(ILogger.IFactory loggerFactory)
@@ -100,12 +100,12 @@ namespace UniT.Signal
 
         private HashSet<object> GetCallbacksWithSignal<T>()
         {
-            return this.callbacksWithSignal.GetOrAdd(typeof(T), () => new());
+            return this.callbacksWithSignal.GetOrAdd(typeof(T), () => new HashSet<object>());
         }
 
         private HashSet<object> GetCallbacksNoSignal<T>()
         {
-            return this.callbacksNoSignal.GetOrAdd(typeof(T), () => new());
+            return this.callbacksNoSignal.GetOrAdd(typeof(T), () => new HashSet<object>());
         }
 
         #endregion

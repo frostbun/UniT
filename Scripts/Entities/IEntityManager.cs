@@ -2,7 +2,6 @@ namespace UniT.Entities
 {
     using System;
     using System.Collections.Generic;
-    using UniT.Extensions;
     using UniT.Logging;
     using UnityEngine;
     #if UNIT_UNITASK
@@ -10,7 +9,7 @@ namespace UniT.Entities
     using Cysharp.Threading.Tasks;
     #endif
 
-    public interface IEntityManager : IHasLogger
+    public interface IEntityManager : IHasLogger, IDisposable
     {
         public void Load(IEntity prefab, int count = 1);
 
@@ -38,6 +37,7 @@ namespace UniT.Entities
 
         #region Implicit Key
 
+        #if NET_STANDARD_2_1
         public void Load<TEntity>(int count = 1) where TEntity : IEntity => this.Load(typeof(TEntity).GetKey(), count);
 
         public TEntity Spawn<TEntity>(Vector3 position = default, Quaternion rotation = default, Transform parent = null) where TEntity : IEntityWithoutModel => this.Spawn<TEntity>(typeof(TEntity).GetKey(), position, rotation, parent);
@@ -47,6 +47,7 @@ namespace UniT.Entities
         public void RecycleAll<TEntity>() where TEntity : IEntity => this.RecycleAll(typeof(TEntity).GetKey());
 
         public void Unload<TEntity>() where TEntity : IEntity => this.Unload(typeof(TEntity).GetKey());
+        #endif
 
         #endregion
 
@@ -55,7 +56,10 @@ namespace UniT.Entities
         #if UNIT_UNITASK
         public UniTask LoadAsync(string key, int count = 1, IProgress<float> progress = null, CancellationToken cancellationToken = default);
 
+        #if NET_STANDARD_2_1
         public UniTask LoadAsync<TEntity>(int count = 1, IProgress<float> progress = null, CancellationToken cancellationToken = default) where TEntity : IEntity => this.LoadAsync(typeof(TEntity).GetKey(), count, progress, cancellationToken);
+        #endif
+
         #endif
 
         #endregion

@@ -11,7 +11,7 @@ namespace UniT.Logging
         protected Logger(string name, LogConfig config = null)
         {
             this.Name   = name;
-            this.Config = config ?? new();
+            this.Config = config ?? new LogConfig();
         }
 
         void ILogger.Debug(string message)

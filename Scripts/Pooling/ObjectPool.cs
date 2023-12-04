@@ -12,8 +12,8 @@ namespace UniT.Pooling
         [SerializeField] private GameObject prefab;
 
         private new      Transform           transform;
-        private readonly Queue<GameObject>   pooledObjects  = new();
-        private readonly HashSet<GameObject> spawnedObjects = new();
+        private readonly Queue<GameObject>   pooledObjects  = new Queue<GameObject>();
+        private readonly HashSet<GameObject> spawnedObjects = new HashSet<GameObject>();
 
         public static ObjectPool Instantiate(GameObject prefab)
         {

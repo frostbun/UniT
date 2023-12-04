@@ -18,7 +18,7 @@ namespace UniT.ResourcesManager
 
         private readonly ILogger logger;
 
-        private readonly Dictionary<string, Texture2D> cache = new();
+        private readonly Dictionary<string, Texture2D> cache = new Dictionary<string, Texture2D>();
 
         [Preserve]
         public ExternalAssetsManager(ILogger.IFactory loggerFactory)

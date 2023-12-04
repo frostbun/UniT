@@ -23,7 +23,7 @@ namespace UniT.Data.Serializers
 
         public void Populate(object data, string rawData)
         {
-            using var reader = CsvDataReader.Create(new StringReader(rawData), new() { HeaderComparer = StringComparer.OrdinalIgnoreCase, });
+            using var reader = CsvDataReader.Create(new StringReader(rawData), new CsvDataReaderOptions { HeaderComparer = StringComparer.OrdinalIgnoreCase, });
             var       parser = new CsvParser((ICsvData)data, reader);
             while (reader.Read()) parser.Parse();
         }
@@ -35,13 +35,14 @@ namespace UniT.Data.Serializers
 
         private sealed class CsvParser
         {
-            private readonly ICsvData                         data;
-            private readonly CsvDataReader                    reader;
-            private readonly Type                             rowType;
-            private readonly FieldInfo                        keyField;
-            private readonly List<FieldInfo>                  normalFields;
-            private readonly List<FieldInfo>                  nestedFields;
-            private readonly Dictionary<FieldInfo, CsvParser> nestedParsers;
+            private readonly ICsvData        data;
+            private readonly CsvDataReader   reader;
+            private readonly Type            rowType;
+            private readonly FieldInfo       keyField;
+            private readonly List<FieldInfo> normalFields;
+            private readonly List<FieldInfo> nestedFields;
+
+            private readonly Dictionary<FieldInfo, CsvParser> nestedParsers = new Dictionary<FieldInfo, CsvParser>();
 
             public CsvParser(ICsvData data, CsvDataReader reader)
             {
@@ -50,7 +51,6 @@ namespace UniT.Data.Serializers
                 this.rowType                           = data.RowType;
                 this.keyField                          = this.rowType.GetCsvKeyField();
                 (this.normalFields, this.nestedFields) = this.rowType.GetCsvFields().Split(field => !typeof(ICsvData).IsAssignableFrom(field.FieldType));
-                this.nestedParsers                     = new();
             }
 
             public void Parse()
@@ -75,7 +75,7 @@ namespace UniT.Data.Serializers
                     }
                 }
 
-                if (keyValue is not null)
+                if (keyValue is { })
                 {
                     this.data.Add(keyValue, row);
                     this.nestedParsers.Clear();

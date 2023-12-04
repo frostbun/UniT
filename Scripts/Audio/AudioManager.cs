@@ -25,8 +25,8 @@ namespace UniT.Audio
         private readonly GameObject  audioSourcesContainer;
         private readonly AudioSource musicSource;
 
-        private readonly Queue<AudioSource>              pooledSoundSources = new();
-        private readonly Dictionary<string, AudioSource> loadedSoundSources = new();
+        private readonly Queue<AudioSource>              pooledSoundSources = new Queue<AudioSource>();
+        private readonly Dictionary<string, AudioSource> loadedSoundSources = new Dictionary<string, AudioSource>();
 
         [Preserve]
         public AudioManager(IAudioConfig config, IAssetsManager assetsManager, ILogger.IFactory loggerFactory)
@@ -108,7 +108,7 @@ namespace UniT.Audio
 
         void IAudioManager.UnloadSound(string name)
         {
-            if (!this.loadedSoundSources.Remove(name, out var soundSource))
+            if (!this.loadedSoundSources.TryRemove(name, out var soundSource))
             {
                 this.logger.Warning($"Trying to unload sound {name} that was not loaded");
                 return;

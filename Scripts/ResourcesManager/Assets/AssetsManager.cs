@@ -17,7 +17,7 @@
 
         private readonly ILogger logger;
 
-        private readonly Dictionary<string, Object> cache = new();
+        private readonly Dictionary<string, Object> cache = new Dictionary<string, Object>();
 
         protected AssetsManager(ILogger.IFactory loggerFactory)
         {
@@ -40,7 +40,7 @@
 
         void IAssetsManager.Unload(string key)
         {
-            if (this.cache.Remove(key, out var @object))
+            if (this.cache.TryRemove(key, out var @object))
             {
                 this.Unload(@object);
                 this.logger.Debug($"Unloaded {key}");

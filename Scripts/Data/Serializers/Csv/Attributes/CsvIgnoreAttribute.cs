@@ -15,8 +15,8 @@ namespace UniT.Data.Serializers
     {
         private static bool IsCsvIgnored(this FieldInfo field)
         {
-            return field.GetCustomAttribute<CsvIgnoreAttribute>() is not null
-                || field.ToPropertyInfo()?.GetCustomAttribute<CsvIgnoreAttribute>() is not null;
+            return field.GetCustomAttribute<CsvIgnoreAttribute>() is { }
+                || field.ToPropertyInfo()?.GetCustomAttribute<CsvIgnoreAttribute>() is { };
         }
 
         public static IEnumerable<FieldInfo> GetCsvFields(this Type type)

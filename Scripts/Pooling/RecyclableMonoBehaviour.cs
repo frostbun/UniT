@@ -36,7 +36,7 @@ namespace UniT.Pooling
 
         protected CancellationToken GetCancellationTokenOnRecycle()
         {
-            return (this.recycleCts ??= new()).Token;
+            return (this.recycleCts ??= new CancellationTokenSource()).Token;
         }
         #endif
 

@@ -16,7 +16,7 @@ namespace UniT.Data.Converters
 
         protected override object ConvertFromString(string str, Type type)
         {
-            var items     = str.Split(this.separator);
+            var items     = str.Split(new[] { this.separator }, StringSplitOptions.None);
             var itemTypes = type.GetGenericArguments();
             return Activator.CreateInstance(type, IterTools.StrictZip(items, itemTypes, ConverterManager.Instance.ConvertFromString).ToArray());
         }
