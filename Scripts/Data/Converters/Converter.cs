@@ -40,6 +40,6 @@ namespace UniT.Data.Converters
 
     public abstract class Converter<T> : Converter
     {
-        protected sealed override Type ConvertibleType { get; } = typeof(T);
+        protected sealed override Type ConvertibleType => typeof(T);
     }
 }

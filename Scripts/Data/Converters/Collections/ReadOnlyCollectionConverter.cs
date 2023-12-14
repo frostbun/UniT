@@ -9,7 +9,7 @@ namespace UniT.Data.Converters
     /// </summary>
     public sealed class ReadOnlyCollectionConverter : Converter
     {
-        protected override Type ConvertibleType { get; } = typeof(ReadOnlyCollection<>);
+        protected override Type ConvertibleType => typeof(ReadOnlyCollection<>);
 
         protected override object ConvertFromString(string str, Type type)
         {

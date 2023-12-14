@@ -16,7 +16,7 @@ namespace UniT.Data.Serializers
     [Preserve]
     public class CsvData<T> : ICsvData, IReadOnlyList<T>
     {
-        Type ICsvData.RowType { get; } = typeof(T);
+        Type ICsvData.RowType => typeof(T);
 
         void ICsvData.Add(object key, object value) => this.list.Add((T)value);
 
@@ -34,7 +34,7 @@ namespace UniT.Data.Serializers
     [Preserve]
     public class CsvData<TKey, TValue> : ICsvData, IReadOnlyDictionary<TKey, TValue>
     {
-        Type ICsvData.RowType { get; } = typeof(TValue);
+        Type ICsvData.RowType => typeof(TValue);
 
         void ICsvData.Add(object key, object value) => this.dictionary.Add((TKey)key, (TValue)value);
 

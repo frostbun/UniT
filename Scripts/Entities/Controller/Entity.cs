@@ -8,7 +8,7 @@ namespace UniT.Entities.Controller
 
         IController IHasController.Controller { set => this.Controller = (TController)value; }
 
-        protected virtual Type ControllerType { get; } = typeof(TController);
+        protected virtual Type ControllerType => typeof(TController);
 
         protected TController Controller { get; private set; }
     }
@@ -19,7 +19,7 @@ namespace UniT.Entities.Controller
 
         IController IHasController.Controller { set => this.Controller = (TController)value; }
 
-        protected virtual Type ControllerType { get; } = typeof(TController);
+        protected virtual Type ControllerType => typeof(TController);
 
         protected TController Controller { get; private set; }
     }
