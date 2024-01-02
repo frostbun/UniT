@@ -3,6 +3,7 @@ namespace UniT.Data.Serializers
 {
     using System;
     using Newtonsoft.Json;
+    using UniT.Data.Types;
     using UnityEngine.Scripting;
 
     public sealed class JsonSerializer : ISerializer
@@ -20,10 +21,7 @@ namespace UniT.Data.Serializers
                 };
         }
 
-        public bool CanSerialize(Type type)
-        {
-            return typeof(IJsonData).IsAssignableFrom(type);
-        }
+        public bool CanSerialize(Type type) => typeof(IJsonData).IsAssignableFrom(type);
 
         public void Populate(object data, string rawData)
         {

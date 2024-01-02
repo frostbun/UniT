@@ -1,8 +1,8 @@
-namespace UniT.Data.Serializers
+namespace UniT.Data.Types
 {
     using System;
 
-    public interface ICsvData
+    public interface ICsvData : ISerializableData
     {
         public Type RowType { get; }
 

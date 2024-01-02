@@ -2,18 +2,18 @@
 namespace UniT.Data.Storages
 {
     using System;
-    using UniT.Extensions;
-    using UniT.FbInstant;
     using UnityEngine.Scripting;
     #if UNIT_UNITASK
     using System.Threading;
     using Cysharp.Threading.Tasks;
+    using UniT.Extensions;
+    using UniT.FbInstant;
     #endif
 
-    public sealed class FbInstantStorage : ReadWriteStorage
+    public sealed class FbInstantSerializableDataStorage : ReadWriteSerializableDataStorage
     {
         [Preserve]
-        public FbInstantStorage()
+        public FbInstantSerializableDataStorage()
         {
         }
 

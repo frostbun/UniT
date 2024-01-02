@@ -6,6 +6,7 @@ namespace UniT.Data
     using System.Linq;
     using UniT.Data.Serializers;
     using UniT.Data.Storages;
+    using UniT.Data.Types;
     using UniT.Extensions;
     using UniT.Logging;
     using UnityEngine.Scripting;
@@ -18,26 +19,32 @@ namespace UniT.Data
     {
         #region Constructor
 
-        private readonly ReadOnlyDictionary<Type, IData>       datas;
-        private readonly ReadOnlyDictionary<Type, IStorage>    storages;
-        private readonly ReadOnlyDictionary<Type, ISerializer> serializers;
-        private readonly ILogger                               logger;
+        private readonly ReadOnlyDictionary<Type, IData>        datas;
+        private readonly ReadOnlyDictionary<Type, IDataStorage> storages;
+        private readonly ReadOnlyDictionary<Type, ISerializer>  serializers;
+        private readonly ILogger                                logger;
 
         [Preserve]
-        public DataManager(IData[] datas, IStorage[] storages, ISerializer[] serializers, ILogger.IFactory loggerFactory)
+        public DataManager(
+            IEnumerable<IData>        datas,
+            IEnumerable<IDataStorage> storages,
+            IEnumerable<ISerializer>  serializers,
+            ILogger.IFactory          loggerFactory
+        )
         {
+            datas      = datas as ICollection<IData> ?? datas.ToArray();
             this.datas = datas.ToDictionary(data => data.GetType()).AsReadOnly();
             this.storages = datas.ToDictionary(
                 data => data.GetType(),
                 data => storages.LastOrDefault(storage => storage.CanStore(data.GetType())) ?? throw new InvalidOperationException($"No storage found for {data.GetType().Name}")
             ).AsReadOnly();
-            this.serializers = datas.ToDictionary(
+            this.serializers = datas.Where(data => data is ISerializableData).ToDictionary(
                 data => data.GetType(),
                 data => serializers.LastOrDefault(serializer => serializer.CanSerialize(data.GetType())) ?? throw new InvalidOperationException($"No serializer found for {data.GetType().Name}")
             ).AsReadOnly();
 
             this.logger = loggerFactory.Create(this);
-            this.datas.Keys.ForEach(type => this.logger.Debug($"Found {type.Name} - {this.storages[type].GetType().Name} - {this.serializers[type].GetType().Name}"));
+            this.datas.Keys.ForEach(type => this.logger.Debug($"Found {type.Name} - {this.storages[type].GetType().Name} - {this.serializers.GetOrDefault(type)?.GetType().Name}"));
             this.logger.Debug("Constructed");
         }
 
@@ -66,11 +73,22 @@ namespace UniT.Data
             types.GroupBy(type => this.storages.GetOrDefault(type) ?? throw new InvalidOperationException($"{type.Name} not found"))
                 .ForEach(group =>
                 {
-                    var keys     = group.Select(type => type.GetKey()).ToArray();
-                    var storage  = group.Key;
-                    var rawDatas = storage.Load(keys);
-                    this.logger.Debug($"Loaded {keys.ToArrayString()}");
-                    IterTools.StrictZip(group, rawDatas).ForEach((type, rawData) => this.serializers[type].Populate(this.datas[type], rawData));
+                    var keys = group.Select(type => type.GetKey()).ToArray();
+                    switch (group.Key)
+                    {
+                        case IReadOnlySerializableDataStorage storage:
+                        {
+                            var rawDatas = storage.Load(keys);
+                            IterTools.StrictZip(group, rawDatas).ForEach((type, rawData) => this.serializers[type].Populate(this.datas[type], rawData));
+                            break;
+                        }
+                        case IReadOnlyBlobDataStorage storage:
+                        {
+                            var blobDatas = storage.Load(keys);
+                            IterTools.StrictZip(group, blobDatas).ForEach((type, blobData) => blobData.CopyTo(this.datas[type]));
+                            break;
+                        }
+                    }
                     this.logger.Debug($"Populated {keys.ToArrayString()}");
                 });
         }
@@ -78,14 +96,24 @@ namespace UniT.Data
         private void Save(IEnumerable<Type> types)
         {
             types.GroupBy(type => this.storages.GetOrDefault(type) ?? throw new InvalidOperationException($"{type.Name} not found"))
-                .Where(group => group.Key is IReadWriteStorage)
                 .ForEach(group =>
                 {
-                    var keys     = group.Select(type => type.GetKey()).ToArray();
-                    var rawDatas = group.Select(type => this.serializers[type].Serialize(this.datas[type])).ToArray();
-                    this.logger.Debug($"Serialized {keys.ToArrayString()}");
-                    var storage = (IReadWriteStorage)group.Key;
-                    storage.Save(keys, rawDatas);
+                    var keys = group.Select(type => type.GetKey()).ToArray();
+                    switch (group.Key)
+                    {
+                        case IReadWriteSerializableDataStorage storage:
+                        {
+                            var rawDatas = group.Select(type => this.serializers[type].Serialize(this.datas[type])).ToArray();
+                            storage.Save(keys, rawDatas);
+                            break;
+                        }
+                        case IReadWriteBlobDataStorage storage:
+                        {
+                            var blobDatas = group.Select(type => this.datas[type]).ToArray();
+                            storage.Save(keys, blobDatas);
+                            break;
+                        }
+                    }
                     this.logger.Debug($"Saved {keys.ToArrayString()}");
                 });
         }
@@ -93,11 +121,11 @@ namespace UniT.Data
         private void Flush(IEnumerable<Type> types)
         {
             types.GroupBy(type => this.storages.GetOrDefault(type) ?? throw new InvalidOperationException($"{type.Name} not found"))
-                .Where(group => group.Key is IReadWriteStorage)
+                .Where(group => group.Key is IFlushableDataStorage)
                 .ForEach(group =>
                 {
                     var keys    = group.Select(type => type.GetKey()).ToArray();
-                    var storage = (IReadWriteStorage)group.Key;
+                    var storage = (IFlushableDataStorage)group.Key;
                     storage.Flush();
                     this.logger.Debug($"Flushed {keys.ToArrayString()}");
                 });
@@ -126,12 +154,26 @@ namespace UniT.Data
                 .ForEachAsync(
                     async (group, progress, cancellationToken) =>
                     {
-                        var keys     = group.Select(type => type.GetKey()).ToArray();
-                        var storage  = group.Key;
-                        var rawDatas = await storage.LoadAsync(keys, progress, cancellationToken);
-                        this.logger.Debug($"Loaded {keys.ToArrayString()}");
-                        IterTools.StrictZip(group, rawDatas).ForEach((type, rawData) => this.serializers[type].Populate(this.datas[type], rawData));
-                        this.logger.Debug($"Populated {keys.ToArrayString()}");
+                        var keys = group.Select(type => type.GetKey()).ToArray();
+                        switch (group.Key)
+                        {
+                            case IReadOnlySerializableDataStorage storage:
+                            {
+                                var rawDatas = await storage.LoadAsync(keys, progress, cancellationToken);
+                                this.logger.Debug($"Loaded {keys.ToArrayString()}");
+                                IterTools.StrictZip(group, rawDatas).ForEach((type, rawData) => this.serializers[type].Populate(this.datas[type], rawData));
+                                this.logger.Debug($"Populated {keys.ToArrayString()}");
+                                break;
+                            }
+                            case IReadOnlyBlobDataStorage storage:
+                            {
+                                var blobDatas = await storage.LoadAsync(keys, progress, cancellationToken);
+                                this.logger.Debug($"Loaded {keys.ToArrayString()}");
+                                IterTools.StrictZip(group, blobDatas).ForEach((type, blobData) => blobData.CopyTo(this.datas[type]));
+                                this.logger.Debug($"Populated {keys.ToArrayString()}");
+                                break;
+                            }
+                        }
                     },
                     progress,
                     cancellationToken
@@ -141,15 +183,26 @@ namespace UniT.Data
         private UniTask SaveAsync(IEnumerable<Type> types, IProgress<float> progress, CancellationToken cancellationToken)
         {
             return types.GroupBy(type => this.storages.GetOrDefault(type) ?? throw new InvalidOperationException($"{type.Name} not found"))
-                .Where(group => group.Key is IReadWriteStorage)
+                .Where(group => group.Key is IReadWriteSerializableDataStorage)
                 .ForEachAsync(
                     async (group, progress, cancellationToken) =>
                     {
-                        var keys     = group.Select(type => type.GetKey()).ToArray();
-                        var rawDatas = group.Select(type => this.serializers[type].Serialize(this.datas[type])).ToArray();
-                        this.logger.Debug($"Serialized {keys.ToArrayString()}");
-                        var storage = (IReadWriteStorage)group.Key;
-                        await storage.SaveAsync(keys, rawDatas, progress, cancellationToken);
+                        var keys = group.Select(type => type.GetKey()).ToArray();
+                        switch (group.Key)
+                        {
+                            case IReadWriteSerializableDataStorage storage:
+                            {
+                                var rawDatas = group.Select(type => this.serializers[type].Serialize(this.datas[type])).ToArray();
+                                await storage.SaveAsync(keys, rawDatas, progress, cancellationToken);
+                                break;
+                            }
+                            case IReadWriteBlobDataStorage storage:
+                            {
+                                var blobDatas = group.Select(type => this.datas[type]).ToArray();
+                                await storage.SaveAsync(keys, blobDatas, progress, cancellationToken);
+                                break;
+                            }
+                        }
                         this.logger.Debug($"Saved {keys.ToArrayString()}");
                     },
                     progress,
@@ -160,19 +213,18 @@ namespace UniT.Data
         private UniTask FlushAsync(IEnumerable<Type> types, IProgress<float> progress, CancellationToken cancellationToken)
         {
             return types.GroupBy(type => this.storages.GetOrDefault(type) ?? throw new InvalidOperationException($"{type.Name} not found"))
-                    .Where(group => group.Key is IReadWriteStorage)
-                    .ForEachAsync(
-                        async (group, progress, cancellationToken) =>
-                        {
-                            var keys    = group.Select(type => type.GetKey()).ToArray();
-                            var storage = (IReadWriteStorage)group.Key;
-                            await storage.FlushAsync(progress, cancellationToken);
-                            this.logger.Debug($"Flushed {keys.ToArrayString()}");
-                        },
-                        progress,
-                        cancellationToken
-                    )
-                ;
+                .Where(group => group.Key is IFlushableDataStorage)
+                .ForEachAsync(
+                    async (group, progress, cancellationToken) =>
+                    {
+                        var keys    = group.Select(type => type.GetKey()).ToArray();
+                        var storage = (IFlushableDataStorage)group.Key;
+                        await storage.FlushAsync(progress, cancellationToken);
+                        this.logger.Debug($"Flushed {keys.ToArrayString()}");
+                    },
+                    progress,
+                    cancellationToken
+                );
         }
         #endif
 

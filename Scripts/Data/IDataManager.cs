@@ -1,7 +1,7 @@
 namespace UniT.Data
 {
     using System;
-    using UniT.Data.Storages;
+    using UniT.Data.Types;
     using UniT.Logging;
     #if UNIT_UNITASK
     using System.Threading;
@@ -68,7 +68,6 @@ namespace UniT.Data
 
         public UniTask FlushAsync<T>(IProgress<float> progress = null, CancellationToken cancellationToken = default) where T : IReadWriteData => this.FlushAsync(typeof(T), progress, cancellationToken);
         #endif
-
         #endif
 
         #endregion

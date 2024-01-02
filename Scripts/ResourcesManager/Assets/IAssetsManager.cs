@@ -48,7 +48,6 @@ namespace UniT.ResourcesManager
 
         public UniTask<T> LoadComponentAsync<T>(IProgress<float> progress = null, CancellationToken cancellationToken = default) => this.LoadComponentAsync<T>(typeof(T).GetKey(), progress, cancellationToken);
         #endif
-
         #endif
 
         #endregion

@@ -10,10 +10,10 @@ namespace UniT.Data.Storages
     using Cysharp.Threading.Tasks;
     #endif
 
-    public sealed class PlayerPrefsStorage : ReadWriteStorage
+    public sealed class PlayerPrefsSerializableDataStorage : ReadWriteSerializableDataStorage
     {
         [Preserve]
-        public PlayerPrefsStorage()
+        public PlayerPrefsSerializableDataStorage()
         {
         }
 

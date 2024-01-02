@@ -6,10 +6,8 @@
     using Cysharp.Threading.Tasks;
     #endif
 
-    public interface IStorage
+    public interface ISerializableDataStorage : IDataStorage
     {
-        public bool CanStore(Type type);
-
         public string[] Load(string[] keys);
 
         #if UNIT_UNITASK

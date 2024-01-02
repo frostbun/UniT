@@ -1,7 +1,6 @@
 namespace UniT.Data.Storages
 {
     using System.Linq;
-    using UniT.Extensions;
     using UniT.ResourcesManager;
     using UnityEngine;
     using UnityEngine.Scripting;
@@ -9,14 +8,15 @@ namespace UniT.Data.Storages
     using System;
     using System.Threading;
     using Cysharp.Threading.Tasks;
+    using UniT.Extensions;
     #endif
 
-    public sealed class AssetsStorage : ReadOnlyStorage
+    public sealed class AssetsSerializableDataStorage : ReadOnlySerializableDataStorage
     {
         private readonly IAssetsManager assetsManager;
 
         [Preserve]
-        public AssetsStorage(IAssetsManager assetsManager)
+        public AssetsSerializableDataStorage(IAssetsManager assetsManager)
         {
             this.assetsManager = assetsManager;
         }

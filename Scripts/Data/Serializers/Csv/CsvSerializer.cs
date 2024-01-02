@@ -6,6 +6,7 @@ namespace UniT.Data.Serializers
     using System.Reflection;
     using Sylvan.Data.Csv;
     using UniT.Data.Converters;
+    using UniT.Data.Types;
     using UniT.Extensions;
     using UnityEngine.Scripting;
 
@@ -16,10 +17,7 @@ namespace UniT.Data.Serializers
         {
         }
 
-        public bool CanSerialize(Type type)
-        {
-            return typeof(ICsvData).IsAssignableFrom(type);
-        }
+        public bool CanSerialize(Type type) => typeof(ICsvData).IsAssignableFrom(type);
 
         public void Populate(object data, string rawData)
         {

@@ -3,6 +3,7 @@ namespace UniT.Data.Serializers
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using UniT.Data.Types;
     using UniT.Extensions;
     using UnityEngine.Scripting;
 
