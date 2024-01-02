@@ -37,7 +37,7 @@ namespace UniT.Entities
 
         #region Implicit Key
 
-        #if NET_STANDARD_2_1
+        #if UNITY_2021_2_OR_NEWER
         public void Load<TEntity>(int count = 1) where TEntity : IEntity => this.Load(typeof(TEntity).GetKey(), count);
 
         public TEntity Spawn<TEntity>(Vector3 position = default, Quaternion rotation = default, Transform parent = null) where TEntity : IEntityWithoutModel => this.Spawn<TEntity>(typeof(TEntity).GetKey(), position, rotation, parent);
@@ -56,7 +56,7 @@ namespace UniT.Entities
         #if UNIT_UNITASK
         public UniTask LoadAsync(string key, int count = 1, IProgress<float> progress = null, CancellationToken cancellationToken = default);
 
-        #if NET_STANDARD_2_1
+        #if UNITY_2021_2_OR_NEWER
         public UniTask LoadAsync<TEntity>(int count = 1, IProgress<float> progress = null, CancellationToken cancellationToken = default) where TEntity : IEntity => this.LoadAsync(typeof(TEntity).GetKey(), count, progress, cancellationToken);
         #endif
 

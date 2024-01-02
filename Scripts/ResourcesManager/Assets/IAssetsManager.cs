@@ -17,7 +17,7 @@ namespace UniT.ResourcesManager
 
         public void Unload(string key);
 
-        #if NET_STANDARD_2_1
+        #if UNITY_2021_2_OR_NEWER
         public T Load<T>() where T : Object => this.Load<T>(typeof(T).GetKey());
 
         public void Unload<T>() => this.Unload(typeof(T).GetKey());
@@ -36,7 +36,7 @@ namespace UniT.ResourcesManager
         #if UNIT_UNITASK
         public UniTask<T> LoadAsync<T>(string key, IProgress<float> progress = null, CancellationToken cancellationToken = default) where T : Object;
 
-        #if NET_STANDARD_2_1
+        #if UNITY_2021_2_OR_NEWER
         public UniTask<T> LoadAsync<T>(IProgress<float> progress = null, CancellationToken cancellationToken = default) where T : Object => this.LoadAsync<T>(typeof(T).GetKey(), progress, cancellationToken);
 
         public UniTask<T> LoadComponentAsync<T>(string key, IProgress<float> progress = null, CancellationToken cancellationToken = default) =>

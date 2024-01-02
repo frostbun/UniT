@@ -30,7 +30,7 @@ namespace UniT.Pooling
 
         #region Component
 
-        #if NET_STANDARD_2_1
+        #if UNITY_2021_2_OR_NEWER
         public void Load(Component component, int count = 1) => this.Load(component.gameObject, count);
 
         public T Spawn<T>(T component, Vector3 position = default, Quaternion rotation = default, Transform parent = null) where T : Component => this.Spawn(component.gameObject, position, rotation, parent).GetComponent<T>();
@@ -48,7 +48,7 @@ namespace UniT.Pooling
 
         #region Implicit Key
 
-        #if NET_STANDARD_2_1
+        #if UNITY_2021_2_OR_NEWER
         public void Load<T>(int count = 1) => this.Load(typeof(T).GetKey(), count);
 
         public T Spawn<T>(Vector3 position = default, Quaternion rotation = default, Transform parent = null) => this.Spawn<T>(typeof(T).GetKey(), position, rotation, parent);
@@ -65,7 +65,7 @@ namespace UniT.Pooling
         #if UNIT_UNITASK
         public UniTask LoadAsync(string key, int count = 1, IProgress<float> progress = null, CancellationToken cancellationToken = default);
 
-        #if NET_STANDARD_2_1
+        #if UNITY_2021_2_OR_NEWER
         public UniTask LoadAsync<T>(int count = 1, IProgress<float> progress = null, CancellationToken cancellationToken = default) => this.LoadAsync(typeof(T).GetKey(), count, progress, cancellationToken);
         #endif
 

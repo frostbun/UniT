@@ -12,7 +12,7 @@ namespace UniT.Data
     {
         public IData Get(Type type);
 
-        #if NET_STANDARD_2_1
+        #if UNITY_2021_2_OR_NEWER
         public T Get<T>() where T : IData => (T)this.Get(typeof(T));
         #endif
 
@@ -30,7 +30,7 @@ namespace UniT.Data
 
         public void FlushAll();
 
-        #if NET_STANDARD_2_1
+        #if UNITY_2021_2_OR_NEWER
         public void Populate<T>() where T : IData => this.Populate(typeof(T));
 
         public void Save<T>() where T : IReadWriteData => this.Save(typeof(T));
@@ -55,7 +55,7 @@ namespace UniT.Data
 
         public UniTask FlushAllAsync(IProgress<float> progress = null, CancellationToken cancellationToken = default);
 
-        #if NET_STANDARD_2_1
+        #if UNITY_2021_2_OR_NEWER
         public UniTask PopulateAsync(Type dataType, IProgress<float> progress = null, CancellationToken cancellationToken = default) => this.PopulateAsync(new[] { dataType }, progress, cancellationToken);
 
         public UniTask SaveAsync(Type dataType, IProgress<float> progress = null, CancellationToken cancellationToken = default) => this.SaveAsync(new[] { dataType }, progress, cancellationToken);
