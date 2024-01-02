@@ -1,7 +1,6 @@
 #if UNIT_ZENJECT
 namespace Zenject
 {
-    using System.Linq;
     using UniT.Advertisements;
     using UniT.Audio;
     using UniT.Data;
@@ -9,11 +8,8 @@ namespace Zenject
     using UniT.Data.Storages;
     using UniT.Entities;
     using UniT.Logging;
-    using UniT.ObjectPool;
+    using UniT.Pooling;
     using UniT.ResourcesManager;
-    using UniT.UI;
-    using UnityEngine;
-    using ILogger = UniT.Logging.ILogger;
 
     public sealed class UniTInstaller : Installer<UniTInstaller>
     {
@@ -76,18 +72,23 @@ namespace Zenject
 
             #region Storages
 
-            this.Container.BindInterfacesTo<AssetsStorage>()
+            this.Container.BindInterfacesTo<AssetsBlobDataStorage>()
                 .AsSingle()
                 .WhenInjectedInto<IDataManager>()
                 .Lazy();
 
-            this.Container.BindInterfacesTo<PlayerPrefsStorage>()
+            this.Container.BindInterfacesTo<AssetsSerializableDataStorage>()
+                .AsSingle()
+                .WhenInjectedInto<IDataManager>()
+                .Lazy();
+
+            this.Container.BindInterfacesTo<PlayerPrefsSerializableDataStorage>()
                 .AsSingle()
                 .WhenInjectedInto<IDataManager>()
                 .Lazy();
 
             #if UNIT_FBINSTANT
-            this.Container.BindInterfacesTo<FbInstantStorage>()
+            this.Container.BindInterfacesTo<FbInstantSerializableDataStorage>()
                 .AsSingle()
                 .WhenInjectedInto<IDataManager>()
                 .Lazy();

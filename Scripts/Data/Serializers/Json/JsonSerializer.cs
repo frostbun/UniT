@@ -21,14 +21,14 @@ namespace UniT.Data.Serializers
                 };
         }
 
-        public bool CanSerialize(Type type) => typeof(IJsonData).IsAssignableFrom(type);
+        bool ISerializer.CanSerialize(Type type) => typeof(IJsonData).IsAssignableFrom(type);
 
-        public void Populate(object data, string rawData)
+        void ISerializer.Populate(IData data, string rawData)
         {
             JsonConvert.PopulateObject(rawData, data, this.settings);
         }
 
-        public string Serialize(object data)
+        string ISerializer.Serialize(IData data)
         {
             return JsonConvert.SerializeObject(data, this.settings);
         }

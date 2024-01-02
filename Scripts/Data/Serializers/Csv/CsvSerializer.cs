@@ -17,16 +17,16 @@ namespace UniT.Data.Serializers
         {
         }
 
-        public bool CanSerialize(Type type) => typeof(ICsvData).IsAssignableFrom(type);
+        bool ISerializer.CanSerialize(Type type) => typeof(ICsvData).IsAssignableFrom(type);
 
-        public void Populate(object data, string rawData)
+        void ISerializer.Populate(IData data, string rawData)
         {
             using var reader = CsvDataReader.Create(new StringReader(rawData), new CsvDataReaderOptions { HeaderComparer = StringComparer.OrdinalIgnoreCase, });
             var       parser = new CsvParser((ICsvData)data, reader);
             while (reader.Read()) parser.Parse();
         }
 
-        public string Serialize(object data)
+        string ISerializer.Serialize(IData data)
         {
             throw new NotImplementedException();
         }
