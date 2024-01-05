@@ -17,8 +17,15 @@ namespace UniT.Entities
         public GameObject gameObject { get; }
 
         public Transform transform { get; }
+    }
 
-        public T[] GetComponentsInChildren<T>();
+    public interface IEntityWithoutModel : IEntity
+    {
+    }
+
+    public interface IEntityWithModel<in TModel> : IEntity
+    {
+        public TModel Model { set; }
     }
 
     public static class EntityExtensions

@@ -2,7 +2,7 @@ namespace UniT.Entities.Controller
 {
     using System;
 
-    public interface IHasController
+    public interface IEntityWithController : IEntity
     {
         public Type ControllerType { get; }
 

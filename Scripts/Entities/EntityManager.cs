@@ -159,10 +159,12 @@ namespace UniT.Entities
             {
                 this.prefab  = prefab;
                 this.manager = manager;
-                prefab.gameObject.SetActive(false);
-                this.entitiesContainer = new GameObject($"{prefab.gameObject.name} pool").transform;
-                this.entitiesContainer.SetParent(manager.poolsContainer);
-                this.interfaces = prefab.GetType().GetInterfaces().AsReadOnly();
+                this.entitiesContainer = new GameObject
+                {
+                    name      = $"{prefab.gameObject.name} pool",
+                    transform = { parent = manager.poolsContainer },
+                }.transform;
+                this.interfaces = prefab.GetType().GetInterfaces().Prepend(prefab.GetType()).ToReadOnlyCollection();
             }
 
             public void Load(int count)
@@ -214,12 +216,14 @@ namespace UniT.Entities
 
             private IEntity Instantiate()
             {
-                var entity = Object.Instantiate(this.prefab.gameObject, this.entitiesContainer).GetComponent<IEntity>();
+                var go = Object.Instantiate(this.prefab.gameObject, this.entitiesContainer);
+                go.SetActive(false);
+                var entity = go.GetComponent<IEntity>();
                 entity.Manager = this.manager;
-                entity.GetComponentsInChildren<IHasController>().ForEach(component =>
+                if (entity is IEntityWithController owner)
                 {
-                    component.Controller = this.manager.controllerFactory.Create(component);
-                });
+                    owner.Controller = this.manager.controllerFactory.Create(owner);
+                }
                 entity.OnInstantiate();
                 return entity;
             }
