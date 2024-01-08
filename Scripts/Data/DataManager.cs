@@ -82,10 +82,10 @@ namespace UniT.Data
                             IterTools.StrictZip(group, rawDatas).ForEach((type, rawData) => this.serializers[type].Populate(this.datas[type], rawData));
                             break;
                         }
-                        case IReadOnlyBlobDataStorage storage:
+                        case IReadOnlyNonSerializableDataStorage storage:
                         {
-                            var blobDatas = storage.Load(keys);
-                            IterTools.StrictZip(group, blobDatas).ForEach((type, blobData) => blobData.CopyTo(this.datas[type]));
+                            var datas = storage.Load(keys);
+                            IterTools.StrictZip(group, datas).ForEach((type, data) => data.CopyTo(this.datas[type]));
                             break;
                         }
                     }
@@ -107,10 +107,10 @@ namespace UniT.Data
                             storage.Save(keys, rawDatas);
                             break;
                         }
-                        case IReadWriteBlobDataStorage storage:
+                        case IReadWriteNonSerializableDataStorage storage:
                         {
-                            var blobDatas = group.Select(type => this.datas[type]).ToArray();
-                            storage.Save(keys, blobDatas);
+                            var datas = group.Select(type => this.datas[type]).ToArray();
+                            storage.Save(keys, datas);
                             break;
                         }
                     }
@@ -165,11 +165,11 @@ namespace UniT.Data
                                 this.logger.Debug($"Populated {keys.ToArrayString()}");
                                 break;
                             }
-                            case IReadOnlyBlobDataStorage storage:
+                            case IReadOnlyNonSerializableDataStorage storage:
                             {
-                                var blobDatas = await storage.LoadAsync(keys, progress, cancellationToken);
+                                var datas = await storage.LoadAsync(keys, progress, cancellationToken);
                                 this.logger.Debug($"Loaded {keys.ToArrayString()}");
-                                IterTools.StrictZip(group, blobDatas).ForEach((type, blobData) => blobData.CopyTo(this.datas[type]));
+                                IterTools.StrictZip(group, datas).ForEach((type, data) => data.CopyTo(this.datas[type]));
                                 this.logger.Debug($"Populated {keys.ToArrayString()}");
                                 break;
                             }
@@ -196,10 +196,10 @@ namespace UniT.Data
                                 await storage.SaveAsync(keys, rawDatas, progress, cancellationToken);
                                 break;
                             }
-                            case IReadWriteBlobDataStorage storage:
+                            case IReadWriteNonSerializableDataStorage storage:
                             {
-                                var blobDatas = group.Select(type => this.datas[type]).ToArray();
-                                await storage.SaveAsync(keys, blobDatas, progress, cancellationToken);
+                                var datas = group.Select(type => this.datas[type]).ToArray();
+                                await storage.SaveAsync(keys, datas, progress, cancellationToken);
                                 break;
                             }
                         }

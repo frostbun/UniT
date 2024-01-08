@@ -72,7 +72,7 @@ namespace Zenject
 
             #region Storages
 
-            this.Container.BindInterfacesTo<AssetsBlobDataStorage>()
+            this.Container.BindInterfacesTo<AssetsNonSerializableDataStorage>()
                 .AsSingle()
                 .WhenInjectedInto<IDataManager>()
                 .Lazy();

@@ -7,7 +7,7 @@
     using Cysharp.Threading.Tasks;
     #endif
 
-    public interface IReadWriteBlobDataStorage : IBlobDataStorage, IFlushableDataStorage
+    public interface IReadWriteNonSerializableDataStorage : INonSerializableDataStorage, IFlushableDataStorage
     {
         public void Save(string[] keys, IData[] values);
 

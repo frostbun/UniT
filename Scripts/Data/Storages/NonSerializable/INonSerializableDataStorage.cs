@@ -7,7 +7,7 @@
     using Cysharp.Threading.Tasks;
     #endif
 
-    public interface IBlobDataStorage : IDataStorage
+    public interface INonSerializableDataStorage : IDataStorage
     {
         public IData[] Load(string[] keys);
 

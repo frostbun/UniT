@@ -12,12 +12,12 @@ namespace UniT.Data.Storages
     using UniT.Extensions;
     #endif
 
-    public sealed class AssetsBlobDataStorage : ReadOnlyBlobDataStorage
+    public sealed class AssetsNonSerializableDataStorage : ReadOnlyNonSerializableDataStorage
     {
         private readonly IAssetsManager assetsManager;
 
         [Preserve]
-        public AssetsBlobDataStorage(IAssetsManager assetsManager)
+        public AssetsNonSerializableDataStorage(IAssetsManager assetsManager)
         {
             this.assetsManager = assetsManager;
         }
