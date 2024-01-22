@@ -8,6 +8,9 @@
     using System;
     using System.Threading;
     using Cysharp.Threading.Tasks;
+    #else
+    using System;
+    using System.Collections;
     #endif
 
     public sealed class ResourceAssetsManager : AssetsManager
@@ -31,6 +34,17 @@
         protected override UniTask<Object> LoadAsync(string key, IProgress<float> progress, CancellationToken cancellationToken)
         {
             return Resources.LoadAsync(key).ToUniTask(progress: progress, cancellationToken: cancellationToken);
+        }
+        #else
+        protected override IEnumerator LoadAsync(string key, Action<Object> callback, IProgress<float> progress)
+        {
+            var request = Resources.LoadAsync(key);
+            while (!request.isDone)
+            {
+                progress?.Report(request.progress);
+                yield return null;
+            }
+            callback(request.asset);
         }
         #endif
     }

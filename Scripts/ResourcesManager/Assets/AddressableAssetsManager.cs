@@ -9,6 +9,9 @@ namespace UniT.ResourcesManager
     using System;
     using System.Threading;
     using Cysharp.Threading.Tasks;
+    #else
+    using System;
+    using System.Collections;
     #endif
 
     public sealed class AddressableAssetsManager : AssetsManager
@@ -32,6 +35,17 @@ namespace UniT.ResourcesManager
         protected override UniTask<Object> LoadAsync(string key, IProgress<float> progress, CancellationToken cancellationToken)
         {
             return Addressables.LoadAssetAsync<Object>(key).ToUniTask(progress: progress, cancellationToken: cancellationToken);
+        }
+        #else
+        protected override IEnumerator LoadAsync(string key, Action<Object> callback, IProgress<float> progress)
+        {
+            var request = Addressables.LoadAssetAsync<Object>(key);
+            while (!request.IsDone)
+            {
+                progress?.Report(request.PercentComplete);
+                yield return null;
+            }
+            callback(request.Result);
         }
         #endif
     }

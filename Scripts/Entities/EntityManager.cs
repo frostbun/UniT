@@ -15,6 +15,8 @@ namespace UniT.Entities
     #if UNIT_UNITASK
     using System.Threading;
     using Cysharp.Threading.Tasks;
+    #else
+    using System.Collections;
     #endif
 
     public sealed class EntityManager : IEntityManager
@@ -77,6 +79,21 @@ namespace UniT.Entities
             });
             this.logger.Debug(isLoaded ? $"Loaded {key} pool" : $"Using cached {key} pool");
             this.keyToPool[key].Load(count);
+        }
+        #else
+        IEnumerator IEntityManager.LoadAsync(string key, int count, Action callback, IProgress<float> progress)
+        {
+            this.ThrowIfDisposed();
+            yield return this.keyToPool.TryAddAsync(
+                key,
+                callback => this.assetsManager.LoadAsync<GameObject>(key, prefab => callback(new EntityPool(prefab.GetComponent<IEntity>(), this))),
+                isLoaded =>
+                {
+                    this.logger.Debug(isLoaded ? $"Loaded {key} pool" : $"Using cached {key} pool");
+                    this.keyToPool[key].Load(count);
+                    callback?.Invoke();
+                }
+            );
         }
         #endif
 

@@ -1,12 +1,15 @@
 namespace UniT.ResourcesManager
 {
     using System;
+    using UniT.Extensions;
     using UniT.Logging;
     using UnityEngine;
     using Object = UnityEngine.Object;
     #if UNIT_UNITASK
     using System.Threading;
     using Cysharp.Threading.Tasks;
+    #else
+    using System.Collections;
     #endif
 
     public interface IAssetsManager : IHasLogger, IDisposable
@@ -41,12 +44,24 @@ namespace UniT.ResourcesManager
 
         public UniTask<T> LoadComponentAsync<T>(string key, IProgress<float> progress = null, CancellationToken cancellationToken = default) =>
             this.LoadAsync<GameObject>(key, progress, cancellationToken)
-                .ContinueWith(gameObject =>
-                    gameObject.GetComponent<T>()
-                    ?? throw new InvalidOperationException($"Component {typeof(T).Name} not found in GameObject {key}")
-                );
+                .ContinueWith(gameObject => gameObject.GetComponentOrThrow<T>());
 
         public UniTask<T> LoadComponentAsync<T>(IProgress<float> progress = null, CancellationToken cancellationToken = default) => this.LoadComponentAsync<T>(typeof(T).GetKey(), progress, cancellationToken);
+        #endif
+        #else
+        public IEnumerator LoadAsync<T>(string key, Action<T> callback, IProgress<float> progress = null) where T : Object;
+
+        #if UNITY_2021_2_OR_NEWER
+        public IEnumerator LoadAsync<T>(Action<T> callback, IProgress<float> progress = null) where T : Object => this.LoadAsync(typeof(T).GetKey(), callback, progress);
+
+        public IEnumerator LoadComponentAsync<T>(string key, Action<T> callback, IProgress<float> progress = null) =>
+            this.LoadAsync<GameObject>(
+                key,
+                gameObject => callback(gameObject.GetComponentOrThrow<T>()),
+                progress
+            );
+
+        public IEnumerator LoadComponentAsync<T>(Action<T> callback, IProgress<float> progress = null) => this.LoadComponentAsync(typeof(T).GetKey(), callback, progress);
         #endif
         #endif
 

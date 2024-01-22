@@ -1,13 +1,15 @@
 namespace UniT.Entities
 {
+    #if UNIT_UNITASK
+    using System.Threading;
+    using Cysharp.Threading.Tasks;
+    #else
+    using System.Collections;
+    #endif
     using System;
     using System.Collections.Generic;
     using UniT.Logging;
     using UnityEngine;
-    #if UNIT_UNITASK
-    using System.Threading;
-    using Cysharp.Threading.Tasks;
-    #endif
 
     public interface IEntityManager : IHasLogger, IDisposable
     {
@@ -59,7 +61,12 @@ namespace UniT.Entities
         #if UNITY_2021_2_OR_NEWER
         public UniTask LoadAsync<TEntity>(int count = 1, IProgress<float> progress = null, CancellationToken cancellationToken = default) where TEntity : IEntity => this.LoadAsync(typeof(TEntity).GetKey(), count, progress, cancellationToken);
         #endif
+        #else
+        public IEnumerator LoadAsync(string key, int count = 1, Action callback = null, IProgress<float> progress = null);
 
+        #if UNITY_2021_2_OR_NEWER
+        public IEnumerator LoadAsync<TEntity>(int count = 1, Action callback = null, IProgress<float> progress = null) where TEntity : IEntity => this.LoadAsync(typeof(TEntity).GetKey(), count, callback, progress);
+        #endif
         #endif
 
         #endregion

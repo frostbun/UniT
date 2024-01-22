@@ -9,6 +9,8 @@
     #if UNIT_UNITASK
     using System.Threading;
     using Cysharp.Threading.Tasks;
+    #else
+    using System.Collections;
     #endif
 
     public abstract class AssetsManager : IAssetsManager
@@ -72,6 +74,20 @@
         }
 
         protected abstract UniTask<Object> LoadAsync(string key, IProgress<float> progress, CancellationToken cancellationToken);
+        #else
+        IEnumerator IAssetsManager.LoadAsync<T>(string key, Action<T> callback, IProgress<float> progress)
+        {
+            yield return this.cache.TryAddAsync(
+                key,
+                callback => this.LoadAsync(key, callback, progress),
+                isLoaded =>
+                {
+                    this.logger.Debug(isLoaded ? $"Loaded {key}" : $"Using cached {key}");
+                    callback((T)this.cache[key]);
+                });
+        }
+
+        protected abstract IEnumerator LoadAsync(string key, Action<Object> callback, IProgress<float> progress);
         #endif
 
         #endregion

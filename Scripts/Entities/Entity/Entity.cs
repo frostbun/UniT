@@ -1,5 +1,10 @@
 ﻿namespace UniT.Entities
 {
+    #if UNIT_UNITASK
+    using System.Threading;
+    #else
+    using System.Collections;
+    #endif
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
@@ -7,9 +12,6 @@
     using System.Reflection;
     using UniT.Extensions;
     using UnityEngine;
-    #if UNIT_UNITASK
-    using System.Threading;
-    #endif
 
     public abstract class BaseEntity : MonoBehaviour, IEntity
     {
@@ -78,6 +80,45 @@
         protected CancellationToken GetCancellationTokenOnHide()
         {
             return (this.hideCts ??= new CancellationTokenSource()).Token;
+        }
+        #else
+        private readonly HashSet<IEnumerator> runningCoroutines = new();
+
+        public new void StartCoroutine(IEnumerator coroutine)
+        {
+            base.StartCoroutine(coroutine);
+            this.runningCoroutines.Add(coroutine);
+        }
+
+        public new void StopCoroutine(IEnumerator coroutine)
+        {
+            base.StopCoroutine(coroutine);
+            this.runningCoroutines.Remove(coroutine);
+            (coroutine as IDisposable)?.Dispose();
+        }
+
+        protected virtual void OnDisable()
+        {
+            this.runningCoroutines.SafeForEach(this.StopCoroutine);
+        }
+
+        public IEnumerator GatherCoroutines(params IEnumerator[] coroutines)
+        {
+            try
+            {
+                var count = coroutines.Length;
+                coroutines.ForEach(coroutine => this.StartCoroutine(coroutine.Then(() => --count)));
+                yield return new WaitUntil(() => count is 0);
+            }
+            finally
+            {
+                coroutines.ForEach(this.StopCoroutine);
+            }
+        }
+
+        public IEnumerator GatherCoroutines(IEnumerable<IEnumerator> coroutines)
+        {
+            return this.GatherCoroutines(coroutines.ToArray());
         }
         #endif
 

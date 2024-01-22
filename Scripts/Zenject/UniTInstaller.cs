@@ -27,7 +27,7 @@ namespace Zenject
             #region ResourcesManager
 
             #if UNIT_ADDRESSABLES
-            this.Container.BindInterfacesTo<AddressableSceneManager>()
+            this.Container.BindInterfacesTo<AddressableScenesManager>()
                 .AsSingle()
                 .Lazy();
 
