@@ -90,7 +90,8 @@
                 {
                     this.logger.Debug(isLoaded ? $"Loaded {key}" : $"Using cached {key}");
                     callback(this.cache[key] as T ?? throw new InvalidCastException($"Failed to cast {key} to {typeof(T).Name}"));
-                });
+                }
+            );
         }
 
         protected abstract IEnumerator LoadAsync(string key, Action<Object> callback, IProgress<float> progress);

@@ -1,7 +1,6 @@
 namespace UniT.UI
 {
     using System.Collections.Generic;
-    using UniT.Extensions;
     using UniT.Logging;
     using UniT.UI.Activity;
     #if UNIT_UNITASK
