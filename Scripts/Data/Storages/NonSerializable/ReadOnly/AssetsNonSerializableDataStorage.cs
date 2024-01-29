@@ -1,15 +1,18 @@
 namespace UniT.Data.Storages
 {
+    using System;
     using System.Linq;
     using UniT.Data.Types;
     using UniT.ResourcesManager;
     using UnityEngine.Scripting;
     using Object = UnityEngine.Object;
     #if UNIT_UNITASK
-    using System;
     using System.Threading;
     using Cysharp.Threading.Tasks;
     using UniT.Extensions;
+    #else
+    using System.Collections;
+    using System.Collections.Generic;
     #endif
 
     public sealed class AssetsNonSerializableDataStorage : ReadOnlyNonSerializableDataStorage
@@ -37,6 +40,21 @@ namespace UniT.Data.Storages
                 progress,
                 cancellationToken
             ).ToArrayAsync();
+        }
+        #else
+        protected override IEnumerator LoadAsync(string[] keys, Action<IData[]> callback, IProgress<float> progress)
+        {
+            // TODO: make it run concurrently
+            var datas = new List<IData>();
+            foreach (var key in keys)
+            {
+                yield return this.assetsManager.LoadAsync<Object>(key, asset =>
+                {
+                    datas.Add((IData)asset);
+                });
+            }
+            progress?.Report(1);
+            callback(datas.ToArray());
         }
         #endif
     }

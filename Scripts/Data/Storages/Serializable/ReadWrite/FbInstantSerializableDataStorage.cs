@@ -8,6 +8,8 @@ namespace UniT.Data.Storages
     using Cysharp.Threading.Tasks;
     using UniT.Extensions;
     using UniT.FbInstant;
+    #else
+    using System.Collections;
     #endif
 
     public sealed class FbInstantSerializableDataStorage : ReadWriteSerializableDataStorage
@@ -19,17 +21,17 @@ namespace UniT.Data.Storages
 
         protected override string[] Load(string[] keys)
         {
-            throw new NotSupportedException("FbInstant only supports async methods. Please install UniTask and use LoadAsync instead.");
+            throw new NotSupportedException("FbInstant only supports async operations. Please use LoadAsync instead.");
         }
 
         protected override void Save(string[] keys, string[] rawDatas)
         {
-            throw new NotSupportedException("FbInstant only supports async methods. Please install UniTask and use SaveAsync instead.");
+            throw new NotSupportedException("FbInstant only supports async operations. Please use SaveAsync instead.");
         }
 
         protected override void Flush()
         {
-            throw new NotSupportedException("FbInstant only supports async methods. Please install UniTask and use FlushAsync instead.");
+            throw new NotSupportedException("FbInstant only supports async operations. Please use FlushAsync instead.");
         }
 
         #if UNIT_UNITASK
@@ -59,6 +61,21 @@ namespace UniT.Data.Storages
                 if (result.IsError) throw new($"Flush {this.GetType().Name} error: {result.Error}");
                 progress?.Report(1);
             });
+        }
+        #else
+        protected override IEnumerator LoadAsync(string[] keys, Action<string[]> callback, IProgress<float> progress)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override IEnumerator SaveAsync(string[] keys, string[] rawDatas, Action callback, IProgress<float> progress)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override IEnumerator FlushAsync(Action callback, IProgress<float> progress)
+        {
+            throw new NotImplementedException();
         }
         #endif
     }

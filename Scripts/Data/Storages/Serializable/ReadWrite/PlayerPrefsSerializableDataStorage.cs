@@ -1,13 +1,15 @@
 namespace UniT.Data.Storages
 {
+    using System;
     using System.Linq;
     using UniT.Extensions;
     using UnityEngine;
     using UnityEngine.Scripting;
     #if UNIT_UNITASK
-    using System;
     using System.Threading;
     using Cysharp.Threading.Tasks;
+    #else
+    using System.Collections;
     #endif
 
     public sealed class PlayerPrefsSerializableDataStorage : ReadWriteSerializableDataStorage
@@ -52,6 +54,30 @@ namespace UniT.Data.Storages
             this.Flush();
             progress?.Report(1);
             return UniTask.CompletedTask;
+        }
+        #else
+        protected override IEnumerator LoadAsync(string[] keys, Action<string[]> callback, IProgress<float> progress)
+        {
+            var rawDatas = this.Load(keys);
+            progress?.Report(1);
+            callback(rawDatas);
+            yield break;
+        }
+
+        protected override IEnumerator SaveAsync(string[] keys, string[] values, Action callback, IProgress<float> progress)
+        {
+            this.Save(keys, values);
+            progress?.Report(1);
+            callback?.Invoke();
+            yield break;
+        }
+
+        protected override IEnumerator FlushAsync(Action callback, IProgress<float> progress)
+        {
+            this.Flush();
+            progress?.Report(1);
+            callback?.Invoke();
+            yield break;
         }
         #endif
     }

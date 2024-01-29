@@ -13,6 +13,9 @@ namespace UniT.Data
     #if UNIT_UNITASK
     using System.Threading;
     using Cysharp.Threading.Tasks;
+
+    #else
+    using System.Collections;
     #endif
 
     public sealed class DataManager : IDataManager
@@ -225,6 +228,99 @@ namespace UniT.Data
                     progress,
                     cancellationToken
                 );
+        }
+        #else
+        IEnumerator IDataManager.PopulateAsync(Type[] types, Action callback, IProgress<float> progress) => this.PopulateAsync(types, callback, progress);
+
+        IEnumerator IDataManager.SaveAsync(Type[] types, Action callback, IProgress<float> progress) => this.SaveAsync(types, callback, progress);
+
+        IEnumerator IDataManager.FlushAsync(Type[] types, Action callback, IProgress<float> progress) => this.FlushAsync(types, callback, progress);
+
+        IEnumerator IDataManager.PopulateAllAsync(Action callback, IProgress<float> progress) => this.PopulateAsync(this.datas.Keys, callback, progress);
+
+        IEnumerator IDataManager.SaveAllAsync(Action callback, IProgress<float> progress) => this.SaveAsync(this.datas.Keys, callback, progress);
+
+        IEnumerator IDataManager.FlushAllAsync(Action callback, IProgress<float> progress) => this.FlushAsync(this.datas.Keys, callback, progress);
+
+        private IEnumerator PopulateAsync(IEnumerable<Type> types, Action callback, IProgress<float> progress)
+        {
+            // TODO: make it run concurrently
+            var groups = types.GroupBy(type => this.storages.GetOrDefault(type) ?? throw new InvalidOperationException($"{type.Name} not found"));
+            foreach (var group in groups)
+            {
+                var keys = group.Select(type => type.GetKey()).ToArray();
+                switch (group.Key)
+                {
+                    case IReadOnlySerializableDataStorage storage:
+                    {
+                        yield return storage.LoadAsync(keys, rawDatas =>
+                        {
+                            this.logger.Debug($"Loaded {keys.ToArrayString()}");
+                            IterTools.StrictZip(group, rawDatas).ForEach((type, rawData) => this.serializers[type].Populate(this.datas[type], rawData));
+                            this.logger.Debug($"Populated {keys.ToArrayString()}");
+                        });
+                        break;
+                    }
+                    case IReadOnlyNonSerializableDataStorage storage:
+                    {
+                        yield return storage.LoadAsync(keys, datas =>
+                        {
+                            this.logger.Debug($"Loaded {keys.ToArrayString()}");
+                            IterTools.StrictZip(group, datas).ForEach((type, data) => data.CopyTo(this.datas[type]));
+                            this.logger.Debug($"Populated {keys.ToArrayString()}");
+                        });
+                        break;
+                    }
+                }
+                this.logger.Debug($"Populated {keys.ToArrayString()}");
+            }
+            progress?.Report(1);
+            callback?.Invoke();
+        }
+
+        private IEnumerator SaveAsync(IEnumerable<Type> types, Action callback, IProgress<float> progress)
+        {
+            // TODO: make it run concurrently
+            var groups = types.GroupBy(type => this.storages.GetOrDefault(type) ?? throw new InvalidOperationException($"{type.Name} not found"))
+                .Where(group => group.Key is IReadWriteSerializableDataStorage);
+            foreach (var group in groups)
+            {
+                var keys = group.Select(type => type.GetKey()).ToArray();
+                switch (group.Key)
+                {
+                    case IReadWriteSerializableDataStorage storage:
+                    {
+                        var rawDatas = group.Select(type => this.serializers[type].Serialize(this.datas[type])).ToArray();
+                        yield return storage.SaveAsync(keys, rawDatas);
+                        break;
+                    }
+                    case IReadWriteNonSerializableDataStorage storage:
+                    {
+                        var datas = group.Select(type => this.datas[type]).ToArray();
+                        yield return storage.SaveAsync(keys, datas);
+                        break;
+                    }
+                }
+                this.logger.Debug($"Saved {keys.ToArrayString()}");
+            }
+            progress?.Report(1);
+            callback?.Invoke();
+        }
+
+        private IEnumerator FlushAsync(IEnumerable<Type> types, Action callback, IProgress<float> progress)
+        {
+            // TODO: make it run concurrently
+            var groups = types.GroupBy(type => this.storages.GetOrDefault(type) ?? throw new InvalidOperationException($"{type.Name} not found"))
+                .Where(group => group.Key is IFlushableDataStorage);
+            foreach (var group in groups)
+            {
+                var keys = group.Select(type => type.GetKey()).ToArray();
+                var storage = (IFlushableDataStorage)group.Key;
+                yield return storage.FlushAsync();
+                this.logger.Debug($"Flushed {keys.ToArrayString()}");
+            }
+            progress?.Report(1);
+            callback?.Invoke();
         }
         #endif
 

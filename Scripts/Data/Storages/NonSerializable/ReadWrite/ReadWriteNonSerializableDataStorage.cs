@@ -5,6 +5,8 @@
     #if UNIT_UNITASK
     using System.Threading;
     using Cysharp.Threading.Tasks;
+    #else
+    using System.Collections;
     #endif
 
     public abstract class ReadWriteNonSerializableDataStorage : NonSerializableDataStorage, IReadWriteNonSerializableDataStorage
@@ -27,6 +29,14 @@
         protected abstract UniTask SaveAsync(string[] keys, IData[] values, IProgress<float> progress, CancellationToken cancellationToken);
 
         protected abstract UniTask FlushAsync(IProgress<float> progress, CancellationToken cancellationToken);
+        #else
+        IEnumerator IReadWriteNonSerializableDataStorage.SaveAsync(string[] keys, IData[] values, Action callback, IProgress<float> progress) => this.SaveAsync(keys, values, callback, progress);
+
+        IEnumerator IFlushableDataStorage.FlushAsync(Action callback, IProgress<float> progress) => this.FlushAsync(callback, progress);
+
+        protected abstract IEnumerator SaveAsync(string[] keys, IData[] values, Action callback, IProgress<float> progress);
+
+        protected abstract IEnumerator FlushAsync(Action callback, IProgress<float> progress);
         #endif
     }
 }
