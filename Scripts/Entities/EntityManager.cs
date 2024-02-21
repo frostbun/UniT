@@ -2,7 +2,6 @@ namespace UniT.Entities
 {
     using System;
     using System.Collections.Generic;
-    using System.Collections.ObjectModel;
     using System.Linq;
     using UniT.Entities.Controller;
     using UniT.Extensions;
@@ -27,11 +26,11 @@ namespace UniT.Entities
         private readonly IAssetsManager       assetsManager;
         private readonly ILogger              logger;
 
-        private readonly Transform                          poolsContainer      = new GameObject(nameof(EntityManager)).DontDestroyOnLoad().transform;
-        private readonly Dictionary<IEntity, EntityPool>    prefabToPool        = new Dictionary<IEntity, EntityPool>();
-        private readonly Dictionary<string, EntityPool>     keyToPool           = new Dictionary<string, EntityPool>();
-        private readonly Dictionary<IEntity, EntityPool>    entityToPool        = new Dictionary<IEntity, EntityPool>();
-        private readonly Dictionary<Type, HashSet<IEntity>> interfaceToEntities = new Dictionary<Type, HashSet<IEntity>>();
+        private readonly Transform                             poolsContainer   = new GameObject(nameof(EntityManager)).DontDestroyOnLoad().transform;
+        private readonly Dictionary<IEntity, EntityPool>       prefabToPool     = new Dictionary<IEntity, EntityPool>();
+        private readonly Dictionary<string, EntityPool>        keyToPool        = new Dictionary<string, EntityPool>();
+        private readonly Dictionary<IEntity, EntityPool>       entityToPool     = new Dictionary<IEntity, EntityPool>();
+        private readonly Dictionary<Type, HashSet<IComponent>> typeToComponents = new Dictionary<Type, HashSet<IComponent>>();
 
         [Preserve]
         public EntityManager(IController.IFactory controllerFactory, IAssetsManager assetsManager, ILogger.IFactory loggerFactory)
@@ -62,7 +61,7 @@ namespace UniT.Entities
             var isLoaded = this.keyToPool.TryAdd(key, () =>
             {
                 var prefab = this.assetsManager.Load<GameObject>(key);
-                return new EntityPool(prefab.GetComponent<IEntity>(), this);
+                return new EntityPool(prefab.GetComponentOrThrow<IEntity>(), this);
             });
             this.logger.Debug(isLoaded ? $"Loaded {key} pool" : $"Using cached {key} pool");
             this.keyToPool[key].Load(count);
@@ -100,35 +99,25 @@ namespace UniT.Entities
         TEntity IEntityManager.Spawn<TEntity>(TEntity prefab, Vector3 position, Quaternion rotation, Transform parent)
         {
             this.ThrowIfDisposed();
-            var entity = (TEntity)this.prefabToPool[prefab].Spawn(position, rotation, parent);
-            entity.OnSpawn();
-            return entity;
+            return (TEntity)this.prefabToPool[prefab].Spawn(position, rotation, parent);
         }
 
         TEntity IEntityManager.Spawn<TEntity, TModel>(TEntity prefab, TModel model, Vector3 position, Quaternion rotation, Transform parent)
         {
             this.ThrowIfDisposed();
-            var entity = (TEntity)this.prefabToPool[prefab].Spawn(position, rotation, parent);
-            entity.Model = model;
-            entity.OnSpawn();
-            return entity;
+            return (TEntity)this.prefabToPool[prefab].Spawn(model, position, rotation, parent);
         }
 
         TEntity IEntityManager.Spawn<TEntity>(string key, Vector3 position, Quaternion rotation, Transform parent)
         {
             this.ThrowIfDisposed();
-            var entity = (TEntity)this.keyToPool[key].Spawn(position, rotation, parent);
-            entity.OnSpawn();
-            return entity;
+            return (TEntity)this.keyToPool[key].Spawn(position, rotation, parent);
         }
 
         TEntity IEntityManager.Spawn<TEntity, TModel>(string key, TModel model, Vector3 position, Quaternion rotation, Transform parent)
         {
             this.ThrowIfDisposed();
-            var entity = (TEntity)this.keyToPool[key].Spawn(position, rotation, parent);
-            entity.Model = model;
-            entity.OnSpawn();
-            return entity;
+            return (TEntity)this.keyToPool[key].Spawn(model, position, rotation, parent);
         }
 
         void IEntityManager.Recycle(IEntity entity)
@@ -164,13 +153,14 @@ namespace UniT.Entities
 
         private class EntityPool
         {
-            private readonly IEntity                  prefab;
-            private readonly EntityManager            manager;
-            private readonly Transform                entitiesContainer;
-            private readonly ReadOnlyCollection<Type> interfaces;
+            private readonly IEntity       prefab;
+            private readonly EntityManager manager;
+            private readonly Transform     entitiesContainer;
 
-            private readonly Queue<IEntity>   pooledEntities  = new Queue<IEntity>();
-            private readonly HashSet<IEntity> spawnedEntities = new HashSet<IEntity>();
+            private readonly Queue<IEntity>                    pooledEntities     = new Queue<IEntity>();
+            private readonly HashSet<IEntity>                  spawnedEntities    = new HashSet<IEntity>();
+            private readonly Dictionary<IEntity, IComponent[]> entityToComponents = new Dictionary<IEntity, IComponent[]>();
+            private readonly Dictionary<IComponent, Type[]>    componentToTypes   = new Dictionary<IComponent, Type[]>();
 
             public EntityPool(IEntity prefab, EntityManager manager)
             {
@@ -181,7 +171,6 @@ namespace UniT.Entities
                     name      = $"{prefab.gameObject.name} pool",
                     transform = { parent = manager.poolsContainer },
                 }.transform;
-                this.interfaces = prefab.GetType().GetInterfaces().Prepend(prefab.GetType()).ToReadOnlyCollection();
             }
 
             public void Load(int count)
@@ -197,14 +186,38 @@ namespace UniT.Entities
                 entity.gameObject.SetActive(true);
                 this.spawnedEntities.Add(entity);
                 this.manager.entityToPool.Add(entity, this);
-                this.interfaces.ForEach(@interface => this.manager.Register(@interface, entity));
+                this.entityToComponents[entity].ForEach(component =>
+                {
+                    this.componentToTypes[component].ForEach(type => this.manager.Register(type, component));
+                    component.OnSpawn();
+                });
+                return entity;
+            }
+
+            public IEntity Spawn<TModel>(TModel model, Vector3 position, Quaternion rotation, Transform parent)
+            {
+                var entity = this.pooledEntities.DequeueOrDefault(this.Instantiate);
+                entity.transform.SetPositionAndRotation(position, rotation);
+                entity.transform.SetParent(parent);
+                entity.gameObject.SetActive(true);
+                this.spawnedEntities.Add(entity);
+                this.manager.entityToPool.Add(entity, this);
+                ((IEntityWithModel<TModel>)entity).Model = model;
+                this.entityToComponents[entity].ForEach(component =>
+                {
+                    this.componentToTypes[component].ForEach(type => this.manager.Register(type, component));
+                    component.OnSpawn();
+                });
                 return entity;
             }
 
             public void Recycle(IEntity entity)
             {
-                entity.OnRecycle();
-                this.interfaces.ForEach(@interface => this.manager.Unregister(@interface, entity));
+                this.entityToComponents[entity].ForEach(component =>
+                {
+                    component.OnRecycle();
+                    this.componentToTypes[component].ForEach(type => this.manager.Unregister(type, component));
+                });
                 this.manager.entityToPool.Remove(entity);
                 this.spawnedEntities.Remove(entity);
                 if (entity.IsDestroyed) return; // Disposed
@@ -233,15 +246,27 @@ namespace UniT.Entities
 
             private IEntity Instantiate()
             {
-                var go = Object.Instantiate(this.prefab.gameObject, this.entitiesContainer);
-                go.SetActive(false);
-                var entity = go.GetComponent<IEntity>();
-                entity.Manager = this.manager;
-                if (entity is IEntityWithController owner)
+                var entity = Object.Instantiate(this.prefab.gameObject, this.entitiesContainer).GetComponent<IEntity>();
+                entity.gameObject.SetActive(false);
+                this.entityToComponents.Add(entity, entity.GetComponentsInChildren<IComponent>());
+                this.entityToComponents[entity].ForEach(component =>
                 {
-                    owner.Controller = this.manager.controllerFactory.Create(owner);
-                }
-                entity.OnInstantiate();
+                    component.Manager = this.manager;
+                    if (component is IHasController owner)
+                    {
+                        owner.Controller = this.manager.controllerFactory.Create(owner);
+                    }
+                    component.OnInstantiate();
+                    this.componentToTypes.Add(
+                        component,
+                        component.GetType()
+                            .GetInterfaces()
+                            .Where(type => !typeof(IComponent).IsAssignableFrom(type))
+                            .Where(type => !typeof(IHasController).IsAssignableFrom(type))
+                            .Prepend(component.GetType())
+                            .ToArray()
+                    );
+                });
                 return entity;
             }
         }
@@ -256,19 +281,19 @@ namespace UniT.Entities
             return this.GetCache(typeof(T)).Cast<T>();
         }
 
-        private void Register(Type @interface, IEntity entity)
+        private void Register(Type type, IComponent component)
         {
-            this.GetCache(@interface).Add(entity);
+            this.GetCache(type).Add(component);
         }
 
-        private void Unregister(Type @interface, IEntity entity)
+        private void Unregister(Type type, IComponent component)
         {
-            this.GetCache(@interface).Remove(entity);
+            this.GetCache(type).Remove(component);
         }
 
-        private HashSet<IEntity> GetCache(Type @interface)
+        private HashSet<IComponent> GetCache(Type type)
         {
-            return this.interfaceToEntities.GetOrAdd(@interface, () => new HashSet<IEntity>());
+            return this.typeToComponents.GetOrAdd(type, () => new HashSet<IComponent>());
         }
 
         #endregion
@@ -292,7 +317,7 @@ namespace UniT.Entities
                 pool.Dispose();
                 this.assetsManager.Unload(key);
             });
-            this.interfaceToEntities.Clear();
+            this.typeToComponents.Clear();
             if (this.poolsContainer)
             {
                 Object.Destroy(this.poolsContainer.gameObject);

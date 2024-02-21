@@ -4,10 +4,10 @@ namespace UniT.Entities.Controller
 
     public interface IController
     {
-        public interface IFactory : IFactory<IEntityWithController, IController>
+        public interface IFactory : IFactory<IHasController, IController>
         {
         }
 
-        public IEntityWithController Owner { set; }
+        public IHasController Owner { set; }
     }
 }

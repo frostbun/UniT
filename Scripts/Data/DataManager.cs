@@ -2,7 +2,6 @@ namespace UniT.Data
 {
     using System;
     using System.Collections.Generic;
-    using System.Collections.ObjectModel;
     using System.Linq;
     using UniT.Data.Serializers;
     using UniT.Data.Storages;
@@ -13,7 +12,6 @@ namespace UniT.Data
     #if UNIT_UNITASK
     using System.Threading;
     using Cysharp.Threading.Tasks;
-
     #else
     using System.Collections;
     #endif
@@ -22,10 +20,10 @@ namespace UniT.Data
     {
         #region Constructor
 
-        private readonly ReadOnlyDictionary<Type, IData>        datas;
-        private readonly ReadOnlyDictionary<Type, IDataStorage> storages;
-        private readonly ReadOnlyDictionary<Type, ISerializer>  serializers;
-        private readonly ILogger                                logger;
+        private readonly Dictionary<Type, IData>        datas;
+        private readonly Dictionary<Type, IDataStorage> storages;
+        private readonly Dictionary<Type, ISerializer>  serializers;
+        private readonly ILogger                        logger;
 
         [Preserve]
         public DataManager(
@@ -36,15 +34,15 @@ namespace UniT.Data
         )
         {
             datas      = datas as ICollection<IData> ?? datas.ToArray();
-            this.datas = datas.ToDictionary(data => data.GetType()).AsReadOnly();
+            this.datas = datas.ToDictionary(data => data.GetType());
             this.storages = datas.ToDictionary(
                 data => data.GetType(),
                 data => storages.LastOrDefault(storage => storage.CanStore(data.GetType())) ?? throw new InvalidOperationException($"No storage found for {data.GetType().Name}")
-            ).AsReadOnly();
+            );
             this.serializers = datas.Where(data => data is ISerializableData).ToDictionary(
                 data => data.GetType(),
                 data => serializers.LastOrDefault(serializer => serializer.CanSerialize(data.GetType())) ?? throw new InvalidOperationException($"No serializer found for {data.GetType().Name}")
-            ).AsReadOnly();
+            );
 
             this.logger = loggerFactory.Create(this);
             this.datas.Keys.ForEach(type => this.logger.Debug($"Found {type.Name} - {this.storages[type].GetType().Name} - {this.serializers.GetOrDefault(type)?.GetType().Name}"));

@@ -25,9 +25,7 @@ namespace UniT.ResourcesManager
 
         public void Unload<T>() => this.Unload(typeof(T).GetKey());
 
-        public T LoadComponent<T>(string key) =>
-            this.Load<GameObject>(key).GetComponent<T>()
-            ?? throw new InvalidOperationException($"Component {typeof(T).Name} not found in GameObject {key}");
+        public T LoadComponent<T>(string key) => this.Load<GameObject>(key).GetComponentOrThrow<T>();
 
         public T LoadComponent<T>() => this.LoadComponent<T>(typeof(T).GetKey());
         #endif

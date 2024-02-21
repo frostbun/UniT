@@ -1,15 +1,15 @@
 namespace UniT.Entities
 {
+    using System;
+    using System.Collections.Generic;
+    using UniT.Logging;
+    using UnityEngine;
     #if UNIT_UNITASK
     using System.Threading;
     using Cysharp.Threading.Tasks;
     #else
     using System.Collections;
     #endif
-    using System;
-    using System.Collections.Generic;
-    using UniT.Logging;
-    using UnityEngine;
 
     public interface IEntityManager : IHasLogger, IDisposable
     {

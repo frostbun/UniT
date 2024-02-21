@@ -1,15 +1,14 @@
 ﻿namespace UniT.ResourcesManager
 {
+    using System;
     using UnityEngine;
     using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;
     using Object = UnityEngine.Object;
     #if UNIT_UNITASK
-    using System;
     using System.Threading;
     using Cysharp.Threading.Tasks;
     #else
-    using System;
     using System.Collections;
     #endif
 
@@ -25,9 +24,9 @@
             return Resources.Load(key);
         }
 
-        protected override void Unload(Object @object)
+        protected override void Unload(Object obj)
         {
-            Resources.UnloadAsset(@object);
+            Resources.UnloadAsset(obj);
         }
 
         #if UNIT_UNITASK

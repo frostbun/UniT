@@ -1,16 +1,15 @@
 #if UNIT_ADDRESSABLES
 namespace UniT.ResourcesManager
 {
+    using System;
     using UnityEngine.AddressableAssets;
     using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;
     using Object = UnityEngine.Object;
     #if UNIT_UNITASK
-    using System;
     using System.Threading;
     using Cysharp.Threading.Tasks;
     #else
-    using System;
     using System.Collections;
     #endif
 
@@ -26,9 +25,9 @@ namespace UniT.ResourcesManager
             return Addressables.LoadAssetAsync<Object>(key).WaitForCompletion();
         }
 
-        protected override void Unload(Object @object)
+        protected override void Unload(Object obj)
         {
-            Addressables.Release(@object);
+            Addressables.Release(obj);
         }
 
         #if UNIT_UNITASK

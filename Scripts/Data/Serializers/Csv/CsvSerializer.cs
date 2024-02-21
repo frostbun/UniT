@@ -2,7 +2,6 @@ namespace UniT.Data.Serializers
 {
     using System;
     using System.Collections.Generic;
-    using System.Collections.ObjectModel;
     using System.Linq;
     using System.Reflection;
     using System.Text.RegularExpressions;
@@ -34,8 +33,8 @@ namespace UniT.Data.Serializers
 
         private sealed class CsvReader
         {
-            private readonly ReadOnlyCollection<ReadOnlyCollection<string>> data;
-            private readonly Dictionary<string, int>                        columnNameToIndex;
+            private readonly string[][]              data;
+            private readonly Dictionary<string, int> columnNameToIndex;
 
             public CsvReader(string rawData)
             {
@@ -43,9 +42,9 @@ namespace UniT.Data.Serializers
                 this.data = rawData.Split("\n", StringSplitOptions.RemoveEmptyEntries)
                     .Select(row => Regex.Split(row, ",(?=(?:(?:[^\"]*\"){2})*[^\"]*$)")
                         .Select(cell => cell.Trim().Trim('"').Replace("\"\"", "\""))
-                        .ToReadOnlyCollection()
-                    ).ToReadOnlyCollection();
-                if (this.data.Count == 0) throw new InvalidOperationException("Empty CSV data");
+                        .ToArray()
+                    ).ToArray();
+                if (this.data.Length == 0) throw new InvalidOperationException("Empty CSV data");
                 this.columnNameToIndex = this.data[0].Select((columnName, index) => (columnName, index)).ToDictionary();
             }
 
@@ -53,7 +52,7 @@ namespace UniT.Data.Serializers
 
             public bool Read()
             {
-                return ++this.currentRow < this.data.Count;
+                return ++this.currentRow < this.data.Length;
             }
 
             public bool ContainsColumn(string columnName)
@@ -63,9 +62,7 @@ namespace UniT.Data.Serializers
 
             public string GetCell(string columnName)
             {
-                if (this.currentRow >= this.data.Count) throw new InvalidOperationException("End of CSV data");
-                if (!this.columnNameToIndex.TryGetValue(columnName, out var index)) throw new InvalidOperationException($"Column {columnName} not found");
-                return this.data[this.currentRow][index];
+                return this.data[this.currentRow][this.columnNameToIndex[columnName]];
             }
         }
 

@@ -45,9 +45,9 @@
 
         void IAssetsManager.Unload(string key)
         {
-            if (this.cache.TryRemove(key, out var @object))
+            if (this.cache.TryRemove(key, out var obj))
             {
-                this.Unload(@object);
+                this.Unload(obj);
                 this.logger.Debug($"Unloaded {key}");
             }
             else
@@ -58,7 +58,7 @@
 
         protected abstract Object Load(string key);
 
-        protected abstract void Unload(Object @object);
+        protected abstract void Unload(Object obj);
 
         #endregion
 
@@ -103,7 +103,7 @@
 
         private void Dispose()
         {
-            this.cache.Clear((_, @object) => this.Unload(@object));
+            this.cache.Clear((_, obj) => this.Unload(obj));
         }
 
         void IDisposable.Dispose()

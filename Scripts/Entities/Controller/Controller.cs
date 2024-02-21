@@ -1,9 +1,9 @@
 namespace UniT.Entities.Controller
 {
-    public abstract class Controller<TEntity> : IController where TEntity : IEntityWithController
+    public abstract class Controller<TOwner> : IController where TOwner : IHasController
     {
-        IEntityWithController IController.Owner { set => this.Entity = (TEntity)value; }
+        IHasController IController.Owner { set => this.Owner = (TOwner)value; }
 
-        protected TEntity Entity { get; private set; }
+        protected TOwner Owner { get; private set; }
     }
 }

@@ -2,7 +2,6 @@ namespace UniT.Pooling
 {
     using System;
     using System.Collections.Generic;
-    using System.Collections.ObjectModel;
     using UniT.Extensions;
     using UniT.Logging;
     using UniT.ResourcesManager;
@@ -22,11 +21,11 @@ namespace UniT.Pooling
         private readonly IAssetsManager assetsManager;
         private readonly ILogger        logger;
 
-        private readonly Transform                                               poolsContainer = new GameObject(nameof(ObjectPoolManager)).DontDestroyOnLoad().transform;
-        private readonly Dictionary<GameObject, ObjectPool>                      prefabToPool   = new Dictionary<GameObject, ObjectPool>();
-        private readonly Dictionary<string, ObjectPool>                          keyToPool      = new Dictionary<string, ObjectPool>();
-        private readonly Dictionary<GameObject, ObjectPool>                      instanceToPool = new Dictionary<GameObject, ObjectPool>();
-        private readonly Dictionary<GameObject, ReadOnlyCollection<IRecyclable>> recyclables    = new Dictionary<GameObject, ReadOnlyCollection<IRecyclable>>();
+        private readonly Transform                             poolsContainer = new GameObject(nameof(ObjectPoolManager)).DontDestroyOnLoad().transform;
+        private readonly Dictionary<GameObject, ObjectPool>    prefabToPool   = new Dictionary<GameObject, ObjectPool>();
+        private readonly Dictionary<string, ObjectPool>        keyToPool      = new Dictionary<string, ObjectPool>();
+        private readonly Dictionary<GameObject, ObjectPool>    instanceToPool = new Dictionary<GameObject, ObjectPool>();
+        private readonly Dictionary<GameObject, IRecyclable[]> recyclables    = new Dictionary<GameObject, IRecyclable[]>();
 
         [Preserve]
         public ObjectPoolManager(IAssetsManager assetsManager, ILogger.IFactory loggerFactory)
@@ -151,7 +150,7 @@ namespace UniT.Pooling
             this.instanceToPool.Add(instance, pool);
             this.recyclables.GetOrAdd(instance, () =>
             {
-                var recyclables = instance.GetComponentsInChildren<IRecyclable>(true).AsReadOnly();
+                var recyclables = instance.GetComponentsInChildren<IRecyclable>(true);
                 recyclables.ForEach(recyclable =>
                 {
                     recyclable.Manager = this;
