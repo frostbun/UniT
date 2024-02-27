@@ -6,6 +6,8 @@
     {
         public IEntityManager Manager { get; set; }
 
+        public IEntity Entity { set; }
+
         public void OnInstantiate();
 
         public void OnSpawn();

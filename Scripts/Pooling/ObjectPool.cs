@@ -19,7 +19,6 @@ namespace UniT.Pooling
         {
             var pool = new GameObject($"{prefab.name} pool").AddComponent<ObjectPool>();
             pool.prefab = prefab;
-            prefab.gameObject.SetActive(false);
             return pool;
         }
 
@@ -34,7 +33,12 @@ namespace UniT.Pooling
 
         public void Load(int count)
         {
-            while (this.pooledObjects.Count < count) this.pooledObjects.Enqueue(Instantiate(this.prefab, this.transform));
+            while (this.pooledObjects.Count < count)
+            {
+                var instance = Instantiate(this.prefab, this.transform);
+                instance.SetActive(false);
+                this.pooledObjects.Enqueue(instance);
+            }
         }
 
         public GameObject Spawn(Vector3 position = default, Quaternion rotation = default, Transform parent = null)

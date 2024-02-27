@@ -15,6 +15,8 @@
     {
         IEntityManager IComponent.Manager { get => this.Manager; set => this.Manager = value; }
 
+        IEntity IComponent.Entity { set => this.Entity = value; }
+
         void IComponent.OnInstantiate()
         {
             this.transform = base.transform;
@@ -38,6 +40,8 @@
 
         protected IEntityManager Manager { get; private set; }
 
+        protected IEntity Entity { get; private set; }
+
         public new Transform transform { get; private set; }
 
         #region Helpers
@@ -53,16 +57,15 @@
 
         #endregion
 
-        protected virtual void OnInstantiate()
-        {
-        }
+        protected virtual void OnInstantiate() { }
 
-        protected virtual void OnSpawn()
-        {
-        }
+        protected virtual void OnSpawn() { }
 
-        protected virtual void OnRecycle()
-        {
-        }
+        protected virtual void OnRecycle() { }
+    }
+
+    public abstract class Component<TEntity> : Component where TEntity : IEntity
+    {
+        protected new TEntity Entity => (TEntity)base.Entity;
     }
 }

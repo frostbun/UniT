@@ -252,6 +252,7 @@ namespace UniT.Entities
                 this.entityToComponents[entity].ForEach(component =>
                 {
                     component.Manager = this.manager;
+                    component.Entity  = entity;
                     if (component is IHasController owner)
                     {
                         owner.Controller = this.manager.controllerFactory.Create(owner);

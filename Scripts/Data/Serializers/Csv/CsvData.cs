@@ -9,14 +9,20 @@ namespace UniT.Data.Serializers
 
     public abstract class CsvData : ICsvData
     {
+        string ICsvData.Prefix => this.Prefix;
+
         Type ICsvData.RowType => this.GetType();
 
         void ICsvData.Add(object key, object value) => value.CopyTo(this);
+
+        protected virtual string Prefix => "";
     }
 
     [Preserve]
     public class CsvData<T> : ICsvData, IReadOnlyList<T>
     {
+        string ICsvData.Prefix => this.Prefix;
+
         Type ICsvData.RowType => typeof(T);
 
         void ICsvData.Add(object key, object value) => this.list.Add((T)value);
@@ -30,11 +36,15 @@ namespace UniT.Data.Serializers
         public int Count => this.list.Count;
 
         public T this[int index] => this.list[index];
+
+        protected virtual string Prefix => "";
     }
 
     [Preserve]
     public class CsvData<TKey, TValue> : ICsvData, IReadOnlyDictionary<TKey, TValue>
     {
+        string ICsvData.Prefix => this.Prefix;
+
         Type ICsvData.RowType => typeof(TValue);
 
         void ICsvData.Add(object key, object value) => this.dictionary.Add((TKey)key, (TValue)value);
@@ -56,5 +66,7 @@ namespace UniT.Data.Serializers
         public bool ContainsKey(TKey key) => this.dictionary.ContainsKey(key);
 
         public bool TryGetValue(TKey key, out TValue value) => this.dictionary.TryGetValue(key, out value);
+
+        protected virtual string Prefix => "";
     }
 }

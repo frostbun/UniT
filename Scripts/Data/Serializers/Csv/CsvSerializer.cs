@@ -70,7 +70,6 @@ namespace UniT.Data.Serializers
         {
             private readonly ICsvData        data;
             private readonly CsvReader       reader;
-            private readonly Type            rowType;
             private readonly FieldInfo       keyField;
             private readonly List<FieldInfo> normalFields;
             private readonly List<FieldInfo> nestedFields;
@@ -81,20 +80,19 @@ namespace UniT.Data.Serializers
             {
                 this.data                              = data;
                 this.reader                            = reader;
-                this.rowType                           = data.RowType;
-                this.keyField                          = this.rowType.GetCsvKeyField();
-                (this.normalFields, this.nestedFields) = this.rowType.GetCsvFields().Split(field => !typeof(ICsvData).IsAssignableFrom(field.FieldType));
+                this.keyField                          = data.RowType.GetCsvKeyField();
+                (this.normalFields, this.nestedFields) = data.RowType.GetCsvFields().Split(field => !typeof(ICsvData).IsAssignableFrom(field.FieldType));
             }
 
             public void Parse()
             {
                 var keyValue = (object)null;
-                var row      = Activator.CreateInstance(this.rowType);
+                var row      = Activator.CreateInstance(this.data.RowType);
 
                 foreach (var field in this.normalFields)
                 {
-                    var columnName = field.GetCsvFieldName();
-                    if (!this.reader.ContainsColumn(columnName)) throw new InvalidOperationException($"Field {columnName} not found in {this.rowType.Name}. If this is intentional, add [CsvIgnore] attribute to the field.");
+                    var columnName = this.data.Prefix + field.GetCsvFieldName();
+                    if (!this.reader.ContainsColumn(columnName)) throw new InvalidOperationException($"Field {columnName} not found in {this.data.RowType.Name}. If this is intentional, add [CsvIgnore] attribute to the field.");
                     var str = this.reader.GetCell(columnName);
                     if (str.IsNullOrWhitespace()) continue;
                     var value = ConverterManager.Instance.ConvertFromString(str, field.FieldType);
