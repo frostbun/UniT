@@ -74,7 +74,7 @@ namespace UniT.Entities
             var isLoaded = await this.keyToPool.TryAddAsync(key, async () =>
             {
                 var prefab = await this.assetsManager.LoadAsync<GameObject>(key, progress, cancellationToken);
-                return new EntityPool(prefab.GetComponent<IEntity>(), this);
+                return new EntityPool(prefab.GetComponentOrThrow<IEntity>(), this);
             });
             this.logger.Debug(isLoaded ? $"Loaded {key} pool" : $"Using cached {key} pool");
             this.keyToPool[key].Load(count);
@@ -85,7 +85,7 @@ namespace UniT.Entities
             this.ThrowIfDisposed();
             yield return this.keyToPool.TryAddAsync(
                 key,
-                callback => this.assetsManager.LoadAsync<GameObject>(key, prefab => callback(new EntityPool(prefab.GetComponent<IEntity>(), this))),
+                callback => this.assetsManager.LoadAsync<GameObject>(key, prefab => callback(new EntityPool(prefab.GetComponentOrThrow<IEntity>(), this))),
                 isLoaded =>
                 {
                     this.logger.Debug(isLoaded ? $"Loaded {key} pool" : $"Using cached {key} pool");
@@ -98,57 +98,94 @@ namespace UniT.Entities
 
         TEntity IEntityManager.Spawn<TEntity>(TEntity prefab, Vector3 position, Quaternion rotation, Transform parent)
         {
-            this.ThrowIfDisposed();
-            return (TEntity)this.prefabToPool[prefab].Spawn(position, rotation, parent);
+            return this.GetPool(prefab).Spawn<TEntity>(position, rotation, parent);
         }
 
         TEntity IEntityManager.Spawn<TEntity, TModel>(TEntity prefab, TModel model, Vector3 position, Quaternion rotation, Transform parent)
         {
-            this.ThrowIfDisposed();
-            return (TEntity)this.prefabToPool[prefab].Spawn(model, position, rotation, parent);
+            return this.GetPool(prefab).Spawn<TEntity, TModel>(model, position, rotation, parent);
         }
 
         TEntity IEntityManager.Spawn<TEntity>(string key, Vector3 position, Quaternion rotation, Transform parent)
         {
-            this.ThrowIfDisposed();
-            return (TEntity)this.keyToPool[key].Spawn(position, rotation, parent);
+            return this.GetPool(key).Spawn<TEntity>(position, rotation, parent);
         }
 
         TEntity IEntityManager.Spawn<TEntity, TModel>(string key, TModel model, Vector3 position, Quaternion rotation, Transform parent)
         {
-            this.ThrowIfDisposed();
-            return (TEntity)this.keyToPool[key].Spawn(model, position, rotation, parent);
+            return this.GetPool(key).Spawn<TEntity, TModel>(model, position, rotation, parent);
         }
 
         void IEntityManager.Recycle(IEntity entity)
         {
             this.ThrowIfDisposed();
-            this.entityToPool[entity].Recycle(entity);
+            if (!this.entityToPool.TryGet(entity, out var pool)) throw new InvalidOperationException($"Trying to recycle {entity.gameObject.name} that is not spawned");
+            pool.Recycle(entity);
         }
 
         void IEntityManager.RecycleAll(IEntity prefab)
         {
             this.ThrowIfDisposed();
-            this.prefabToPool.GetOrDefault(prefab)?.RecycleAll();
+            if (!this.prefabToPool.TryGet(prefab, out var pool))
+            {
+                this.logger.Warning($"Trying to recycle all {prefab.gameObject.name} that is not loaded");
+                return;
+            }
+            pool.RecycleAll();
         }
 
         void IEntityManager.RecycleAll(string key)
         {
             this.ThrowIfDisposed();
-            this.keyToPool.GetOrDefault(key)?.RecycleAll();
+            if (!this.keyToPool.TryGet(key, out var pool))
+            {
+                this.logger.Warning($"Trying to recycle all {key} that is not loaded");
+                return;
+            }
+            pool.RecycleAll();
         }
 
         void IEntityManager.Unload(IEntity prefab)
         {
             this.ThrowIfDisposed();
-            this.prefabToPool.RemoveOrDefault(prefab)?.Dispose();
+            if (!this.prefabToPool.TryRemove(prefab, out var pool))
+            {
+                this.logger.Warning($"Trying to unload {prefab.gameObject.name} pool that is not loaded");
+                return;
+            }
+            pool.Dispose();
         }
 
         void IEntityManager.Unload(string key)
         {
             this.ThrowIfDisposed();
-            this.keyToPool.RemoveOrDefault(key)?.Dispose();
+            if (!this.keyToPool.TryRemove(key, out var pool))
+            {
+                this.logger.Warning($"Trying to unload {key} pool that is not loaded");
+                return;
+            }
+            pool.Dispose();
             this.assetsManager.Unload(key);
+        }
+
+        private EntityPool GetPool(IEntity prefab)
+        {
+            this.ThrowIfDisposed();
+            var isLoaded = this.prefabToPool.TryAdd(prefab, () => new EntityPool(prefab, this));
+            if (isLoaded) this.logger.Warning($"Auto loading {prefab.gameObject.name} pool. Consider preloading it with `Load` method.");
+            return this.prefabToPool[prefab];
+        }
+
+        private EntityPool GetPool(string key)
+        {
+            this.ThrowIfDisposed();
+            var isLoaded = this.keyToPool.TryAdd(key, () =>
+            {
+                var prefab = this.assetsManager.Load<GameObject>(key);
+                return new EntityPool(prefab.GetComponentOrThrow<IEntity>(), this);
+            });
+            if (isLoaded) this.logger.Warning($"Auto loading {key} pool. Consider preloading it with `Load` method.");
+            return this.keyToPool[key];
         }
 
         private class EntityPool
@@ -178,7 +215,7 @@ namespace UniT.Entities
                 while (this.pooledEntities.Count < count) this.pooledEntities.Enqueue(this.Instantiate());
             }
 
-            public IEntity Spawn(Vector3 position, Quaternion rotation, Transform parent)
+            public TEntity Spawn<TEntity>(Vector3 position, Quaternion rotation, Transform parent) where TEntity : IEntityWithoutModel
             {
                 var entity = this.pooledEntities.DequeueOrDefault(this.Instantiate);
                 entity.transform.SetPositionAndRotation(position, rotation);
@@ -191,10 +228,10 @@ namespace UniT.Entities
                     this.componentToTypes[component].ForEach(type => this.manager.Register(type, component));
                     component.OnSpawn();
                 });
-                return entity;
+                return (TEntity)entity;
             }
 
-            public IEntity Spawn<TModel>(TModel model, Vector3 position, Quaternion rotation, Transform parent)
+            public TEntity Spawn<TEntity, TModel>(TModel model, Vector3 position, Quaternion rotation, Transform parent) where TEntity : IEntityWithModel<TModel>
             {
                 var entity = this.pooledEntities.DequeueOrDefault(this.Instantiate);
                 entity.transform.SetPositionAndRotation(position, rotation);
@@ -208,7 +245,7 @@ namespace UniT.Entities
                     this.componentToTypes[component].ForEach(type => this.manager.Register(type, component));
                     component.OnSpawn();
                 });
-                return entity;
+                return (TEntity)entity;
             }
 
             public void Recycle(IEntity entity)

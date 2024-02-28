@@ -6,6 +6,8 @@ namespace UniT.Entities
     {
         public bool IsDestroyed { get; }
 
+        public void Recycle();
+
         public GameObject gameObject { get; }
 
         public T[] GetComponentsInChildren<T>();

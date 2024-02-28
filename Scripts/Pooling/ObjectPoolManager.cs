@@ -21,11 +21,10 @@ namespace UniT.Pooling
         private readonly IAssetsManager assetsManager;
         private readonly ILogger        logger;
 
-        private readonly Transform                             poolsContainer = new GameObject(nameof(ObjectPoolManager)).DontDestroyOnLoad().transform;
-        private readonly Dictionary<GameObject, ObjectPool>    prefabToPool   = new Dictionary<GameObject, ObjectPool>();
-        private readonly Dictionary<string, ObjectPool>        keyToPool      = new Dictionary<string, ObjectPool>();
-        private readonly Dictionary<GameObject, ObjectPool>    instanceToPool = new Dictionary<GameObject, ObjectPool>();
-        private readonly Dictionary<GameObject, IRecyclable[]> recyclables    = new Dictionary<GameObject, IRecyclable[]>();
+        private readonly Transform                          poolsContainer = new GameObject(nameof(ObjectPoolManager)).DontDestroyOnLoad().transform;
+        private readonly Dictionary<GameObject, ObjectPool> prefabToPool   = new Dictionary<GameObject, ObjectPool>();
+        private readonly Dictionary<string, ObjectPool>     keyToPool      = new Dictionary<string, ObjectPool>();
+        private readonly Dictionary<GameObject, ObjectPool> instanceToPool = new Dictionary<GameObject, ObjectPool>();
 
         [Preserve]
         public ObjectPoolManager(IAssetsManager assetsManager, ILogger.IFactory loggerFactory)
@@ -68,7 +67,8 @@ namespace UniT.Pooling
         {
             var pool     = this.GetPool(prefab);
             var instance = pool.Spawn(position, rotation, parent);
-            this.Spawn(instance, pool);
+            this.instanceToPool.Add(instance, pool);
+            this.logger.Debug($"Spawned {prefab.name}");
             return instance;
         }
 
@@ -76,7 +76,8 @@ namespace UniT.Pooling
         {
             var pool     = this.GetPool(key);
             var instance = pool.Spawn(position, rotation, parent);
-            this.Spawn(instance, pool);
+            this.instanceToPool.Add(instance, pool);
+            this.logger.Debug($"Spawned {key}");
             return instance;
         }
 
@@ -104,7 +105,7 @@ namespace UniT.Pooling
         {
             if (!this.prefabToPool.TryRemove(prefab, out var pool))
             {
-                this.logger.Warning($"Trying to unload {prefab.name} pool that was not instantiated");
+                this.logger.Warning($"Trying to unload {prefab.name} pool that is not loaded");
                 return;
             }
             this.Unload(pool);
@@ -114,7 +115,7 @@ namespace UniT.Pooling
         {
             if (!this.keyToPool.TryRemove(key, out var pool))
             {
-                this.logger.Warning($"Trying to unload {key} pool that was not instantiated");
+                this.logger.Warning($"Trying to unload {key} pool that is not loaded");
                 return;
             }
             this.Unload(pool);
@@ -127,14 +128,16 @@ namespace UniT.Pooling
 
         private ObjectPool GetPool(GameObject prefab)
         {
-            return this.prefabToPool.GetOrDefault(prefab)
-                ?? throw new InvalidOperationException($"{prefab.name} pool was not instantiated");
+            var isLoaded = this.prefabToPool.TryAdd(prefab, () => this.Load(prefab));
+            if (isLoaded) this.logger.Warning($"Auto loading {prefab.name} pool. Consider preloading it with `Load` method.");
+            return this.prefabToPool[prefab];
         }
 
         private ObjectPool GetPool(string key)
         {
-            return this.keyToPool.GetOrDefault(key)
-                ?? throw new InvalidOperationException($"{key} pool was not instantiated");
+            var isLoaded = this.keyToPool.TryAdd(key, () => this.Load(this.assetsManager.Load<GameObject>(key)));
+            if (isLoaded) this.logger.Warning($"Auto loading {key} pool. Consider preloading it with `Load` method.");
+            return this.keyToPool[key];
         }
 
         private ObjectPool Load(GameObject prefab)
@@ -145,31 +148,12 @@ namespace UniT.Pooling
             return pool;
         }
 
-        private void Spawn(GameObject instance, ObjectPool pool)
-        {
-            this.instanceToPool.Add(instance, pool);
-            this.recyclables.GetOrAdd(instance, () =>
-            {
-                var recyclables = instance.GetComponentsInChildren<IRecyclable>(true);
-                recyclables.ForEach(recyclable =>
-                {
-                    recyclable.Manager = this;
-                    recyclable.OnInstantiate();
-                });
-                this.logger.Debug($"Instantiated {instance.name}");
-                return recyclables;
-            }).ForEach(component => component.OnSpawn());
-            this.logger.Debug($"Spawned {instance.name}");
-        }
-
         private void Recycle(GameObject instance, ObjectPool pool)
         {
             pool.Recycle(instance);
-            this.recyclables[instance].ForEach(recyclable => recyclable.OnRecycle());
             if (!instance)
             {
-                this.recyclables.Remove(instance);
-                this.logger.Warning($"Trying to recycle {instance.name} that was already destroyed");
+                this.logger.Warning($"Trying to recycle {instance.name} that is destroyed");
                 return;
             }
             this.logger.Debug($"Recycled {instance.name}");
@@ -189,7 +173,6 @@ namespace UniT.Pooling
         private void Unload(ObjectPool pool)
         {
             this.RecycleAll(pool);
-            pool.GetComponentsInChildren<Transform>().ForEach(transform => this.recyclables.Remove(transform.gameObject));
             Object.Destroy(pool.gameObject);
             this.logger.Debug($"Destroyed {pool.gameObject.name}");
         }

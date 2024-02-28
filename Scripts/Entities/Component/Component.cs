@@ -40,7 +40,7 @@
 
         protected IEntityManager Manager { get; private set; }
 
-        protected IEntity Entity { get; private set; }
+        public IEntity Entity { get; private set; }
 
         public new Transform transform { get; private set; }
 

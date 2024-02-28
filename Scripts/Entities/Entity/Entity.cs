@@ -3,6 +3,8 @@
     public abstract class BaseEntity : Component, IEntity
     {
         bool IEntity.IsDestroyed => !this;
+
+        public void Recycle() => this.Manager.Recycle(this);
     }
 
     public abstract class Entity : BaseEntity, IEntityWithoutModel
@@ -13,6 +15,6 @@
     {
         TModel IEntityWithModel<TModel>.Model { set => this.Model = value; }
 
-        protected TModel Model { get; private set; }
+        public TModel Model { get; private set; }
     }
 }
