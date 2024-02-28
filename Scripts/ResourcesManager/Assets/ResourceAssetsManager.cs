@@ -19,9 +19,9 @@
         {
         }
 
-        protected override Object Load(string key)
+        protected override Object Load<T>(string key)
         {
-            return Resources.Load(key);
+            return Resources.Load<T>(key);
         }
 
         protected override void Unload(Object obj)
@@ -30,14 +30,14 @@
         }
 
         #if UNIT_UNITASK
-        protected override UniTask<Object> LoadAsync(string key, IProgress<float> progress, CancellationToken cancellationToken)
+        protected override async UniTask<Object> LoadAsync<T>(string key, IProgress<float> progress, CancellationToken cancellationToken)
         {
-            return Resources.LoadAsync(key).ToUniTask(progress: progress, cancellationToken: cancellationToken);
+            return await Resources.LoadAsync<T>(key).ToUniTask(progress: progress, cancellationToken: cancellationToken);
         }
         #else
-        protected override IEnumerator LoadAsync(string key, Action<Object> callback, IProgress<float> progress)
+        protected override IEnumerator LoadAsync<T>(string key, Action<Object> callback, IProgress<float> progress)
         {
-            var request = Resources.LoadAsync(key);
+            var request = Resources.LoadAsync<T>(key);
             while (!request.isDone)
             {
                 progress?.Report(request.progress);

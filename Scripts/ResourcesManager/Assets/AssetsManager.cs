@@ -37,10 +37,10 @@
         {
             var isLoaded = this.cache.TryAdd(
                 key,
-                () => this.Load(key) ?? throw new ArgumentOutOfRangeException(nameof(key), key, $"Failed to load {key}")
+                () => this.Load<T>(key) ?? throw new ArgumentOutOfRangeException(nameof(key), key, $"Failed to load {key}")
             );
             this.logger.Debug(isLoaded ? $"Using cached {key}" : $"Loaded {key}");
-            return this.cache[key] as T ?? throw new InvalidCastException($"Failed to cast {key} to {typeof(T).Name}");
+            return (T)this.cache[key];
         }
 
         void IAssetsManager.Unload(string key)
@@ -56,7 +56,7 @@
             }
         }
 
-        protected abstract Object Load(string key);
+        protected abstract Object Load<T>(string key) where T : Object;
 
         protected abstract void Unload(Object obj);
 
@@ -69,19 +69,19 @@
         {
             var isLoaded = await this.cache.TryAddAsync(
                 key,
-                async () => await this.LoadAsync(key, progress, cancellationToken) ?? throw new ArgumentOutOfRangeException(nameof(key), key, $"Failed to load {key}")
+                async () => await this.LoadAsync<T>(key, progress, cancellationToken) ?? throw new ArgumentOutOfRangeException(nameof(key), key, $"Failed to load {key}")
             );
             this.logger.Debug(isLoaded ? $"Using cached {key}" : $"Loaded {key}");
-            return this.cache[key] as T ?? throw new InvalidCastException($"Failed to cast {key} to {typeof(T).Name}");
+            return (T)this.cache[key];
         }
 
-        protected abstract UniTask<Object> LoadAsync(string key, IProgress<float> progress, CancellationToken cancellationToken);
+        protected abstract UniTask<Object> LoadAsync<T>(string key, IProgress<float> progress, CancellationToken cancellationToken) where T : Object;
         #else
         IEnumerator IAssetsManager.LoadAsync<T>(string key, Action<T> callback, IProgress<float> progress)
         {
             yield return this.cache.TryAddAsync(
                 key,
-                callback => this.LoadAsync(
+                callback => this.LoadAsync<T>(
                     key,
                     obj => callback(obj ?? throw new ArgumentOutOfRangeException(nameof(key), key, $"Failed to load {key}")),
                     progress
@@ -89,12 +89,12 @@
                 isLoaded =>
                 {
                     this.logger.Debug(isLoaded ? $"Loaded {key}" : $"Using cached {key}");
-                    callback(this.cache[key] as T ?? throw new InvalidCastException($"Failed to cast {key} to {typeof(T).Name}"));
+                    callback((T)this.cache[key]);
                 }
             );
         }
 
-        protected abstract IEnumerator LoadAsync(string key, Action<Object> callback, IProgress<float> progress);
+        protected abstract IEnumerator LoadAsync<T>(string key, Action<Object> callback, IProgress<float> progress) where T : Object;
         #endif
 
         #endregion

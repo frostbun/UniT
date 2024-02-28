@@ -172,7 +172,7 @@ namespace UniT.Entities
         {
             this.ThrowIfDisposed();
             var isLoaded = this.prefabToPool.TryAdd(prefab, () => new EntityPool(prefab, this));
-            if (isLoaded) this.logger.Warning($"Auto loading {prefab.gameObject.name} pool. Consider preloading it with `Load` method.");
+            if (isLoaded) this.logger.Warning($"Auto loaded {prefab.gameObject.name} pool. Consider preload it with `Load` or `LoadAsync` for better performance.");
             return this.prefabToPool[prefab];
         }
 
@@ -184,7 +184,7 @@ namespace UniT.Entities
                 var prefab = this.assetsManager.Load<GameObject>(key);
                 return new EntityPool(prefab.GetComponentOrThrow<IEntity>(), this);
             });
-            if (isLoaded) this.logger.Warning($"Auto loading {key} pool. Consider preloading it with `Load` method.");
+            if (isLoaded) this.logger.Warning($"Auto loaded {key} pool. Consider preload it with `Load` or `LoadAsync` for better performance.");
             return this.keyToPool[key];
         }
 

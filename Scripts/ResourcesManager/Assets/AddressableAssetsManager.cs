@@ -20,9 +20,9 @@ namespace UniT.ResourcesManager
         {
         }
 
-        protected override Object Load(string key)
+        protected override Object Load<T>(string key)
         {
-            return Addressables.LoadAssetAsync<Object>(key).WaitForCompletion();
+            return Addressables.LoadAssetAsync<T>(key).WaitForCompletion();
         }
 
         protected override void Unload(Object obj)
@@ -31,14 +31,14 @@ namespace UniT.ResourcesManager
         }
 
         #if UNIT_UNITASK
-        protected override UniTask<Object> LoadAsync(string key, IProgress<float> progress, CancellationToken cancellationToken)
+        protected override async UniTask<Object> LoadAsync<T>(string key, IProgress<float> progress, CancellationToken cancellationToken)
         {
-            return Addressables.LoadAssetAsync<Object>(key).ToUniTask(progress: progress, cancellationToken: cancellationToken);
+            return await Addressables.LoadAssetAsync<T>(key).ToUniTask(progress: progress, cancellationToken: cancellationToken);
         }
         #else
-        protected override IEnumerator LoadAsync(string key, Action<Object> callback, IProgress<float> progress)
+        protected override IEnumerator LoadAsync<T>(string key, Action<Object> callback, IProgress<float> progress)
         {
-            var request = Addressables.LoadAssetAsync<Object>(key);
+            var request = Addressables.LoadAssetAsync<T>(key);
             while (!request.IsDone)
             {
                 progress?.Report(request.PercentComplete);
