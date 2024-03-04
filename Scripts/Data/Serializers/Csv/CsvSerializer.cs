@@ -1,12 +1,10 @@
-namespace UniT.Data.Serializers
+namespace UniT.Data
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
     using System.Text.RegularExpressions;
-    using UniT.Data.Converters;
-    using UniT.Data.Types;
     using UniT.Extensions;
     using UnityEngine.Scripting;
 
@@ -78,10 +76,11 @@ namespace UniT.Data.Serializers
 
             public CsvParser(ICsvData data, CsvReader reader)
             {
-                this.data                              = data;
-                this.reader                            = reader;
-                this.keyField                          = data.RowType.GetCsvKeyField();
-                (this.normalFields, this.nestedFields) = data.RowType.GetCsvFields().Split(field => !typeof(ICsvData).IsAssignableFrom(field.FieldType));
+                this.data   = data;
+                this.reader = reader;
+                var csvFields = data.RowType.GetCsvFields().ToArray();
+                this.keyField                          = data.Key.IsNullOrWhitespace() ? csvFields.First() : csvFields.First(field => field.Name == data.Key);
+                (this.normalFields, this.nestedFields) = csvFields.Split(field => !typeof(ICsvData).IsAssignableFrom(field.FieldType));
             }
 
             public void Parse()

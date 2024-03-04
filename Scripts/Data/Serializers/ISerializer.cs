@@ -1,7 +1,6 @@
-namespace UniT.Data.Serializers
+namespace UniT.Data
 {
     using System;
-    using UniT.Data.Types;
 
     public interface ISerializer
     {

@@ -257,12 +257,7 @@ namespace UniT.Entities
                 });
                 this.manager.entityToPool.Remove(entity);
                 this.spawnedEntities.Remove(entity);
-                if (entity.IsDestroyed) return; // Disposed
-                if (!this.entitiesContainer)    // Disposed
-                {
-                    Object.Destroy(entity.gameObject);
-                    return;
-                }
+                if (entity.IsDestroyed) return;
                 entity.gameObject.SetActive(false);
                 entity.transform.SetParent(this.entitiesContainer);
                 this.pooledEntities.Enqueue(entity);
@@ -277,7 +272,6 @@ namespace UniT.Entities
             {
                 this.RecycleAll();
                 this.pooledEntities.Clear();
-                if (!this.entitiesContainer) return; // Disposed
                 Object.Destroy(this.entitiesContainer.gameObject);
             }
 
@@ -338,14 +332,20 @@ namespace UniT.Entities
 
         #region Finalizer
 
+        private bool isDisposed = false;
+
         private void ThrowIfDisposed()
         {
-            if (this.poolsContainer) return;
-            throw new ObjectDisposedException(nameof(EntityManager));
+            if (this.isDisposed) throw new ObjectDisposedException(nameof(EntityManager));
         }
 
         private void Dispose()
         {
+            if (!this.poolsContainer)
+            {
+                this.isDisposed = true;
+                return;
+            }
             this.prefabToPool.Clear((_, pool) =>
             {
                 pool.Dispose();
@@ -356,10 +356,8 @@ namespace UniT.Entities
                 this.assetsManager.Unload(key);
             });
             this.typeToComponents.Clear();
-            if (this.poolsContainer)
-            {
-                Object.Destroy(this.poolsContainer.gameObject);
-            }
+            Object.Destroy(this.poolsContainer.gameObject);
+            this.isDisposed = true;
             this.logger.Debug("Disposed");
         }
 

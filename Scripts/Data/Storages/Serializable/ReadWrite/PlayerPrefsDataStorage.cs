@@ -1,4 +1,4 @@
-namespace UniT.Data.Storages
+namespace UniT.Data
 {
     using System;
     using System.Linq;
@@ -12,10 +12,10 @@ namespace UniT.Data.Storages
     using System.Collections;
     #endif
 
-    public sealed class PlayerPrefsSerializableDataStorage : ReadWriteSerializableDataStorage
+    public sealed class PlayerPrefsDataStorage : ReadWriteSerializableDataStorage
     {
         [Preserve]
-        public PlayerPrefsSerializableDataStorage()
+        public PlayerPrefsDataStorage()
         {
         }
 

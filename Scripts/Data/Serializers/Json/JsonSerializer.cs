@@ -1,9 +1,8 @@
 #if UNIT_NEWTONSOFT_JSON
-namespace UniT.Data.Serializers
+namespace UniT.Data
 {
     using System;
     using Newtonsoft.Json;
-    using UniT.Data.Types;
     using UnityEngine.Scripting;
 
     public sealed class JsonSerializer : ISerializer

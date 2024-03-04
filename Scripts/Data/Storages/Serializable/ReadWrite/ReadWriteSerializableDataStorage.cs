@@ -1,7 +1,6 @@
-namespace UniT.Data.Storages
+namespace UniT.Data
 {
     using System;
-    using UniT.Data.Types;
     #if UNIT_UNITASK
     using System.Threading;
     using Cysharp.Threading.Tasks;

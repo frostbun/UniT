@@ -4,8 +4,6 @@ namespace Zenject
     using UniT.Advertisements;
     using UniT.Audio;
     using UniT.Data;
-    using UniT.Data.Serializers;
-    using UniT.Data.Storages;
     using UniT.Entities;
     using UniT.Logging;
     using UniT.Pooling;
@@ -82,13 +80,13 @@ namespace Zenject
                 .WhenInjectedInto<IDataManager>()
                 .Lazy();
 
-            this.Container.BindInterfacesTo<PlayerPrefsSerializableDataStorage>()
+            this.Container.BindInterfacesTo<PlayerPrefsDataStorage>()
                 .AsSingle()
                 .WhenInjectedInto<IDataManager>()
                 .Lazy();
 
             #if UNIT_FBINSTANT
-            this.Container.BindInterfacesTo<FbInstantSerializableDataStorage>()
+            this.Container.BindInterfacesTo<FbInstantDataStorage>()
                 .AsSingle()
                 .WhenInjectedInto<IDataManager>()
                 .Lazy();

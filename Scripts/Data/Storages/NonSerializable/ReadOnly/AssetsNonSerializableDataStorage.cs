@@ -1,8 +1,7 @@
-namespace UniT.Data.Storages
+namespace UniT.Data
 {
     using System;
     using System.Linq;
-    using UniT.Data.Types;
     using UniT.ResourcesManager;
     using UnityEngine.Scripting;
     using Object = UnityEngine.Object;

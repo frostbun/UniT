@@ -1,5 +1,5 @@
 ﻿#if UNIT_FBINSTANT
-namespace UniT.Data.Storages
+namespace UniT.Data
 {
     using System;
     using UnityEngine.Scripting;
@@ -12,10 +12,10 @@ namespace UniT.Data.Storages
     using System.Collections;
     #endif
 
-    public sealed class FbInstantSerializableDataStorage : ReadWriteSerializableDataStorage
+    public sealed class FbInstantDataStorage : ReadWriteSerializableDataStorage
     {
         [Preserve]
-        public FbInstantSerializableDataStorage()
+        public FbInstantDataStorage()
         {
         }
 

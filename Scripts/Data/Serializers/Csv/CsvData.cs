@@ -1,26 +1,28 @@
-namespace UniT.Data.Serializers
+namespace UniT.Data
 {
     using System;
     using System.Collections;
     using System.Collections.Generic;
-    using UniT.Data.Types;
     using UniT.Extensions;
     using UnityEngine.Scripting;
 
     public abstract class CsvData : ICsvData
     {
+        string ICsvData.Key    => this.Key;
         string ICsvData.Prefix => this.Prefix;
 
         Type ICsvData.RowType => this.GetType();
 
         void ICsvData.Add(object key, object value) => value.CopyTo(this);
 
+        protected virtual string Key    => "";
         protected virtual string Prefix => "";
     }
 
     [Preserve]
     public class CsvData<T> : ICsvData, IReadOnlyList<T>
     {
+        string ICsvData.Key    => this.Key;
         string ICsvData.Prefix => this.Prefix;
 
         Type ICsvData.RowType => typeof(T);
@@ -37,12 +39,14 @@ namespace UniT.Data.Serializers
 
         public T this[int index] => this.list[index];
 
+        protected virtual string Key    => "";
         protected virtual string Prefix => "";
     }
 
     [Preserve]
     public class CsvData<TKey, TValue> : ICsvData, IReadOnlyDictionary<TKey, TValue>
     {
+        string ICsvData.Key    => this.Key;
         string ICsvData.Prefix => this.Prefix;
 
         Type ICsvData.RowType => typeof(TValue);
@@ -67,6 +71,7 @@ namespace UniT.Data.Serializers
 
         public bool TryGetValue(TKey key, out TValue value) => this.dictionary.TryGetValue(key, out value);
 
+        protected virtual string Key    => "";
         protected virtual string Prefix => "";
     }
 }

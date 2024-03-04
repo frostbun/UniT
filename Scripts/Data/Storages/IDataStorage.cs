@@ -1,4 +1,4 @@
-﻿namespace UniT.Data.Storages
+﻿namespace UniT.Data
 {
     using System;
 

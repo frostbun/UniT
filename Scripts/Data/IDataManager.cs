@@ -1,7 +1,6 @@
 namespace UniT.Data
 {
     using System;
-    using UniT.Data.Types;
     using UniT.Logging;
     #if UNIT_UNITASK
     using System.Threading;

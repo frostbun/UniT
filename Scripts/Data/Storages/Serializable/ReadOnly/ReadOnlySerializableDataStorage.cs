@@ -1,7 +1,6 @@
-namespace UniT.Data.Storages
+namespace UniT.Data
 {
     using System;
-    using UniT.Data.Types;
 
     public abstract class ReadOnlySerializableDataStorage : SerializableDataStorage, IReadOnlySerializableDataStorage
     {

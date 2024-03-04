@@ -1,5 +1,5 @@
 #if UNIT_NEWTONSOFT_JSON
-namespace UniT.Data.Converters
+namespace UniT.Data
 {
     using System;
     using Newtonsoft.Json;
