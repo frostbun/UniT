@@ -11,16 +11,11 @@
         protected virtual Type ControllerType => typeof(TController);
 
         protected TController Controller { get; private set; }
-    }
 
-    public abstract class Component<TEntity, TController> : Entities.Component<TEntity>, IHasController where TEntity : IEntity where TController : IController
-    {
-        Type IHasController.ControllerType => this.ControllerType;
+        protected sealed override void OnInstantiate() => this.Controller.OnInstantiate();
 
-        IController IHasController.Controller { set => this.Controller = (TController)value; }
+        protected sealed override void OnSpawn() => this.Controller.OnSpawn();
 
-        protected virtual Type ControllerType => typeof(TController);
-
-        protected TController Controller { get; private set; }
+        protected sealed override void OnRecycle() => this.Controller.OnRecycle();
     }
 }

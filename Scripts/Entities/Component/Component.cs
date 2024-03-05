@@ -3,23 +3,17 @@
     using UnityEngine;
     #if UNIT_UNITASK
     using System.Threading;
-    #else
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Linq;
-    using UniT.Extensions;
     #endif
 
     public abstract class Component : UnmanagedComponent, IComponent
     {
         IEntityManager IComponent.Manager { get => this.Manager; set => this.Manager = value; }
 
-        IEntity IComponent.Entity { set => this.Entity = value; }
+        Transform IComponent.Transform => this.Transform;
 
         void IComponent.OnInstantiate()
         {
-            this.transform = base.transform;
+            this.Transform = this.transform;
             this.OnInstantiate();
         }
 
@@ -31,41 +25,34 @@
         void IComponent.OnRecycle()
         {
             #if UNIT_UNITASK
-            this.hideCts?.Cancel();
-            this.hideCts?.Dispose();
-            this.hideCts = null;
+            this.recycleCts?.Cancel();
+            this.recycleCts?.Dispose();
+            this.recycleCts = null;
             #endif
             this.OnRecycle();
         }
 
-        protected IEntityManager Manager { get; private set; }
-
-        public IEntity Entity { get; private set; }
-
-        public new Transform transform { get; private set; }
-
-        #region Helpers
-
         #if UNIT_UNITASK
-        private CancellationTokenSource hideCts;
-
-        protected CancellationToken GetCancellationTokenOnHide()
-        {
-            return (this.hideCts ??= new CancellationTokenSource()).Token;
-        }
+        CancellationToken IComponent.GetCancellationTokenOnRecycle() => this.GetCancellationTokenOnRecycle();
         #endif
 
-        #endregion
+        protected IEntityManager Manager { get; private set; }
+
+        protected Transform Transform { get; private set; }
 
         protected virtual void OnInstantiate() { }
 
         protected virtual void OnSpawn() { }
 
         protected virtual void OnRecycle() { }
-    }
 
-    public abstract class Component<TEntity> : Component where TEntity : IEntity
-    {
-        protected new TEntity Entity => (TEntity)base.Entity;
+        #if UNIT_UNITASK
+        private CancellationTokenSource recycleCts;
+
+        protected CancellationToken GetCancellationTokenOnRecycle()
+        {
+            return (this.recycleCts ??= new CancellationTokenSource()).Token;
+        }
+        #endif
     }
 }

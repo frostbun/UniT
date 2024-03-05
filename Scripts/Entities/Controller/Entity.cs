@@ -11,6 +11,12 @@ namespace UniT.Entities.Controller
         protected virtual Type ControllerType => typeof(TController);
 
         protected TController Controller { get; private set; }
+
+        protected sealed override void OnInstantiate() => this.Controller.OnInstantiate();
+
+        protected sealed override void OnSpawn() => this.Controller.OnSpawn();
+
+        protected sealed override void OnRecycle() => this.Controller.OnRecycle();
     }
 
     public abstract class Entity<TModel, TController> : Entities.Entity<TModel>, IHasController where TController : IController
@@ -22,5 +28,11 @@ namespace UniT.Entities.Controller
         protected virtual Type ControllerType => typeof(TController);
 
         protected TController Controller { get; private set; }
+
+        protected sealed override void OnInstantiate() => this.Controller.OnInstantiate();
+
+        protected sealed override void OnSpawn() => this.Controller.OnSpawn();
+
+        protected sealed override void OnRecycle() => this.Controller.OnRecycle();
     }
 }

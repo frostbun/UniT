@@ -218,8 +218,8 @@ namespace UniT.Entities
             public TEntity Spawn<TEntity>(Vector3 position, Quaternion rotation, Transform parent) where TEntity : IEntityWithoutModel
             {
                 var entity = this.pooledEntities.DequeueOrDefault(this.Instantiate);
-                entity.transform.SetPositionAndRotation(position, rotation);
-                entity.transform.SetParent(parent);
+                entity.Transform.SetPositionAndRotation(position, rotation);
+                entity.Transform.SetParent(parent);
                 entity.gameObject.SetActive(true);
                 this.spawnedEntities.Add(entity);
                 this.manager.entityToPool.Add(entity, this);
@@ -234,8 +234,8 @@ namespace UniT.Entities
             public TEntity Spawn<TEntity, TModel>(TModel model, Vector3 position, Quaternion rotation, Transform parent) where TEntity : IEntityWithModel<TModel>
             {
                 var entity = this.pooledEntities.DequeueOrDefault(this.Instantiate);
-                entity.transform.SetPositionAndRotation(position, rotation);
-                entity.transform.SetParent(parent);
+                entity.Transform.SetPositionAndRotation(position, rotation);
+                entity.Transform.SetParent(parent);
                 entity.gameObject.SetActive(true);
                 this.spawnedEntities.Add(entity);
                 this.manager.entityToPool.Add(entity, this);
@@ -259,7 +259,7 @@ namespace UniT.Entities
                 this.spawnedEntities.Remove(entity);
                 if (entity.IsDestroyed) return;
                 entity.gameObject.SetActive(false);
-                entity.transform.SetParent(this.entitiesContainer);
+                entity.Transform.SetParent(this.entitiesContainer);
                 this.pooledEntities.Enqueue(entity);
             }
 
@@ -283,7 +283,6 @@ namespace UniT.Entities
                 this.entityToComponents[entity].ForEach(component =>
                 {
                     component.Manager = this.manager;
-                    component.Entity  = entity;
                     if (component is IHasController owner)
                     {
                         owner.Controller = this.manager.controllerFactory.Create(owner);
