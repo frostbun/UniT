@@ -310,22 +310,17 @@ namespace UniT.Entities
         IEnumerable<T> IEntityManager.Query<T>()
         {
             this.ThrowIfDisposed();
-            return this.GetCache(typeof(T)).Cast<T>();
+            return this.typeToComponents.GetOrAdd(typeof(T)).Cast<T>();
         }
 
         private void Register(Type type, IComponent component)
         {
-            this.GetCache(type).Add(component);
+            this.typeToComponents.GetOrAdd(type).Add(component);
         }
 
         private void Unregister(Type type, IComponent component)
         {
-            this.GetCache(type).Remove(component);
-        }
-
-        private HashSet<IComponent> GetCache(Type type)
-        {
-            return this.typeToComponents.GetOrAdd(type, () => new HashSet<IComponent>());
+            this.typeToComponents.GetOrAdd(type).Remove(component);
         }
 
         #endregion

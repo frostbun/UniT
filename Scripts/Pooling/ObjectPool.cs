@@ -51,10 +51,9 @@ namespace UniT.Pooling
             return instance;
         }
 
-        public T Spawn<T>(Vector3 position, Quaternion rotation, Transform parent = null)
+        public T Spawn<T>(Vector3 position = default, Quaternion rotation = default, Transform parent = null)
         {
-            return this.Spawn(position, rotation, parent).GetComponent<T>()
-                ?? throw new InvalidOperationException($"Component {typeof(T).Name} not found in GameObject {this.prefab.name}");
+            return this.Spawn(position, rotation, parent).GetComponentOrThrow<T>();
         }
 
         public void Recycle(GameObject instance)
