@@ -1,7 +1,8 @@
-namespace UniT.Entities
+namespace UniT.ECC
 {
     using System;
     using System.Collections.Generic;
+    using UniT.ECC.Entity;
     using UniT.Logging;
     using UnityEngine;
     #if UNIT_UNITASK
@@ -17,19 +18,23 @@ namespace UniT.Entities
 
         public void Load(string key, int count = 1);
 
-        public TEntity Spawn<TEntity>(TEntity prefab, Vector3 position = default, Quaternion rotation = default, Transform parent = null) where TEntity : IEntityWithoutModel;
+        public TEntity Spawn<TEntity>(TEntity prefab, Vector3 position = default, Quaternion rotation = default, Transform parent = null) where TEntity : IEntityWithoutParams;
 
-        public TEntity Spawn<TEntity, TModel>(TEntity prefab, TModel model, Vector3 position = default, Quaternion rotation = default, Transform parent = null) where TEntity : IEntityWithModel<TModel>;
+        public TEntity Spawn<TEntity, TParams>(TEntity prefab, TParams @params, Vector3 position = default, Quaternion rotation = default, Transform parent = null) where TEntity : IEntityWithParams<TParams>;
 
-        public TEntity Spawn<TEntity>(string key, Vector3 position = default, Quaternion rotation = default, Transform parent = null) where TEntity : IEntityWithoutModel;
+        public TEntity Spawn<TEntity>(string key, Vector3 position = default, Quaternion rotation = default, Transform parent = null) where TEntity : IEntityWithoutParams;
 
-        public TEntity Spawn<TEntity, TModel>(string key, TModel model, Vector3 position = default, Quaternion rotation = default, Transform parent = null) where TEntity : IEntityWithModel<TModel>;
+        public TEntity Spawn<TEntity, TParams>(string key, TParams @params, Vector3 position = default, Quaternion rotation = default, Transform parent = null) where TEntity : IEntityWithParams<TParams>;
 
         public void Recycle(IEntity instance);
 
         public void RecycleAll(IEntity prefab);
 
         public void RecycleAll(string key);
+
+        public void Cleanup(IEntity prefab, int retainCount = 1);
+
+        public void Cleanup(string key, int retainCount = 1);
 
         public void Unload(IEntity prefab);
 
@@ -42,11 +47,13 @@ namespace UniT.Entities
         #if UNITY_2021_2_OR_NEWER
         public void Load<TEntity>(int count = 1) where TEntity : IEntity => this.Load(typeof(TEntity).GetKey(), count);
 
-        public TEntity Spawn<TEntity>(Vector3 position = default, Quaternion rotation = default, Transform parent = null) where TEntity : IEntityWithoutModel => this.Spawn<TEntity>(typeof(TEntity).GetKey(), position, rotation, parent);
+        public TEntity Spawn<TEntity>(Vector3 position = default, Quaternion rotation = default, Transform parent = null) where TEntity : IEntityWithoutParams => this.Spawn<TEntity>(typeof(TEntity).GetKey(), position, rotation, parent);
 
-        public TEntity Spawn<TEntity, TModel>(TModel model, Vector3 position = default, Quaternion rotation = default, Transform parent = null) where TEntity : IEntityWithModel<TModel> => this.Spawn<TEntity, TModel>(typeof(TEntity).GetKey(), model, position, rotation, parent);
+        public TEntity Spawn<TEntity, TParams>(TParams @params, Vector3 position = default, Quaternion rotation = default, Transform parent = null) where TEntity : IEntityWithParams<TParams> => this.Spawn<TEntity, TParams>(typeof(TEntity).GetKey(), @params, position, rotation, parent);
 
         public void RecycleAll<TEntity>() where TEntity : IEntity => this.RecycleAll(typeof(TEntity).GetKey());
+
+        public void Cleanup<TEntity>(int retainCount = 1) where TEntity : IEntity => this.Cleanup(typeof(TEntity).GetKey(), retainCount);
 
         public void Unload<TEntity>() where TEntity : IEntity => this.Unload(typeof(TEntity).GetKey());
         #endif

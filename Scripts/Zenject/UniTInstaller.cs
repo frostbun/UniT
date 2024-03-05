@@ -4,7 +4,7 @@ namespace Zenject
     using UniT.Advertisements;
     using UniT.Audio;
     using UniT.Data;
-    using UniT.Entities;
+    using UniT.ECC;
     using UniT.Logging;
     using UniT.Pooling;
     using UniT.ResourcesManager;

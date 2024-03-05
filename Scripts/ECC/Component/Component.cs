@@ -1,11 +1,11 @@
-﻿namespace UniT.Entities
+﻿namespace UniT.ECC.Component
 {
     using UnityEngine;
     #if UNIT_UNITASK
     using System.Threading;
     #endif
 
-    public abstract class Component : UnmanagedComponent, IComponent
+    public abstract class Component : BetterMonoBehavior, IComponent
     {
         IEntityManager IComponent.Manager { get => this.Manager; set => this.Manager = value; }
 

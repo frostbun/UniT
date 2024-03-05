@@ -1,4 +1,4 @@
-﻿namespace UniT.Entities
+﻿namespace UniT
 {
     using UnityEngine;
     #if !UNIT_UNITASK
@@ -9,7 +9,7 @@
     using UniT.Extensions;
     #endif
 
-    public abstract class UnmanagedComponent : MonoBehaviour
+    public abstract class BetterMonoBehavior : MonoBehaviour
     {
         #if !UNIT_UNITASK
         private readonly HashSet<IEnumerator> runningCoroutines = new HashSet<IEnumerator>();

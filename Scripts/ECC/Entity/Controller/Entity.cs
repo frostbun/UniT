@@ -1,8 +1,9 @@
-namespace UniT.Entities.Controller
+namespace UniT.ECC.Entity.Controller
 {
     using System;
+    using UniT.ECC.Controller;
 
-    public abstract class Entity<TController> : Entity, IHasController where TController : IController
+    public abstract class Entity<TController> : Entity, IHasController where TController : IEntityController
     {
         Type IHasController.ControllerType => this.ControllerType;
 
@@ -19,7 +20,7 @@ namespace UniT.Entities.Controller
         protected sealed override void OnRecycle() => this.Controller.OnRecycle();
     }
 
-    public abstract class Entity<TModel, TController> : Entities.Entity<TModel>, IHasController where TController : IController
+    public abstract class Entity<TParams, TController> : ECC.Entity.Entity<TParams>, IHasController where TController : IEntityController
     {
         Type IHasController.ControllerType => this.ControllerType;
 

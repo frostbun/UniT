@@ -65,7 +65,7 @@ namespace UniT.Pooling
 
         GameObject IObjectPoolManager.Spawn(GameObject prefab, Vector3 position, Quaternion rotation, Transform parent)
         {
-            var pool     = this.GetPool(prefab);
+            var pool     = this.GetPoolOrLoad(prefab);
             var instance = pool.Spawn(position, rotation, parent);
             this.instanceToPool.Add(instance, pool);
             this.logger.Debug($"Spawned {prefab.name}");
@@ -74,7 +74,7 @@ namespace UniT.Pooling
 
         GameObject IObjectPoolManager.Spawn(string key, Vector3 position, Quaternion rotation, Transform parent)
         {
-            var pool     = this.GetPool(key);
+            var pool     = this.GetPoolOrLoad(key);
             var instance = pool.Spawn(position, rotation, parent);
             this.instanceToPool.Add(instance, pool);
             this.logger.Debug($"Spawned {key}");
@@ -93,31 +93,35 @@ namespace UniT.Pooling
 
         void IObjectPoolManager.RecycleAll(GameObject prefab)
         {
-            this.RecycleAll(this.GetPool(prefab));
+            if (this.GetPoolOrWarning(prefab) is not { } pool) return;
+            this.RecycleAll(pool);
         }
 
         void IObjectPoolManager.RecycleAll(string key)
         {
-            this.RecycleAll(this.GetPool(key));
+            if (this.GetPoolOrWarning(key) is not { } pool) return;
+            this.RecycleAll(pool);
+        }
+
+        void IObjectPoolManager.Cleanup(GameObject prefab, int retainCount)
+        {
+            this.GetPoolOrWarning(prefab)?.Cleanup(retainCount);
+        }
+
+        void IObjectPoolManager.Cleanup(string key, int retainCount)
+        {
+            this.GetPoolOrWarning(key)?.Cleanup(retainCount);
         }
 
         void IObjectPoolManager.Unload(GameObject prefab)
         {
-            if (!this.prefabToPool.TryRemove(prefab, out var pool))
-            {
-                this.logger.Warning($"Trying to unload {prefab.name} pool that is not loaded");
-                return;
-            }
+            if (this.GetPoolOrWarning(prefab) is not { } pool) return;
             this.Unload(pool);
         }
 
         void IObjectPoolManager.Unload(string key)
         {
-            if (!this.keyToPool.TryRemove(key, out var pool))
-            {
-                this.logger.Warning($"Trying to unload {key} pool that is not loaded");
-                return;
-            }
+            if (this.GetPoolOrWarning(key) is not { } pool) return;
             this.Unload(pool);
             this.assetsManager.Unload(key);
         }
@@ -126,18 +130,36 @@ namespace UniT.Pooling
 
         #region Private
 
-        private ObjectPool GetPool(GameObject prefab)
+        private ObjectPool GetPoolOrLoad(GameObject prefab)
         {
             var isLoaded = this.prefabToPool.TryAdd(prefab, () => this.Load(prefab));
             if (isLoaded) this.logger.Warning($"Auto loading {prefab.name} pool. Consider preloading it with `Load` method.");
             return this.prefabToPool[prefab];
         }
 
-        private ObjectPool GetPool(string key)
+        private ObjectPool GetPoolOrLoad(string key)
         {
             var isLoaded = this.keyToPool.TryAdd(key, () => this.Load(this.assetsManager.Load<GameObject>(key)));
             if (isLoaded) this.logger.Warning($"Auto loading {key} pool. Consider preloading it with `Load` method.");
             return this.keyToPool[key];
+        }
+
+        private ObjectPool GetPoolOrWarning(GameObject prefab)
+        {
+            if (!this.prefabToPool.TryGet(prefab, out var pool))
+            {
+                this.logger.Warning($"{prefab.name} pool not loaded");
+            }
+            return pool;
+        }
+
+        private ObjectPool GetPoolOrWarning(string key)
+        {
+            if (!this.keyToPool.TryGet(key, out var pool))
+            {
+                this.logger.Warning($"{key} pool not loaded");
+            }
+            return pool;
         }
 
         private ObjectPool Load(GameObject prefab)

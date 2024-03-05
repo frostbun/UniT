@@ -1,4 +1,4 @@
-namespace UniT.Entities.Controller
+namespace UniT.ECC.Controller
 {
     using UniT.Factories;
 
@@ -9,11 +9,5 @@ namespace UniT.Entities.Controller
         }
 
         public IHasController Owner { set; }
-
-        public void OnInstantiate();
-
-        public void OnSpawn();
-
-        public void OnRecycle();
     }
 }

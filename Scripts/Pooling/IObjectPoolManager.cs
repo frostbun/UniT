@@ -24,6 +24,10 @@ namespace UniT.Pooling
 
         public void RecycleAll(string key);
 
+        public void Cleanup(GameObject prefab, int retainCount = 1);
+
+        public void Cleanup(string key, int retainCount = 1);
+
         public void Unload(GameObject prefab);
 
         public void Unload(string key);
@@ -41,6 +45,8 @@ namespace UniT.Pooling
 
         public void RecycleAll(Component component) => this.RecycleAll(component.gameObject);
 
+        public void Cleanup(Component component, int retainCount = 1) => this.Cleanup(component.gameObject, retainCount);
+
         public void Unload(Component component) => this.Unload(component.gameObject);
         #endif
 
@@ -54,6 +60,8 @@ namespace UniT.Pooling
         public T Spawn<T>(Vector3 position = default, Quaternion rotation = default, Transform parent = null) => this.Spawn<T>(typeof(T).GetKey(), position, rotation, parent);
 
         public void RecycleAll<T>() => this.RecycleAll(typeof(T).GetKey());
+
+        public void Cleanup<T>(int retainCount = 1) => this.Cleanup(typeof(T).GetKey(), retainCount);
 
         public void Unload<T>() => this.Unload(typeof(T).GetKey());
         #endif

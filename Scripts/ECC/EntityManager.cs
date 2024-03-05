@@ -1,9 +1,11 @@
-namespace UniT.Entities
+namespace UniT.ECC
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using UniT.Entities.Controller;
+    using UniT.ECC.Component;
+    using UniT.ECC.Controller;
+    using UniT.ECC.Entity;
     using UniT.Extensions;
     using UniT.Logging;
     using UniT.ResourcesManager;
@@ -98,22 +100,22 @@ namespace UniT.Entities
 
         TEntity IEntityManager.Spawn<TEntity>(TEntity prefab, Vector3 position, Quaternion rotation, Transform parent)
         {
-            return this.GetPool(prefab).Spawn<TEntity>(position, rotation, parent);
+            return this.GetPoolOrLoad(prefab).Spawn<TEntity>(position, rotation, parent);
         }
 
-        TEntity IEntityManager.Spawn<TEntity, TModel>(TEntity prefab, TModel model, Vector3 position, Quaternion rotation, Transform parent)
+        TEntity IEntityManager.Spawn<TEntity, TParams>(TEntity prefab, TParams @params, Vector3 position, Quaternion rotation, Transform parent)
         {
-            return this.GetPool(prefab).Spawn<TEntity, TModel>(model, position, rotation, parent);
+            return this.GetPoolOrLoad(prefab).Spawn<TEntity, TParams>(@params, position, rotation, parent);
         }
 
         TEntity IEntityManager.Spawn<TEntity>(string key, Vector3 position, Quaternion rotation, Transform parent)
         {
-            return this.GetPool(key).Spawn<TEntity>(position, rotation, parent);
+            return this.GetPoolOrLoad(key).Spawn<TEntity>(position, rotation, parent);
         }
 
-        TEntity IEntityManager.Spawn<TEntity, TModel>(string key, TModel model, Vector3 position, Quaternion rotation, Transform parent)
+        TEntity IEntityManager.Spawn<TEntity, TParams>(string key, TParams @params, Vector3 position, Quaternion rotation, Transform parent)
         {
-            return this.GetPool(key).Spawn<TEntity, TModel>(model, position, rotation, parent);
+            return this.GetPoolOrLoad(key).Spawn<TEntity, TParams>(@params, position, rotation, parent);
         }
 
         void IEntityManager.Recycle(IEntity entity)
@@ -125,24 +127,22 @@ namespace UniT.Entities
 
         void IEntityManager.RecycleAll(IEntity prefab)
         {
-            this.ThrowIfDisposed();
-            if (!this.prefabToPool.TryGet(prefab, out var pool))
-            {
-                this.logger.Warning($"Trying to recycle all {prefab.gameObject.name} that is not loaded");
-                return;
-            }
-            pool.RecycleAll();
+            this.GetPoolOrWarning(prefab)?.RecycleAll();
         }
 
         void IEntityManager.RecycleAll(string key)
         {
-            this.ThrowIfDisposed();
-            if (!this.keyToPool.TryGet(key, out var pool))
-            {
-                this.logger.Warning($"Trying to recycle all {key} that is not loaded");
-                return;
-            }
-            pool.RecycleAll();
+            this.GetPoolOrWarning(key)?.RecycleAll();
+        }
+
+        void IEntityManager.Cleanup(IEntity prefab, int retainCount)
+        {
+            this.GetPoolOrWarning(prefab)?.Cleanup(retainCount);
+        }
+
+        void IEntityManager.Cleanup(string key, int retainCount)
+        {
+            this.GetPoolOrWarning(key)?.Cleanup(retainCount);
         }
 
         void IEntityManager.Unload(IEntity prefab)
@@ -168,7 +168,7 @@ namespace UniT.Entities
             this.assetsManager.Unload(key);
         }
 
-        private EntityPool GetPool(IEntity prefab)
+        private EntityPool GetPoolOrLoad(IEntity prefab)
         {
             this.ThrowIfDisposed();
             var isLoaded = this.prefabToPool.TryAdd(prefab, () => new EntityPool(prefab, this));
@@ -176,7 +176,7 @@ namespace UniT.Entities
             return this.prefabToPool[prefab];
         }
 
-        private EntityPool GetPool(string key)
+        private EntityPool GetPoolOrLoad(string key)
         {
             this.ThrowIfDisposed();
             var isLoaded = this.keyToPool.TryAdd(key, () =>
@@ -186,6 +186,25 @@ namespace UniT.Entities
             });
             if (isLoaded) this.logger.Warning($"Auto loaded {key} pool. Consider preload it with `Load` or `LoadAsync` for better performance.");
             return this.keyToPool[key];
+        }
+
+        private EntityPool GetPoolOrWarning(IEntity prefab)
+        {
+            this.ThrowIfDisposed();
+            if (!this.prefabToPool.TryGet(prefab, out var pool))
+            {
+                this.logger.Warning($"{prefab.gameObject.name} pool not loaded");
+            }
+            return pool;
+        }
+
+        private EntityPool GetPoolOrWarning(string key)
+        {
+            if (!this.keyToPool.TryGet(key, out var pool))
+            {
+                this.logger.Warning($"{key} pool not loaded");
+            }
+            return pool;
         }
 
         private class EntityPool
@@ -215,7 +234,7 @@ namespace UniT.Entities
                 while (this.pooledEntities.Count < count) this.pooledEntities.Enqueue(this.Instantiate());
             }
 
-            public TEntity Spawn<TEntity>(Vector3 position, Quaternion rotation, Transform parent) where TEntity : IEntityWithoutModel
+            public TEntity Spawn<TEntity>(Vector3 position, Quaternion rotation, Transform parent) where TEntity : IEntityWithoutParams
             {
                 var entity = this.pooledEntities.DequeueOrDefault(this.Instantiate);
                 entity.Transform.SetPositionAndRotation(position, rotation);
@@ -231,7 +250,7 @@ namespace UniT.Entities
                 return (TEntity)entity;
             }
 
-            public TEntity Spawn<TEntity, TModel>(TModel model, Vector3 position, Quaternion rotation, Transform parent) where TEntity : IEntityWithModel<TModel>
+            public TEntity Spawn<TEntity, TParams>(TParams @params, Vector3 position, Quaternion rotation, Transform parent) where TEntity : IEntityWithParams<TParams>
             {
                 var entity = this.pooledEntities.DequeueOrDefault(this.Instantiate);
                 entity.Transform.SetPositionAndRotation(position, rotation);
@@ -239,7 +258,7 @@ namespace UniT.Entities
                 entity.gameObject.SetActive(true);
                 this.spawnedEntities.Add(entity);
                 this.manager.entityToPool.Add(entity, this);
-                ((IEntityWithModel<TModel>)entity).Model = model;
+                ((IEntityWithParams<TParams>)entity).Params = @params;
                 this.entityToComponents[entity].ForEach(component =>
                 {
                     this.componentToTypes[component].ForEach(type => this.manager.Register(type, component));
@@ -266,6 +285,17 @@ namespace UniT.Entities
             public void RecycleAll()
             {
                 this.spawnedEntities.SafeForEach(this.Recycle);
+            }
+
+            public void Cleanup(int retainCount)
+            {
+                while (this.pooledEntities.Count > retainCount)
+                {
+                    var entity = this.pooledEntities.Dequeue();
+                    this.entityToComponents.Remove(entity, out var components);
+                    components.ForEach(component => this.componentToTypes.Remove(component));
+                    Object.Destroy(entity.gameObject);
+                }
             }
 
             public void Dispose()

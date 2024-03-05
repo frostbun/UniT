@@ -1,4 +1,4 @@
-﻿namespace UniT.Entities
+﻿namespace UniT.ECC.Component
 {
     using UnityEngine;
     #if UNIT_UNITASK

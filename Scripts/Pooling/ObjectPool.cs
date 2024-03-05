@@ -75,6 +75,14 @@ namespace UniT.Pooling
             this.spawnedObjects.SafeForEach(this.Recycle);
         }
 
+        public void Cleanup(int retainCount = 1)
+        {
+            while (this.pooledObjects.Count > retainCount)
+            {
+                Destroy(this.pooledObjects.Dequeue());
+            }
+        }
+
         #endregion
     }
 }

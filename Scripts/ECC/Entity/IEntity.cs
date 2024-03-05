@@ -1,5 +1,6 @@
-namespace UniT.Entities
+namespace UniT.ECC.Entity
 {
+    using UniT.ECC.Component;
     using UnityEngine;
 
     public interface IEntity : IComponent
@@ -13,12 +14,12 @@ namespace UniT.Entities
         public T[] GetComponentsInChildren<T>();
     }
 
-    public interface IEntityWithoutModel : IEntity
+    public interface IEntityWithoutParams : IEntity
     {
     }
 
-    public interface IEntityWithModel<in TModel> : IEntity
+    public interface IEntityWithParams<TParams> : IEntity
     {
-        public TModel Model { set; }
+        public TParams Params { get; set; }
     }
 }

@@ -1,8 +1,9 @@
-﻿namespace UniT.Entities.Controller
+﻿namespace UniT.ECC.Component.Controller
 {
     using System;
+    using UniT.ECC.Controller;
 
-    public abstract class Component<TController> : Component, IHasController where TController : IController
+    public abstract class Component<TController> : Component, IHasController where TController : IComponentController
     {
         Type IHasController.ControllerType => this.ControllerType;
 

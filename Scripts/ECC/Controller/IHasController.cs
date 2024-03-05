@@ -1,4 +1,4 @@
-namespace UniT.Entities.Controller
+namespace UniT.ECC.Controller
 {
     using System;
 
