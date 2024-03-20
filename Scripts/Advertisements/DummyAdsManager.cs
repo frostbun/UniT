@@ -60,7 +60,7 @@ namespace UniT.Advertisements
         void IAdsManager.ShowRewardedAd(Action onSuccess, Action onComplete)
         {
             this.logger.Info("ShowRewardedAd");
-            onSuccess?.Invoke();
+            onSuccess.Invoke();
             onComplete?.Invoke();
         }
 

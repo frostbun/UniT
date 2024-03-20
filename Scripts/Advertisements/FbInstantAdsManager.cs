@@ -76,22 +76,19 @@ namespace UniT.Advertisements
 
         private static readonly int[] RetryIntervals = { 4, 8, 16, 32, 64 };
 
-        private void InvokeUntilSuccess(string[] adIds, Func<string, UniTask<Result>> action, [CallerMemberName] string caller = null)
+        private void InvokeUntilSuccess(string[] adIds, Func<string, UniTask<Result>> action, [CallerMemberName] string caller = null) => UniTask.Void(async () =>
         {
-            UniTask.Void(async () =>
+            for (var index = 0;; ++index)
             {
-                for (var index = 0;; ++index)
-                {
-                    var adId   = adIds[Mathf.Min(index, adIds.Length - 1)];
-                    var result = await action(adId);
-                    if (result.IsSuccess) break;
-                    this.logger.Error($"{caller} error {index + 1} time(s): {result.Error}");
-                    var retryInterval = RetryIntervals[Mathf.Min(index, RetryIntervals.Length - 1)];
-                    await UniTask.WaitForSeconds(retryInterval);
-                }
-                this.logger.Debug($"{caller} success");
-            });
-        }
+                var adId   = adIds[Mathf.Min(index, adIds.Length - 1)];
+                var result = await action(adId);
+                if (result.IsSuccess) break;
+                this.logger.Error($"{caller} error {index + 1} time(s): {result.Error}");
+                var retryInterval = RetryIntervals[Mathf.Min(index, RetryIntervals.Length - 1)];
+                await UniTask.WaitForSeconds(retryInterval);
+            }
+            this.logger.Debug($"{caller} success");
+        });
 
         private void ShowAd(string[] adIds, Func<string, bool> isAdReady, Func<string, UniTask<Result>> showAction, Action reloadAction, Action onSuccess, Action onComplete, [CallerMemberName] string caller = null)
         {
