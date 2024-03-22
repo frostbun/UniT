@@ -13,7 +13,7 @@
     using System.Collections;
     #endif
 
-    public abstract class AssetsManager : IAssetsManager
+    public abstract class AssetsManager : IAssetsManager, IHasLogger, IDisposable
     {
         #region Constructor
 

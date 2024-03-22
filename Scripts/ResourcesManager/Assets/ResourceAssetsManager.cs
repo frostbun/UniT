@@ -37,13 +37,13 @@
         #else
         protected override IEnumerator LoadAsync<T>(string key, Action<Object> callback, IProgress<float> progress)
         {
-            var request = Resources.LoadAsync<T>(key);
-            while (!request.isDone)
+            var operation = Resources.LoadAsync<T>(key);
+            while (!operation.isDone)
             {
-                progress?.Report(request.progress);
+                progress?.Report(operation.progress);
                 yield return null;
             }
-            callback(request.asset);
+            callback(operation.asset);
         }
         #endif
     }

@@ -14,7 +14,7 @@ namespace UniT.Audio
     using Cysharp.Threading.Tasks;
     #endif
 
-    public sealed class AudioManager : IAudioManager
+    public sealed class AudioManager : IAudioManager, IHasLogger
     {
         #region Constructor
 

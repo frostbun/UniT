@@ -38,13 +38,13 @@ namespace UniT.ResourcesManager
         #else
         protected override IEnumerator LoadAsync<T>(string key, Action<Object> callback, IProgress<float> progress)
         {
-            var request = Addressables.LoadAssetAsync<T>(key);
-            while (!request.IsDone)
+            var operation = Addressables.LoadAssetAsync<T>(key);
+            while (!operation.IsDone)
             {
-                progress?.Report(request.PercentComplete);
+                progress?.Report(operation.PercentComplete);
                 yield return null;
             }
-            callback(request.Result);
+            callback(operation.Result);
         }
         #endif
     }

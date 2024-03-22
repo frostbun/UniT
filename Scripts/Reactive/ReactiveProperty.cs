@@ -6,8 +6,14 @@ namespace UniT.Reactive
 
     public class ReactiveProperty<T>
     {
-        private          T                  value;
+        private T value;
+
         private readonly HashSet<Action<T>> callbacks = new HashSet<Action<T>>();
+
+        public ReactiveProperty(T value = default)
+        {
+            this.value = value;
+        }
 
         public T Value
         {
@@ -17,11 +23,6 @@ namespace UniT.Reactive
                 this.value = value;
                 this.callbacks.SafeForEach(callback => callback(value));
             }
-        }
-
-        public ReactiveProperty(T value = default)
-        {
-            this.value = value;
         }
 
         public bool Subscribe(Action<T> callback, bool invokeImmediately = true)

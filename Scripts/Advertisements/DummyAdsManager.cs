@@ -5,7 +5,7 @@ namespace UniT.Advertisements
     using UniT.Logging;
     using UnityEngine.Scripting;
 
-    public sealed class DummyAdsManager : IAdsManager
+    public sealed class DummyAdsManager : IAdsManager, IHasLogger
     {
         #region Constructor
 

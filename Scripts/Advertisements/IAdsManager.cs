@@ -2,9 +2,8 @@
 {
     using System;
     using UniT.Initializables;
-    using UniT.Logging;
 
-    public interface IAdsManager : IInitializable, IHasLogger
+    public interface IAdsManager : IInitializable
     {
         public void ShowBannerAd();
 

@@ -1,14 +1,13 @@
 namespace UniT.Pooling
 {
     using System;
-    using UniT.Logging;
     using UnityEngine;
     #if UNIT_UNITASK
     using System.Threading;
     using Cysharp.Threading.Tasks;
     #endif
 
-    public interface IObjectPoolManager : IHasLogger
+    public interface IObjectPoolManager
     {
         public void Load(GameObject prefab, int count = 1);
 

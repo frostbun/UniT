@@ -1,18 +1,17 @@
 namespace UniT.Signal
 {
     using System;
-    using UniT.Logging;
 
-    public interface ISignalBus : IHasLogger
+    public interface ISignalBus
     {
         public void Fire<T>(T signal);
 
-        public void Subscribe<T>(Action<T> callback);
+        public bool Subscribe<T>(Action<T> callback);
 
-        public void Subscribe<T>(Action callback);
+        public bool Subscribe<T>(Action callback);
 
-        public void Unsubscribe<T>(Action<T> callback);
+        public bool Unsubscribe<T>(Action<T> callback);
 
-        public void Unsubscribe<T>(Action callback);
+        public bool Unsubscribe<T>(Action callback);
     }
 }

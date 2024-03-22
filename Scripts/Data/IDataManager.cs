@@ -1,7 +1,6 @@
 namespace UniT.Data
 {
     using System;
-    using UniT.Logging;
     #if UNIT_UNITASK
     using System.Threading;
     using Cysharp.Threading.Tasks;
@@ -9,7 +8,7 @@ namespace UniT.Data
     using System.Collections;
     #endif
 
-    public interface IDataManager : IHasLogger
+    public interface IDataManager
     {
         public IData Get(Type type);
 

@@ -1,15 +1,17 @@
 ﻿namespace UniT.ResourcesManager
 {
+    using System;
     using UniT.Logging;
     using UnityEngine.SceneManagement;
     using UnityEngine.Scripting;
     #if UNIT_UNITASK
-    using System;
     using System.Threading;
     using Cysharp.Threading.Tasks;
+    #else
+    using System.Collections;
     #endif
 
-    public class ResourceScenesManager : IScenesManager
+    public class ResourceScenesManager : IScenesManager, IHasLogger
     {
         #region Constructor
 
@@ -38,6 +40,18 @@
             return SceneManager.LoadSceneAsync(sceneName, loadMode)
                 .ToUniTask(progress: progress, cancellationToken: cancellationToken)
                 .ContinueWith(() => this.logger.Debug($"Loaded {sceneName}"));
+        }
+        #else
+        IEnumerator IScenesManager.LoadSceneAsync(string sceneName, LoadSceneMode loadMode, Action callback, IProgress<float> progress)
+        {
+            var operation = SceneManager.LoadSceneAsync(sceneName, loadMode);
+            while (!operation.isDone)
+            {
+                progress?.Report(operation.progress);
+                yield return null;
+            }
+            this.logger.Debug($"Loaded {sceneName}");
+            callback?.Invoke();
         }
         #endif
     }

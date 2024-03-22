@@ -4,6 +4,9 @@ namespace UniT.ECC.Component.Controller
     using UnityEngine;
     #if UNIT_UNITASK
     using System.Threading;
+    #else
+    using System.Collections;
+    using System.Collections.Generic;
     #endif
 
     public abstract class ComponentController<TComponent> : Controller<TComponent>, IComponentController where TComponent : IComponent, IHasController
@@ -14,12 +17,6 @@ namespace UniT.ECC.Component.Controller
 
         void IComponentController.OnRecycle() => this.OnRecycle();
 
-        protected virtual void OnInstantiate() { }
-
-        protected virtual void OnSpawn() { }
-
-        protected virtual void OnRecycle() { }
-
         protected TComponent Component => this.Owner;
 
         protected IEntityManager Manager => this.Owner.Manager;
@@ -28,6 +25,20 @@ namespace UniT.ECC.Component.Controller
 
         #if UNIT_UNITASK
         protected CancellationToken GetCancellationTokenOnRecycle() => this.Owner.GetCancellationTokenOnRecycle();
+        #else
+        protected void StartCoroutine(IEnumerator coroutine) => this.Owner.StartCoroutine(coroutine);
+
+        protected void StopCoroutine(IEnumerator coroutine) => this.Owner.StopCoroutine(coroutine);
+
+        protected IEnumerator GatherCoroutines(params IEnumerator[] coroutines) => this.Owner.GatherCoroutines(coroutines);
+
+        protected IEnumerator GatherCoroutines(IEnumerable<IEnumerator> coroutines) => this.Owner.GatherCoroutines(coroutines);
         #endif
+
+        protected virtual void OnInstantiate() { }
+
+        protected virtual void OnSpawn() { }
+
+        protected virtual void OnRecycle() { }
     }
 }

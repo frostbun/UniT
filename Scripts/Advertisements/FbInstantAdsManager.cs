@@ -12,7 +12,7 @@ namespace UniT.Advertisements
     using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;
 
-    public sealed class FbInstantAdsManager : IAdsManager
+    public sealed class FbInstantAdsManager : IAdsManager, IHasLogger
     {
         #region Constructor
 

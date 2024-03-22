@@ -2,13 +2,12 @@ namespace UniT.Audio
 {
     using System;
     using UniT.Initializables;
-    using UniT.Logging;
     #if UNIT_UNITASK
     using System.Threading;
     using Cysharp.Threading.Tasks;
     #endif
 
-    public interface IAudioManager : IInitializable, IHasLogger
+    public interface IAudioManager : IInitializable
     {
         public IAudioConfig Config { get; }
 

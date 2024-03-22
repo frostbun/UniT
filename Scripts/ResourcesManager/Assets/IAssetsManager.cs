@@ -2,7 +2,6 @@ namespace UniT.ResourcesManager
 {
     using System;
     using UniT.Extensions;
-    using UniT.Logging;
     using UnityEngine;
     using Object = UnityEngine.Object;
     #if UNIT_UNITASK
@@ -12,7 +11,7 @@ namespace UniT.ResourcesManager
     using System.Collections;
     #endif
 
-    public interface IAssetsManager : IHasLogger, IDisposable
+    public interface IAssetsManager
     {
         #region Sync
 

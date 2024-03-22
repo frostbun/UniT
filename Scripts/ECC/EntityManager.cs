@@ -7,6 +7,7 @@ namespace UniT.ECC
     using UniT.ECC.Controller;
     using UniT.ECC.Entity;
     using UniT.Extensions;
+    using UniT.Instantiator;
     using UniT.Logging;
     using UniT.ResourcesManager;
     using UnityEngine;
@@ -20,13 +21,13 @@ namespace UniT.ECC
     using System.Collections;
     #endif
 
-    public sealed class EntityManager : IEntityManager
+    public sealed class EntityManager : IEntityManager, IHasLogger, IDisposable
     {
         #region Constructor
 
-        private readonly IController.IFactory controllerFactory;
-        private readonly IAssetsManager       assetsManager;
-        private readonly ILogger              logger;
+        private readonly IInstantiator  instantiator;
+        private readonly IAssetsManager assetsManager;
+        private readonly ILogger        logger;
 
         private readonly Transform                             poolsContainer   = new GameObject(nameof(EntityManager)).DontDestroyOnLoad().transform;
         private readonly Dictionary<IEntity, EntityPool>       prefabToPool     = new Dictionary<IEntity, EntityPool>();
@@ -35,11 +36,11 @@ namespace UniT.ECC
         private readonly Dictionary<Type, HashSet<IComponent>> typeToComponents = new Dictionary<Type, HashSet<IComponent>>();
 
         [Preserve]
-        public EntityManager(IController.IFactory controllerFactory, IAssetsManager assetsManager, ILogger.IFactory loggerFactory)
+        public EntityManager(IInstantiator instantiator, IAssetsManager assetsManager, ILogger.IFactory loggerFactory)
         {
-            this.controllerFactory = controllerFactory;
-            this.assetsManager     = assetsManager;
-            this.logger            = loggerFactory.Create(this);
+            this.instantiator  = instantiator;
+            this.assetsManager = assetsManager;
+            this.logger        = loggerFactory.Create(this);
             this.logger.Debug("Constructed");
         }
 
@@ -315,7 +316,9 @@ namespace UniT.ECC
                     component.Manager = this.manager;
                     if (component is IHasController owner)
                     {
-                        owner.Controller = this.manager.controllerFactory.Create(owner);
+                        var controller = (IController)this.manager.instantiator.Instantiate(owner.ControllerType);
+                        controller.Owner = owner;
+                        owner.Controller = controller;
                     }
                     component.OnInstantiate();
                     this.componentToTypes.Add(

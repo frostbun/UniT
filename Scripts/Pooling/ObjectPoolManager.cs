@@ -14,7 +14,7 @@ namespace UniT.Pooling
     using Cysharp.Threading.Tasks;
     #endif
 
-    public sealed class ObjectPoolManager : IObjectPoolManager
+    public sealed class ObjectPoolManager : IObjectPoolManager, IHasLogger
     {
         #region Constructor
 

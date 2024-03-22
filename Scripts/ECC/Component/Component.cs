@@ -33,7 +33,12 @@
         }
 
         #if UNIT_UNITASK
-        CancellationToken IComponent.GetCancellationTokenOnRecycle() => this.GetCancellationTokenOnRecycle();
+        private CancellationTokenSource recycleCts;
+
+        public CancellationToken GetCancellationTokenOnRecycle()
+        {
+            return (this.recycleCts ??= new CancellationTokenSource()).Token;
+        }
         #endif
 
         protected IEntityManager Manager { get; private set; }
@@ -45,14 +50,5 @@
         protected virtual void OnSpawn() { }
 
         protected virtual void OnRecycle() { }
-
-        #if UNIT_UNITASK
-        private CancellationTokenSource recycleCts;
-
-        protected CancellationToken GetCancellationTokenOnRecycle()
-        {
-            return (this.recycleCts ??= new CancellationTokenSource()).Token;
-        }
-        #endif
     }
 }

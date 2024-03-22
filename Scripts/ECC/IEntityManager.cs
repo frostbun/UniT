@@ -3,7 +3,6 @@ namespace UniT.ECC
     using System;
     using System.Collections.Generic;
     using UniT.ECC.Entity;
-    using UniT.Logging;
     using UnityEngine;
     #if UNIT_UNITASK
     using System.Threading;
@@ -12,7 +11,7 @@ namespace UniT.ECC
     using System.Collections;
     #endif
 
-    public interface IEntityManager : IHasLogger, IDisposable
+    public interface IEntityManager
     {
         public void Load(IEntity prefab, int count = 1);
 

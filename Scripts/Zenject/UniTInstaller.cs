@@ -5,6 +5,7 @@ namespace Zenject
     using UniT.Audio;
     using UniT.Data;
     using UniT.ECC;
+    using UniT.Instantiator;
     using UniT.Logging;
     using UniT.Pooling;
     using UniT.ResourcesManager;
@@ -30,7 +31,7 @@ namespace Zenject
                 .Lazy();
 
             this.Container.BindInterfacesTo<AddressableAssetsManager>()
-                .AsTransient()
+                .AsSingle()
                 .Lazy();
             #else
             this.Container.BindInterfacesTo<ResourceScenesManager>()
@@ -38,15 +39,13 @@ namespace Zenject
                 .Lazy();
 
             this.Container.BindInterfacesTo<ResourceAssetsManager>()
-                .AsTransient()
+                .AsSingle()
                 .Lazy();
             #endif
 
-            #if UNIT_UNITASK
             this.Container.BindInterfacesTo<ExternalAssetsManager>()
-                .AsTransient()
+                .AsSingle()
                 .Lazy();
-            #endif
 
             #endregion
 
@@ -97,6 +96,20 @@ namespace Zenject
             this.Container.BindInterfacesTo<DataManager>()
                 .AsSingle()
                 .Lazy();
+
+            #endregion
+
+            #region Instantiator
+
+            #if UNIT_ZENJECT
+            this.Container.BindInterfacesTo<ZenjectInstantiator>()
+                .AsSingle()
+                .Lazy();
+            #elif UNIT_DI
+            this.Container.BindInterfacesTo<DIInstantiator>()
+                .AsSingle()
+                .Lazy();
+            #endif
 
             #endregion
 

@@ -13,7 +13,7 @@ namespace UniT.Data
     using System.Collections;
     #endif
 
-    public sealed class DataManager : IDataManager
+    public sealed class DataManager : IDataManager, IHasLogger
     {
         #region Constructor
 
