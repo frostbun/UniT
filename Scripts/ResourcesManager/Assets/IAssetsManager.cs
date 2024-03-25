@@ -2,6 +2,7 @@ namespace UniT.ResourcesManager
 {
     using System;
     using UniT.Extensions;
+    using UniT.Utilities;
     using UnityEngine;
     using Object = UnityEngine.Object;
     #if UNIT_UNITASK

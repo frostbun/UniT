@@ -1,4 +1,4 @@
-﻿namespace UniT
+﻿namespace UniT.Utilities
 {
     using UnityEngine;
     #if !UNIT_UNITASK

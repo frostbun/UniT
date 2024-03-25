@@ -3,6 +3,7 @@ namespace UniT.UI
     using System.Collections.Generic;
     using UniT.Logging;
     using UniT.UI.Activity;
+    using UniT.Utilities;
     #if UNIT_UNITASK
     using System;
     using System.Threading;

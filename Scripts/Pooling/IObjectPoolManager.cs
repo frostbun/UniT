@@ -1,6 +1,7 @@
 namespace UniT.Pooling
 {
     using System;
+    using UniT.Utilities;
     using UnityEngine;
     #if UNIT_UNITASK
     using System.Threading;

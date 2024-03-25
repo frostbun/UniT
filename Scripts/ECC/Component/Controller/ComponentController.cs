@@ -11,12 +11,6 @@ namespace UniT.ECC.Component.Controller
 
     public abstract class ComponentController<TComponent> : Controller<TComponent>, IComponentController where TComponent : IComponent, IHasController
     {
-        void IComponentController.OnInstantiate() => this.OnInstantiate();
-
-        void IComponentController.OnSpawn() => this.OnSpawn();
-
-        void IComponentController.OnRecycle() => this.OnRecycle();
-
         protected TComponent Component => this.Owner;
 
         protected IEntityManager Manager => this.Owner.Manager;
@@ -35,10 +29,10 @@ namespace UniT.ECC.Component.Controller
         protected IEnumerator GatherCoroutines(IEnumerable<IEnumerator> coroutines) => this.Owner.GatherCoroutines(coroutines);
         #endif
 
-        protected virtual void OnInstantiate() { }
+        public virtual void OnInstantiate() { }
 
-        protected virtual void OnSpawn() { }
+        public virtual void OnSpawn() { }
 
-        protected virtual void OnRecycle() { }
+        public virtual void OnRecycle() { }
     }
 }
