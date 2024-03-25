@@ -3,9 +3,9 @@ namespace UniT.Logging
     using System;
     using UnityEngine.Scripting;
 
+    [Preserve]
     public sealed class UnityLogger : Logger
     {
-        [Preserve]
         public UnityLogger(string name, LogConfig config = null) : base(name, config)
         {
         }

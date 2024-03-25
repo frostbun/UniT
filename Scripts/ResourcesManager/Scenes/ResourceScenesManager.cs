@@ -11,13 +11,13 @@
     using System.Collections;
     #endif
 
-    public class ResourceScenesManager : IScenesManager, IHasLogger
+    [Preserve]
+    public sealed class ResourceScenesManager : IScenesManager, IHasLogger
     {
         #region Constructor
 
         private readonly ILogger logger;
 
-        [Preserve]
         public ResourceScenesManager(ILogger.IFactory loggerFactory)
         {
             this.logger = loggerFactory.Create(this);

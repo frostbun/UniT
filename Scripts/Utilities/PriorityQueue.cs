@@ -3,7 +3,7 @@ namespace UniT.Utilities
     using System;
     using System.Collections.Generic;
 
-    public sealed class PriorityQueue<TElement, TPriority>
+    public class PriorityQueue<TElement, TPriority>
     {
         private readonly SortedList<TPriority, TElement> items;
 

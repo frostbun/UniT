@@ -12,13 +12,9 @@ namespace UniT.Data
     using System.Collections;
     #endif
 
+    [Preserve]
     public sealed class PlayerPrefsDataStorage : ReadWriteSerializableDataStorage
     {
-        [Preserve]
-        public PlayerPrefsDataStorage()
-        {
-        }
-
         protected override string[] Load(string[] keys)
         {
             return keys.Select(PlayerPrefs.GetString).ToArray();

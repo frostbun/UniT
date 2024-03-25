@@ -5,11 +5,11 @@ namespace UniT.Data
     using Newtonsoft.Json;
     using UnityEngine.Scripting;
 
+    [Preserve]
     public sealed class JsonSerializer : ISerializer
     {
         private readonly JsonSerializerSettings settings;
 
-        [Preserve]
         public JsonSerializer(JsonSerializerSettings settings = null)
         {
             this.settings = settings

@@ -14,6 +14,7 @@ namespace UniT.Pooling
     using Cysharp.Threading.Tasks;
     #endif
 
+    [Preserve]
     public sealed class ObjectPoolManager : IObjectPoolManager, IHasLogger
     {
         #region Constructor
@@ -26,7 +27,6 @@ namespace UniT.Pooling
         private readonly Dictionary<string, ObjectPool>     keyToPool      = new Dictionary<string, ObjectPool>();
         private readonly Dictionary<GameObject, ObjectPool> instanceToPool = new Dictionary<GameObject, ObjectPool>();
 
-        [Preserve]
         public ObjectPoolManager(IAssetsManager assetsManager, ILogger.IFactory loggerFactory)
         {
             this.assetsManager = assetsManager;
@@ -42,30 +42,33 @@ namespace UniT.Pooling
 
         void IObjectPoolManager.Load(GameObject prefab, int count)
         {
-            var isLoaded = this.prefabToPool.TryAdd(prefab, () => this.Load(prefab));
-            this.logger.Debug(isLoaded ? $"Loaded {prefab.name} pool" : $"Using cached {prefab.name} pool");
-            this.prefabToPool[prefab].Load(count);
+            this.prefabToPool.GetOrAdd(prefab, () => this.Load(prefab))
+                .Load(count);
         }
 
         void IObjectPoolManager.Load(string key, int count)
         {
-            var isLoaded = this.keyToPool.TryAdd(key, () => this.Load(this.assetsManager.Load<GameObject>(key)));
-            this.logger.Debug(isLoaded ? $"Loaded {key} pool" : $"Using cached {key} pool");
-            this.keyToPool[key].Load(count);
+            this.keyToPool.GetOrAdd(key, () => this.Load(this.assetsManager.Load<GameObject>(key)))
+                .Load(count);
         }
 
         #if UNIT_UNITASK
-        async UniTask IObjectPoolManager.LoadAsync(string key, int count, IProgress<float> progress, CancellationToken cancellationToken)
+        UniTask IObjectPoolManager.LoadAsync(string key, int count, IProgress<float> progress, CancellationToken cancellationToken)
         {
-            var isLoaded = await this.keyToPool.TryAddAsync(key, async () => this.Load(await this.assetsManager.LoadAsync<GameObject>(key, progress, cancellationToken)));
-            this.logger.Debug(isLoaded ? $"Loaded {key} pool" : $"Using cached {key} pool");
-            this.keyToPool[key].Load(count);
+            return this.keyToPool.GetOrAddAsync(key, () =>
+                this.assetsManager.LoadAsync<GameObject>(key, progress, cancellationToken)
+                    .ContinueWith(this.Load)
+            ).ContinueWith(pool => pool.Load(count));
         }
         #endif
 
         GameObject IObjectPoolManager.Spawn(GameObject prefab, Vector3 position, Quaternion rotation, Transform parent)
         {
-            var pool     = this.GetPoolOrLoad(prefab);
+            var pool = this.prefabToPool.GetOrAdd(prefab, () =>
+            {
+                this.logger.Warning($"Auto loading {prefab.name} pool. Consider preload it with `Load` or `LoadAsync` for better performance.");
+                return this.Load(prefab);
+            });
             var instance = pool.Spawn(position, rotation, parent);
             this.instanceToPool.Add(instance, pool);
             this.logger.Debug($"Spawned {prefab.name}");
@@ -74,7 +77,11 @@ namespace UniT.Pooling
 
         GameObject IObjectPoolManager.Spawn(string key, Vector3 position, Quaternion rotation, Transform parent)
         {
-            var pool     = this.GetPoolOrLoad(key);
+            var pool = this.keyToPool.GetOrAdd(key, () =>
+            {
+                this.logger.Warning($"Auto loading {key} pool. Consider preload it with `Load` or `LoadAsync` for better performance.");
+                return this.Load(this.assetsManager.Load<GameObject>(key));
+            });
             var instance = pool.Spawn(position, rotation, parent);
             this.instanceToPool.Add(instance, pool);
             this.logger.Debug($"Spawned {key}");
@@ -129,20 +136,6 @@ namespace UniT.Pooling
         #endregion
 
         #region Private
-
-        private ObjectPool GetPoolOrLoad(GameObject prefab)
-        {
-            var isLoaded = this.prefabToPool.TryAdd(prefab, () => this.Load(prefab));
-            if (isLoaded) this.logger.Warning($"Auto loading {prefab.name} pool. Consider preloading it with `Load` method.");
-            return this.prefabToPool[prefab];
-        }
-
-        private ObjectPool GetPoolOrLoad(string key)
-        {
-            var isLoaded = this.keyToPool.TryAdd(key, () => this.Load(this.assetsManager.Load<GameObject>(key)));
-            if (isLoaded) this.logger.Warning($"Auto loading {key} pool. Consider preloading it with `Load` method.");
-            return this.keyToPool[key];
-        }
 
         private ObjectPool GetPoolOrWarning(GameObject prefab)
         {

@@ -8,13 +8,9 @@ namespace UniT.Data
     using UniT.Extensions;
     using UnityEngine.Scripting;
 
+    [Preserve]
     public sealed class CsvSerializer : ISerializer
     {
-        [Preserve]
-        public CsvSerializer()
-        {
-        }
-
         bool ISerializer.CanSerialize(Type type) => typeof(ICsvData).IsAssignableFrom(type);
 
         void ISerializer.Populate(IData data, string rawData)

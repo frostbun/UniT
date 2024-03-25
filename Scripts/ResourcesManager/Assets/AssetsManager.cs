@@ -35,25 +35,24 @@
 
         T IAssetsManager.Load<T>(string key)
         {
-            var isLoaded = this.cache.TryAdd(
-                key,
-                () => this.Load<T>(key) ?? throw new ArgumentOutOfRangeException(nameof(key), key, $"Failed to load {key}")
-            );
-            this.logger.Debug(isLoaded ? $"Using cached {key}" : $"Loaded {key}");
-            return (T)this.cache[key];
+            return (T)this.cache.GetOrAdd(key, () =>
+            {
+                var obj = this.Load<T>(key);
+                if (obj is null) throw new ArgumentOutOfRangeException(nameof(key), key, $"Failed to load {key}");
+                this.logger.Debug($"Loaded {key}");
+                return obj;
+            });
         }
 
         void IAssetsManager.Unload(string key)
         {
-            if (this.cache.TryRemove(key, out var obj))
-            {
-                this.Unload(obj);
-                this.logger.Debug($"Unloaded {key}");
-            }
-            else
+            if (!this.cache.TryRemove(key, out var obj))
             {
                 this.logger.Warning($"Trying to unload {key} that was not loaded");
+                return;
             }
+            this.Unload(obj);
+            this.logger.Debug($"Unloaded {key}");
         }
 
         protected abstract Object Load<T>(string key) where T : Object;
@@ -65,32 +64,36 @@
         #region Async
 
         #if UNIT_UNITASK
-        async UniTask<T> IAssetsManager.LoadAsync<T>(string key, IProgress<float> progress, CancellationToken cancellationToken)
+        UniTask<T> IAssetsManager.LoadAsync<T>(string key, IProgress<float> progress, CancellationToken cancellationToken)
         {
-            var isLoaded = await this.cache.TryAddAsync(
-                key,
-                async () => await this.LoadAsync<T>(key, progress, cancellationToken) ?? throw new ArgumentOutOfRangeException(nameof(key), key, $"Failed to load {key}")
-            );
-            this.logger.Debug(isLoaded ? $"Using cached {key}" : $"Loaded {key}");
-            return (T)this.cache[key];
+            return this.cache.GetOrAddAsync(key, () =>
+                this.LoadAsync<T>(key, progress, cancellationToken)
+                    .ContinueWith(obj =>
+                    {
+                        if (obj is null) throw new ArgumentOutOfRangeException(nameof(key), key, $"Failed to load {key}");
+                        this.logger.Debug($"Loaded {key}");
+                        return obj;
+                    })
+            ).ContinueWith(obj => (T)obj);
         }
 
         protected abstract UniTask<Object> LoadAsync<T>(string key, IProgress<float> progress, CancellationToken cancellationToken) where T : Object;
         #else
         IEnumerator IAssetsManager.LoadAsync<T>(string key, Action<T> callback, IProgress<float> progress)
         {
-            yield return this.cache.TryAddAsync(
+            return this.cache.GetOrAddAsync(
                 key,
                 callback => this.LoadAsync<T>(
                     key,
-                    obj => callback(obj ?? throw new ArgumentOutOfRangeException(nameof(key), key, $"Failed to load {key}")),
+                    obj =>
+                    {
+                        if (obj is null) throw new ArgumentOutOfRangeException(nameof(key), key, $"Failed to load {key}");
+                        this.logger.Debug($"Loaded {key}");
+                        callback(obj);
+                    },
                     progress
                 ),
-                isLoaded =>
-                {
-                    this.logger.Debug(isLoaded ? $"Loaded {key}" : $"Using cached {key}");
-                    callback((T)this.cache[key]);
-                }
+                obj => callback((T)obj)
             );
         }
 

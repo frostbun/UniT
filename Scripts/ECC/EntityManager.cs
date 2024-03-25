@@ -21,6 +21,7 @@ namespace UniT.ECC
     using System.Collections;
     #endif
 
+    [Preserve]
     public sealed class EntityManager : IEntityManager, IHasLogger, IDisposable
     {
         #region Constructor
@@ -35,7 +36,6 @@ namespace UniT.ECC
         private readonly Dictionary<IEntity, EntityPool>       entityToPool     = new Dictionary<IEntity, EntityPool>();
         private readonly Dictionary<Type, HashSet<IComponent>> typeToComponents = new Dictionary<Type, HashSet<IComponent>>();
 
-        [Preserve]
         public EntityManager(IInstantiator instantiator, IAssetsManager assetsManager, ILogger.IFactory loggerFactory)
         {
             this.instantiator  = instantiator;
@@ -53,46 +53,36 @@ namespace UniT.ECC
         void IEntityManager.Load(IEntity prefab, int count)
         {
             this.ThrowIfDisposed();
-            var isLoaded = this.prefabToPool.TryAdd(prefab, () => new EntityPool(prefab, this));
-            this.logger.Debug(isLoaded ? $"Loaded {prefab.gameObject.name} pool" : $"Using cached {prefab.gameObject.name} pool");
-            this.prefabToPool[prefab].Load(count);
+            this.prefabToPool.GetOrAdd(prefab, () => new EntityPool(prefab, this))
+                .Load(count);
         }
 
         void IEntityManager.Load(string key, int count)
         {
             this.ThrowIfDisposed();
-            var isLoaded = this.keyToPool.TryAdd(key, () =>
-            {
-                var prefab = this.assetsManager.Load<GameObject>(key);
-                return new EntityPool(prefab.GetComponentOrThrow<IEntity>(), this);
-            });
-            this.logger.Debug(isLoaded ? $"Loaded {key} pool" : $"Using cached {key} pool");
-            this.keyToPool[key].Load(count);
+            this.keyToPool.GetOrAdd(key, () => new EntityPool(this.assetsManager.Load<GameObject>(key).GetComponentOrThrow<IEntity>(), this))
+                .Load(count);
         }
 
         #if UNIT_UNITASK
-        async UniTask IEntityManager.LoadAsync(string key, int count, IProgress<float> progress, CancellationToken cancellationToken)
+        UniTask IEntityManager.LoadAsync(string key, int count, IProgress<float> progress, CancellationToken cancellationToken)
         {
             this.ThrowIfDisposed();
-            var isLoaded = await this.keyToPool.TryAddAsync(key, async () =>
-            {
-                var prefab = await this.assetsManager.LoadAsync<GameObject>(key, progress, cancellationToken);
-                return new EntityPool(prefab.GetComponentOrThrow<IEntity>(), this);
-            });
-            this.logger.Debug(isLoaded ? $"Loaded {key} pool" : $"Using cached {key} pool");
-            this.keyToPool[key].Load(count);
+            return this.keyToPool.GetOrAddAsync(key, () =>
+                this.assetsManager.LoadAsync<GameObject>(key, progress, cancellationToken)
+                    .ContinueWith(prefab => new EntityPool(prefab.GetComponentOrThrow<IEntity>(), this))
+            ).ContinueWith(pool => pool.Load(count));
         }
         #else
         IEnumerator IEntityManager.LoadAsync(string key, int count, Action callback, IProgress<float> progress)
         {
             this.ThrowIfDisposed();
-            yield return this.keyToPool.TryAddAsync(
+            return this.keyToPool.GetOrAddAsync(
                 key,
                 callback => this.assetsManager.LoadAsync<GameObject>(key, prefab => callback(new EntityPool(prefab.GetComponentOrThrow<IEntity>(), this))),
-                isLoaded =>
+                pool =>
                 {
-                    this.logger.Debug(isLoaded ? $"Loaded {key} pool" : $"Using cached {key} pool");
-                    this.keyToPool[key].Load(count);
+                    pool.Load(count);
                     callback?.Invoke();
                 }
             );
@@ -172,21 +162,21 @@ namespace UniT.ECC
         private EntityPool GetPoolOrLoad(IEntity prefab)
         {
             this.ThrowIfDisposed();
-            var isLoaded = this.prefabToPool.TryAdd(prefab, () => new EntityPool(prefab, this));
-            if (isLoaded) this.logger.Warning($"Auto loaded {prefab.gameObject.name} pool. Consider preload it with `Load` or `LoadAsync` for better performance.");
-            return this.prefabToPool[prefab];
+            return this.prefabToPool.GetOrAdd(prefab, () =>
+            {
+                this.logger.Warning($"Auto loading {prefab.gameObject.name} pool. Consider preload it with `Load` or `LoadAsync` for better performance.");
+                return new EntityPool(prefab, this);
+            });
         }
 
         private EntityPool GetPoolOrLoad(string key)
         {
             this.ThrowIfDisposed();
-            var isLoaded = this.keyToPool.TryAdd(key, () =>
+            return this.keyToPool.GetOrAdd(key, () =>
             {
-                var prefab = this.assetsManager.Load<GameObject>(key);
-                return new EntityPool(prefab.GetComponentOrThrow<IEntity>(), this);
+                this.logger.Warning($"Auto loading {key} pool. Consider preload it with `Load` or `LoadAsync` for better performance.");
+                return new EntityPool(this.assetsManager.Load<GameObject>(key).GetComponentOrThrow<IEntity>(), this);
             });
-            if (isLoaded) this.logger.Warning($"Auto loaded {key} pool. Consider preload it with `Load` or `LoadAsync` for better performance.");
-            return this.keyToPool[key];
         }
 
         private EntityPool GetPoolOrWarning(IEntity prefab)

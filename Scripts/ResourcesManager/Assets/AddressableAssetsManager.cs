@@ -13,9 +13,9 @@ namespace UniT.ResourcesManager
     using System.Collections;
     #endif
 
+    [Preserve]
     public sealed class AddressableAssetsManager : AssetsManager
     {
-        [Preserve]
         public AddressableAssetsManager(ILogger.IFactory loggerFactory) : base(loggerFactory)
         {
         }
@@ -31,9 +31,11 @@ namespace UniT.ResourcesManager
         }
 
         #if UNIT_UNITASK
-        protected override async UniTask<Object> LoadAsync<T>(string key, IProgress<float> progress, CancellationToken cancellationToken)
+        protected override UniTask<Object> LoadAsync<T>(string key, IProgress<float> progress, CancellationToken cancellationToken)
         {
-            return await Addressables.LoadAssetAsync<T>(key).ToUniTask(progress: progress, cancellationToken: cancellationToken);
+            return Addressables.LoadAssetAsync<T>(key)
+                .ToUniTask(progress: progress, cancellationToken: cancellationToken)
+                .ContinueWith(obj => (Object)obj);
         }
         #else
         protected override IEnumerator LoadAsync<T>(string key, Action<Object> callback, IProgress<float> progress)

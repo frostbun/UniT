@@ -12,13 +12,9 @@ namespace UniT.Data
     using System.Collections;
     #endif
 
+    [Preserve]
     public sealed class FbInstantDataStorage : ReadWriteSerializableDataStorage
     {
-        [Preserve]
-        public FbInstantDataStorage()
-        {
-        }
-
         protected override string[] Load(string[] keys)
         {
             throw new NotSupportedException("FbInstant only supports async operations. Please use LoadAsync instead.");

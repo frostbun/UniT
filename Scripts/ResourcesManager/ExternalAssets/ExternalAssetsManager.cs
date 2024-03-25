@@ -15,6 +15,7 @@ namespace UniT.ResourcesManager
     using System.Collections;
     #endif
 
+    [Preserve]
     public sealed class ExternalAssetsManager : IExternalAssetsManager, IHasLogger, IDisposable
     {
         #region Constructor
@@ -23,7 +24,6 @@ namespace UniT.ResourcesManager
 
         private readonly Dictionary<string, Texture2D> cache = new Dictionary<string, Texture2D>();
 
-        [Preserve]
         public ExternalAssetsManager(ILogger.IFactory loggerFactory)
         {
             this.logger = loggerFactory.Create(this);

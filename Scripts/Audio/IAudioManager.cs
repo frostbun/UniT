@@ -1,15 +1,30 @@
 namespace UniT.Audio
 {
     using System;
-    using UniT.Initializables;
     #if UNIT_UNITASK
     using System.Threading;
     using Cysharp.Threading.Tasks;
+    #else
+    using System.Collections;
     #endif
 
-    public interface IAudioManager : IInitializable
+    public interface IAudioManager
     {
-        public IAudioConfig Config { get; }
+        #region Configs
+
+        public float SoundVolume { get; set; }
+
+        public float MusicVolume { get; set; }
+
+        public float MasterVolume { get; set; }
+
+        public bool MuteSound { get; set; }
+
+        public bool MuteMusic { get; set; }
+
+        public bool MuteMaster { get; set; }
+
+        #endregion
 
         #region Sound
 
@@ -21,7 +36,11 @@ namespace UniT.Audio
 
         public void StopSound(string name);
 
+        public void StopAllSounds();
+
         public void UnloadSound(string name);
+
+        public void UnloadAllSounds();
 
         #endregion
 
@@ -49,6 +68,10 @@ namespace UniT.Audio
         public UniTask LoadSoundAsync(string name, IProgress<float> progress = null, CancellationToken cancellationToken = default);
 
         public UniTask LoadMusicAsync(string name, IProgress<float> progress = null, CancellationToken cancellationToken = default);
+        #else
+        public IEnumerator LoadSoundAsync(string name, Action callback = null, IProgress<float> progress = null);
+
+        public IEnumerator LoadMusicAsync(string name, Action callback = null, IProgress<float> progress = null);
         #endif
 
         #endregion
