@@ -34,7 +34,7 @@ namespace UniT.UI
 
         public UIManager(RootUICanvas canvas, IInstantiator instantiator, IAssetsManager assetsManager, ILogger.IFactory loggerFactory)
         {
-            this.canvas        = canvas.DontDestroyOnLoad();
+            this.canvas        = canvas;
             this.instantiator  = instantiator;
             this.assetsManager = assetsManager;
             this.logger        = loggerFactory.Create(this);

@@ -9,7 +9,7 @@
     using System.Collections.Generic;
     #endif
 
-    public abstract class BaseUIElementPresenter<TUIElement> : Presenter<TUIElement> where TUIElement : IUIElement, IHasPresenter
+    public abstract class BaseUIElementPresenter<TUIElement> : Presenter<TUIElement>, IUIElementPresenter where TUIElement : IUIElement, IHasPresenter
     {
         protected TUIElement UIElement => this.Owner;
 

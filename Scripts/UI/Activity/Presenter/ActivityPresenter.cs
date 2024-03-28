@@ -3,7 +3,7 @@
     using UniT.UI.Presenter;
     using UniT.UI.UIElement.Presenter;
 
-    public abstract class BaseActivityPresenter<TActivity> : BaseUIElementPresenter<TActivity> where TActivity : IActivity, IHasPresenter
+    public abstract class BaseActivityPresenter<TActivity> : BaseUIElementPresenter<TActivity>, IActivityPresenter where TActivity : IActivity, IHasPresenter
     {
         protected TActivity Activity => this.Owner;
 

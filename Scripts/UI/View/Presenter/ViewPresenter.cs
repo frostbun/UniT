@@ -3,7 +3,7 @@
     using UniT.UI.Presenter;
     using UniT.UI.UIElement.Presenter;
 
-    public abstract class BaseViewPresenter<TView> : BaseUIElementPresenter<TView> where TView : IView, IHasPresenter
+    public abstract class BaseViewPresenter<TView> : BaseUIElementPresenter<TView>, IViewPresenter where TView : IView, IHasPresenter
     {
         protected TView View => this.Owner;
     }
