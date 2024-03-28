@@ -1,188 +1,263 @@
-// namespace UniT.UI
-// {
-//     using System;
-//     using System.Collections.Generic;
-//     using System.Linq;
-//     using Cysharp.Threading.Tasks;
-//     using UniT.Extensions;
-//     using UniT.Logging;
-//     using UniT.ResourcesManager;
-//     using UniT.UI.Activity;
-//     using UnityEngine;
-//     using UnityEngine.Scripting;
-//     using ILogger = UniT.Logging.ILogger;
-//
-//     public sealed class UIManager : MonoBehaviour, IUIManager
-//     {
-//         #region Constructor
-//
-//         [SerializeField] private Transform hiddenActivities;
-//         [SerializeField] private Transform stackingActivities;
-//         [SerializeField] private Transform floatingActivities;
-//         [SerializeField] private Transform dockedActivities;
-//
-//         private IPresenter.Factory presenterFactory;
-//         private IAssetsManager     assetsManager;
-//         private ILogger            logger;
-//
-//         private readonly Dictionary<Type, IActivity> activities    = new();
-//         private readonly List<IActivity>             activityStack = new();
-//         private readonly Dictionary<Type, string>    keys          = new();
-//
-//         [Preserve]
-//         public UIManager Construct(IPresenter.Factory presenterFactory, IAssetsManager assetsManager, ILogger logger)
-//         {
-//             this.presenterFactory = presenterFactory;
-//             this.assetsManager    = assetsManager;
-//             this.logger           = logger;
-//             this.logger.Debug("Constructed");
-//             return this.DontDestroyOnLoad();
-//         }
-//
-//         #endregion
-//
-//         #region Public
-//
-//         LogConfig IUIManager.LogConfig => this.logger.Config;
-//
-//         public TView Initialize<TView>(TView view) where TView : IView
-//         {
-//             Initialize(view);
-//             (view as Component)?.GetComponentsInChildren<IView>().ForEach(Initialize);
-//             this.logger.Debug($"Initialized {view.GetType().Name}");
-//             return view;
-//
-//             void Initialize(IView view)
-//             {
-//                 view.Manager = this;
-//                 if (view is IViewWithPresenter viewWithPresenter)
-//                 {
-//                     var presenter = this.presenterFactory.Create(viewWithPresenter.PresenterType);
-//                     presenter.View              = viewWithPresenter;
-//                     viewWithPresenter.Presenter = presenter;
-//                 }
-//                 view.OnInitialize();
-//             }
-//         }
-//
-//         public IActivity StackingActivity => this.activityStack.LastOrDefault(activity => activity.CurrentStatus is IActivity.Status.Stacking);
-//
-//         public IActivity NextActivityInStack => this.activityStack.LastOrDefault(activity => activity.CurrentStatus is not IActivity.Status.Stacking);
-//
-//         public IEnumerable<IActivity> FloatingActivities => this.activities.Values.Where(activity => activity.CurrentStatus is IActivity.Status.Floating);
-//
-//         public IEnumerable<IActivity> DockedActivities => this.activities.Values.Where(activity => activity.CurrentStatus is IActivity.Status.Docked);
-//
-//         public IActivity GetActivity(IActivity activity)
-//         {
-//             var initializedActivity = this.activities.GetOrAdd(activity.GetType(), () => this.Initialize(activity));
-//             if (initializedActivity != activity) this.logger.Warning($"Found another instance of {activity.GetType().Name} in the manager. Using the cached instance.");
-//             return initializedActivity;
-//         }
-//
-//         public IActivity GetActivity(string key)
-//         {
-//             return this.activities.GetOrAdd(
-//                 typeof(TActivity),
-//                 () =>
-//                 {
-//                     return this.assetsManager.Load<GameObject>(key).ContinueWith(activityPrefab =>
-//                     {
-//                         this.keys.Add(typeof(TActivity), key);
-//                         return this.Initialize(Instantiate(activityPrefab, this.hiddenActivities, false).GetComponent<IActivity>());
-//                     });
-//                 });
-//         }
-//
-//         public UniTask<IActivity> GetActivityAsync<TActivity>(string key = null) where TActivity : IActivity
-//         {
-//             return this.activities.GetOrAddAsync(
-//                 typeof(TActivity),
-//                 () => this.assetsManager.LoadAsync<GameObject>(key).ContinueWith(activityPrefab =>
-//                 {
-//                     this.keys.Add(typeof(TActivity), key);
-//                     return this.Initialize(Instantiate(activityPrefab, this.hiddenActivities, false).GetComponent<IActivity>());
-//                 })
-//             );
-//         }
-//
-//         public IActivity Stack(IActivity activity, bool force = false) => this.Show(activity, force, IActivity.Status.Stacking);
-//
-//         public IActivity Float(IActivity activity, bool force = false) => this.Show(activity, force, IActivity.Status.Floating);
-//
-//         public IActivity Dock(IActivity activity, bool force = false) => this.Show(activity, force, IActivity.Status.Docked);
-//
-//         public void Hide(IActivity activity, bool removeFromStack = true, bool autoStack = true)
-//         {
-//             if (activity.CurrentStatus is IActivity.Status.Hidden) return;
-//             activity.transform.SetParent(this.hiddenActivities, false);
-//             this.logger.Debug($"{activity.GetType().Name} status: {activity.CurrentStatus = IActivity.Status.Hidden}");
-//             activity.OnHide();
-//             if (removeFromStack)
-//             {
-//                 this.activityStack.Remove(activity);
-//             }
-//             if (autoStack && this.StackingActivity is null && this.NextActivityInStack is { } nextActivity)
-//             {
-//                 this.Stack(nextActivity);
-//             }
-//         }
-//
-//         public void Dispose(IActivity activity, bool autoStack = true)
-//         {
-//             this.Hide(activity, true, autoStack);
-//             this.activities.Remove(activity.GetType());
-//             this.logger.Debug($"{activity.GetType().Name} status: {activity.CurrentStatus = IActivity.Status.Disposed}");
-//             activity.OnDispose();
-//             Destroy(activity.gameObject);
-//             if (!this.keys.Remove(activity.GetType(), out var key)) return;
-//             this.assetsManager.Unload(key);
-//         }
-//
-//         #endregion
-//
-//         #region Private
-//
-//         private IActivity Show(IActivity activity, bool force, IActivity.Status nextStatus)
-//         {
-//             if (!force && activity.CurrentStatus == nextStatus) return activity;
-//             this.Hide(activity, false, false);
-//             switch (nextStatus)
-//             {
-//                 case IActivity.Status.Stacking:
-//                 {
-//                     var index = this.activityStack.IndexOf(activity);
-//                     if (index == -1)
-//                     {
-//                         this.activityStack.Add(activity);
-//                     }
-//                     else
-//                     {
-//                         this.activityStack.RemoveRange(index + 1, this.activityStack.Count - index - 1);
-//                     }
-//                     this.activities.Values
-//                         .Where(other => other.CurrentStatus is IActivity.Status.Floating or IActivity.Status.Stacking)
-//                         .SafeForEach(other => this.Hide(other, false, false));
-//                     activity.transform.SetParent(this.stackingActivities, false);
-//                     break;
-//                 }
-//                 case IActivity.Status.Floating:
-//                 {
-//                     activity.transform.SetParent(this.floatingActivities, false);
-//                     break;
-//                 }
-//                 case IActivity.Status.Docked:
-//                 {
-//                     activity.transform.SetParent(this.dockedActivities, false);
-//                     break;
-//                 }
-//             }
-//             activity.transform.SetAsLastSibling();
-//             this.logger.Debug($"{activity.GetType().Name} status: {activity.CurrentStatus = nextStatus}");
-//             activity.OnShow();
-//             return activity;
-//         }
-//
-//         #endregion
-//     }
-// }
+namespace UniT.UI
+{
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using UniT.Extensions;
+    using UniT.Instantiator;
+    using UniT.Logging;
+    using UniT.ResourcesManager;
+    using UniT.UI.Activity;
+    using UniT.UI.Presenter;
+    using UniT.UI.UIElement;
+    using UnityEngine;
+    using UnityEngine.Scripting;
+    using ILogger = UniT.Logging.ILogger;
+    using Object = UnityEngine.Object;
+    #if UNIT_UNITASK
+    using System.Threading;
+    using Cysharp.Threading.Tasks;
+    #endif
+
+    [Preserve]
+    public sealed class UIManager : IUIManager, IHasLogger
+    {
+        #region Constructor
+
+        private readonly IInstantiator  instantiator;
+        private readonly IAssetsManager assetsManager;
+        private readonly ILogger        logger;
+
+        private readonly Transform hiddenActivitiesContainer;
+        private readonly Transform stackingActivitiesContainer;
+        private readonly Transform floatingActivitiesContainer;
+        private readonly Transform dockedActivitiesContainer;
+
+        private readonly Dictionary<Type, IActivity> activities    = new();
+        private readonly List<IActivity>             activityStack = new();
+        private readonly Dictionary<Type, string>    keys          = new();
+
+        public UIManager(IInstantiator instantiator, IAssetsManager assetsManager, ILogger.IFactory loggerFactory)
+        {
+            this.instantiator  = instantiator;
+            this.assetsManager = assetsManager;
+            this.logger        = loggerFactory.Create(this);
+
+            var container = new GameObject(nameof(UIManager)).DontDestroyOnLoad().transform;
+            this.hiddenActivitiesContainer   = new GameObject("HiddenActivities") { transform   = { parent = container } }.DontDestroyOnLoad().transform;
+            this.stackingActivitiesContainer = new GameObject("StackingActivities") { transform = { parent = container } }.DontDestroyOnLoad().transform;
+            this.floatingActivitiesContainer = new GameObject("FloatingActivities") { transform = { parent = container } }.DontDestroyOnLoad().transform;
+            this.dockedActivitiesContainer   = new GameObject("DockedActivities") { transform   = { parent = container } }.DontDestroyOnLoad().transform;
+
+            this.logger.Debug("Constructed");
+        }
+
+        #endregion
+
+        LogConfig IHasLogger.LogConfig => this.logger.Config;
+
+        #region Public
+
+        void IUIManager.Initialize<TUIElement>(TUIElement uiElement) => this.Initialize(uiElement);
+
+        #region Query
+
+        IActivity IUIManager.StackingActivity => this.activityStack.LastOrDefault(activity => activity.CurrentStatus is IActivity.Status.Stacking);
+
+        IActivity IUIManager.NextActivityInStack => this.activityStack.LastOrDefault(activity => activity.CurrentStatus is not IActivity.Status.Stacking);
+
+        IEnumerable<IActivity> IUIManager.FloatingActivities => this.activities.Values.Where(activity => activity.CurrentStatus is IActivity.Status.Floating);
+
+        IEnumerable<IActivity> IUIManager.DockedActivities => this.activities.Values.Where(activity => activity.CurrentStatus is IActivity.Status.Docked);
+
+        #endregion
+
+        TActivity IUIManager.GetActivity<TActivity>(TActivity activity)
+        {
+            var initializedActivity = this.activities.GetOrAdd(activity.GetType(), () =>
+            {
+                activity.GetComponentsInChildren<IUIElement>().ForEach(this.Initialize);
+                return activity;
+            });
+            if (!ReferenceEquals(initializedActivity, activity)) this.logger.Warning($"Found another instance of {activity.GetType().Name} in the manager. Using the cached instance.");
+            return activity;
+        }
+
+        TActivity IUIManager.GetActivity<TActivity>(string key)
+        {
+            return (TActivity)this.activities.GetOrAdd(
+                typeof(TActivity),
+                () =>
+                {
+                    var prefab = this.assetsManager.Load<GameObject>(key);
+                    this.keys.Add(typeof(TActivity), key);
+                    return this.InstantiateActivity(prefab);
+                });
+        }
+
+        #if UNIT_UNITASK
+        UniTask<TActivity> IUIManager.GetActivityAsync<TActivity>(string key, IProgress<float> progress, CancellationToken cancellationToken)
+        {
+            return this.activities.GetOrAddAsync(
+                typeof(TActivity),
+                () => this.assetsManager.LoadAsync<GameObject>(key, progress, cancellationToken)
+                    .ContinueWith(prefab =>
+                    {
+                        this.keys.Add(typeof(TActivity), key);
+                        return this.InstantiateActivity(prefab);
+                    })
+            ).ContinueWith(activity => (TActivity)activity);
+        }
+        #endif
+
+        #region UI Flow
+
+        IActivity IUIManager.Stack(IActivityWithoutParams activity, bool force)
+        {
+            if (!force && activity.CurrentStatus is IActivity.Status.Stacking) return activity;
+            this.Hide(activity, false, false);
+            return this.Show(activity, IActivity.Status.Stacking);
+        }
+
+        IActivity IUIManager.Float(IActivityWithoutParams activity, bool force)
+        {
+            if (!force && activity.CurrentStatus is IActivity.Status.Floating) return activity;
+            this.Hide(activity, false, false);
+            return this.Show(activity, IActivity.Status.Floating);
+        }
+
+        IActivity IUIManager.Dock(IActivityWithoutParams activity, bool force)
+        {
+            if (!force && activity.CurrentStatus is IActivity.Status.Docked) return activity;
+            this.Hide(activity, false, false);
+            return this.Show(activity, IActivity.Status.Docked);
+        }
+
+        IActivity IUIManager.Stack<TParams>(IActivityWithParams<TParams> activity, TParams @params, bool force)
+        {
+            if (!force && activity.CurrentStatus is IActivity.Status.Stacking) return activity;
+            this.Hide(activity, false, false);
+            activity.Params = @params;
+            return this.Show(activity, IActivity.Status.Stacking);
+        }
+
+        IActivity IUIManager.Float<TParams>(IActivityWithParams<TParams> activity, TParams @params, bool force)
+        {
+            if (!force && activity.CurrentStatus is IActivity.Status.Floating) return activity;
+            this.Hide(activity, false, false);
+            activity.Params = @params;
+            return this.Show(activity, IActivity.Status.Floating);
+        }
+
+        IActivity IUIManager.Dock<TParams>(IActivityWithParams<TParams> activity, TParams @params, bool force)
+        {
+            if (!force && activity.CurrentStatus is IActivity.Status.Docked) return activity;
+            this.Hide(activity, false, false);
+            activity.Params = @params;
+            return this.Show(activity, IActivity.Status.Docked);
+        }
+
+        void IUIManager.Hide(IActivity activity, bool removeFromStack, bool autoStack)
+        {
+            this.Hide(activity, removeFromStack, autoStack);
+        }
+
+        void IUIManager.Dispose(IActivity activity, bool autoStack)
+        {
+            this.Dispose(activity, autoStack);
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Private
+
+        private IActivity InstantiateActivity(GameObject prefab)
+        {
+            var activity = Object.Instantiate(prefab, this.hiddenActivitiesContainer, false).GetComponentOrThrow<IActivity>();
+            activity.GetComponentsInChildren<IUIElement>().ForEach(this.Initialize);
+            return activity;
+        }
+
+        private void Initialize(IUIElement uiElement)
+        {
+            uiElement.Manager = this;
+            if (uiElement is IHasPresenter owner)
+            {
+                var presenter = (IPresenter)this.instantiator.Instantiate(owner.PresenterType);
+                presenter.Owner = owner;
+                owner.Presenter = presenter;
+            }
+            uiElement.OnInitialize();
+            this.logger.Debug($"{uiElement.GetType().Name} initialized");
+        }
+
+        private IActivity Show(IActivity activity, IActivity.Status nextStatus)
+        {
+            switch (nextStatus)
+            {
+                case IActivity.Status.Stacking:
+                {
+                    var index = this.activityStack.IndexOf(activity);
+                    if (index is -1)
+                    {
+                        this.activityStack.Add(activity);
+                    }
+                    else
+                    {
+                        this.activityStack.RemoveRange(index + 1, this.activityStack.Count - index - 1);
+                    }
+                    this.activities.Values
+                        .Where(other => other.CurrentStatus is IActivity.Status.Floating or IActivity.Status.Stacking)
+                        .SafeForEach(other => this.Hide(other, false, false));
+                    activity.Transform.SetParent(this.stackingActivitiesContainer, false);
+                    break;
+                }
+                case IActivity.Status.Floating:
+                {
+                    activity.Transform.SetParent(this.floatingActivitiesContainer, false);
+                    break;
+                }
+                case IActivity.Status.Docked:
+                {
+                    activity.Transform.SetParent(this.dockedActivitiesContainer, false);
+                    break;
+                }
+            }
+            activity.Transform.SetAsLastSibling();
+            this.logger.Debug($"{activity.GetType().Name} status: {activity.CurrentStatus = nextStatus}");
+            activity.OnShow();
+            return activity;
+        }
+
+        private void Hide(IActivity activity, bool removeFromStack, bool autoStack)
+        {
+            if (activity.CurrentStatus is IActivity.Status.Hidden) return;
+            activity.Transform.SetParent(this.hiddenActivitiesContainer, false);
+            this.logger.Debug($"{activity.GetType().Name} status: {activity.CurrentStatus = IActivity.Status.Hidden}");
+            activity.OnHide();
+            if (removeFromStack)
+            {
+                this.activityStack.Remove(activity);
+            }
+            if (autoStack && this.activityStack.LastOrDefault() is { CurrentStatus: not IActivity.Status.Stacking } nextActivity)
+            {
+                this.Show(nextActivity, IActivity.Status.Stacking);
+            }
+        }
+
+        private void Dispose(IActivity activity, bool autoStack)
+        {
+            this.Hide(activity, true, autoStack);
+            this.activities.Remove(activity.GetType());
+            this.logger.Debug($"{activity.GetType().Name} status: {activity.CurrentStatus = IActivity.Status.Disposed}");
+            activity.OnDispose();
+            Object.Destroy(activity.gameObject);
+            if (!this.keys.Remove(activity.GetType(), out var key)) return;
+            this.assetsManager.Unload(key);
+        }
+
+        #endregion
+    }
+}

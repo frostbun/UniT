@@ -9,6 +9,8 @@ namespace Zenject
     using UniT.Logging;
     using UniT.Pooling;
     using UniT.ResourcesManager;
+    using UniT.Signal;
+    using UniT.UI;
 
     public sealed class UniTInstaller : Installer<UniTInstaller>
     {
@@ -115,14 +117,9 @@ namespace Zenject
 
             #region Utilities
 
-            // this.Container.BindInterfacesTo<UIManager>()
-            //     .FromMethod(_ => Object.FindObjectsOfType<UIManager>().Single().Construct(
-            //         new(type => (IPresenter)CurrentContext.Container.Instantiate(type)),
-            //         this.Container.TryResolve<IAssetsManager>(),
-            //         this.Container.TryResolve<ILogger>()
-            //     ))
-            //     .AsSingle()
-            //     .Lazy();
+            this.Container.BindInterfacesTo<UIManager>()
+                .AsSingle()
+                .Lazy();
 
             this.Container.BindInterfacesTo<AudioManager>()
                 .AsSingle()

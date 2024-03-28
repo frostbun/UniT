@@ -1,9 +1,9 @@
 ﻿namespace UniT.ECC.Controller
 {
-    public abstract class Controller<T> : IController where T : IHasController
+    public abstract class Controller<TOwner> : IController where TOwner : IHasController
     {
-        IHasController IController.Owner { set => this.Owner = (T)value; }
+        IHasController IController.Owner { set => this.Owner = (TOwner)value; }
 
-        protected T Owner { get; private set; }
+        protected TOwner Owner { get; private set; }
     }
 }

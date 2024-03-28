@@ -1,8 +1,8 @@
 namespace UniT.UI
 {
     using System.Collections.Generic;
-    using UniT.Logging;
     using UniT.UI.Activity;
+    using UniT.UI.UIElement;
     using UniT.Utilities;
     #if UNIT_UNITASK
     using System;
@@ -10,9 +10,15 @@ namespace UniT.UI
     using Cysharp.Threading.Tasks;
     #endif
 
-    public interface IUIManager : IHasLogger
+    public interface IUIManager
     {
-        public TView Initialize<TView>(TView view) where TView : IView;
+        public void Initialize<TUIElement>(TUIElement uiElement) where TUIElement : IUIElement;
+
+        public TActivity GetActivity<TActivity>(TActivity activity) where TActivity : IActivity;
+
+        public TActivity GetActivity<TActivity>(string key) where TActivity : IActivity;
+
+        #region Query
 
         public IActivity StackingActivity { get; }
 
@@ -22,28 +28,44 @@ namespace UniT.UI
 
         public IEnumerable<IActivity> DockedActivities { get; }
 
-        public IActivity GetActivity(IActivity activity);
+        #endregion
 
-        public IActivity GetActivity(string key);
+        #region UI Flow
 
-        public IActivity GetActivity<TActivity>() where TActivity : IActivity => this.GetActivity(typeof(TActivity).GetKey());
+        public IActivity Stack(IActivityWithoutParams activity, bool force = false);
 
-        public IActivity Stack(IActivity activity, bool force = false);
+        public IActivity Float(IActivityWithoutParams activity, bool force = false);
 
-        public IActivity Float(IActivity activity, bool force = false);
+        public IActivity Dock(IActivityWithoutParams activity, bool force = false);
 
-        public IActivity Dock(IActivity activity, bool force = false);
+        public IActivity Stack<TParams>(IActivityWithParams<TParams> activity, TParams @params, bool force = true);
+
+        public IActivity Float<TParams>(IActivityWithParams<TParams> activity, TParams @params, bool force = true);
+
+        public IActivity Dock<TParams>(IActivityWithParams<TParams> activity, TParams @params, bool force = true);
 
         public void Hide(IActivity activity, bool removeFromStack = true, bool autoStack = true);
 
         public void Dispose(IActivity activity, bool autoStack = true);
 
+        #endregion
+
+        #region Implicit Key
+
+        #if UNITY_2021_2_OR_NEWER
+        public TActivity GetActivity<TActivity>() where TActivity : IActivity => this.GetActivity<TActivity>(typeof(TActivity).GetKey());
+        #endif
+
+        #endregion
+
         #region Async
 
         #if UNIT_UNITASK
-        public UniTask<IActivity> GetActivityAsync(string key, IProgress<float> progress = null, CancellationToken cancellationToken = default);
+        public UniTask<TActivity> GetActivityAsync<TActivity>(string key, IProgress<float> progress = null, CancellationToken cancellationToken = default) where TActivity : IActivity;
 
-        public UniTask<IActivity> GetActivityAsync<TActivity>() where TActivity : IActivity => this.GetActivityAsync(typeof(TActivity).GetKey());
+        #if UNITY_2021_2_OR_NEWER
+        public UniTask<TActivity> GetActivityAsync<TActivity>(IProgress<float> progress = null, CancellationToken cancellationToken = default) where TActivity : IActivity => this.GetActivityAsync<TActivity>(typeof(TActivity).GetKey(), progress, cancellationToken);
+        #endif
         #endif
 
         #endregion
