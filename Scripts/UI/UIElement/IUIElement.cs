@@ -12,7 +12,7 @@
     {
         public IUIManager Manager { get; set; }
 
-        public Transform Transform { get; }
+        public RectTransform Transform { get; }
 
         public GameObject gameObject { get; }
 

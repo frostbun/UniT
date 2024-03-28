@@ -1,6 +1,6 @@
 #pragma warning disable CS0660, CS0661
 
-namespace UniT.Reactive
+namespace UniT.Utilities
 {
     using UnityEngine;
 

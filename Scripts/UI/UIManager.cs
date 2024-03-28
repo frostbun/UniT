@@ -13,42 +13,31 @@ namespace UniT.UI
     using UnityEngine;
     using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;
-    using Object = UnityEngine.Object;
     #if UNIT_UNITASK
     using System.Threading;
     using Cysharp.Threading.Tasks;
     #endif
 
     [Preserve]
-    public sealed class UIManager : IUIManager, IHasLogger
+    public sealed class UIManager : MonoBehaviour, IUIManager, IHasLogger
     {
         #region Constructor
 
+        private readonly RootUICanvas   canvas;
         private readonly IInstantiator  instantiator;
         private readonly IAssetsManager assetsManager;
         private readonly ILogger        logger;
 
-        private readonly Transform hiddenActivitiesContainer;
-        private readonly Transform stackingActivitiesContainer;
-        private readonly Transform floatingActivitiesContainer;
-        private readonly Transform dockedActivitiesContainer;
+        private readonly Dictionary<Type, IActivity> activities    = new Dictionary<Type, IActivity>();
+        private readonly List<IActivity>             activityStack = new List<IActivity>();
+        private readonly Dictionary<Type, string>    keys          = new Dictionary<Type, string>();
 
-        private readonly Dictionary<Type, IActivity> activities    = new();
-        private readonly List<IActivity>             activityStack = new();
-        private readonly Dictionary<Type, string>    keys          = new();
-
-        public UIManager(IInstantiator instantiator, IAssetsManager assetsManager, ILogger.IFactory loggerFactory)
+        public UIManager(RootUICanvas canvas, IInstantiator instantiator, IAssetsManager assetsManager, ILogger.IFactory loggerFactory)
         {
+            this.canvas        = canvas.DontDestroyOnLoad();
             this.instantiator  = instantiator;
             this.assetsManager = assetsManager;
             this.logger        = loggerFactory.Create(this);
-
-            var container = new GameObject(nameof(UIManager)).DontDestroyOnLoad().transform;
-            this.hiddenActivitiesContainer   = new GameObject("HiddenActivities") { transform   = { parent = container } }.DontDestroyOnLoad().transform;
-            this.stackingActivitiesContainer = new GameObject("StackingActivities") { transform = { parent = container } }.DontDestroyOnLoad().transform;
-            this.floatingActivitiesContainer = new GameObject("FloatingActivities") { transform = { parent = container } }.DontDestroyOnLoad().transform;
-            this.dockedActivitiesContainer   = new GameObject("DockedActivities") { transform   = { parent = container } }.DontDestroyOnLoad().transform;
-
             this.logger.Debug("Constructed");
         }
 
@@ -175,7 +164,7 @@ namespace UniT.UI
 
         private IActivity InstantiateActivity(GameObject prefab)
         {
-            var activity = Object.Instantiate(prefab, this.hiddenActivitiesContainer, false).GetComponentOrThrow<IActivity>();
+            var activity = Instantiate(prefab, this.canvas.HiddenActivities, false).GetComponentOrThrow<IActivity>();
             activity.GetComponentsInChildren<IUIElement>().ForEach(this.Initialize);
             return activity;
         }
@@ -211,17 +200,17 @@ namespace UniT.UI
                     this.activities.Values
                         .Where(other => other.CurrentStatus is IActivity.Status.Floating or IActivity.Status.Stacking)
                         .SafeForEach(other => this.Hide(other, false, false));
-                    activity.Transform.SetParent(this.stackingActivitiesContainer, false);
+                    activity.Transform.SetParent(this.canvas.StackingActivities, false);
                     break;
                 }
                 case IActivity.Status.Floating:
                 {
-                    activity.Transform.SetParent(this.floatingActivitiesContainer, false);
+                    activity.Transform.SetParent(this.canvas.FloatingActivities, false);
                     break;
                 }
                 case IActivity.Status.Docked:
                 {
-                    activity.Transform.SetParent(this.dockedActivitiesContainer, false);
+                    activity.Transform.SetParent(this.canvas.DockedActivities, false);
                     break;
                 }
             }
@@ -234,7 +223,7 @@ namespace UniT.UI
         private void Hide(IActivity activity, bool removeFromStack, bool autoStack)
         {
             if (activity.CurrentStatus is IActivity.Status.Hidden) return;
-            activity.Transform.SetParent(this.hiddenActivitiesContainer, false);
+            activity.Transform.SetParent(this.canvas.HiddenActivities, false);
             this.logger.Debug($"{activity.GetType().Name} status: {activity.CurrentStatus = IActivity.Status.Hidden}");
             activity.OnHide();
             if (removeFromStack)
@@ -253,7 +242,7 @@ namespace UniT.UI
             this.activities.Remove(activity.GetType());
             this.logger.Debug($"{activity.GetType().Name} status: {activity.CurrentStatus = IActivity.Status.Disposed}");
             activity.OnDispose();
-            Object.Destroy(activity.gameObject);
+            Destroy(activity.gameObject);
             if (!this.keys.Remove(activity.GetType(), out var key)) return;
             this.assetsManager.Unload(key);
         }

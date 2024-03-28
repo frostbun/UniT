@@ -10,8 +10,8 @@ namespace UniT.UI.Adapter
         [SerializeField] private Transform content;
         [SerializeField] private TView     viewPrefab;
 
-        private readonly Queue<TView>   pooledViews  = new();
-        private readonly HashSet<TView> spawnedViews = new();
+        private readonly Queue<TView>   pooledViews  = new Queue<TView>();
+        private readonly HashSet<TView> spawnedViews = new HashSet<TView>();
 
         public void Set(IEnumerable<TParams> allParams)
         {

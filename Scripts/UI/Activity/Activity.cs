@@ -30,7 +30,7 @@
 
         UniTask<T> IActivity.WaitForResult<T>()
         {
-            return (this.resultSource ??= new()).Task.ContinueWith(result =>
+            return (this.resultSource ??= new UniTaskCompletionSource<object>()).Task.ContinueWith(result =>
             {
                 if (result is null)
                     return default;
@@ -42,7 +42,7 @@
 
         UniTask IActivity.WaitForHide()
         {
-            return (this.resultSource ??= new()).Task;
+            return (this.resultSource ??= new UniTaskCompletionSource<object>()).Task;
         }
 
         bool IActivity.SetResult(object result)
@@ -52,7 +52,7 @@
 
         protected bool SetResult(object result)
         {
-            return (this.resultSource ??= new()).TrySetResult(result);
+            return (this.resultSource ??= new UniTaskCompletionSource<object>()).TrySetResult(result);
         }
         #endif
 

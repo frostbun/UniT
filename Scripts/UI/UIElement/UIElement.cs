@@ -6,15 +6,16 @@
     using System.Threading;
     #endif
 
+    [RequireComponent(typeof(RectTransform))]
     public abstract class BaseUIElement : BetterMonoBehavior, IUIElement
     {
         IUIManager IUIElement.Manager { get => this.Manager; set => this.Manager = value; }
 
-        Transform IUIElement.Transform => this.Transform;
+        RectTransform IUIElement.Transform => this.Transform;
 
         void IUIElement.OnInitialize()
         {
-            this.Transform = this.transform;
+            this.Transform = (RectTransform)this.transform;
             this.OnInitialize();
         }
 
@@ -49,7 +50,7 @@
 
         protected IUIManager Manager { get; private set; }
 
-        protected Transform Transform { get; private set; }
+        protected RectTransform Transform { get; private set; }
 
         protected virtual void OnInitialize() { }
 
