@@ -16,6 +16,10 @@ namespace UniT.UI.Activity
 
         public Status CurrentStatus { get; set; }
 
+        public bool IsDestroyed { get; }
+
+        public T[] GetComponentsInChildren<T>();
+
         #if UNIT_UNITASK
         public UniTask<T> WaitForResult<T>();
 
@@ -27,10 +31,6 @@ namespace UniT.UI.Activity
         public void Hide(bool removeFromStack = true, bool autoStack = true);
 
         public void Dispose(bool autoStack = true);
-
-        public bool IsDestroyed { get; }
-
-        public T[] GetComponentsInChildren<T>();
     }
 
     public interface IActivityWithoutParams : IActivity, IUIElementWithoutParams

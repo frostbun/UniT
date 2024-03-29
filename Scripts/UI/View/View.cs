@@ -14,6 +14,6 @@
     {
         TParams IUIElementWithParams<TParams>.Params { get => this.Params; set => this.Params = value; }
 
-        protected TParams Params { get; private set; }
+        public TParams Params { get; private set; }
     }
 }

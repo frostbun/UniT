@@ -68,7 +68,7 @@ namespace UniT.UI
                 activity.GetComponentsInChildren<IUIElement>().ForEach(this.Initialize);
                 return activity;
             });
-            if (!ReferenceEquals(initializedActivity, activity)) this.logger.Warning($"Found another instance of {activity.GetType().Name} in the manager. Using the cached instance.");
+            if (!ReferenceEquals(initializedActivity, activity)) this.logger.Warning($"Found another instance of {activity.Name} in the manager. Using the cached instance.");
             return activity;
         }
 
@@ -179,43 +179,38 @@ namespace UniT.UI
                 owner.Presenter = presenter;
             }
             uiElement.OnInitialize();
-            this.logger.Debug($"{uiElement.GetType().Name} initialized");
+            this.logger.Debug($"{uiElement.Name} initialized");
         }
 
         private IActivity Show(IActivity activity, IActivity.Status nextStatus)
         {
-            switch (nextStatus)
+            if (nextStatus is IActivity.Status.Stacking)
             {
-                case IActivity.Status.Stacking:
+                var index = this.activityStack.IndexOf(activity);
+                if (index is -1)
                 {
-                    var index = this.activityStack.IndexOf(activity);
-                    if (index is -1)
-                    {
-                        this.activityStack.Add(activity);
-                    }
-                    else
-                    {
-                        this.activityStack.RemoveRange(index + 1, this.activityStack.Count - index - 1);
-                    }
-                    this.activities.Values
-                        .Where(other => other.CurrentStatus is IActivity.Status.Floating or IActivity.Status.Stacking)
-                        .SafeForEach(other => this.Hide(other, false, false));
-                    activity.Transform.SetParent(this.canvas.StackingActivities, false);
-                    break;
+                    this.activityStack.Add(activity);
                 }
-                case IActivity.Status.Floating:
+                else
                 {
-                    activity.Transform.SetParent(this.canvas.FloatingActivities, false);
-                    break;
+                    this.activityStack.RemoveRange(index + 1, this.activityStack.Count - index - 1);
                 }
-                case IActivity.Status.Docked:
-                {
-                    activity.Transform.SetParent(this.canvas.DockedActivities, false);
-                    break;
-                }
+                this.activities.Values
+                    .Where(other => other.CurrentStatus is IActivity.Status.Stacking or IActivity.Status.Floating)
+                    .SafeForEach(other => this.Hide(other, false, false));
             }
+            activity.Transform.SetParent(
+                nextStatus switch
+                {
+                    IActivity.Status.Stacking => this.canvas.StackingActivities,
+                    IActivity.Status.Floating => this.canvas.FloatingActivities,
+                    IActivity.Status.Docked   => this.canvas.DockedActivities,
+                    _                         => throw new ArgumentOutOfRangeException(nameof(nextStatus), nextStatus, null),
+                },
+                false
+            );
             activity.Transform.SetAsLastSibling();
-            this.logger.Debug($"{activity.GetType().Name} status: {activity.CurrentStatus = nextStatus}");
+            this.logger.Debug($"{activity.Name} status: {activity.CurrentStatus = nextStatus}");
             activity.OnShow();
             return activity;
         }
@@ -224,7 +219,7 @@ namespace UniT.UI
         {
             if (activity.CurrentStatus is IActivity.Status.Hidden) return;
             activity.Transform.SetParent(this.canvas.HiddenActivities, false);
-            this.logger.Debug($"{activity.GetType().Name} status: {activity.CurrentStatus = IActivity.Status.Hidden}");
+            this.logger.Debug($"{activity.Name} status: {activity.CurrentStatus = IActivity.Status.Hidden}");
             activity.OnHide();
             if (removeFromStack)
             {
@@ -240,9 +235,9 @@ namespace UniT.UI
         {
             this.Hide(activity, true, autoStack);
             this.activities.Remove(activity.GetType());
-            this.logger.Debug($"{activity.GetType().Name} status: {activity.CurrentStatus = IActivity.Status.Disposed}");
+            this.logger.Debug($"{activity.Name} status: {activity.CurrentStatus = IActivity.Status.Disposed}");
             activity.OnDispose();
-            Destroy(activity.gameObject);
+            Destroy(activity.GameObject);
             if (!this.keys.Remove(activity.GetType(), out var key)) return;
             this.assetsManager.Unload(key);
         }

@@ -19,12 +19,12 @@ namespace UniT.UI.Adapter
             {
                 var view = this.pooledViews.DequeueOrDefault(() =>
                 {
-                    var view = Instantiate(this.viewPrefab.gameObject, this.content).GetComponent<TView>();
+                    var view = Instantiate(this.viewPrefab.GameObject, this.content).GetComponent<TView>();
                     this.Manager.Initialize(view);
                     return view;
                 });
                 view.Transform.SetAsLastSibling();
-                view.gameObject.SetActive(true);
+                view.GameObject.SetActive(true);
                 this.spawnedViews.Add(view);
                 view.Params = @params;
                 view.OnShow();
@@ -35,7 +35,7 @@ namespace UniT.UI.Adapter
         {
             this.spawnedViews.Clear(view =>
             {
-                view.gameObject.SetActive(false);
+                view.GameObject.SetActive(false);
                 view.OnHide();
                 this.pooledViews.Enqueue(view);
             });
@@ -46,7 +46,7 @@ namespace UniT.UI.Adapter
             this.pooledViews.Clear(view =>
             {
                 view.OnDispose();
-                Destroy(view.gameObject);
+                Destroy(view.GameObject);
             });
         }
     }

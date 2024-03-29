@@ -12,9 +12,11 @@
     {
         public IUIManager Manager { get; set; }
 
-        public RectTransform Transform { get; }
+        public string Name { get; }
 
-        public GameObject gameObject { get; }
+        public GameObject GameObject { get; }
+
+        public RectTransform Transform { get; }
 
         public void OnInitialize();
 

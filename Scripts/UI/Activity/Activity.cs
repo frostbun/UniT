@@ -8,7 +8,9 @@
     {
         IActivity.Status IActivity.CurrentStatus { get => this.CurrentStatus; set => this.CurrentStatus = value; }
 
-        bool IActivity.IsDestroyed => !this;
+        public IActivity.Status CurrentStatus { get; private set; } = IActivity.Status.Hidden;
+
+        public bool IsDestroyed => !this;
 
         #if UNIT_UNITASK
         void IUIElement.OnHide()
@@ -56,8 +58,6 @@
         }
         #endif
 
-        protected IActivity.Status CurrentStatus { get; private set; } = IActivity.Status.Hidden;
-
         public void Hide(bool removeFromStack = true, bool autoStack = true) => this.Manager.Hide(this, removeFromStack, autoStack);
 
         public void Dispose(bool autoStack = true) => this.Manager.Dispose(this, autoStack);
@@ -76,7 +76,7 @@
     {
         TParams IUIElementWithParams<TParams>.Params { get => this.Params; set => this.Params = value; }
 
-        protected TParams Params { get; private set; }
+        public TParams Params { get; private set; }
 
         public IActivity Stack(TParams @params, bool force = true) => this.Manager.Stack(this, @params, force);
 

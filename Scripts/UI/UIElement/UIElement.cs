@@ -11,7 +11,13 @@
     {
         IUIManager IUIElement.Manager { get => this.Manager; set => this.Manager = value; }
 
-        RectTransform IUIElement.Transform => this.Transform;
+        public IUIManager Manager { get; private set; }
+
+        public string Name => this.name;
+
+        public GameObject GameObject => this.gameObject;
+
+        public RectTransform Transform { get; private set; }
 
         void IUIElement.OnInitialize()
         {
@@ -48,10 +54,6 @@
         }
         #endif
 
-        protected IUIManager Manager { get; private set; }
-
-        protected RectTransform Transform { get; private set; }
-
         protected virtual void OnInitialize() { }
 
         protected virtual void OnShow() { }
@@ -69,6 +71,6 @@
     {
         TParams IUIElementWithParams<TParams>.Params { get => this.Params; set => this.Params = value; }
 
-        protected TParams Params { get; private set; }
+        public TParams Params { get; private set; }
     }
 }

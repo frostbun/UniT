@@ -10,7 +10,13 @@
     {
         IEntityManager IComponent.Manager { get => this.Manager; set => this.Manager = value; }
 
-        Transform IComponent.Transform => this.Transform;
+        public IEntityManager Manager { get; private set; }
+
+        public string Name => this.name;
+
+        public GameObject GameObject => this.gameObject;
+
+        public Transform Transform { get; private set; }
 
         void IComponent.OnInstantiate()
         {
@@ -41,10 +47,6 @@
             return (this.recycleCts ??= new CancellationTokenSource()).Token;
         }
         #endif
-
-        protected IEntityManager Manager { get; private set; }
-
-        protected Transform Transform { get; private set; }
 
         protected virtual void OnInstantiate() { }
 

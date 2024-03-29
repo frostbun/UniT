@@ -1,17 +1,14 @@
 namespace UniT.ECC.Entity
 {
     using UniT.ECC.Component;
-    using UnityEngine;
 
     public interface IEntity : IComponent
     {
         public bool IsDestroyed { get; }
 
-        public void Recycle();
-
-        public GameObject gameObject { get; }
-
         public T[] GetComponentsInChildren<T>();
+
+        public void Recycle();
     }
 
     public interface IEntityWithoutParams : IEntity

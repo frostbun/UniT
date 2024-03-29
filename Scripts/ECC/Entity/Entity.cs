@@ -4,7 +4,7 @@
 
     public abstract class BaseEntity : Component, IEntity
     {
-        bool IEntity.IsDestroyed => !this;
+        public bool IsDestroyed => !this;
 
         public void Recycle() => this.Manager.Recycle(this);
     }
@@ -17,6 +17,6 @@
     {
         TParams IEntityWithParams<TParams>.Params { get => this.Params; set => this.Params = value; }
 
-        protected TParams Params { get; private set; }
+        public TParams Params { get; private set; }
     }
 }

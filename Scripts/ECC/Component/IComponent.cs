@@ -12,6 +12,10 @@
     {
         public IEntityManager Manager { get; set; }
 
+        public string Name { get; }
+
+        public GameObject GameObject { get; }
+
         public Transform Transform { get; }
 
         public void OnInstantiate();

@@ -112,7 +112,7 @@ namespace UniT.ECC
         void IEntityManager.Recycle(IEntity entity)
         {
             this.ThrowIfDisposed();
-            if (!this.entityToPool.TryGet(entity, out var pool)) throw new InvalidOperationException($"Trying to recycle {entity.gameObject.name} that is not spawned");
+            if (!this.entityToPool.TryGet(entity, out var pool)) throw new InvalidOperationException($"Trying to recycle {entity.Name} that is not spawned");
             pool.Recycle(entity);
         }
 
@@ -141,7 +141,7 @@ namespace UniT.ECC
             this.ThrowIfDisposed();
             if (!this.prefabToPool.TryRemove(prefab, out var pool))
             {
-                this.logger.Warning($"Trying to unload {prefab.gameObject.name} pool that is not loaded");
+                this.logger.Warning($"Trying to unload {prefab.Name} pool that is not loaded");
                 return;
             }
             pool.Dispose();
@@ -164,7 +164,7 @@ namespace UniT.ECC
             this.ThrowIfDisposed();
             return this.prefabToPool.GetOrAdd(prefab, () =>
             {
-                this.logger.Warning($"Auto loading {prefab.gameObject.name} pool. Consider preload it with `Load` or `LoadAsync` for better performance.");
+                this.logger.Warning($"Auto loading {prefab.Name} pool. Consider preload it with `Load` or `LoadAsync` for better performance.");
                 return new EntityPool(prefab, this);
             });
         }
@@ -184,7 +184,7 @@ namespace UniT.ECC
             this.ThrowIfDisposed();
             if (!this.prefabToPool.TryGet(prefab, out var pool))
             {
-                this.logger.Warning($"{prefab.gameObject.name} pool not loaded");
+                this.logger.Warning($"{prefab.Name} pool not loaded");
             }
             return pool;
         }
@@ -215,7 +215,7 @@ namespace UniT.ECC
                 this.manager = manager;
                 this.entitiesContainer = new GameObject
                 {
-                    name      = $"{prefab.gameObject.name} pool",
+                    name      = $"{prefab.Name} pool",
                     transform = { parent = manager.poolsContainer },
                 }.transform;
             }
@@ -230,7 +230,7 @@ namespace UniT.ECC
                 var entity = this.pooledEntities.DequeueOrDefault(this.Instantiate);
                 entity.Transform.SetPositionAndRotation(position, rotation);
                 entity.Transform.SetParent(parent);
-                entity.gameObject.SetActive(true);
+                entity.GameObject.SetActive(true);
                 this.spawnedEntities.Add(entity);
                 this.manager.entityToPool.Add(entity, this);
                 this.entityToComponents[entity].ForEach(component =>
@@ -246,7 +246,7 @@ namespace UniT.ECC
                 var entity = this.pooledEntities.DequeueOrDefault(this.Instantiate);
                 entity.Transform.SetPositionAndRotation(position, rotation);
                 entity.Transform.SetParent(parent);
-                entity.gameObject.SetActive(true);
+                entity.GameObject.SetActive(true);
                 this.spawnedEntities.Add(entity);
                 this.manager.entityToPool.Add(entity, this);
                 ((IEntityWithParams<TParams>)entity).Params = @params;
@@ -268,7 +268,7 @@ namespace UniT.ECC
                 this.manager.entityToPool.Remove(entity);
                 this.spawnedEntities.Remove(entity);
                 if (entity.IsDestroyed) return;
-                entity.gameObject.SetActive(false);
+                entity.GameObject.SetActive(false);
                 entity.Transform.SetParent(this.entitiesContainer);
                 this.pooledEntities.Enqueue(entity);
             }
@@ -285,7 +285,7 @@ namespace UniT.ECC
                     var entity = this.pooledEntities.Dequeue();
                     this.entityToComponents.Remove(entity, out var components);
                     components.ForEach(component => this.componentToTypes.Remove(component));
-                    Object.Destroy(entity.gameObject);
+                    Object.Destroy(entity.GameObject);
                 }
             }
 
@@ -298,8 +298,8 @@ namespace UniT.ECC
 
             private IEntity Instantiate()
             {
-                var entity = Object.Instantiate(this.prefab.gameObject, this.entitiesContainer).GetComponent<IEntity>();
-                entity.gameObject.SetActive(false);
+                var entity = Object.Instantiate(this.prefab.GameObject, this.entitiesContainer).GetComponent<IEntity>();
+                entity.GameObject.SetActive(false);
                 this.entityToComponents.Add(entity, entity.GetComponentsInChildren<IComponent>());
                 this.entityToComponents[entity].ForEach(component =>
                 {
