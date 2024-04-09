@@ -1,11 +1,10 @@
 namespace UniT.Data
 {
     using System;
-    using UniT.Extensions;
 
     public abstract class Converter : IConverter
     {
-        bool IConverter.CanConvert(Type type) => type.DerivesFrom(this.ConvertibleType);
+        bool IConverter.CanConvert(Type type) => this.CanConvert(type);
 
         object IConverter.ConvertFromString(string str, Type type)
         {
@@ -31,7 +30,7 @@ namespace UniT.Data
             }
         }
 
-        protected abstract Type ConvertibleType { get; }
+        protected abstract bool CanConvert(Type type);
 
         protected abstract object ConvertFromString(string str, Type type);
 
@@ -40,6 +39,6 @@ namespace UniT.Data
 
     public abstract class Converter<T> : Converter
     {
-        protected sealed override Type ConvertibleType => typeof(T);
+        protected sealed override bool CanConvert(Type type) => typeof(T).IsAssignableFrom(type);
     }
 }

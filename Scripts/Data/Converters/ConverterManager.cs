@@ -53,10 +53,9 @@ namespace UniT.Data
             #region Collections
 
             this.AddConverter(new ArrayConverter());
-            this.AddConverter(new ListConverter());               // Depend on ArrayConverter
-            this.AddConverter(new DictionaryConverter());         // Depend on ArrayConverter
-            this.AddConverter(new ReadOnlyCollectionConverter()); // Depend on ArrayConverter
-            this.AddConverter(new ReadOnlyDictionaryConverter()); // Depend on DictionaryConverter
+            this.AddConverter(new ListAndReadOnlyCollectionConverter()); // Depend on ArrayConverter
+            this.AddConverter(new DictionaryConverter());                // Depend on ArrayConverter
+            this.AddConverter(new ReadOnlyDictionaryConverter());        // Depend on DictionaryConverter
 
             #endregion
 

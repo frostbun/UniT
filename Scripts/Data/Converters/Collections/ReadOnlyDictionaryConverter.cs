@@ -3,13 +3,14 @@ namespace UniT.Data
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using UniT.Extensions;
 
     /// <summary>
     ///     Depends on <see cref="DictionaryConverter"/>
     /// </summary>
     public sealed class ReadOnlyDictionaryConverter : Converter
     {
-        protected override Type ConvertibleType => typeof(ReadOnlyDictionary<,>);
+        protected override bool CanConvert(Type type) => type.DerivesFrom(typeof(ReadOnlyDictionary<,>));
 
         protected override object ConvertFromString(string str, Type type)
         {

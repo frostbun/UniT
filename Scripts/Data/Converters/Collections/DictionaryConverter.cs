@@ -4,6 +4,7 @@ namespace UniT.Data
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
+    using UniT.Extensions;
 
     /// <summary>
     ///     Depends on <see cref="ArrayConverter"/>
@@ -17,7 +18,7 @@ namespace UniT.Data
             this.separator = separator;
         }
 
-        protected override Type ConvertibleType => typeof(Dictionary<,>);
+        protected override bool CanConvert(Type type) => type.DerivesFrom(typeof(Dictionary<,>));
 
         private static readonly Type ArrayType = typeof(string[]);
 

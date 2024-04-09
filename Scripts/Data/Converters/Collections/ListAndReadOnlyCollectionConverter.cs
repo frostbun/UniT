@@ -3,14 +3,16 @@ namespace UniT.Data
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Linq;
+    using UniT.Extensions;
 
     /// <summary>
     ///     Depends on <see cref="ArrayConverter"/>
     /// </summary>
-    public sealed class ListConverter : Converter
+    public sealed class ListAndReadOnlyCollectionConverter : Converter
     {
-        protected override Type ConvertibleType => typeof(List<>);
+        protected override bool CanConvert(Type type) => type.DerivesFrom(typeof(List<>)) || type.DerivesFrom(typeof(ReadOnlyCollection<>));
 
         protected override object ConvertFromString(string str, Type type)
         {
@@ -19,7 +21,7 @@ namespace UniT.Data
 
         protected override string ConvertToString(object obj, Type type)
         {
-            return ConverterManager.Instance.ConvertToString(((IList)obj).Cast<object>().ToArray(), MakeArrayType(type));
+            return ConverterManager.Instance.ConvertToString(((IEnumerable)obj).Cast<object>().ToArray(), MakeArrayType(type));
         }
 
         private static Type MakeArrayType(Type type)
