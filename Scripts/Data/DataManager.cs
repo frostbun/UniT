@@ -79,13 +79,16 @@ namespace UniT.Data
                         case IReadableSerializableDataStorage storage:
                         {
                             var rawDatas = storage.Load(keys);
-                            IterTools.StrictZip(group, rawDatas).ForEach((type, rawData) => this.serializers[type].Populate(this.datas[type], rawData));
+                            IterTools.StrictZip(group, rawDatas)
+                                .Where((_,      rawData) => !rawData.IsNullOrWhitespace())
+                                .ForEach((type, rawData) => this.serializers[type].Populate(this.datas[type], rawData));
                             break;
                         }
                         case IReadableNonSerializableDataStorage storage:
                         {
                             var datas = storage.Load(keys);
-                            IterTools.StrictZip(group, datas).ForEach((type, data) => data.CopyTo(this.datas[type]));
+                            IterTools.StrictZip(group, datas)
+                                .ForEach((type, data) => data.CopyTo(this.datas[type]));
                             break;
                         }
                     }
@@ -162,20 +165,20 @@ namespace UniT.Data
                             case IReadableSerializableDataStorage storage:
                             {
                                 var rawDatas = await storage.LoadAsync(keys, progress, cancellationToken);
-                                this.logger.Debug($"Loaded {keys.ToArrayString()}");
-                                IterTools.StrictZip(group, rawDatas).ForEach((type, rawData) => this.serializers[type].Populate(this.datas[type], rawData));
-                                this.logger.Debug($"Populated {keys.ToArrayString()}");
+                                IterTools.StrictZip(group, rawDatas)
+                                    .Where((_,      rawData) => !rawData.IsNullOrWhitespace())
+                                    .ForEach((type, rawData) => this.serializers[type].Populate(this.datas[type], rawData));
                                 break;
                             }
                             case IReadableNonSerializableDataStorage storage:
                             {
                                 var datas = await storage.LoadAsync(keys, progress, cancellationToken);
-                                this.logger.Debug($"Loaded {keys.ToArrayString()}");
-                                IterTools.StrictZip(group, datas).ForEach((type, data) => data.CopyTo(this.datas[type]));
-                                this.logger.Debug($"Populated {keys.ToArrayString()}");
+                                IterTools.StrictZip(group, datas)
+                                    .ForEach((type, data) => data.CopyTo(this.datas[type]));
                                 break;
                             }
                         }
+                        this.logger.Debug($"Populated {keys.ToArrayString()}");
                     },
                     progress,
                     cancellationToken
@@ -255,9 +258,9 @@ namespace UniT.Data
                     {
                         yield return storage.LoadAsync(keys, rawDatas =>
                         {
-                            this.logger.Debug($"Loaded {keys.ToArrayString()}");
-                            IterTools.StrictZip(group, rawDatas).ForEach((type, rawData) => this.serializers[type].Populate(this.datas[type], rawData));
-                            this.logger.Debug($"Populated {keys.ToArrayString()}");
+                            IterTools.StrictZip(group, rawDatas)
+                                .Where((_,      rawData) => !rawData.IsNullOrWhitespace())
+                                .ForEach((type, rawData) => this.serializers[type].Populate(this.datas[type], rawData));
                         });
                         break;
                     }
@@ -265,9 +268,8 @@ namespace UniT.Data
                     {
                         yield return storage.LoadAsync(keys, datas =>
                         {
-                            this.logger.Debug($"Loaded {keys.ToArrayString()}");
-                            IterTools.StrictZip(group, datas).ForEach((type, data) => data.CopyTo(this.datas[type]));
-                            this.logger.Debug($"Populated {keys.ToArrayString()}");
+                            IterTools.StrictZip(group, datas)
+                                .ForEach((type, data) => data.CopyTo(this.datas[type]));
                         });
                         break;
                     }
