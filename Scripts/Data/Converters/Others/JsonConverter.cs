@@ -13,8 +13,9 @@ namespace UniT.Data
             this.settings = settings
                 ?? new JsonSerializerSettings
                 {
-                    TypeNameHandling      = TypeNameHandling.Auto,
-                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                    TypeNameHandling       = TypeNameHandling.Auto,
+                    ReferenceLoopHandling  = ReferenceLoopHandling.Ignore,
+                    ObjectCreationHandling = ObjectCreationHandling.Replace,
                 };
         }
 

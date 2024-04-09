@@ -81,7 +81,8 @@ namespace UniT.UI
                     var prefab = this.assetsManager.Load<GameObject>(key);
                     this.keys.Add(typeof(TActivity), key);
                     return this.InstantiateActivity(prefab);
-                });
+                }
+            );
         }
 
         #if UNIT_UNITASK
