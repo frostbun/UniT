@@ -15,7 +15,6 @@ namespace UniT.Data
                 {
                     TypeNameHandling       = TypeNameHandling.Auto,
                     ReferenceLoopHandling  = ReferenceLoopHandling.Ignore,
-                    ObjectCreationHandling = ObjectCreationHandling.Replace,
                 };
         }
 
