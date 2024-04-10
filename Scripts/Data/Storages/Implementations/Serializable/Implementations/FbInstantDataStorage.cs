@@ -13,7 +13,7 @@ namespace UniT.Data
     #endif
 
     [Preserve]
-    public sealed class FbInstantDataStorage : SerializableDataStorage, IReadableSerializableDataStorage, IWritableSerializableDataStorage, IFlushableDataStorage
+    public sealed class FbInstantDataStorage : SerializableDataStorage, IReadableSerializableDataStorage, IWritableSerializableDataStorage
     {
         protected override bool CanStore(Type type) => base.CanStore(type)
             && typeof(IReadableData).IsAssignableFrom(type)
@@ -29,7 +29,7 @@ namespace UniT.Data
             throw new NotSupportedException("FbInstant only supports async operations. Please use SaveAsync instead.");
         }
 
-        void IFlushableDataStorage.Flush()
+        void IWritableDataStorage.Flush()
         {
             throw new NotSupportedException("FbInstant only supports async operations. Please use FlushAsync instead.");
         }
@@ -54,7 +54,7 @@ namespace UniT.Data
             });
         }
 
-        UniTask IFlushableDataStorage.FlushAsync(IProgress<float> progress, CancellationToken _)
+        UniTask IWritableDataStorage.FlushAsync(IProgress<float> progress, CancellationToken _)
         {
             return FbInstant.Player.FlushData().ContinueWith(result =>
             {
@@ -73,7 +73,7 @@ namespace UniT.Data
             throw new NotImplementedException();
         }
 
-        IEnumerator IFlushableDataStorage.FlushAsync(Action callback, IProgress<float> progress)
+        IEnumerator IWritableDataStorage.FlushAsync(Action callback, IProgress<float> progress)
         {
             throw new NotImplementedException();
         }

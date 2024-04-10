@@ -13,7 +13,7 @@ namespace UniT.Data
     #endif
 
     [Preserve]
-    public sealed class PlayerPrefsDataStorage : SerializableDataStorage, IReadableSerializableDataStorage, IWritableSerializableDataStorage, IFlushableDataStorage
+    public sealed class PlayerPrefsDataStorage : SerializableDataStorage, IReadableSerializableDataStorage, IWritableSerializableDataStorage
     {
         protected override bool CanStore(Type type) => base.CanStore(type)
             && typeof(IReadableData).IsAssignableFrom(type)
@@ -23,7 +23,7 @@ namespace UniT.Data
 
         void IWritableSerializableDataStorage.Save(string[] keys, string[] values) => Save(keys, values);
 
-        void IFlushableDataStorage.Flush() => Flush();
+        void IWritableDataStorage.Flush() => Flush();
 
         #if UNIT_UNITASK
         UniTask<string[]> IReadableSerializableDataStorage.LoadAsync(string[] keys, IProgress<float> progress, CancellationToken cancellationToken)
@@ -40,7 +40,7 @@ namespace UniT.Data
             return UniTask.CompletedTask;
         }
 
-        UniTask IFlushableDataStorage.FlushAsync(IProgress<float> progress, CancellationToken cancellationToken)
+        UniTask IWritableDataStorage.FlushAsync(IProgress<float> progress, CancellationToken cancellationToken)
         {
             Flush();
             progress?.Report(1);
@@ -63,7 +63,7 @@ namespace UniT.Data
             yield break;
         }
 
-        IEnumerator IFlushableDataStorage.FlushAsync(Action callback, IProgress<float> progress)
+        IEnumerator IWritableDataStorage.FlushAsync(Action callback, IProgress<float> progress)
         {
             Flush();
             progress?.Report(1);

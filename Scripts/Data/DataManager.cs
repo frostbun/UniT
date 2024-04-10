@@ -61,16 +61,15 @@ namespace UniT.Data
 
         void IDataManager.Flush(params Type[] types) => this.Flush(types);
 
-        void IDataManager.PopulateAll() => this.Populate(this.datas.Keys);
+        void IDataManager.PopulateAll() => this.Populate(this.datas.Keys.Where(type => typeof(IReadableData).IsAssignableFrom(type)));
 
-        void IDataManager.SaveAll() => this.Save(this.datas.Keys);
+        void IDataManager.SaveAll() => this.Save(this.datas.Keys.Where(type => typeof(IWritableData).IsAssignableFrom(type)));
 
-        void IDataManager.FlushAll() => this.Flush(this.datas.Keys);
+        void IDataManager.FlushAll() => this.Flush(this.datas.Keys.Where(type => typeof(IWritableData).IsAssignableFrom(type)));
 
         private void Populate(IEnumerable<Type> types)
         {
-            types.GroupBy(type => this.storages.GetOrDefault(type) ?? throw new InvalidOperationException($"{type.Name} not found"))
-                .Where(group => group.Key is IReadableDataStorage)
+            types.GroupBy(type => this.storages.GetOrDefault(type) as IReadableDataStorage ?? throw new InvalidOperationException($"{type.Name} not found or not readable"))
                 .ForEach(group =>
                 {
                     var keys = group.Select(type => type.GetKey()).ToArray();
@@ -98,8 +97,7 @@ namespace UniT.Data
 
         private void Save(IEnumerable<Type> types)
         {
-            types.GroupBy(type => this.storages.GetOrDefault(type) ?? throw new InvalidOperationException($"{type.Name} not found"))
-                .Where(group => group.Key is IWritableDataStorage)
+            types.GroupBy(type => this.storages.GetOrDefault(type) as IWritableDataStorage ?? throw new InvalidOperationException($"{type.Name} not found or not writable"))
                 .ForEach(group =>
                 {
                     var keys = group.Select(type => type.GetKey()).ToArray();
@@ -124,12 +122,11 @@ namespace UniT.Data
 
         private void Flush(IEnumerable<Type> types)
         {
-            types.GroupBy(type => this.storages.GetOrDefault(type) ?? throw new InvalidOperationException($"{type.Name} not found"))
-                .Where(group => group.Key is IFlushableDataStorage)
+            types.GroupBy(type => this.storages.GetOrDefault(type) as IWritableDataStorage ?? throw new InvalidOperationException($"{type.Name} not found or not writable"))
                 .ForEach(group =>
                 {
                     var keys    = group.Select(type => type.GetKey()).ToArray();
-                    var storage = (IFlushableDataStorage)group.Key;
+                    var storage = group.Key;
                     storage.Flush();
                     this.logger.Debug($"Flushed {keys.ToArrayString()}");
                 });
@@ -146,16 +143,15 @@ namespace UniT.Data
 
         UniTask IDataManager.FlushAsync(Type[] types, IProgress<float> progress, CancellationToken cancellationToken) => this.FlushAsync(types, progress, cancellationToken);
 
-        UniTask IDataManager.PopulateAllAsync(IProgress<float> progress, CancellationToken cancellationToken) => this.PopulateAsync(this.datas.Keys, progress, cancellationToken);
+        UniTask IDataManager.PopulateAllAsync(IProgress<float> progress, CancellationToken cancellationToken) => this.PopulateAsync(this.datas.Keys.Where(type => typeof(IReadableData).IsAssignableFrom(type)), progress, cancellationToken);
 
-        UniTask IDataManager.SaveAllAsync(IProgress<float> progress, CancellationToken cancellationToken) => this.SaveAsync(this.datas.Keys, progress, cancellationToken);
+        UniTask IDataManager.SaveAllAsync(IProgress<float> progress, CancellationToken cancellationToken) => this.SaveAsync(this.datas.Keys.Where(type => typeof(IWritableData).IsAssignableFrom(type)), progress, cancellationToken);
 
-        UniTask IDataManager.FlushAllAsync(IProgress<float> progress, CancellationToken cancellationToken) => this.FlushAsync(this.datas.Keys, progress, cancellationToken);
+        UniTask IDataManager.FlushAllAsync(IProgress<float> progress, CancellationToken cancellationToken) => this.FlushAsync(this.datas.Keys.Where(type => typeof(IWritableData).IsAssignableFrom(type)), progress, cancellationToken);
 
         private UniTask PopulateAsync(IEnumerable<Type> types, IProgress<float> progress, CancellationToken cancellationToken)
         {
-            return types.GroupBy(type => this.storages.GetOrDefault(type) ?? throw new InvalidOperationException($"{type.Name} not found"))
-                .Where(group => group.Key is IReadableDataStorage)
+            return types.GroupBy(type => this.storages.GetOrDefault(type) as IReadableDataStorage ?? throw new InvalidOperationException($"{type.Name} not found or not readable"))
                 .ForEachAsync(
                     async (group, progress, cancellationToken) =>
                     {
@@ -187,8 +183,7 @@ namespace UniT.Data
 
         private UniTask SaveAsync(IEnumerable<Type> types, IProgress<float> progress, CancellationToken cancellationToken)
         {
-            return types.GroupBy(type => this.storages.GetOrDefault(type) ?? throw new InvalidOperationException($"{type.Name} not found"))
-                .Where(group => group.Key is IWritableDataStorage)
+            return types.GroupBy(type => this.storages.GetOrDefault(type) as IWritableDataStorage ?? throw new InvalidOperationException($"{type.Name} not found or not writable"))
                 .ForEachAsync(
                     async (group, progress, cancellationToken) =>
                     {
@@ -217,13 +212,12 @@ namespace UniT.Data
 
         private UniTask FlushAsync(IEnumerable<Type> types, IProgress<float> progress, CancellationToken cancellationToken)
         {
-            return types.GroupBy(type => this.storages.GetOrDefault(type) ?? throw new InvalidOperationException($"{type.Name} not found"))
-                .Where(group => group.Key is IFlushableDataStorage)
+            return types.GroupBy(type => this.storages.GetOrDefault(type) as IWritableDataStorage ?? throw new InvalidOperationException($"{type.Name} not found or not writable"))
                 .ForEachAsync(
                     async (group, progress, cancellationToken) =>
                     {
                         var keys    = group.Select(type => type.GetKey()).ToArray();
-                        var storage = (IFlushableDataStorage)group.Key;
+                        var storage = group.Key;
                         await storage.FlushAsync(progress, cancellationToken);
                         this.logger.Debug($"Flushed {keys.ToArrayString()}");
                     },
@@ -238,18 +232,16 @@ namespace UniT.Data
 
         IEnumerator IDataManager.FlushAsync(Type[] types, Action callback, IProgress<float> progress) => this.FlushAsync(types, callback, progress);
 
-        IEnumerator IDataManager.PopulateAllAsync(Action callback, IProgress<float> progress) => this.PopulateAsync(this.datas.Keys, callback, progress);
+        IEnumerator IDataManager.PopulateAllAsync(Action callback, IProgress<float> progress) => this.PopulateAsync(this.datas.Keys.Where(type => typeof(IReadableData).IsAssignableFrom(type)), callback, progress);
 
-        IEnumerator IDataManager.SaveAllAsync(Action callback, IProgress<float> progress) => this.SaveAsync(this.datas.Keys, callback, progress);
+        IEnumerator IDataManager.SaveAllAsync(Action callback, IProgress<float> progress) => this.SaveAsync(this.datas.Keys.Where(type => typeof(IWritableData).IsAssignableFrom(type)), callback, progress);
 
-        IEnumerator IDataManager.FlushAllAsync(Action callback, IProgress<float> progress) => this.FlushAsync(this.datas.Keys, callback, progress);
+        IEnumerator IDataManager.FlushAllAsync(Action callback, IProgress<float> progress) => this.FlushAsync(this.datas.Keys.Where(type => typeof(IWritableData).IsAssignableFrom(type)), callback, progress);
 
         private IEnumerator PopulateAsync(IEnumerable<Type> types, Action callback, IProgress<float> progress)
         {
             // TODO: make it run concurrently
-            var groups = types.GroupBy(type => this.storages.GetOrDefault(type) ?? throw new InvalidOperationException($"{type.Name} not found"))
-                .Where(group => group.Key is IReadableDataStorage);
-            foreach (var group in groups)
+            foreach (var group in types.GroupBy(type => this.storages.GetOrDefault(type) as IReadableDataStorage ?? throw new InvalidOperationException($"{type.Name} not found or not readable")))
             {
                 var keys = group.Select(type => type.GetKey()).ToArray();
                 switch (group.Key)
@@ -283,9 +275,7 @@ namespace UniT.Data
         private IEnumerator SaveAsync(IEnumerable<Type> types, Action callback, IProgress<float> progress)
         {
             // TODO: make it run concurrently
-            var groups = types.GroupBy(type => this.storages.GetOrDefault(type) ?? throw new InvalidOperationException($"{type.Name} not found"))
-                .Where(group => group.Key is IWritableDataStorage);
-            foreach (var group in groups)
+            foreach (var group in types.GroupBy(type => this.storages.GetOrDefault(type) as IWritableDataStorage ?? throw new InvalidOperationException($"{type.Name} not found or not writable")))
             {
                 var keys = group.Select(type => type.GetKey()).ToArray();
                 switch (group.Key)
@@ -312,12 +302,10 @@ namespace UniT.Data
         private IEnumerator FlushAsync(IEnumerable<Type> types, Action callback, IProgress<float> progress)
         {
             // TODO: make it run concurrently
-            var groups = types.GroupBy(type => this.storages.GetOrDefault(type) ?? throw new InvalidOperationException($"{type.Name} not found"))
-                .Where(group => group.Key is IFlushableDataStorage);
-            foreach (var group in groups)
+            foreach (var group in types.GroupBy(type => this.storages.GetOrDefault(type) as IWritableDataStorage ?? throw new InvalidOperationException($"{type.Name} not found or not writable")))
             {
                 var keys = group.Select(type => type.GetKey()).ToArray();
-                var storage = (IFlushableDataStorage)group.Key;
+                var storage = group.Key;
                 yield return storage.FlushAsync();
                 this.logger.Debug($"Flushed {keys.ToArrayString()}");
             }
