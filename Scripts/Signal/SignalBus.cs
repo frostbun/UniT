@@ -6,9 +6,13 @@ namespace UniT.Signal
     using UniT.Extensions;
     using UnityEngine.Scripting;
 
-    [Preserve]
     public sealed class SignalBus : ISignalBus
     {
+        [Preserve]
+        public SignalBus()
+        {
+        }
+
         #region Public
 
         void ISignalBus.Fire<T>(T signal)

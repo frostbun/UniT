@@ -14,11 +14,11 @@ namespace UniT.Data
     using System.Collections.Generic;
     #endif
 
-    [Preserve]
     public sealed class AssetsNonSerializableDataStorage : NonSerializableDataStorage, IReadableNonSerializableDataStorage
     {
         private readonly IAssetsManager assetsManager;
 
+        [Preserve]
         public AssetsNonSerializableDataStorage(IAssetsManager assetsManager)
         {
             this.assetsManager = assetsManager;

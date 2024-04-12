@@ -5,11 +5,11 @@ namespace UniT.Instantiator
     using UniT.DI;
     using UnityEngine.Scripting;
 
-    [Preserve]
     public sealed class DIInstantiator : IInstantiator
     {
         private readonly DependencyContainer dependencyContainer;
 
+        [Preserve]
         public DIInstantiator(DependencyContainer dependencyContainer)
         {
             this.dependencyContainer = dependencyContainer;

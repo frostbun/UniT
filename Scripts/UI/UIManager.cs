@@ -18,7 +18,6 @@ namespace UniT.UI
     using Cysharp.Threading.Tasks;
     #endif
 
-    [Preserve]
     public sealed class UIManager : MonoBehaviour, IUIManager, IHasLogger
     {
         #region Constructor
@@ -32,6 +31,7 @@ namespace UniT.UI
         private readonly List<IActivity>             activityStack = new List<IActivity>();
         private readonly Dictionary<Type, string>    keys          = new Dictionary<Type, string>();
 
+        [Preserve]
         public UIManager(RootUICanvas canvas, IInstantiator instantiator, IAssetsManager assetsManager, ILogger.IFactory loggerFactory)
         {
             this.canvas        = canvas;

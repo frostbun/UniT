@@ -13,13 +13,13 @@ namespace UniT.ResourcesManager
     using System.Collections;
     #endif
 
-    [Preserve]
     public sealed class AddressableScenesManager : IScenesManager, IHasLogger
     {
         #region Constructor
 
         private readonly ILogger logger;
 
+        [Preserve]
         public AddressableScenesManager(ILogger.IFactory loggerFactory)
         {
             this.logger = loggerFactory.Create(this);

@@ -14,7 +14,6 @@ namespace UniT.Data
     using System.Collections;
     #endif
 
-    [Preserve]
     public sealed class DataManager : IDataManager, IHasLogger
     {
         #region Constructor
@@ -24,6 +23,7 @@ namespace UniT.Data
         private readonly Dictionary<Type, ISerializer>  serializers;
         private readonly ILogger                        logger;
 
+        [Preserve]
         public DataManager(
             IEnumerable<IData>        datas,
             IEnumerable<IDataStorage> storages,

@@ -12,9 +12,9 @@
     using System.Collections;
     #endif
 
-    [Preserve]
     public sealed class ResourceAssetsManager : AssetsManager
     {
+        [Preserve]
         public ResourceAssetsManager(ILogger.IFactory loggerFactory) : base(loggerFactory)
         {
         }

@@ -12,9 +12,13 @@ namespace UniT.Data
     using System.Collections;
     #endif
 
-    [Preserve]
     public sealed class FbInstantDataStorage : SerializableDataStorage, IReadableSerializableDataStorage, IWritableSerializableDataStorage
     {
+        [Preserve]
+        public FbInstantDataStorage()
+        {
+        }
+
         protected override bool CanStore(Type type) => base.CanStore(type)
             && typeof(IReadableData).IsAssignableFrom(type)
             && typeof(IWritableData).IsAssignableFrom(type);

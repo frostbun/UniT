@@ -13,9 +13,9 @@ namespace UniT.ResourcesManager
     using System.Collections;
     #endif
 
-    [Preserve]
     public sealed class AddressableAssetsManager : AssetsManager
     {
+        [Preserve]
         public AddressableAssetsManager(ILogger.IFactory loggerFactory) : base(loggerFactory)
         {
         }

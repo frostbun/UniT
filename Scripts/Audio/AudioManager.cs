@@ -15,7 +15,6 @@ namespace UniT.Audio
     using System.Collections;
     #endif
 
-    [Preserve]
     public sealed class AudioManager : IAudioManager, IHasLogger
     {
         #region Constructor
@@ -29,6 +28,7 @@ namespace UniT.Audio
         private readonly Queue<AudioSource>              pooledSoundSources = new Queue<AudioSource>();
         private readonly Dictionary<string, AudioSource> loadedSoundSources = new Dictionary<string, AudioSource>();
 
+        [Preserve]
         public AudioManager(IAssetsManager assetsManager, ILogger.IFactory loggerFactory)
         {
             this.assetsManager = assetsManager;

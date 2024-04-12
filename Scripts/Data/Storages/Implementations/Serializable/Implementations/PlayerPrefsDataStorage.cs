@@ -12,9 +12,13 @@ namespace UniT.Data
     using System.Collections;
     #endif
 
-    [Preserve]
     public sealed class PlayerPrefsDataStorage : SerializableDataStorage, IReadableSerializableDataStorage, IWritableSerializableDataStorage
     {
+        [Preserve]
+        public PlayerPrefsDataStorage()
+        {
+        }
+
         protected override bool CanStore(Type type) => base.CanStore(type)
             && typeof(IReadableData).IsAssignableFrom(type)
             && typeof(IWritableData).IsAssignableFrom(type);

@@ -12,7 +12,6 @@ namespace UniT.Advertisements
     using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;
 
-    [Preserve]
     public sealed class FbInstantAdsManager : IAdsManager, IHasLogger
     {
         #region Constructor
@@ -20,6 +19,7 @@ namespace UniT.Advertisements
         private readonly IFbInstantAdvertisementConfig config;
         private readonly ILogger                       logger;
 
+        [Preserve]
         public FbInstantAdsManager(IFbInstantAdvertisementConfig config, ILogger.IFactory loggerFactory)
         {
             this.config = config;

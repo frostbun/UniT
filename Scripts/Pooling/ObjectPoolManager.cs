@@ -14,7 +14,6 @@ namespace UniT.Pooling
     using Cysharp.Threading.Tasks;
     #endif
 
-    [Preserve]
     public sealed class ObjectPoolManager : IObjectPoolManager, IHasLogger
     {
         #region Constructor
@@ -27,6 +26,7 @@ namespace UniT.Pooling
         private readonly Dictionary<string, ObjectPool>     keyToPool      = new Dictionary<string, ObjectPool>();
         private readonly Dictionary<GameObject, ObjectPool> instanceToPool = new Dictionary<GameObject, ObjectPool>();
 
+        [Preserve]
         public ObjectPoolManager(IAssetsManager assetsManager, ILogger.IFactory loggerFactory)
         {
             this.assetsManager = assetsManager;
