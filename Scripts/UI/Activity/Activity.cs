@@ -15,17 +15,13 @@
         #if UNIT_UNITASK
         void IUIElement.OnHide()
         {
-            #if UNIT_UNITASK
             this.hideCts?.Cancel();
             this.hideCts?.Dispose();
             this.hideCts = null;
-            #endif
             this.OnHide();
-            #if UNIT_UNITASK
             this.resultSource?.TrySetResult(null);
             this.resultSource?.Task.Forget();
             this.resultSource = null;
-            #endif
         }
 
         private UniTaskCompletionSource<object> resultSource;

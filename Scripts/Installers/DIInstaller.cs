@@ -16,7 +16,7 @@ namespace UniT.DI
 
     public static class DIInstaller
     {
-        public static void AddUniT(this DependencyContainer container, RootUICanvas rootUICanvas, params Type[] dataTypes)
+        public static void AddUniT(this DependencyContainer container, RootUICanvas rootUICanvas = null, params Type[] dataTypes)
         {
             container.AddInterfaces<LoggerFactory>();
             container.AddInterfaces<DIInstantiator>();
@@ -63,8 +63,11 @@ namespace UniT.DI
 
             #region UI
 
-            container.Add(rootUICanvas);
-            container.AddInterfaces<UIManager>();
+            if (rootUICanvas is { })
+            {
+                container.Add(rootUICanvas);
+                container.AddInterfaces<UIManager>();
+            }
 
             #endregion
 

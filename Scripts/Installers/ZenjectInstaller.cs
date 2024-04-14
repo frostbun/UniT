@@ -16,7 +16,7 @@ namespace Zenject
 
     public static class ZenjectInstaller
     {
-        public static void BindUniT(this DiContainer container, RootUICanvas rootUICanvas, params Type[] dataTypes)
+        public static void BindUniT(this DiContainer container, RootUICanvas rootUICanvas = null, params Type[] dataTypes)
         {
             container.BindInterfacesTo<LoggerFactory>().AsSingle().WhenInjectedInto<IHasLogger>();
             container.BindInterfacesTo<ZenjectInstantiator>().AsSingle();
@@ -63,8 +63,11 @@ namespace Zenject
 
             #region UI
 
-            container.Bind<RootUICanvas>().FromInstance(rootUICanvas).AsSingle().WhenInjectedInto<IUIManager>();
-            container.BindInterfacesTo<UIManager>().AsSingle();
+            if (rootUICanvas is { })
+            {
+                container.Bind<RootUICanvas>().FromInstance(rootUICanvas).AsSingle().WhenInjectedInto<IUIManager>();
+                container.BindInterfacesTo<UIManager>().AsSingle();
+            }
 
             #endregion
 

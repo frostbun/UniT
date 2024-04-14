@@ -28,7 +28,7 @@
       "define": "UNIT_ADDRESSABLES"
     },
     {
-      "name": "com.modesttree.zenject",
+      "name": "com.svermeulen.extenject",
       "expression": "",
       "define": "UNIT_ZENJECT"
     },
