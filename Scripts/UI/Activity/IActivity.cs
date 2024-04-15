@@ -1,7 +1,9 @@
 namespace UniT.UI.Activity
 {
-    using Cysharp.Threading.Tasks;
     using UniT.UI.UIElement;
+    #if UNIT_UNITASK
+    using Cysharp.Threading.Tasks;
+    #endif
 
     public interface IActivity : IUIElement
     {

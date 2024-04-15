@@ -8,7 +8,7 @@ namespace UniT.Data
     using UniT.Extensions;
     using UnityEngine.Scripting;
 
-    public sealed class CsvSerializer : ISerializer
+    public sealed class CsvSerializer : IStringSerializer
     {
         [Preserve]
         public CsvSerializer()
@@ -17,14 +17,14 @@ namespace UniT.Data
 
         bool ISerializer.CanSerialize(Type type) => typeof(ICsvData).IsAssignableFrom(type);
 
-        void ISerializer.Populate(IData data, string rawData)
+        void IStringSerializer.Populate(IData data, string rawData)
         {
             var reader = new CsvReader(rawData);
             var parser = new CsvParser((ICsvData)data, reader);
             while (reader.Read()) parser.Parse();
         }
 
-        string ISerializer.Serialize(IData data)
+        string IStringSerializer.Serialize(IData data)
         {
             throw new NotImplementedException();
         }

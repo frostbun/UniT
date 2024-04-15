@@ -1,8 +1,10 @@
 ﻿namespace UniT.UI.Activity
 {
+    using UniT.UI.UIElement;
+    #if UNIT_UNITASK
     using System;
     using Cysharp.Threading.Tasks;
-    using UniT.UI.UIElement;
+    #endif
 
     public abstract class BaseActivity : BaseUIElement, IActivity
     {

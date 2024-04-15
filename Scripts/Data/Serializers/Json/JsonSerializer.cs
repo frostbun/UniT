@@ -5,7 +5,7 @@ namespace UniT.Data
     using Newtonsoft.Json;
     using UnityEngine.Scripting;
 
-    public sealed class JsonSerializer : ISerializer
+    public sealed class JsonSerializer : IStringSerializer
     {
         private readonly JsonSerializerSettings settings;
 
@@ -23,12 +23,12 @@ namespace UniT.Data
 
         bool ISerializer.CanSerialize(Type type) => typeof(IJsonData).IsAssignableFrom(type);
 
-        void ISerializer.Populate(IData data, string rawData)
+        void IStringSerializer.Populate(IData data, string rawData)
         {
             JsonConvert.PopulateObject(rawData, data, this.settings);
         }
 
-        string ISerializer.Serialize(IData data)
+        string IStringSerializer.Serialize(IData data)
         {
             return JsonConvert.SerializeObject(data, this.settings);
         }

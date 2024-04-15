@@ -28,7 +28,7 @@ namespace UniT.Data
             && typeof(IReadableData).IsAssignableFrom(type)
             && !typeof(IWritableData).IsAssignableFrom(type);
 
-        string[] IReadableSerializableDataStorage.Load(string[] keys)
+        string[] IReadableSerializableDataStorage.ReadStrings(string[] keys)
         {
             return keys.Select(key =>
             {
@@ -38,8 +38,18 @@ namespace UniT.Data
             }).ToArray();
         }
 
+        byte[][] IReadableSerializableDataStorage.ReadBytes(string[] keys)
+        {
+            return keys.Select(key =>
+            {
+                var bytes = this.assetsManager.Load<TextAsset>(key).bytes;
+                this.assetsManager.Unload(key);
+                return bytes;
+            }).ToArray();
+        }
+
         #if UNIT_UNITASK
-        UniTask<string[]> IReadableSerializableDataStorage.LoadAsync(string[] keys, IProgress<float> progress, CancellationToken cancellationToken)
+        UniTask<string[]> IReadableSerializableDataStorage.ReadStringsAsync(string[] keys, IProgress<float> progress, CancellationToken cancellationToken)
         {
             return keys.SelectAsync(
                 (key, progress, cancellationToken) =>
@@ -54,18 +64,44 @@ namespace UniT.Data
                 cancellationToken
             ).ToArrayAsync();
         }
+
+        UniTask<byte[][]> IReadableSerializableDataStorage.ReadBytesAsync(string[] keys, IProgress<float> progress, CancellationToken cancellationToken)
+        {
+            return keys.SelectAsync(
+                (key, progress, cancellationToken) =>
+                    this.assetsManager.LoadAsync<TextAsset>(key, progress, cancellationToken)
+                        .ContinueWith(asset =>
+                        {
+                            var bytes = asset.bytes;
+                            this.assetsManager.Unload(key);
+                            return bytes;
+                        }),
+                progress,
+                cancellationToken
+            ).ToArrayAsync();
+        }
         #else
-        IEnumerator IReadableSerializableDataStorage.LoadAsync(string[] keys, Action<string[]> callback, IProgress<float> progress)
+        IEnumerator IReadableSerializableDataStorage.ReadStringsAsync(string[] keys, Action<string[]> callback, IProgress<float> progress)
         {
             // TODO: make it run concurrently
             var rawDatas = new List<string>();
             foreach (var key in keys)
             {
-                yield return this.assetsManager.LoadAsync<TextAsset>(key, asset =>
-                {
-                    rawDatas.Add(asset.text);
-                    this.assetsManager.Unload(key);
-                });
+                yield return this.assetsManager.LoadAsync<TextAsset>(key, asset => rawDatas.Add(asset.text));
+                this.assetsManager.Unload(key);
+            }
+            progress?.Report(1);
+            callback(rawDatas.ToArray());
+        }
+
+        IEnumerator IReadableSerializableDataStorage.ReadBytesAsync(string[] keys, Action<byte[][]> callback, IProgress<float> progress)
+        {
+            // TODO: make it run concurrently
+            var rawDatas = new List<byte[]>();
+            foreach (var key in keys)
+            {
+                yield return this.assetsManager.LoadAsync<TextAsset>(key, asset => rawDatas.Add(asset.bytes));
+                this.assetsManager.Unload(key);
             }
             progress?.Report(1);
             callback(rawDatas.ToArray());

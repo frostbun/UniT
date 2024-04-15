@@ -23,23 +23,41 @@ namespace UniT.Data
             && typeof(IReadableData).IsAssignableFrom(type)
             && typeof(IWritableData).IsAssignableFrom(type);
 
-        string[] IReadableSerializableDataStorage.Load(string[] keys) => Load(keys);
+        string[] IReadableSerializableDataStorage.ReadStrings(string[] keys) => ReadStrings(keys);
 
-        void IWritableSerializableDataStorage.Save(string[] keys, string[] values) => Save(keys, values);
+        byte[][] IReadableSerializableDataStorage.ReadBytes(string[] keys) => ReadBytes(keys);
+
+        void IWritableSerializableDataStorage.WriteStrings(string[] keys, string[] values) => WriteStrings(keys, values);
+
+        void IWritableSerializableDataStorage.WriteBytes(string[] keys, byte[][] values) => WriteBytes(keys, values);
 
         void IWritableDataStorage.Flush() => Flush();
 
         #if UNIT_UNITASK
-        UniTask<string[]> IReadableSerializableDataStorage.LoadAsync(string[] keys, IProgress<float> progress, CancellationToken cancellationToken)
+        UniTask<string[]> IReadableSerializableDataStorage.ReadStringsAsync(string[] keys, IProgress<float> progress, CancellationToken cancellationToken)
         {
-            var rawDatas = Load(keys);
+            var rawDatas = ReadStrings(keys);
             progress?.Report(1);
             return UniTask.FromResult(rawDatas);
         }
 
-        UniTask IWritableSerializableDataStorage.SaveAsync(string[] keys, string[] values, IProgress<float> progress, CancellationToken cancellationToken)
+        UniTask<byte[][]> IReadableSerializableDataStorage.ReadBytesAsync(string[] keys, IProgress<float> progress, CancellationToken cancellationToken)
         {
-            Save(keys, values);
+            var rawDatas = ReadBytes(keys);
+            progress?.Report(1);
+            return UniTask.FromResult(rawDatas);
+        }
+
+        UniTask IWritableSerializableDataStorage.WriteStringsAsync(string[] keys, string[] values, IProgress<float> progress, CancellationToken cancellationToken)
+        {
+            WriteStrings(keys, values);
+            progress?.Report(1);
+            return UniTask.CompletedTask;
+        }
+
+        UniTask IWritableSerializableDataStorage.WriteBytesAsync(string[] keys, byte[][] values, IProgress<float> progress, CancellationToken cancellationToken)
+        {
+            WriteBytes(keys, values);
             progress?.Report(1);
             return UniTask.CompletedTask;
         }
@@ -51,17 +69,33 @@ namespace UniT.Data
             return UniTask.CompletedTask;
         }
         #else
-        IEnumerator IReadableSerializableDataStorage.LoadAsync(string[] keys, Action<string[]> callback, IProgress<float> progress)
+        IEnumerator IReadableSerializableDataStorage.ReadStringsAsync(string[] keys, Action<string[]> callback, IProgress<float> progress)
         {
-            var rawDatas = Load(keys);
+            var rawDatas = ReadStrings(keys);
             progress?.Report(1);
             callback(rawDatas);
             yield break;
         }
 
-        IEnumerator IWritableSerializableDataStorage.SaveAsync(string[] keys, string[] values, Action callback, IProgress<float> progress)
+        IEnumerator IReadableSerializableDataStorage.ReadBytesAsync(string[] keys, Action<byte[][]> callback, IProgress<float> progress)
         {
-            Save(keys, values);
+            var rawDatas = ReadBytes(keys);
+            progress?.Report(1);
+            callback(rawDatas);
+            yield break;
+        }
+
+        IEnumerator IWritableSerializableDataStorage.WriteStringsAsync(string[] keys, string[] values, Action callback, IProgress<float> progress)
+        {
+            WriteStrings(keys, values);
+            progress?.Report(1);
+            callback?.Invoke();
+            yield break;
+        }
+
+        IEnumerator IWritableSerializableDataStorage.WriteBytesAsync(string[] keys, byte[][] values, Action callback, IProgress<float> progress)
+        {
+            WriteBytes(keys, values);
             progress?.Report(1);
             callback?.Invoke();
             yield break;
@@ -76,14 +110,24 @@ namespace UniT.Data
         }
         #endif
 
-        private static string[] Load(string[] keys)
+        private static string[] ReadStrings(string[] keys)
         {
             return keys.Select(PlayerPrefs.GetString).ToArray();
         }
 
-        private static void Save(string[] keys, string[] values)
+        private static byte[][] ReadBytes(string[] keys)
+        {
+            return keys.Select(PlayerPrefs.GetString).Select(Convert.FromBase64String).ToArray();
+        }
+
+        private static void WriteStrings(string[] keys, string[] values)
         {
             IterTools.StrictZip(keys, values).ForEach(PlayerPrefs.SetString);
+        }
+
+        private static void WriteBytes(string[] keys, byte[][] values)
+        {
+            IterTools.StrictZip(keys, values.Select(Convert.ToBase64String)).ForEach(PlayerPrefs.SetString);
         }
 
         private static void Flush()

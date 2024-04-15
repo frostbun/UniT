@@ -10,12 +10,18 @@
 
     public interface IReadableSerializableDataStorage : IReadableDataStorage
     {
-        public string[] Load(string[] keys);
+        public string[] ReadStrings(string[] keys);
+
+        public byte[][] ReadBytes(string[] keys);
 
         #if UNIT_UNITASK
-        public UniTask<string[]> LoadAsync(string[] keys, IProgress<float> progress = null, CancellationToken cancellationToken = default);
+        public UniTask<string[]> ReadStringsAsync(string[] keys, IProgress<float> progress = null, CancellationToken cancellationToken = default);
+
+        public UniTask<byte[][]> ReadBytesAsync(string[] keys, IProgress<float> progress = null, CancellationToken cancellationToken = default);
         #else
-        public IEnumerator LoadAsync(string[] keys, Action<string[]> callback, IProgress<float> progress = null);
+        public IEnumerator ReadStringsAsync(string[] keys, Action<string[]> callback, IProgress<float> progress = null);
+
+        public IEnumerator ReadBytesAsync(string[] keys, Action<byte[][]> callback, IProgress<float> progress = null);
         #endif
     }
 }

@@ -28,13 +28,13 @@ namespace UniT.Data
             && typeof(IReadableData).IsAssignableFrom(type)
             && !typeof(IWritableData).IsAssignableFrom(type);
 
-        IData[] IReadableNonSerializableDataStorage.Load(string[] keys)
+        IData[] IReadableNonSerializableDataStorage.Read(string[] keys)
         {
             return keys.Select(key => (IData)this.assetsManager.Load<Object>(key)).ToArray();
         }
 
         #if UNIT_UNITASK
-        UniTask<IData[]> IReadableNonSerializableDataStorage.LoadAsync(string[] keys, IProgress<float> progress, CancellationToken cancellationToken)
+        UniTask<IData[]> IReadableNonSerializableDataStorage.ReadAsync(string[] keys, IProgress<float> progress, CancellationToken cancellationToken)
         {
             return keys.SelectAsync(
                 (key, progress, cancellationToken) =>
@@ -45,7 +45,7 @@ namespace UniT.Data
             ).ToArrayAsync();
         }
         #else
-        IEnumerator IReadableNonSerializableDataStorage.LoadAsync(string[] keys, Action<IData[]> callback, IProgress<float> progress)
+        IEnumerator IReadableNonSerializableDataStorage.ReadAsync(string[] keys, Action<IData[]> callback, IProgress<float> progress)
         {
             // TODO: make it run concurrently
             var datas = new List<IData>();

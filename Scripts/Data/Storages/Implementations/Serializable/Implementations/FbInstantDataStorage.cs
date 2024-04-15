@@ -2,6 +2,7 @@
 namespace UniT.Data
 {
     using System;
+    using System.Linq;
     using UnityEngine.Scripting;
     #if UNIT_UNITASK
     using System.Threading;
@@ -23,12 +24,22 @@ namespace UniT.Data
             && typeof(IReadableData).IsAssignableFrom(type)
             && typeof(IWritableData).IsAssignableFrom(type);
 
-        string[] IReadableSerializableDataStorage.Load(string[] keys)
+        string[] IReadableSerializableDataStorage.ReadStrings(string[] keys)
         {
             throw new NotSupportedException("FbInstant only supports async operations. Please use LoadAsync instead.");
         }
 
-        void IWritableSerializableDataStorage.Save(string[] keys, string[] rawDatas)
+        byte[][] IReadableSerializableDataStorage.ReadBytes(string[] keys)
+        {
+            throw new NotSupportedException("FbInstant only supports async operations. Please use LoadAsync instead.");
+        }
+
+        void IWritableSerializableDataStorage.WriteStrings(string[] keys, string[] rawDatas)
+        {
+            throw new NotSupportedException("FbInstant only supports async operations. Please use SaveAsync instead.");
+        }
+
+        void IWritableSerializableDataStorage.WriteBytes(string[] keys, byte[][] rawDatas)
         {
             throw new NotSupportedException("FbInstant only supports async operations. Please use SaveAsync instead.");
         }
@@ -39,7 +50,7 @@ namespace UniT.Data
         }
 
         #if UNIT_UNITASK
-        UniTask<string[]> IReadableSerializableDataStorage.LoadAsync(string[] keys, IProgress<float> progress, CancellationToken _)
+        UniTask<string[]> IReadableSerializableDataStorage.ReadStringsAsync(string[] keys, IProgress<float> progress, CancellationToken _)
         {
             return FbInstant.Player.LoadData(keys).ContinueWith(result =>
             {
@@ -49,9 +60,28 @@ namespace UniT.Data
             });
         }
 
-        UniTask IWritableSerializableDataStorage.SaveAsync(string[] keys, string[] rawDatas, IProgress<float> progress, CancellationToken _)
+        UniTask<byte[][]> IReadableSerializableDataStorage.ReadBytesAsync(string[] keys, IProgress<float> progress, CancellationToken _)
+        {
+            return FbInstant.Player.LoadData(keys).ContinueWith(result =>
+            {
+                if (result.IsError) throw new($"Load {keys.ToArrayString()} error: {result.Error}");
+                progress?.Report(1);
+                return result.Data.Select(Convert.FromBase64String).ToArray();
+            });
+        }
+
+        UniTask IWritableSerializableDataStorage.WriteStringsAsync(string[] keys, string[] rawDatas, IProgress<float> progress, CancellationToken _)
         {
             return FbInstant.Player.SaveData(keys, rawDatas).ContinueWith(result =>
+            {
+                if (result.IsError) throw new($"Save {keys.ToArrayString()} error: {result.Error}");
+                progress?.Report(1);
+            });
+        }
+
+        UniTask IWritableSerializableDataStorage.WriteBytesAsync(string[] keys, byte[][] rawDatas, IProgress<float> progress, CancellationToken _)
+        {
+            return FbInstant.Player.SaveData(keys, rawDatas.Select(Convert.ToBase64String).ToArray()).ContinueWith(result =>
             {
                 if (result.IsError) throw new($"Save {keys.ToArrayString()} error: {result.Error}");
                 progress?.Report(1);
@@ -67,12 +97,22 @@ namespace UniT.Data
             });
         }
         #else
-        IEnumerator IReadableSerializableDataStorage.LoadAsync(string[] keys, Action<string[]> callback, IProgress<float> progress)
+        IEnumerator IReadableSerializableDataStorage.ReadStringsAsync(string[] keys, Action<string[]> callback, IProgress<float> progress)
         {
             throw new NotImplementedException();
         }
 
-        IEnumerator IWritableSerializableDataStorage.SaveAsync(string[] keys, string[] rawDatas, Action callback, IProgress<float> progress)
+        IEnumerator IReadableSerializableDataStorage.ReadBytesAsync(string[] keys, Action<byte[][]> callback, IProgress<float> progress)
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerator IWritableSerializableDataStorage.WriteStringsAsync(string[] keys, string[] rawDatas, Action callback, IProgress<float> progress)
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerator IWritableSerializableDataStorage.WriteBytesAsync(string[] keys, byte[][] rawDatas, Action callback, IProgress<float> progress)
         {
             throw new NotImplementedException();
         }
