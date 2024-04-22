@@ -86,13 +86,17 @@ namespace UniT.Data
                                         case IStringSerializer serializer:
                                         {
                                             var rawDatas = storage.ReadStrings(keys);
-                                            this.Populate(serializer, group, rawDatas);
+                                            IterTools.StrictZip(group, rawDatas)
+                                                .Where((_,      rawData) => !rawData.IsNullOrWhitespace())
+                                                .ForEach((type, rawData) => serializer.Populate(this.datas[type], rawData));
                                             break;
                                         }
                                         case IBinarySerializer serializer:
                                         {
                                             var rawDatas = storage.ReadBytes(keys);
-                                            this.Populate(serializer, group, rawDatas);
+                                            IterTools.StrictZip(group, rawDatas)
+                                                .Where((_,      rawData) => rawData is { Length: > 0 })
+                                                .ForEach((type, rawData) => serializer.Populate(this.datas[type], rawData));
                                             break;
                                         }
                                     }
@@ -204,13 +208,17 @@ namespace UniT.Data
                                                 case IStringSerializer serializer:
                                                 {
                                                     var rawDatas = await storage.ReadStringsAsync(keys, progress, cancellationToken);
-                                                    this.Populate(serializer, group, rawDatas);
+                                                    await IterTools.StrictZip(group, rawDatas)
+                                                        .Where((_,           rawData) => !rawData.IsNullOrWhitespace())
+                                                        .ForEachAsync((type, rawData) => serializer.PopulateAsync(this.datas[type], rawData));
                                                     break;
                                                 }
                                                 case IBinarySerializer serializer:
                                                 {
                                                     var rawDatas = await storage.ReadBytesAsync(keys, progress, cancellationToken);
-                                                    this.Populate(serializer, group, rawDatas);
+                                                    await IterTools.StrictZip(group, rawDatas)
+                                                        .Where((_,           rawData) => rawData is { Length: > 0 })
+                                                        .ForEachAsync((type, rawData) => serializer.PopulateAsync(this.datas[type], rawData));
                                                     break;
                                                 }
                                             }
@@ -255,13 +263,13 @@ namespace UniT.Data
                                             {
                                                 case IStringSerializer serializer:
                                                 {
-                                                    var rawDatas = group.Select(type => serializer.Serialize(this.datas[type])).ToArray();
+                                                    var rawDatas = await group.Select(type => serializer.SerializeAsync(this.datas[type]));
                                                     await storage.WriteStringsAsync(keys, rawDatas, progress, cancellationToken);
                                                     break;
                                                 }
                                                 case IBinarySerializer serializer:
                                                 {
-                                                    var rawDatas = group.Select(type => serializer.Serialize(this.datas[type])).ToArray();
+                                                    var rawDatas = await group.Select(type => serializer.SerializeAsync(this.datas[type]));
                                                     await storage.WriteBytesAsync(keys, rawDatas, progress, cancellationToken);
                                                     break;
                                                 }
@@ -331,12 +339,22 @@ namespace UniT.Data
                             {
                                 case IStringSerializer serializer:
                                 {
-                                    yield return storage.ReadStringsAsync(keys1, rawDatas => this.Populate(serializer, group1, rawDatas));
+                                    string[] rawDatas = null;
+                                    yield return storage.ReadStringsAsync(keys1, result => rawDatas = result);
+                                    foreach (var (type, rawData) in IterTools.StrictZip(group1, rawDatas).Where((_, rawData) => !rawData.IsNullOrWhitespace()))
+                                    {
+                                        yield return serializer.PopulateAsync(this.datas[type], rawData);
+                                    }
                                     break;
                                 }
                                 case IBinarySerializer serializer:
                                 {
-                                    yield return storage.ReadBytesAsync(keys1, rawDatas => this.Populate(serializer, group1, rawDatas));
+                                    byte[][] rawDatas = null;
+                                    yield return storage.ReadBytesAsync(keys1, result => rawDatas = result);
+                                    foreach (var (type, rawData) in IterTools.StrictZip(group1, rawDatas).Where((_, rawData) => rawData is { Length: > 0 }))
+                                    {
+                                        yield return serializer.PopulateAsync(this.datas[type], rawData);
+                                    }
                                     break;
                                 }
                             }
@@ -376,14 +394,22 @@ namespace UniT.Data
                             {
                                 case IStringSerializer serializer:
                                 {
-                                    var rawDatas = group1.Select(type => serializer.Serialize(this.datas[type])).ToArray();
-                                    yield return storage.WriteStringsAsync(keys1, rawDatas);
+                                    var rawDatas = new List<string>();
+                                    foreach (var type in group1)
+                                    {
+                                        yield return serializer.SerializeAsync(this.datas[type], result => rawDatas.Add(result));
+                                    }
+                                    yield return storage.WriteStringsAsync(keys1, rawDatas.ToArray());
                                     break;
                                 }
                                 case IBinarySerializer serializer:
                                 {
-                                    var rawDatas = group1.Select(type => serializer.Serialize(this.datas[type])).ToArray();
-                                    yield return storage.WriteBytesAsync(keys1, rawDatas);
+                                    var rawDatas = new List<byte[]>();
+                                    foreach (var type in group1)
+                                    {
+                                        yield return serializer.SerializeAsync(this.datas[type], result => rawDatas.Add(result));
+                                    }
+                                    yield return storage.WriteBytesAsync(keys1, rawDatas.ToArray());
                                     break;
                                 }
                             }
@@ -408,7 +434,7 @@ namespace UniT.Data
             // TODO: make it run concurrently
             foreach (var group in types.GroupBy(type => this.storages.GetOrDefault(type) as IWritableDataStorage ?? throw new InvalidOperationException($"{type.Name} not found or not writable")))
             {
-                var keys    = group.Select(type => type.GetKey()).ToArray();
+                var keys = group.Select(type => type.GetKey()).ToArray();
                 var storage = group.Key;
                 yield return storage.FlushAsync();
                 this.logger.Debug($"Flushed {keys.ToArrayString()}");
@@ -419,19 +445,5 @@ namespace UniT.Data
         #endif
 
         #endregion
-
-        private void Populate(IStringSerializer serializer, IEnumerable<Type> types, IEnumerable<string> rawDatas)
-        {
-            IterTools.StrictZip(types, rawDatas)
-                .Where((_,      rawData) => !rawData.IsNullOrWhitespace())
-                .ForEach((type, rawData) => serializer.Populate(this.datas[type], rawData));
-        }
-
-        private void Populate(IBinarySerializer serializer, IEnumerable<Type> types, IEnumerable<byte[]> rawDatas)
-        {
-            IterTools.StrictZip(types, rawDatas)
-                .Where((_,      rawData) => rawData is { Length: > 0 })
-                .ForEach((type, rawData) => serializer.Populate(this.datas[type], rawData));
-        }
     }
 }
