@@ -66,7 +66,11 @@ namespace UniT.DI
 
                 #endregion
 
-                dataTypes.ForEach(container.AddInterfacesAndSelf);
+                dataTypes.ForEach(type =>
+                {
+                    if (!typeof(IData).IsAssignableFrom(type)) throw new ArgumentException($"{type} does not implement IData");
+                    container.AddInterfacesAndSelf(type);
+                });
                 container.AddInterfaces<DataManager>();
             }
 

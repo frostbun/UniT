@@ -13,12 +13,13 @@ namespace UniT.UI
     using UnityEngine;
     using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;
+    using Object = UnityEngine.Object;
     #if UNIT_UNITASK
     using System.Threading;
     using Cysharp.Threading.Tasks;
     #endif
 
-    public sealed class UIManager : MonoBehaviour, IUIManager, IHasLogger
+    public sealed class UIManager : IUIManager, IHasLogger
     {
         #region Constructor
 
@@ -165,7 +166,7 @@ namespace UniT.UI
 
         private IActivity InstantiateActivity(GameObject prefab)
         {
-            var activity = Instantiate(prefab, this.canvas.HiddenActivities, false).GetComponentOrThrow<IActivity>();
+            var activity = Object.Instantiate(prefab, this.canvas.HiddenActivities, false).GetComponentOrThrow<IActivity>();
             activity.GetComponentsInChildren<IUIElement>().ForEach(this.Initialize);
             return activity;
         }
@@ -238,7 +239,7 @@ namespace UniT.UI
             this.activities.Remove(activity.GetType());
             this.logger.Debug($"{activity.Name} status: {activity.CurrentStatus = IActivity.Status.Disposed}");
             activity.OnDispose();
-            Destroy(activity.GameObject);
+            Object.Destroy(activity.GameObject);
             if (!this.keys.Remove(activity.GetType(), out var key)) return;
             this.assetsManager.Unload(key);
         }

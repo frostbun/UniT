@@ -1,6 +1,5 @@
 ﻿namespace UniT.UI
 {
-    using UniT.Extensions;
     using UnityEngine;
     using UnityEngine.UI;
 
@@ -18,16 +17,22 @@
             this.StackingActivities = this.CreateChild(nameof(this.StackingActivities));
             this.FloatingActivities = this.CreateChild(nameof(this.FloatingActivities));
             this.DockedActivities   = this.CreateChild(nameof(this.DockedActivities));
-            this.DontDestroyOnLoad();
+            this.HiddenActivities.gameObject.SetActive(false);
+            DontDestroyOnLoad(this);
         }
 
         private Transform CreateChild(string name)
         {
-            return new GameObject
+            var child = new GameObject
             {
                 name      = name,
                 transform = { parent = this.transform },
-            }.transform;
+            }.AddComponent<RectTransform>();
+            child.anchorMin     = Vector2.zero;
+            child.anchorMax     = Vector2.one;
+            child.sizeDelta     = Vector2.zero;
+            child.localPosition = Vector3.zero;
+            return child;
         }
     }
 }

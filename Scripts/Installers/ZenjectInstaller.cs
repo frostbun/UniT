@@ -67,7 +67,11 @@ namespace Zenject
 
                 #endregion
 
-                dataTypes.ForEach(type => container.BindInterfacesAndSelfTo(type).AsSingle());
+                dataTypes.ForEach(type =>
+                {
+                    if (!typeof(IData).IsAssignableFrom(type)) throw new ArgumentException($"{type} does not implement IData");
+                    container.BindInterfacesAndSelfTo(type).AsSingle();
+                });
                 container.BindInterfacesTo<DataManager>().AsSingle();
             }
 
