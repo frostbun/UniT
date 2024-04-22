@@ -48,8 +48,7 @@ namespace UniT.DI
             {
                 #region Storages
 
-                container.AddInterfaces<AssetsNonSerializableDataStorage>();
-                container.AddInterfaces<AssetsSerializableDataStorage>();
+                container.AddInterfaces<AssetDataStorage>();
                 container.AddInterfaces<PlayerPrefsDataStorage>();
                 #if UNIT_FBINSTANT
                 container.AddInterfaces<FbInstantDataStorage>();

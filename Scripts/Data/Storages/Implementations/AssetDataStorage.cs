@@ -5,6 +5,7 @@ namespace UniT.Data
     using UniT.ResourcesManager;
     using UnityEngine;
     using UnityEngine.Scripting;
+    using Object = UnityEngine.Object;
     #if UNIT_UNITASK
     using System.Threading;
     using Cysharp.Threading.Tasks;
@@ -14,18 +15,17 @@ namespace UniT.Data
     using System.Collections.Generic;
     #endif
 
-    public sealed class AssetsSerializableDataStorage : SerializableDataStorage, IReadableSerializableDataStorage
+    public sealed class AssetDataStorage : IReadableSerializableDataStorage, IReadableNonSerializableDataStorage
     {
         private readonly IAssetsManager assetsManager;
 
         [Preserve]
-        public AssetsSerializableDataStorage(IAssetsManager assetsManager)
+        public AssetDataStorage(IAssetsManager assetsManager)
         {
             this.assetsManager = assetsManager;
         }
 
-        protected override bool CanStore(Type type) => base.CanStore(type)
-            && typeof(IReadableData).IsAssignableFrom(type)
+        bool IDataStorage.CanStore(Type type) => typeof(IReadableData).IsAssignableFrom(type)
             && !typeof(IWritableData).IsAssignableFrom(type);
 
         string[] IReadableSerializableDataStorage.ReadStrings(string[] keys)
@@ -46,6 +46,11 @@ namespace UniT.Data
                 this.assetsManager.Unload(key);
                 return bytes;
             }).ToArray();
+        }
+
+        IData[] IReadableNonSerializableDataStorage.Read(string[] keys)
+        {
+            return keys.Select(key => (IData)this.assetsManager.Load<Object>(key)).ToArray();
         }
 
         #if UNIT_UNITASK
@@ -80,6 +85,17 @@ namespace UniT.Data
                 cancellationToken
             ).ToArrayAsync();
         }
+
+        UniTask<IData[]> IReadableNonSerializableDataStorage.ReadAsync(string[] keys, IProgress<float> progress, CancellationToken cancellationToken)
+        {
+            return keys.SelectAsync(
+                (key, progress, cancellationToken) =>
+                    this.assetsManager.LoadAsync<Object>(key, progress, cancellationToken)
+                        .ContinueWith(asset => (IData)asset),
+                progress,
+                cancellationToken
+            ).ToArrayAsync();
+        }
         #else
         IEnumerator IReadableSerializableDataStorage.ReadStringsAsync(string[] keys, Action<string[]> callback, IProgress<float> progress)
         {
@@ -105,6 +121,21 @@ namespace UniT.Data
             }
             progress?.Report(1);
             callback(rawDatas.ToArray());
+        }
+
+        IEnumerator IReadableNonSerializableDataStorage.ReadAsync(string[] keys, Action<IData[]> callback, IProgress<float> progress)
+        {
+            // TODO: make it run concurrently
+            var datas = new List<IData>();
+            foreach (var key in keys)
+            {
+                yield return this.assetsManager.LoadAsync<Object>(key, asset =>
+                {
+                    datas.Add((IData)asset);
+                });
+            }
+            progress?.Report(1);
+            callback(datas.ToArray());
         }
         #endif
     }

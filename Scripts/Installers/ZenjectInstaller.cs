@@ -49,8 +49,7 @@ namespace Zenject
             {
                 #region Storages
 
-                container.BindInterfacesTo<AssetsNonSerializableDataStorage>().AsSingle().WhenInjectedInto<IDataManager>();
-                container.BindInterfacesTo<AssetsSerializableDataStorage>().AsSingle().WhenInjectedInto<IDataManager>();
+                container.BindInterfacesTo<AssetDataStorage>().AsSingle().WhenInjectedInto<IDataManager>();
                 container.BindInterfacesTo<PlayerPrefsDataStorage>().AsSingle().WhenInjectedInto<IDataManager>();
                 #if UNIT_FBINSTANT
                 container.BindInterfacesTo<FbInstantDataStorage>().AsSingle().WhenInjectedInto<IDataManager>();

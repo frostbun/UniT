@@ -70,92 +70,75 @@ namespace UniT.Data
         private void Populate(IEnumerable<Type> types)
         {
             types.GroupBy(type => this.storages.GetOrDefault(type) as IReadableDataStorage ?? throw new InvalidOperationException($"{type.Name} not found or not readable"))
-                .ForEach(group =>
-                {
-                    var keys = group.Select(type => type.GetKey()).ToArray();
-                    switch (group.Key)
+                .ForEach(storageGroup => storageGroup.GroupBy(type => this.serializers.GetOrDefault(type))
+                    .ForEach(serializerGroup =>
                     {
-                        case IReadableSerializableDataStorage storage:
+                        var keys = serializerGroup.Select(type => type.GetKey()).ToArray();
+                        switch (storageGroup.Key)
                         {
-                            group.GroupBy(type => this.serializers[type])
-                                .ForEach(group =>
-                                {
-                                    var keys = group.Select(type => type.GetKey()).ToArray();
-                                    switch (group.Key)
-                                    {
-                                        case IStringSerializer serializer:
-                                        {
-                                            var rawDatas = storage.ReadStrings(keys);
-                                            IterTools.StrictZip(group, rawDatas)
-                                                .Where((_,      rawData) => !rawData.IsNullOrWhitespace())
-                                                .ForEach((type, rawData) => serializer.Populate(this.datas[type], rawData));
-                                            break;
-                                        }
-                                        case IBinarySerializer serializer:
-                                        {
-                                            var rawDatas = storage.ReadBytes(keys);
-                                            IterTools.StrictZip(group, rawDatas)
-                                                .Where((_,      rawData) => rawData is { Length: > 0 })
-                                                .ForEach((type, rawData) => serializer.Populate(this.datas[type], rawData));
-                                            break;
-                                        }
-                                    }
-                                });
-                            break;
+                            case IReadableSerializableDataStorage storage when serializerGroup.Key is IStringSerializer serializer:
+                            {
+                                var rawDatas = storage.ReadStrings(keys);
+                                IterTools.StrictZip(serializerGroup, rawDatas)
+                                    .Where((_,      rawData) => !rawData.IsNullOrWhitespace())
+                                    .ForEach((type, rawData) => serializer.Populate(this.datas[type], rawData));
+                                break;
+                            }
+                            case IReadableSerializableDataStorage storage when serializerGroup.Key is IBinarySerializer serializer:
+                            {
+                                var rawDatas = storage.ReadBytes(keys);
+                                IterTools.StrictZip(serializerGroup, rawDatas)
+                                    .Where((_,      rawData) => rawData is { Length: > 0 })
+                                    .ForEach((type, rawData) => serializer.Populate(this.datas[type], rawData));
+                                break;
+                            }
+                            case IReadableNonSerializableDataStorage storage when serializerGroup.Key is null:
+                            {
+                                var datas = storage.Read(keys);
+                                IterTools.StrictZip(serializerGroup, datas)
+                                    .Where(data => data is { })
+                                    .ForEach((type, data) => data.CopyTo(this.datas[type]));
+                                break;
+                            }
+                            default: throw new InvalidOperationException();
                         }
-                        case IReadableNonSerializableDataStorage storage:
-                        {
-                            var datas = storage.Read(keys);
-                            IterTools.StrictZip(group, datas)
-                                .ForEach((type, data) => data.CopyTo(this.datas[type]));
-                            break;
-                        }
-                    }
-                    this.logger.Debug($"Populated {keys.ToArrayString()}");
-                });
+                        this.logger.Debug($"Populated {keys.ToArrayString()}");
+                    })
+                );
         }
 
         private void Save(IEnumerable<Type> types)
         {
             types.GroupBy(type => this.storages.GetOrDefault(type) as IWritableDataStorage ?? throw new InvalidOperationException($"{type.Name} not found or not writable"))
-                .ForEach(group =>
-                {
-                    var keys = group.Select(type => type.GetKey()).ToArray();
-                    switch (group.Key)
+                .ForEach(storageGroup => storageGroup.GroupBy(type => this.serializers.GetOrDefault(type))
+                    .ForEach(serializerGroup =>
                     {
-                        case IWritableSerializableDataStorage storage:
+                        var keys = serializerGroup.Select(type => type.GetKey()).ToArray();
+                        switch (storageGroup.Key)
                         {
-                            group.GroupBy(type => this.serializers[type])
-                                .ForEach(group =>
-                                {
-                                    var keys = group.Select(type => type.GetKey()).ToArray();
-                                    switch (group.Key)
-                                    {
-                                        case IStringSerializer serializer:
-                                        {
-                                            var rawDatas = group.Select(type => serializer.Serialize(this.datas[type])).ToArray();
-                                            storage.WriteStrings(keys, rawDatas);
-                                            break;
-                                        }
-                                        case IBinarySerializer serializer:
-                                        {
-                                            var rawDatas = group.Select(type => serializer.Serialize(this.datas[type])).ToArray();
-                                            storage.WriteBytes(keys, rawDatas);
-                                            break;
-                                        }
-                                    }
-                                });
-                            break;
+                            case IWritableSerializableDataStorage storage when serializerGroup.Key is IStringSerializer serializer:
+                            {
+                                var rawDatas = serializerGroup.Select(type => serializer.Serialize(this.datas[type])).ToArray();
+                                storage.WriteStrings(keys, rawDatas);
+                                break;
+                            }
+                            case IWritableSerializableDataStorage storage when serializerGroup.Key is IBinarySerializer serializer:
+                            {
+                                var rawDatas = serializerGroup.Select(type => serializer.Serialize(this.datas[type])).ToArray();
+                                storage.WriteBytes(keys, rawDatas);
+                                break;
+                            }
+                            case IWritableNonSerializableDataStorage storage when serializerGroup.Key is null:
+                            {
+                                var datas = serializerGroup.Select(type => this.datas[type]).ToArray();
+                                storage.Save(keys, datas);
+                                break;
+                            }
+                            default: throw new InvalidOperationException();
                         }
-                        case IWritableNonSerializableDataStorage storage:
-                        {
-                            var datas = group.Select(type => this.datas[type]).ToArray();
-                            storage.Save(keys, datas);
-                            break;
-                        }
-                    }
-                    this.logger.Debug($"Saved {keys.ToArrayString()}");
-                });
+                        this.logger.Debug($"Saved {keys.ToArrayString()}");
+                    })
+                );
         }
 
         private void Flush(IEnumerable<Type> types)
@@ -190,54 +173,43 @@ namespace UniT.Data
         private UniTask PopulateAsync(IEnumerable<Type> types, IProgress<float> progress, CancellationToken cancellationToken)
         {
             return types.GroupBy(type => this.storages.GetOrDefault(type) as IReadableDataStorage ?? throw new InvalidOperationException($"{type.Name} not found or not readable"))
-                .ForEachAsync(
-                    async (group, progress, cancellationToken) =>
-                    {
-                        var keys = group.Select(type => type.GetKey()).ToArray();
-                        switch (group.Key)
-                        {
-                            case IReadableSerializableDataStorage storage:
+                .ForEachAsync((storageGroup, progress, cancellationToken) => storageGroup.GroupBy(type => this.serializers.GetOrDefault(type))
+                        .ForEachAsync(async (serializerGroup, progress, cancellationToken) =>
                             {
-                                await group.GroupBy(type => this.serializers[type])
-                                    .ForEachAsync(
-                                        async (group, progress, cancellationToken) =>
-                                        {
-                                            var keys = group.Select(type => type.GetKey()).ToArray();
-                                            switch (group.Key)
-                                            {
-                                                case IStringSerializer serializer:
-                                                {
-                                                    var rawDatas = await storage.ReadStringsAsync(keys, progress, cancellationToken);
-                                                    await IterTools.StrictZip(group, rawDatas)
-                                                        .Where((_,           rawData) => !rawData.IsNullOrWhitespace())
-                                                        .ForEachAsync((type, rawData) => serializer.PopulateAsync(this.datas[type], rawData));
-                                                    break;
-                                                }
-                                                case IBinarySerializer serializer:
-                                                {
-                                                    var rawDatas = await storage.ReadBytesAsync(keys, progress, cancellationToken);
-                                                    await IterTools.StrictZip(group, rawDatas)
-                                                        .Where((_,           rawData) => rawData is { Length: > 0 })
-                                                        .ForEachAsync((type, rawData) => serializer.PopulateAsync(this.datas[type], rawData));
-                                                    break;
-                                                }
-                                            }
-                                        },
-                                        progress,
-                                        cancellationToken
-                                    );
-                                break;
-                            }
-                            case IReadableNonSerializableDataStorage storage:
-                            {
-                                var datas = await storage.ReadAsync(keys, progress, cancellationToken);
-                                IterTools.StrictZip(group, datas)
-                                    .ForEach((type, data) => data.CopyTo(this.datas[type]));
-                                break;
-                            }
-                        }
-                        this.logger.Debug($"Populated {keys.ToArrayString()}");
-                    },
+                                var keys = serializerGroup.Select(type => type.GetKey()).ToArray();
+                                switch (storageGroup.Key)
+                                {
+                                    case IReadableSerializableDataStorage storage when serializerGroup.Key is IStringSerializer serializer:
+                                    {
+                                        var rawDatas = await storage.ReadStringsAsync(keys, progress, cancellationToken);
+                                        await IterTools.StrictZip(serializerGroup, rawDatas)
+                                            .Where((_,           rawData) => !rawData.IsNullOrWhitespace())
+                                            .ForEachAsync((type, rawData) => serializer.PopulateAsync(this.datas[type], rawData));
+                                        break;
+                                    }
+                                    case IReadableSerializableDataStorage storage when serializerGroup.Key is IBinarySerializer serializer:
+                                    {
+                                        var rawDatas = await storage.ReadBytesAsync(keys, progress, cancellationToken);
+                                        await IterTools.StrictZip(serializerGroup, rawDatas)
+                                            .Where((_,           rawData) => rawData is { Length: > 0 })
+                                            .ForEachAsync((type, rawData) => serializer.PopulateAsync(this.datas[type], rawData));
+                                        break;
+                                    }
+                                    case IReadableNonSerializableDataStorage storage when serializerGroup.Key is null:
+                                    {
+                                        var datas = await storage.ReadAsync(keys, progress, cancellationToken);
+                                        IterTools.StrictZip(serializerGroup, datas)
+                                            .Where(data => data is { })
+                                            .ForEach((type, data) => data.CopyTo(this.datas[type]));
+                                        break;
+                                    }
+                                    default: throw new InvalidOperationException();
+                                }
+                                this.logger.Debug($"Populated {keys.ToArrayString()}");
+                            },
+                            progress,
+                            cancellationToken
+                        ),
                     progress,
                     cancellationToken
                 );
@@ -246,49 +218,37 @@ namespace UniT.Data
         private UniTask SaveAsync(IEnumerable<Type> types, IProgress<float> progress, CancellationToken cancellationToken)
         {
             return types.GroupBy(type => this.storages.GetOrDefault(type) as IWritableDataStorage ?? throw new InvalidOperationException($"{type.Name} not found or not writable"))
-                .ForEachAsync(
-                    async (group, progress, cancellationToken) =>
-                    {
-                        var keys = group.Select(type => type.GetKey()).ToArray();
-                        switch (group.Key)
-                        {
-                            case IWritableSerializableDataStorage storage:
+                .ForEachAsync((storageGroup, progress, cancellationToken) => storageGroup.GroupBy(type => this.serializers.GetOrDefault(type))
+                        .ForEachAsync(async (serializerGroup, progress, cancellationToken) =>
                             {
-                                await group.GroupBy(type => this.serializers[type])
-                                    .ForEachAsync(
-                                        async (group, progress, cancellationToken) =>
-                                        {
-                                            var keys = group.Select(type => type.GetKey()).ToArray();
-                                            switch (group.Key)
-                                            {
-                                                case IStringSerializer serializer:
-                                                {
-                                                    var rawDatas = await group.Select(type => serializer.SerializeAsync(this.datas[type]));
-                                                    await storage.WriteStringsAsync(keys, rawDatas, progress, cancellationToken);
-                                                    break;
-                                                }
-                                                case IBinarySerializer serializer:
-                                                {
-                                                    var rawDatas = await group.Select(type => serializer.SerializeAsync(this.datas[type]));
-                                                    await storage.WriteBytesAsync(keys, rawDatas, progress, cancellationToken);
-                                                    break;
-                                                }
-                                            }
-                                        },
-                                        progress,
-                                        cancellationToken
-                                    );
-                                break;
-                            }
-                            case IWritableNonSerializableDataStorage storage:
-                            {
-                                var datas = group.Select(type => this.datas[type]).ToArray();
-                                await storage.SaveAsync(keys, datas, progress, cancellationToken);
-                                break;
-                            }
-                        }
-                        this.logger.Debug($"Saved {keys.ToArrayString()}");
-                    },
+                                var keys = serializerGroup.Select(type => type.GetKey()).ToArray();
+                                switch (storageGroup.Key)
+                                {
+                                    case IWritableSerializableDataStorage storage when serializerGroup.Key is IStringSerializer serializer:
+                                    {
+                                        var rawDatas = await serializerGroup.Select(type => serializer.SerializeAsync(this.datas[type]));
+                                        await storage.WriteStringsAsync(keys, rawDatas, progress, cancellationToken);
+                                        break;
+                                    }
+                                    case IWritableSerializableDataStorage storage when serializerGroup.Key is IBinarySerializer serializer:
+                                    {
+                                        var rawDatas = await serializerGroup.Select(type => serializer.SerializeAsync(this.datas[type]));
+                                        await storage.WriteBytesAsync(keys, rawDatas, progress, cancellationToken);
+                                        break;
+                                    }
+                                    case IWritableNonSerializableDataStorage storage when serializerGroup.Key is null:
+                                    {
+                                        var datas = serializerGroup.Select(type => this.datas[type]).ToArray();
+                                        await storage.SaveAsync(keys, datas, progress, cancellationToken);
+                                        break;
+                                    }
+                                    default: throw new InvalidOperationException();
+                                }
+                                this.logger.Debug($"Saved {keys.ToArrayString()}");
+                            },
+                            progress,
+                            cancellationToken
+                        ),
                     progress,
                     cancellationToken
                 );
@@ -297,10 +257,9 @@ namespace UniT.Data
         private UniTask FlushAsync(IEnumerable<Type> types, IProgress<float> progress, CancellationToken cancellationToken)
         {
             return types.GroupBy(type => this.storages.GetOrDefault(type) as IWritableDataStorage ?? throw new InvalidOperationException($"{type.Name} not found or not writable"))
-                .ForEachAsync(
-                    async (group, progress, cancellationToken) =>
+                .ForEachAsync(async (group, progress, cancellationToken) =>
                     {
-                        var keys    = group.Select(type => type.GetKey()).ToArray();
+                        var keys = group.Select(type => type.GetKey()).ToArray();
                         var storage = group.Key;
                         await storage.FlushAsync(progress, cancellationToken);
                         this.logger.Debug($"Flushed {keys.ToArrayString()}");
@@ -325,53 +284,49 @@ namespace UniT.Data
         private IEnumerator PopulateAsync(IEnumerable<Type> types, Action callback, IProgress<float> progress)
         {
             // TODO: make it run concurrently
-            foreach (var group in types.GroupBy(type => this.storages.GetOrDefault(type) as IReadableDataStorage ?? throw new InvalidOperationException($"{type.Name} not found or not readable")))
+            foreach (var storageGroup in types.GroupBy(type => this.storages.GetOrDefault(type) as IReadableDataStorage ?? throw new InvalidOperationException($"{type.Name} not found or not readable")))
             {
-                var keys = group.Select(type => type.GetKey()).ToArray();
-                switch (group.Key)
+                foreach (var serializerGroup in storageGroup.GroupBy(type => this.serializers.GetOrDefault(type)))
                 {
-                    case IReadableSerializableDataStorage storage:
+                    var keys = serializerGroup.Select(type => type.GetKey()).ToArray();
+                    switch (storageGroup.Key)
                     {
-                        foreach (var group1 in group.GroupBy(type => this.serializers[type]))
+                        case IReadableSerializableDataStorage storage when serializerGroup.Key is IStringSerializer serializer:
                         {
-                            var keys1 = group1.Select(type => type.GetKey()).ToArray();
-                            switch (group1.Key)
+                            var rawDatas = (string[])null;
+                            yield return storage.ReadStringsAsync(keys, result => rawDatas = result);
+                            // TODO: make it run concurrently
+                            foreach (var (type, rawData) in IterTools.StrictZip(serializerGroup, rawDatas).Where((_, rawData) => !rawData.IsNullOrWhitespace()))
                             {
-                                case IStringSerializer serializer:
-                                {
-                                    string[] rawDatas = null;
-                                    yield return storage.ReadStringsAsync(keys1, result => rawDatas = result);
-                                    foreach (var (type, rawData) in IterTools.StrictZip(group1, rawDatas).Where((_, rawData) => !rawData.IsNullOrWhitespace()))
-                                    {
-                                        yield return serializer.PopulateAsync(this.datas[type], rawData);
-                                    }
-                                    break;
-                                }
-                                case IBinarySerializer serializer:
-                                {
-                                    byte[][] rawDatas = null;
-                                    yield return storage.ReadBytesAsync(keys1, result => rawDatas = result);
-                                    foreach (var (type, rawData) in IterTools.StrictZip(group1, rawDatas).Where((_, rawData) => rawData is { Length: > 0 }))
-                                    {
-                                        yield return serializer.PopulateAsync(this.datas[type], rawData);
-                                    }
-                                    break;
-                                }
+                                yield return serializer.PopulateAsync(this.datas[type], rawData);
                             }
+                            break;
                         }
-                        break;
-                    }
-                    case IReadableNonSerializableDataStorage storage:
-                    {
-                        yield return storage.ReadAsync(keys, datas =>
+                        case IReadableSerializableDataStorage storage when serializerGroup.Key is IBinarySerializer serializer:
                         {
-                            IterTools.StrictZip(group, datas)
-                                .ForEach((type, data) => data.CopyTo(this.datas[type]));
-                        });
-                        break;
+                            var rawDatas = (byte[][])null;
+                            yield return storage.ReadBytesAsync(keys, result => rawDatas = result);
+                            // TODO: make it run concurrently
+                            foreach (var (type, rawData) in IterTools.StrictZip(serializerGroup, rawDatas).Where((_, rawData) => rawData is { Length: > 0 }))
+                            {
+                                yield return serializer.PopulateAsync(this.datas[type], rawData);
+                            }
+                            break;
+                        }
+                        case IReadableNonSerializableDataStorage storage when serializerGroup.Key is null:
+                        {
+                            var datas = (IData[])null;
+                            yield return storage.ReadAsync(keys, result => datas = result);
+                            foreach (var (type, data) in IterTools.StrictZip(serializerGroup, datas).Where(data => data is { }))
+                            {
+                                data.CopyTo(this.datas[type]);
+                            }
+                            break;
+                        }
+                        default: throw new InvalidOperationException();
                     }
+                    this.logger.Debug($"Populated {keys.ToArrayString()}");
                 }
-                this.logger.Debug($"Populated {keys.ToArrayString()}");
             }
             progress?.Report(1);
             callback?.Invoke();
@@ -380,50 +335,45 @@ namespace UniT.Data
         private IEnumerator SaveAsync(IEnumerable<Type> types, Action callback, IProgress<float> progress)
         {
             // TODO: make it run concurrently
-            foreach (var group in types.GroupBy(type => this.storages.GetOrDefault(type) as IWritableDataStorage ?? throw new InvalidOperationException($"{type.Name} not found or not writable")))
+            foreach (var storageGroup in types.GroupBy(type => this.storages.GetOrDefault(type) as IWritableDataStorage ?? throw new InvalidOperationException($"{type.Name} not found or not writable")))
             {
-                var keys = group.Select(type => type.GetKey()).ToArray();
-                switch (group.Key)
+                foreach (var serializerGroup in storageGroup.GroupBy(type => this.serializers.GetOrDefault(type)))
                 {
-                    case IWritableSerializableDataStorage storage:
+                    var keys = serializerGroup.Select(type => type.GetKey()).ToArray();
+                    switch (storageGroup.Key)
                     {
-                        foreach (var group1 in group.GroupBy(type => this.serializers[type]))
+                        case IWritableSerializableDataStorage storage when serializerGroup.Key is IStringSerializer serializer:
                         {
-                            var keys1 = group1.Select(type => type.GetKey()).ToArray();
-                            switch (group1.Key)
+                            var rawDatas = new List<string>();
+                            // TODO: make it run concurrently
+                            foreach (var type in serializerGroup)
                             {
-                                case IStringSerializer serializer:
-                                {
-                                    var rawDatas = new List<string>();
-                                    foreach (var type in group1)
-                                    {
-                                        yield return serializer.SerializeAsync(this.datas[type], result => rawDatas.Add(result));
-                                    }
-                                    yield return storage.WriteStringsAsync(keys1, rawDatas.ToArray());
-                                    break;
-                                }
-                                case IBinarySerializer serializer:
-                                {
-                                    var rawDatas = new List<byte[]>();
-                                    foreach (var type in group1)
-                                    {
-                                        yield return serializer.SerializeAsync(this.datas[type], result => rawDatas.Add(result));
-                                    }
-                                    yield return storage.WriteBytesAsync(keys1, rawDatas.ToArray());
-                                    break;
-                                }
+                                yield return serializer.SerializeAsync(this.datas[type], result => rawDatas.Add(result));
                             }
+                            yield return storage.WriteStringsAsync(keys, rawDatas.ToArray());
+                            break;
                         }
-                        break;
+                        case IWritableSerializableDataStorage storage when serializerGroup.Key is IBinarySerializer serializer:
+                        {
+                            var rawDatas = new List<byte[]>();
+                            // TODO: make it run concurrently
+                            foreach (var type in serializerGroup)
+                            {
+                                yield return serializer.SerializeAsync(this.datas[type], result => rawDatas.Add(result));
+                            }
+                            yield return storage.WriteBytesAsync(keys, rawDatas.ToArray());
+                            break;
+                        }
+                        case IWritableNonSerializableDataStorage storage when serializerGroup.Key is null:
+                        {
+                            var datas = serializerGroup.Select(type => this.datas[type]).ToArray();
+                            yield return storage.SaveAsync(keys, datas);
+                            break;
+                        }
+                        default: throw new InvalidOperationException();
                     }
-                    case IWritableNonSerializableDataStorage storage:
-                    {
-                        var datas = group.Select(type => this.datas[type]).ToArray();
-                        yield return storage.SaveAsync(keys, datas);
-                        break;
-                    }
+                    this.logger.Debug($"Saved {keys.ToArrayString()}");
                 }
-                this.logger.Debug($"Saved {keys.ToArrayString()}");
             }
             progress?.Report(1);
             callback?.Invoke();
@@ -434,7 +384,7 @@ namespace UniT.Data
             // TODO: make it run concurrently
             foreach (var group in types.GroupBy(type => this.storages.GetOrDefault(type) as IWritableDataStorage ?? throw new InvalidOperationException($"{type.Name} not found or not writable")))
             {
-                var keys = group.Select(type => type.GetKey()).ToArray();
+                var keys    = group.Select(type => type.GetKey()).ToArray();
                 var storage = group.Key;
                 yield return storage.FlushAsync();
                 this.logger.Debug($"Flushed {keys.ToArrayString()}");
