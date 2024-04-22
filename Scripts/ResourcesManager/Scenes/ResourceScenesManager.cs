@@ -18,7 +18,7 @@
         private readonly ILogger logger;
 
         [Preserve]
-        public ResourceScenesManager(ILogger.IFactory loggerFactory)
+        public ResourceScenesManager(ILoggerFactory loggerFactory)
         {
             this.logger = loggerFactory.Create(this);
             this.logger.Debug("Constructed");

@@ -20,7 +20,7 @@ namespace UniT.Advertisements
         private readonly ILogger                       logger;
 
         [Preserve]
-        public FbInstantAdsManager(IFbInstantAdvertisementConfig config, ILogger.IFactory loggerFactory)
+        public FbInstantAdsManager(IFbInstantAdvertisementConfig config, ILoggerFactory loggerFactory)
         {
             this.config = config;
             this.logger = loggerFactory.Create(this);

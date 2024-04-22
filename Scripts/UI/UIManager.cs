@@ -32,7 +32,7 @@ namespace UniT.UI
         private readonly Dictionary<Type, string>    keys          = new Dictionary<Type, string>();
 
         [Preserve]
-        public UIManager(RootUICanvas canvas, IInstantiator instantiator, IAssetsManager assetsManager, ILogger.IFactory loggerFactory)
+        public UIManager(RootUICanvas canvas, IInstantiator instantiator, IAssetsManager assetsManager, ILoggerFactory loggerFactory)
         {
             this.canvas        = canvas;
             this.instantiator  = instantiator;

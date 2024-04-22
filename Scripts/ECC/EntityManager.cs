@@ -36,7 +36,7 @@ namespace UniT.ECC
         private readonly Dictionary<Type, HashSet<IComponent>> typeToComponents = new Dictionary<Type, HashSet<IComponent>>();
 
         [Preserve]
-        public EntityManager(IInstantiator instantiator, IAssetsManager assetsManager, ILogger.IFactory loggerFactory)
+        public EntityManager(IInstantiator instantiator, IAssetsManager assetsManager, ILoggerFactory loggerFactory)
         {
             this.instantiator  = instantiator;
             this.assetsManager = assetsManager;

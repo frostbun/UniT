@@ -2,6 +2,7 @@
 namespace UniT.DI
 {
     using System;
+    using System.Collections.Generic;
     using UniT.Advertisements;
     using UniT.Audio;
     using UniT.Data;
@@ -16,10 +17,17 @@ namespace UniT.DI
 
     public static class DIInstaller
     {
-        public static void AddUniT(this DependencyContainer container, RootUICanvas rootUICanvas = null, params Type[] dataTypes)
+        public static void AddUniT(this DependencyContainer container, IEnumerable<Type> dataTypes = null, RootUICanvas rootUICanvas = null, LogLevel logLevel = LogLevel.Info)
         {
-            container.AddInterfaces<LoggerFactory>();
             container.AddInterfaces<DIInstantiator>();
+
+            #region Logging
+
+            var loggerFactory = (ILoggerFactory)new LoggerFactory(() => new LogConfig { Level = logLevel });
+            container.AddInterfaces(loggerFactory);
+            container.AddInterfaces(loggerFactory.Create("Global"));
+
+            #endregion
 
             #region ResourcesManager
 
@@ -36,28 +44,31 @@ namespace UniT.DI
 
             #region Data
 
-            #region Storages
+            if (dataTypes is { })
+            {
+                #region Storages
 
-            container.AddInterfaces<AssetsNonSerializableDataStorage>();
-            container.AddInterfaces<AssetsSerializableDataStorage>();
-            container.AddInterfaces<PlayerPrefsDataStorage>();
-            #if UNIT_FBINSTANT
-            container.AddInterfaces<FbInstantDataStorage>();
-            #endif
+                container.AddInterfaces<AssetsNonSerializableDataStorage>();
+                container.AddInterfaces<AssetsSerializableDataStorage>();
+                container.AddInterfaces<PlayerPrefsDataStorage>();
+                #if UNIT_FBINSTANT
+                container.AddInterfaces<FbInstantDataStorage>();
+                #endif
 
-            #endregion
+                #endregion
 
-            #region Serializers
+                #region Serializers
 
-            #if UNIT_NEWTONSOFT_JSON
-            container.AddInterfaces<JsonSerializer>();
-            #endif
-            container.AddInterfaces<CsvSerializer>();
+                container.AddInterfaces<CsvSerializer>();
+                #if UNIT_NEWTONSOFT_JSON
+                container.AddInterfaces<JsonSerializer>();
+                #endif
 
-            #endregion
+                #endregion
 
-            dataTypes.ForEach(container.AddInterfacesAndSelf);
-            container.AddInterfaces<DataManager>();
+                dataTypes.ForEach(container.AddInterfacesAndSelf);
+                container.AddInterfaces<DataManager>();
+            }
 
             #endregion
 

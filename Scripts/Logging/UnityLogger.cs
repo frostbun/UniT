@@ -6,7 +6,7 @@ namespace UniT.Logging
     public sealed class UnityLogger : Logger
     {
         [Preserve]
-        public UnityLogger(string name, LogConfig config = null) : base(name, config)
+        public UnityLogger(string name, LogConfig config) : base(name, config)
         {
         }
 

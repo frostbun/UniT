@@ -1,9 +1,9 @@
 ﻿namespace UniT.ResourcesManager
 {
     using System;
+    using UniT.Logging;
     using UnityEngine;
     using UnityEngine.Scripting;
-    using ILogger = UniT.Logging.ILogger;
     using Object = UnityEngine.Object;
     #if UNIT_UNITASK
     using System.Threading;
@@ -15,7 +15,7 @@
     public sealed class ResourceAssetsManager : AssetsManager
     {
         [Preserve]
-        public ResourceAssetsManager(ILogger.IFactory loggerFactory) : base(loggerFactory)
+        public ResourceAssetsManager(ILoggerFactory loggerFactory) : base(loggerFactory)
         {
         }
 

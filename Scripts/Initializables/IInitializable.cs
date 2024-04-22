@@ -1,11 +1,11 @@
 namespace UniT.Initializables
 {
-    public interface IInitializable
+    public interface IEarlyInitializable
     {
         public void Initialize();
     }
 
-    public interface IEarlyInitializable
+    public interface IInitializable
     {
         public void Initialize();
     }

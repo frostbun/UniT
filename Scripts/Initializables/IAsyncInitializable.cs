@@ -3,12 +3,12 @@ namespace UniT.Initializables
 {
     using Cysharp.Threading.Tasks;
 
-    public interface IAsyncInitializable
+    public interface IAsyncEarlyInitializable
     {
         public UniTask InitializeAsync();
     }
 
-    public interface IAsyncEarlyInitializable
+    public interface IAsyncInitializable
     {
         public UniTask InitializeAsync();
     }

@@ -27,7 +27,7 @@ namespace UniT.Pooling
         private readonly Dictionary<GameObject, ObjectPool> instanceToPool = new Dictionary<GameObject, ObjectPool>();
 
         [Preserve]
-        public ObjectPoolManager(IAssetsManager assetsManager, ILogger.IFactory loggerFactory)
+        public ObjectPoolManager(IAssetsManager assetsManager, ILoggerFactory loggerFactory)
         {
             this.assetsManager = assetsManager;
             this.logger        = loggerFactory.Create(this);

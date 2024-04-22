@@ -2,6 +2,7 @@
 namespace Zenject
 {
     using System;
+    using System.Collections.Generic;
     using UniT.Advertisements;
     using UniT.Audio;
     using UniT.Data;
@@ -16,10 +17,18 @@ namespace Zenject
 
     public static class ZenjectInstaller
     {
-        public static void BindUniT(this DiContainer container, RootUICanvas rootUICanvas = null, params Type[] dataTypes)
+        public static void BindUniT(this DiContainer container, IEnumerable<Type> dataTypes = null, RootUICanvas rootUICanvas = null, LogLevel logLevel = LogLevel.Info)
         {
-            container.BindInterfacesTo<LoggerFactory>().AsSingle().WhenInjectedInto<IHasLogger>();
             container.BindInterfacesTo<ZenjectInstantiator>().AsSingle();
+
+            #region Logging
+
+            var loggerFactory = (ILoggerFactory)new LoggerFactory(() => new LogConfig { Level = logLevel });
+            container.BindInterfacesTo(loggerFactory.GetType()).FromInstance(loggerFactory).AsSingle().WhenInjectedInto<IHasLogger>();
+            var logger = loggerFactory.Create("Global");
+            container.BindInterfacesTo(logger.GetType()).FromInstance(logger).AsSingle();
+
+            #endregion
 
             #region ResourcesManager
 
@@ -36,28 +45,31 @@ namespace Zenject
 
             #region Data
 
-            #region Storages
+            if (dataTypes is { })
+            {
+                #region Storages
 
-            container.BindInterfacesTo<AssetsNonSerializableDataStorage>().AsSingle().WhenInjectedInto<IDataManager>();
-            container.BindInterfacesTo<AssetsSerializableDataStorage>().AsSingle().WhenInjectedInto<IDataManager>();
-            container.BindInterfacesTo<PlayerPrefsDataStorage>().AsSingle().WhenInjectedInto<IDataManager>();
-            #if UNIT_FBINSTANT
-            container.BindInterfacesTo<FbInstantDataStorage>().AsSingle().WhenInjectedInto<IDataManager>();
-            #endif
+                container.BindInterfacesTo<AssetsNonSerializableDataStorage>().AsSingle().WhenInjectedInto<IDataManager>();
+                container.BindInterfacesTo<AssetsSerializableDataStorage>().AsSingle().WhenInjectedInto<IDataManager>();
+                container.BindInterfacesTo<PlayerPrefsDataStorage>().AsSingle().WhenInjectedInto<IDataManager>();
+                #if UNIT_FBINSTANT
+                container.BindInterfacesTo<FbInstantDataStorage>().AsSingle().WhenInjectedInto<IDataManager>();
+                #endif
 
-            #endregion
+                #endregion
 
-            #region Serializers
+                #region Serializers
 
-            #if UNIT_NEWTONSOFT_JSON
-            container.BindInterfacesTo<JsonSerializer>().AsSingle().WhenInjectedInto<IDataManager>();
-            #endif
-            container.BindInterfacesTo<CsvSerializer>().AsSingle().WhenInjectedInto<IDataManager>();
+                container.BindInterfacesTo<CsvSerializer>().AsSingle().WhenInjectedInto<IDataManager>();
+                #if UNIT_NEWTONSOFT_JSON
+                container.BindInterfacesTo<JsonSerializer>().AsSingle().WhenInjectedInto<IDataManager>();
+                #endif
 
-            #endregion
+                #endregion
 
-            dataTypes.ForEach(type => container.BindInterfacesAndSelfTo(type).AsSingle());
-            container.BindInterfacesTo<DataManager>().AsSingle();
+                dataTypes.ForEach(type => container.BindInterfacesAndSelfTo(type).AsSingle());
+                container.BindInterfacesTo<DataManager>().AsSingle();
+            }
 
             #endregion
 

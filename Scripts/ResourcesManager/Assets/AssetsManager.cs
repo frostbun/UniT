@@ -21,7 +21,7 @@
 
         private readonly Dictionary<string, Object> cache = new Dictionary<string, Object>();
 
-        protected AssetsManager(ILogger.IFactory loggerFactory)
+        protected AssetsManager(ILoggerFactory loggerFactory)
         {
             this.logger = loggerFactory.Create(this);
             this.logger.Debug("Constructed");

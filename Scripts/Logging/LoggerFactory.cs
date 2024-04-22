@@ -1,18 +1,21 @@
 ﻿namespace UniT.Logging
 {
-    using UniT.Factories;
+    using System;
     using UnityEngine.Scripting;
 
-    public sealed class LoggerFactory : ILogger.IFactory
+    public sealed class LoggerFactory : ILoggerFactory
     {
+        private readonly Func<LogConfig> configFactory;
+
         [Preserve]
-        public LoggerFactory()
+        public LoggerFactory(Func<LogConfig> configFactory)
         {
+            this.configFactory = configFactory;
         }
 
-        ILogger IFactory<IHasLogger, ILogger>.Create(IHasLogger owner)
+        ILogger ILoggerFactory.Create(string name)
         {
-            return new UnityLogger(owner.GetType().Name);
+            return new UnityLogger(name, this.configFactory());
         }
     }
 }

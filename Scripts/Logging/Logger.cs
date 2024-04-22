@@ -8,10 +8,10 @@ namespace UniT.Logging
 
         public LogConfig Config { get; }
 
-        protected Logger(string name, LogConfig config = null)
+        protected Logger(string name, LogConfig config)
         {
             this.Name   = name;
-            this.Config = config ?? new LogConfig();
+            this.Config = config;
         }
 
         void ILogger.Debug(string message)

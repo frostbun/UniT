@@ -20,7 +20,7 @@ namespace UniT.ResourcesManager
         private readonly ILogger logger;
 
         [Preserve]
-        public AddressableScenesManager(ILogger.IFactory loggerFactory)
+        public AddressableScenesManager(ILoggerFactory loggerFactory)
         {
             this.logger = loggerFactory.Create(this);
             this.logger.Debug("Constructed");

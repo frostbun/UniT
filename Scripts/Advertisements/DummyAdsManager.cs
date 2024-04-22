@@ -12,7 +12,7 @@ namespace UniT.Advertisements
         private readonly ILogger logger;
 
         [Preserve]
-        public DummyAdsManager(ILogger.IFactory loggerFactory)
+        public DummyAdsManager(ILoggerFactory loggerFactory)
         {
             this.logger = loggerFactory.Create(this);
             this.logger.Debug("Constructed");

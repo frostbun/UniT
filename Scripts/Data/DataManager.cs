@@ -28,7 +28,7 @@ namespace UniT.Data
             IEnumerable<IData>        datas,
             IEnumerable<IDataStorage> storages,
             IEnumerable<ISerializer>  serializers,
-            ILogger.IFactory          loggerFactory
+            ILoggerFactory            loggerFactory
         )
         {
             datas      = datas as ICollection<IData> ?? datas.ToArray();

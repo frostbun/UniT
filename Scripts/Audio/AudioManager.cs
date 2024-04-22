@@ -29,7 +29,7 @@ namespace UniT.Audio
         private readonly Dictionary<string, AudioSource> loadedSoundSources = new Dictionary<string, AudioSource>();
 
         [Preserve]
-        public AudioManager(IAssetsManager assetsManager, ILogger.IFactory loggerFactory)
+        public AudioManager(IAssetsManager assetsManager, ILoggerFactory loggerFactory)
         {
             this.assetsManager = assetsManager;
             this.logger        = loggerFactory.Create(this);

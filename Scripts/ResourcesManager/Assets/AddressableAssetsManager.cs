@@ -2,9 +2,9 @@
 namespace UniT.ResourcesManager
 {
     using System;
+    using UniT.Logging;
     using UnityEngine.AddressableAssets;
     using UnityEngine.Scripting;
-    using ILogger = UniT.Logging.ILogger;
     using Object = UnityEngine.Object;
     #if UNIT_UNITASK
     using System.Threading;
@@ -16,7 +16,7 @@ namespace UniT.ResourcesManager
     public sealed class AddressableAssetsManager : AssetsManager
     {
         [Preserve]
-        public AddressableAssetsManager(ILogger.IFactory loggerFactory) : base(loggerFactory)
+        public AddressableAssetsManager(ILoggerFactory loggerFactory) : base(loggerFactory)
         {
         }
 
