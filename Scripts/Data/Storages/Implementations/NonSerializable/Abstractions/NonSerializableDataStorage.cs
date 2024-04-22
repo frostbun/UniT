@@ -4,6 +4,6 @@
 
     public abstract class NonSerializableDataStorage : DataStorage
     {
-        protected override bool CanStore(Type type) => typeof(INonSerializableData).IsAssignableFrom(type);
+        protected override bool CanStore(Type type) => !typeof(ISerializableData).IsAssignableFrom(type);
     }
 }
