@@ -15,7 +15,7 @@ namespace UniT.Audio
     using System.Collections;
     #endif
 
-    public sealed class AudioManager : IAudioManager, IHasLogger
+    public sealed class AudioManager : IAudioManager
     {
         #region Constructor
 
@@ -29,10 +29,10 @@ namespace UniT.Audio
         private readonly Dictionary<string, AudioSource> loadedSoundSources = new Dictionary<string, AudioSource>();
 
         [Preserve]
-        public AudioManager(IAssetsManager assetsManager, ILoggerFactory loggerFactory)
+        public AudioManager(IAssetsManager assetsManager, ILoggerManager loggerManager)
         {
             this.assetsManager = assetsManager;
-            this.logger        = loggerFactory.Create(this);
+            this.logger        = loggerManager.GetLogger(this);
 
             this.audioSourcesContainer = new GameObject(nameof(AudioManager)).DontDestroyOnLoad();
             this.musicSource           = this.audioSourcesContainer.AddComponent<AudioSource>();
@@ -42,8 +42,6 @@ namespace UniT.Audio
         }
 
         #endregion
-
-        LogConfig IHasLogger.LogConfig => this.logger.Config;
 
         #region Configs
 
@@ -293,7 +291,7 @@ namespace UniT.Audio
                         {
                             this.musicSource.clip = audioClip;
                             if (this.currentMusic != null) this.assetsManager.Unload(this.currentMusic);
-                            this.currentMusic = name;
+                            this.currentMusic   = name;
                             this.isMusicLoading = false;
                         });
                 });
@@ -327,7 +325,7 @@ namespace UniT.Audio
                 {
                     this.musicSource.clip = audioClip;
                     if (this.currentMusic != null) this.assetsManager.Unload(this.currentMusic);
-                    this.currentMusic   = name;
+                    this.currentMusic = name;
                     this.isMusicLoading = false;
                     callback?.Invoke();
                 },

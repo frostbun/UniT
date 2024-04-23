@@ -21,7 +21,7 @@ namespace UniT.ECC
     using System.Collections;
     #endif
 
-    public sealed class EntityManager : IEntityManager, IHasLogger, IDisposable
+    public sealed class EntityManager : IEntityManager, IDisposable
     {
         #region Constructor
 
@@ -36,17 +36,15 @@ namespace UniT.ECC
         private readonly Dictionary<Type, HashSet<IComponent>> typeToComponents = new Dictionary<Type, HashSet<IComponent>>();
 
         [Preserve]
-        public EntityManager(IInstantiator instantiator, IAssetsManager assetsManager, ILoggerFactory loggerFactory)
+        public EntityManager(IInstantiator instantiator, IAssetsManager assetsManager, ILoggerManager loggerManager)
         {
             this.instantiator  = instantiator;
             this.assetsManager = assetsManager;
-            this.logger        = loggerFactory.Create(this);
+            this.logger        = loggerManager.GetLogger(this);
             this.logger.Debug("Constructed");
         }
 
         #endregion
-
-        LogConfig IHasLogger.LogConfig => this.logger.Config;
 
         #region Pooling
 

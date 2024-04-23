@@ -12,7 +12,7 @@ namespace UniT.Advertisements
     using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;
 
-    public sealed class FbInstantAdsManager : IAdsManager, IHasLogger
+    public sealed class FbInstantAdsManager : IAdsManager
     {
         #region Constructor
 
@@ -20,10 +20,10 @@ namespace UniT.Advertisements
         private readonly ILogger                       logger;
 
         [Preserve]
-        public FbInstantAdsManager(IFbInstantAdvertisementConfig config, ILoggerFactory loggerFactory)
+        public FbInstantAdsManager(IFbInstantAdvertisementConfig config, ILoggerManager loggerManager)
         {
             this.config = config;
-            this.logger = loggerFactory.Create(this);
+            this.logger = loggerManager.Create(this);
             this.logger.Debug("Constructed");
         }
 
@@ -37,8 +37,6 @@ namespace UniT.Advertisements
         #endregion
 
         #region Public
-
-        LogConfig IHasLogger.LogConfig => this.logger.Config;
 
         void IAdsManager.ShowBannerAd() => this.InvokeUntilSuccess(this.config.BannerAdIds, FbInstant.Advertisements.ShowBannerAd);
 

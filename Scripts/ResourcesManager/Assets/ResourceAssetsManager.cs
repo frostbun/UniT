@@ -15,7 +15,7 @@
     public sealed class ResourceAssetsManager : AssetsManager
     {
         [Preserve]
-        public ResourceAssetsManager(ILoggerFactory loggerFactory) : base(loggerFactory)
+        public ResourceAssetsManager(ILoggerManager loggerManager) : base(loggerManager)
         {
         }
 

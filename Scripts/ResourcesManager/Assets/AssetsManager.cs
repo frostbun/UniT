@@ -13,7 +13,7 @@
     using System.Collections;
     #endif
 
-    public abstract class AssetsManager : IAssetsManager, IHasLogger, IDisposable
+    public abstract class AssetsManager : IAssetsManager, IDisposable
     {
         #region Constructor
 
@@ -21,15 +21,13 @@
 
         private readonly Dictionary<string, Object> cache = new Dictionary<string, Object>();
 
-        protected AssetsManager(ILoggerFactory loggerFactory)
+        protected AssetsManager(ILoggerManager loggerManager)
         {
-            this.logger = loggerFactory.Create(this);
+            this.logger = loggerManager.GetLogger(this);
             this.logger.Debug("Constructed");
         }
 
         #endregion
-
-        LogConfig IHasLogger.LogConfig => this.logger.Config;
 
         #region Sync
 

@@ -15,7 +15,7 @@ namespace UniT.ResourcesManager
     using System.Collections;
     #endif
 
-    public sealed class ExternalAssetsManager : IExternalAssetsManager, IHasLogger, IDisposable
+    public sealed class ExternalAssetsManager : IExternalAssetsManager, IDisposable
     {
         #region Constructor
 
@@ -24,17 +24,15 @@ namespace UniT.ResourcesManager
         private readonly Dictionary<string, Texture2D> cache = new Dictionary<string, Texture2D>();
 
         [Preserve]
-        public ExternalAssetsManager(ILoggerFactory loggerFactory)
+        public ExternalAssetsManager(ILoggerManager loggerManager)
         {
-            this.logger = loggerFactory.Create(this);
+            this.logger = loggerManager.GetLogger(this);
             this.logger.Debug("Constructed");
         }
 
         #endregion
 
         #region Public
-
-        LogConfig IHasLogger.LogConfig => this.logger.Config;
 
         #if UNIT_UNITASK
         UniTask<Texture2D> IExternalAssetsManager.DownloadTexture(string url, IProgress<float> progress, CancellationToken cancellationToken)

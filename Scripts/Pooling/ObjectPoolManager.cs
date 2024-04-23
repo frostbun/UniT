@@ -14,7 +14,7 @@ namespace UniT.Pooling
     using Cysharp.Threading.Tasks;
     #endif
 
-    public sealed class ObjectPoolManager : IObjectPoolManager, IHasLogger
+    public sealed class ObjectPoolManager : IObjectPoolManager
     {
         #region Constructor
 
@@ -27,18 +27,16 @@ namespace UniT.Pooling
         private readonly Dictionary<GameObject, ObjectPool> instanceToPool = new Dictionary<GameObject, ObjectPool>();
 
         [Preserve]
-        public ObjectPoolManager(IAssetsManager assetsManager, ILoggerFactory loggerFactory)
+        public ObjectPoolManager(IAssetsManager assetsManager, ILoggerManager loggerManager)
         {
             this.assetsManager = assetsManager;
-            this.logger        = loggerFactory.Create(this);
+            this.logger        = loggerManager.GetLogger(this);
             this.logger.Debug("Constructed");
         }
 
         #endregion
 
         #region Public
-
-        LogConfig IHasLogger.LogConfig => this.logger.Config;
 
         void IObjectPoolManager.Load(GameObject prefab, int count)
         {

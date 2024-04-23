@@ -19,7 +19,7 @@ namespace UniT.UI
     using Cysharp.Threading.Tasks;
     #endif
 
-    public sealed class UIManager : IUIManager, IHasLogger
+    public sealed class UIManager : IUIManager
     {
         #region Constructor
 
@@ -33,18 +33,16 @@ namespace UniT.UI
         private readonly Dictionary<Type, string>    keys          = new Dictionary<Type, string>();
 
         [Preserve]
-        public UIManager(RootUICanvas canvas, IInstantiator instantiator, IAssetsManager assetsManager, ILoggerFactory loggerFactory)
+        public UIManager(RootUICanvas canvas, IInstantiator instantiator, IAssetsManager assetsManager, ILoggerManager loggerManager)
         {
             this.canvas        = canvas;
             this.instantiator  = instantiator;
             this.assetsManager = assetsManager;
-            this.logger        = loggerFactory.Create(this);
+            this.logger        = loggerManager.GetLogger(this);
             this.logger.Debug("Constructed");
         }
 
         #endregion
-
-        LogConfig IHasLogger.LogConfig => this.logger.Config;
 
         #region Public
 

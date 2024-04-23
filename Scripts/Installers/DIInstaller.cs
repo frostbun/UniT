@@ -23,9 +23,9 @@ namespace UniT.DI
 
             #region Logging
 
-            var loggerFactory = (ILoggerFactory)new LoggerFactory(() => new LogConfig { Level = logLevel });
+            var loggerFactory = (ILoggerManager)new UnityLoggerManager(logLevel);
             container.AddInterfaces(loggerFactory);
-            container.AddInterfaces(loggerFactory.Create("Global"));
+            container.AddInterfaces(loggerFactory.GetDefaultLogger());
 
             #endregion
 

@@ -5,24 +5,22 @@ namespace UniT.Advertisements
     using UniT.Logging;
     using UnityEngine.Scripting;
 
-    public sealed class DummyAdsManager : IAdsManager, IHasLogger
+    public sealed class DummyAdsManager : IAdsManager
     {
         #region Constructor
 
         private readonly ILogger logger;
 
         [Preserve]
-        public DummyAdsManager(ILoggerFactory loggerFactory)
+        public DummyAdsManager(ILoggerManager loggerManager)
         {
-            this.logger = loggerFactory.Create(this);
+            this.logger = loggerManager.GetLogger(this);
             this.logger.Debug("Constructed");
         }
 
         #endregion
 
         #region Public
-
-        LogConfig IHasLogger.LogConfig => this.logger.Config;
 
         void IInitializable.Initialize()
         {

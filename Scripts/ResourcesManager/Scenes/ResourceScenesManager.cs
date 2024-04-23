@@ -11,22 +11,20 @@
     using System.Collections;
     #endif
 
-    public sealed class ResourceScenesManager : IScenesManager, IHasLogger
+    public sealed class ResourceScenesManager : IScenesManager
     {
         #region Constructor
 
         private readonly ILogger logger;
 
         [Preserve]
-        public ResourceScenesManager(ILoggerFactory loggerFactory)
+        public ResourceScenesManager(ILoggerManager loggerManager)
         {
-            this.logger = loggerFactory.Create(this);
+            this.logger = loggerManager.GetLogger(this);
             this.logger.Debug("Constructed");
         }
 
         #endregion
-
-        LogConfig IHasLogger.LogConfig => this.logger.Config;
 
         void IScenesManager.LoadScene(string sceneName, LoadSceneMode loadMode)
         {

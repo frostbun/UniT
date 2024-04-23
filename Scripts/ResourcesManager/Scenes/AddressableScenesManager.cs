@@ -13,22 +13,20 @@ namespace UniT.ResourcesManager
     using System.Collections;
     #endif
 
-    public sealed class AddressableScenesManager : IScenesManager, IHasLogger
+    public sealed class AddressableScenesManager : IScenesManager
     {
         #region Constructor
 
         private readonly ILogger logger;
 
         [Preserve]
-        public AddressableScenesManager(ILoggerFactory loggerFactory)
+        public AddressableScenesManager(ILoggerManager loggerManager)
         {
-            this.logger = loggerFactory.Create(this);
+            this.logger = loggerManager.GetLogger(this);
             this.logger.Debug("Constructed");
         }
 
         #endregion
-
-        LogConfig IHasLogger.LogConfig => this.logger.Config;
 
         void IScenesManager.LoadScene(string sceneName, LoadSceneMode loadMode)
         {

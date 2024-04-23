@@ -14,7 +14,7 @@ namespace UniT.Data
     using System.Collections;
     #endif
 
-    public sealed class DataManager : IDataManager, IHasLogger
+    public sealed class DataManager : IDataManager
     {
         #region Constructor
 
@@ -28,7 +28,7 @@ namespace UniT.Data
             IEnumerable<IData>        datas,
             IEnumerable<IDataStorage> storages,
             IEnumerable<ISerializer>  serializers,
-            ILoggerFactory            loggerFactory
+            ILoggerManager            loggerManager
         )
         {
             datas      = datas as ICollection<IData> ?? datas.ToArray();
@@ -42,14 +42,12 @@ namespace UniT.Data
                 data => serializers.LastOrDefault(serializer => serializer.CanSerialize(data.GetType())) ?? throw new InvalidOperationException($"No serializer found for {data.GetType().Name}")
             );
 
-            this.logger = loggerFactory.Create(this);
+            this.logger = loggerManager.GetLogger(this);
             this.datas.Keys.ForEach(type => this.logger.Debug($"Found {type.Name} - {this.storages[type].GetType().Name} - {this.serializers.GetOrDefault(type)?.GetType().Name}"));
             this.logger.Debug("Constructed");
         }
 
         #endregion
-
-        LogConfig IHasLogger.LogConfig => this.logger.Config;
 
         IData IDataManager.Get(Type type) => this.datas.GetOrDefault(type);
 
@@ -259,7 +257,7 @@ namespace UniT.Data
             return types.GroupBy(type => this.storages.GetOrDefault(type) as IWritableDataStorage ?? throw new InvalidOperationException($"{type.Name} not found or not writable"))
                 .ForEachAsync(async (group, progress, cancellationToken) =>
                     {
-                        var keys = group.Select(type => type.GetKey()).ToArray();
+                        var keys    = group.Select(type => type.GetKey()).ToArray();
                         var storage = group.Key;
                         await storage.FlushAsync(progress, cancellationToken);
                         this.logger.Debug($"Flushed {keys.ToArrayString()}");
@@ -384,7 +382,7 @@ namespace UniT.Data
             // TODO: make it run concurrently
             foreach (var group in types.GroupBy(type => this.storages.GetOrDefault(type) as IWritableDataStorage ?? throw new InvalidOperationException($"{type.Name} not found or not writable")))
             {
-                var keys    = group.Select(type => type.GetKey()).ToArray();
+                var keys = group.Select(type => type.GetKey()).ToArray();
                 var storage = group.Key;
                 yield return storage.FlushAsync();
                 this.logger.Debug($"Flushed {keys.ToArrayString()}");
