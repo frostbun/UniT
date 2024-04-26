@@ -10,7 +10,7 @@
         private readonly Dictionary<string, ILogger> loggers = new Dictionary<string, ILogger>();
 
         [Preserve]
-        public UnityLoggerManager(LogLevel level)
+        public UnityLoggerManager(LogLevel level = LogLevel.Info)
         {
             this.level = level;
         }
