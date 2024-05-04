@@ -1,11 +1,14 @@
 namespace UniT.Pooling
 {
     using System;
+    using UniT.Extensions;
     using UniT.Utilities;
     using UnityEngine;
     #if UNIT_UNITASK
     using System.Threading;
     using Cysharp.Threading.Tasks;
+    #else
+    using System.Collections;
     #endif
 
     public interface IObjectPoolManager
@@ -34,12 +37,11 @@ namespace UniT.Pooling
 
         #region Component
 
-        #if UNITY_2021_2_OR_NEWER
         public void Load(Component component, int count = 1) => this.Load(component.gameObject, count);
 
         public T Spawn<T>(T component, Vector3 position = default, Quaternion rotation = default, Transform parent = null) where T : Component => this.Spawn(component.gameObject, position, rotation, parent).GetComponent<T>();
 
-        public T Spawn<T>(string key, Vector3 position = default, Quaternion rotation = default, Transform parent = null) => this.Spawn(key, position, rotation, parent).GetComponent<T>();
+        public T Spawn<T>(string key, Vector3 position = default, Quaternion rotation = default, Transform parent = null) => this.Spawn(key, position, rotation, parent).GetComponentOrThrow<T>();
 
         public void Recycle(Component component) => this.Recycle(component.gameObject);
 
@@ -48,13 +50,11 @@ namespace UniT.Pooling
         public void Cleanup(Component component, int retainCount = 1) => this.Cleanup(component.gameObject, retainCount);
 
         public void Unload(Component component) => this.Unload(component.gameObject);
-        #endif
 
         #endregion
 
         #region Implicit Key
 
-        #if UNITY_2021_2_OR_NEWER
         public void Load<T>(int count = 1) => this.Load(typeof(T).GetKey(), count);
 
         public T Spawn<T>(Vector3 position = default, Quaternion rotation = default, Transform parent = null) => this.Spawn<T>(typeof(T).GetKey(), position, rotation, parent);
@@ -64,7 +64,6 @@ namespace UniT.Pooling
         public void Cleanup<T>(int retainCount = 1) => this.Cleanup(typeof(T).GetKey(), retainCount);
 
         public void Unload<T>() => this.Unload(typeof(T).GetKey());
-        #endif
 
         #endregion
 
@@ -73,10 +72,11 @@ namespace UniT.Pooling
         #if UNIT_UNITASK
         public UniTask LoadAsync(string key, int count = 1, IProgress<float> progress = null, CancellationToken cancellationToken = default);
 
-        #if UNITY_2021_2_OR_NEWER
         public UniTask LoadAsync<T>(int count = 1, IProgress<float> progress = null, CancellationToken cancellationToken = default) => this.LoadAsync(typeof(T).GetKey(), count, progress, cancellationToken);
-        #endif
+        #else
+        public IEnumerator LoadAsync(string key, int count = 1, Action callback = null, IProgress<float> progress = null);
 
+        public IEnumerator LoadAsync<T>(int count = 1, Action callback = null, IProgress<float> progress = null) => this.LoadAsync(typeof(T).GetKey(), count, callback, progress);
         #endif
 
         #endregion

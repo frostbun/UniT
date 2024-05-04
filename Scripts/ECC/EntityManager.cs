@@ -58,7 +58,7 @@ namespace UniT.ECC
         void IEntityManager.Load(string key, int count)
         {
             this.ThrowIfDisposed();
-            this.keyToPool.GetOrAdd(key, () => new EntityPool(this.assetsManager.Load<GameObject>(key).GetComponentOrThrow<IEntity>(), this))
+            this.keyToPool.GetOrAdd(key, () => new EntityPool(this.assetsManager.LoadComponent<IEntity>(key), this))
                 .Load(count);
         }
 
@@ -67,8 +67,8 @@ namespace UniT.ECC
         {
             this.ThrowIfDisposed();
             return this.keyToPool.GetOrAddAsync(key, () =>
-                this.assetsManager.LoadAsync<GameObject>(key, progress, cancellationToken)
-                    .ContinueWith(prefab => new EntityPool(prefab.GetComponentOrThrow<IEntity>(), this))
+                this.assetsManager.LoadComponentAsync<IEntity>(key, progress, cancellationToken)
+                    .ContinueWith(prefab => new EntityPool(prefab, this))
             ).ContinueWith(pool => pool.Load(count));
         }
         #else
@@ -77,7 +77,11 @@ namespace UniT.ECC
             this.ThrowIfDisposed();
             return this.keyToPool.GetOrAddAsync(
                 key,
-                callback => this.assetsManager.LoadAsync<GameObject>(key, prefab => callback(new EntityPool(prefab.GetComponentOrThrow<IEntity>(), this))),
+                callback => this.assetsManager.LoadComponentAsync<IEntity>(
+                    key,
+                    prefab => callback(new EntityPool(prefab, this)),
+                    progress
+                ),
                 pool =>
                 {
                     pool.Load(count);
@@ -173,7 +177,7 @@ namespace UniT.ECC
             return this.keyToPool.GetOrAdd(key, () =>
             {
                 this.logger.Warning($"Auto loading {key} pool. Consider preload it with `Load` or `LoadAsync` for better performance.");
-                return new EntityPool(this.assetsManager.Load<GameObject>(key).GetComponentOrThrow<IEntity>(), this);
+                return new EntityPool(this.assetsManager.LoadComponent<IEntity>(key), this);
             });
         }
 

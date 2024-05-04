@@ -12,9 +12,7 @@ namespace UniT.Data
     {
         public IData Get(Type type);
 
-        #if UNITY_2021_2_OR_NEWER
         public T Get<T>() where T : IData => (T)this.Get(typeof(T));
-        #endif
 
         #region Sync
 
@@ -30,13 +28,11 @@ namespace UniT.Data
 
         public void FlushAll();
 
-        #if UNITY_2021_2_OR_NEWER
         public void Populate<T>() where T : IReadableData => this.Populate(typeof(T));
 
         public void Save<T>() where T : IWritableData => this.Save(typeof(T));
 
         public void Flush<T>() where T : IWritableData => this.Flush(typeof(T));
-        #endif
 
         #endregion
 
@@ -55,7 +51,6 @@ namespace UniT.Data
 
         public UniTask FlushAllAsync(IProgress<float> progress = null, CancellationToken cancellationToken = default);
 
-        #if UNITY_2021_2_OR_NEWER
         public UniTask PopulateAsync(Type dataType, IProgress<float> progress = null, CancellationToken cancellationToken = default) => this.PopulateAsync(new[] { dataType }, progress, cancellationToken);
 
         public UniTask SaveAsync(Type dataType, IProgress<float> progress = null, CancellationToken cancellationToken = default) => this.SaveAsync(new[] { dataType }, progress, cancellationToken);
@@ -67,7 +62,6 @@ namespace UniT.Data
         public UniTask SaveAsync<T>(IProgress<float> progress = null, CancellationToken cancellationToken = default) where T : IWritableData => this.SaveAsync(typeof(T), progress, cancellationToken);
 
         public UniTask FlushAsync<T>(IProgress<float> progress = null, CancellationToken cancellationToken = default) where T : IWritableData => this.FlushAsync(typeof(T), progress, cancellationToken);
-        #endif
         #else
         public IEnumerator PopulateAsync(Type[] dataTypes, Action callback = null, IProgress<float> progress = null);
 
@@ -81,7 +75,6 @@ namespace UniT.Data
 
         public IEnumerator FlushAllAsync(Action callback = null, IProgress<float> progress = null);
 
-        #if UNITY_2021_2_OR_NEWER
         public IEnumerator PopulateAsync(Type dataType, Action callback = null, IProgress<float> progress = null) => this.PopulateAsync(new[] { dataType }, callback, progress);
 
         public IEnumerator SaveAsync(Type dataType, Action callback = null, IProgress<float> progress = null) => this.SaveAsync(new[] { dataType }, callback, progress);
@@ -93,7 +86,6 @@ namespace UniT.Data
         public IEnumerator SaveAsync<T>(Action callback = null, IProgress<float> progress = null) where T : IWritableData => this.SaveAsync(typeof(T), callback, progress);
 
         public IEnumerator FlushAsync<T>(Action callback = null, IProgress<float> progress = null) where T : IWritableData => this.FlushAsync(typeof(T), callback, progress);
-        #endif
         #endif
 
         #endregion

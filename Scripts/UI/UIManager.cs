@@ -10,13 +10,14 @@ namespace UniT.UI
     using UniT.UI.Activity;
     using UniT.UI.Presenter;
     using UniT.UI.View;
-    using UnityEngine;
     using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;
     using Object = UnityEngine.Object;
     #if UNIT_UNITASK
     using System.Threading;
     using Cysharp.Threading.Tasks;
+    #else
+    using System.Collections;
     #endif
 
     public sealed class UIManager : IUIManager
@@ -48,27 +49,9 @@ namespace UniT.UI
 
         void IUIManager.Initialize(IView view, IActivity parent) => this.Initialize(view, parent);
 
-        #region Query
-
-        IActivity IUIManager.StackingActivity => this.activityStack.LastOrDefault(activity => activity.CurrentStatus is IActivity.Status.Stacking);
-
-        IActivity IUIManager.NextActivityInStack => this.activityStack.LastOrDefault(activity => activity.CurrentStatus is not IActivity.Status.Stacking);
-
-        IEnumerable<IActivity> IUIManager.FloatingActivities => this.activities.Values.Where(activity => activity.CurrentStatus is IActivity.Status.Floating);
-
-        IEnumerable<IActivity> IUIManager.DockedActivities => this.activities.Values.Where(activity => activity.CurrentStatus is IActivity.Status.Docked);
-
-        #endregion
-
-        TActivity IUIManager.GetActivity<TActivity>(TActivity activity)
+        TActivity IUIManager.GetActivity<TActivity>(TActivity prefab)
         {
-            var initializedActivity = this.activities.GetOrAdd(activity.GetType(), () =>
-            {
-                activity.GetComponentsInChildren<IView>().ForEach(view => this.Initialize(view, activity));
-                return activity;
-            });
-            if (!ReferenceEquals(initializedActivity, activity)) this.logger.Warning($"Found another instance of {activity.Name} in the manager. Using the cached instance.");
-            return activity;
+            return (TActivity)this.activities.GetOrAdd(typeof(TActivity), () => this.InstantiateActivity(prefab));
         }
 
         TActivity IUIManager.GetActivity<TActivity>(string key)
@@ -77,7 +60,7 @@ namespace UniT.UI
                 typeof(TActivity),
                 () =>
                 {
-                    var prefab = this.assetsManager.Load<GameObject>(key);
+                    var prefab = this.assetsManager.LoadComponent<IActivity>(key);
                     this.keys.Add(typeof(TActivity), key);
                     return this.InstantiateActivity(prefab);
                 }
@@ -89,7 +72,7 @@ namespace UniT.UI
         {
             return this.activities.GetOrAddAsync(
                 typeof(TActivity),
-                () => this.assetsManager.LoadAsync<GameObject>(key, progress, cancellationToken)
+                () => this.assetsManager.LoadComponentAsync<IActivity>(key, progress, cancellationToken)
                     .ContinueWith(prefab =>
                     {
                         this.keys.Add(typeof(TActivity), key);
@@ -97,7 +80,36 @@ namespace UniT.UI
                     })
             ).ContinueWith(activity => (TActivity)activity);
         }
+        #else
+        IEnumerator IUIManager.GetActivityAsync<TActivity>(string key, Action<TActivity> callback, IProgress<float> progress)
+        {
+            return this.activities.GetOrAddAsync(
+                typeof(TActivity),
+                callback => this.assetsManager.LoadComponentAsync<IActivity>(
+                    key,
+                    prefab =>
+                    {
+                        this.keys.Add(typeof(TActivity), key);
+                        callback(this.InstantiateActivity(prefab));
+                    },
+                    progress
+                ),
+                activity => callback((TActivity)activity)
+            );
+        }
         #endif
+
+        #region Query
+
+        IActivity IUIManager.StackingActivity => this.activityStack.LastOrDefault(activity => activity.CurrentStatus is IActivity.Status.Stacking);
+
+        IActivity IUIManager.NextActivityInStack => this.activityStack.LastOrDefault(activity => activity.CurrentStatus is not IActivity.Status.Stacking);
+
+        IEnumerable<IActivity> IUIManager.FloatingActivities => this.activities.Values.Where(activity => activity.CurrentStatus is IActivity.Status.Floating);
+
+        IEnumerable<IActivity> IUIManager.DockedActivities => this.activities.Values.Where(activity => activity.CurrentStatus is IActivity.Status.Docked);
+
+        #endregion
 
         #region UI Flow
 
@@ -162,9 +174,9 @@ namespace UniT.UI
 
         #region Private
 
-        private IActivity InstantiateActivity(GameObject prefab)
+        private IActivity InstantiateActivity(IActivity prefab)
         {
-            var activity = Object.Instantiate(prefab, this.canvas.HiddenActivities, false).GetComponentOrThrow<IActivity>();
+            var activity = Object.Instantiate(prefab.GameObject, this.canvas.HiddenActivities, false).GetComponent<IActivity>();
             activity.GetComponentsInChildren<IView>().ForEach(view => this.Initialize(view, activity));
             return activity;
         }
@@ -218,14 +230,11 @@ namespace UniT.UI
 
         private void Hide(IActivity activity, bool removeFromStack, bool autoStack)
         {
+            if (removeFromStack) this.activityStack.Remove(activity);
             if (activity.CurrentStatus is IActivity.Status.Hidden) return;
             activity.Transform.SetParent(this.canvas.HiddenActivities, false);
             this.logger.Debug($"{activity.Name} status: {activity.CurrentStatus = IActivity.Status.Hidden}");
             activity.OnHide();
-            if (removeFromStack)
-            {
-                this.activityStack.Remove(activity);
-            }
             if (autoStack && this.activityStack.LastOrDefault() is { CurrentStatus: not IActivity.Status.Stacking } nextActivity)
             {
                 this.Show(nextActivity, IActivity.Status.Stacking);

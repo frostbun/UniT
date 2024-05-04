@@ -44,7 +44,6 @@ namespace UniT.ECC
 
         #region Implicit Key
 
-        #if UNITY_2021_2_OR_NEWER
         public void Load<TEntity>(int count = 1) where TEntity : IEntity => this.Load(typeof(TEntity).GetKey(), count);
 
         public TEntity Spawn<TEntity>(Vector3 position = default, Quaternion rotation = default, Transform parent = null) where TEntity : IEntityWithoutParams => this.Spawn<TEntity>(typeof(TEntity).GetKey(), position, rotation, parent);
@@ -56,7 +55,6 @@ namespace UniT.ECC
         public void Cleanup<TEntity>(int retainCount = 1) where TEntity : IEntity => this.Cleanup(typeof(TEntity).GetKey(), retainCount);
 
         public void Unload<TEntity>() where TEntity : IEntity => this.Unload(typeof(TEntity).GetKey());
-        #endif
 
         #endregion
 
@@ -65,15 +63,11 @@ namespace UniT.ECC
         #if UNIT_UNITASK
         public UniTask LoadAsync(string key, int count = 1, IProgress<float> progress = null, CancellationToken cancellationToken = default);
 
-        #if UNITY_2021_2_OR_NEWER
         public UniTask LoadAsync<TEntity>(int count = 1, IProgress<float> progress = null, CancellationToken cancellationToken = default) where TEntity : IEntity => this.LoadAsync(typeof(TEntity).GetKey(), count, progress, cancellationToken);
-        #endif
         #else
         public IEnumerator LoadAsync(string key, int count = 1, Action callback = null, IProgress<float> progress = null);
 
-        #if UNITY_2021_2_OR_NEWER
         public IEnumerator LoadAsync<TEntity>(int count = 1, Action callback = null, IProgress<float> progress = null) where TEntity : IEntity => this.LoadAsync(typeof(TEntity).GetKey(), count, callback, progress);
-        #endif
         #endif
 
         #endregion

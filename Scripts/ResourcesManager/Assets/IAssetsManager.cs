@@ -20,7 +20,6 @@ namespace UniT.ResourcesManager
 
         public void Unload(string key);
 
-        #if UNITY_2021_2_OR_NEWER
         public T Load<T>() where T : Object => this.Load<T>(typeof(T).GetKey());
 
         public void Unload<T>() => this.Unload(typeof(T).GetKey());
@@ -28,7 +27,6 @@ namespace UniT.ResourcesManager
         public T LoadComponent<T>(string key) => this.Load<GameObject>(key).GetComponentOrThrow<T>();
 
         public T LoadComponent<T>() => this.LoadComponent<T>(typeof(T).GetKey());
-        #endif
 
         #endregion
 
@@ -37,7 +35,6 @@ namespace UniT.ResourcesManager
         #if UNIT_UNITASK
         public UniTask<T> LoadAsync<T>(string key, IProgress<float> progress = null, CancellationToken cancellationToken = default) where T : Object;
 
-        #if UNITY_2021_2_OR_NEWER
         public UniTask<T> LoadAsync<T>(IProgress<float> progress = null, CancellationToken cancellationToken = default) where T : Object => this.LoadAsync<T>(typeof(T).GetKey(), progress, cancellationToken);
 
         public UniTask<T> LoadComponentAsync<T>(string key, IProgress<float> progress = null, CancellationToken cancellationToken = default) =>
@@ -45,11 +42,9 @@ namespace UniT.ResourcesManager
                 .ContinueWith(gameObject => gameObject.GetComponentOrThrow<T>());
 
         public UniTask<T> LoadComponentAsync<T>(IProgress<float> progress = null, CancellationToken cancellationToken = default) => this.LoadComponentAsync<T>(typeof(T).GetKey(), progress, cancellationToken);
-        #endif
         #else
         public IEnumerator LoadAsync<T>(string key, Action<T> callback, IProgress<float> progress = null) where T : Object;
 
-        #if UNITY_2021_2_OR_NEWER
         public IEnumerator LoadAsync<T>(Action<T> callback, IProgress<float> progress = null) where T : Object => this.LoadAsync(typeof(T).GetKey(), callback, progress);
 
         public IEnumerator LoadComponentAsync<T>(string key, Action<T> callback, IProgress<float> progress = null) =>
@@ -60,7 +55,6 @@ namespace UniT.ResourcesManager
             );
 
         public IEnumerator LoadComponentAsync<T>(Action<T> callback, IProgress<float> progress = null) => this.LoadComponentAsync(typeof(T).GetKey(), callback, progress);
-        #endif
         #endif
 
         #endregion

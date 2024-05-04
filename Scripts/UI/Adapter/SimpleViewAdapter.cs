@@ -8,7 +8,7 @@ namespace UniT.UI.Adapter
     public abstract class SimpleViewAdapter<TParams, TView> : View where TView : IViewWithParams<TParams>
     {
         [SerializeField] private Transform content;
-        [SerializeField] private TView     viewPrefab;
+        [SerializeField] private TView     prefab;
 
         private readonly Queue<TView>   pooledViews  = new Queue<TView>();
         private readonly HashSet<TView> spawnedViews = new HashSet<TView>();
@@ -19,7 +19,7 @@ namespace UniT.UI.Adapter
             {
                 var view = this.pooledViews.DequeueOrDefault(() =>
                 {
-                    var view = Instantiate(this.viewPrefab.GameObject, this.content).GetComponent<TView>();
+                    var view = Instantiate(this.prefab.GameObject, this.content).GetComponent<TView>();
                     this.Manager.Initialize(view, this.Activity);
                     return view;
                 });

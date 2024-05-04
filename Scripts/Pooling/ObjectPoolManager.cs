@@ -12,6 +12,8 @@ namespace UniT.Pooling
     #if UNIT_UNITASK
     using System.Threading;
     using Cysharp.Threading.Tasks;
+    #else
+    using System.Collections;
     #endif
 
     public sealed class ObjectPoolManager : IObjectPoolManager
@@ -57,6 +59,23 @@ namespace UniT.Pooling
                 this.assetsManager.LoadAsync<GameObject>(key, progress, cancellationToken)
                     .ContinueWith(this.Load)
             ).ContinueWith(pool => pool.Load(count));
+        }
+        #else
+        IEnumerator IObjectPoolManager.LoadAsync(string key, int count, Action callback, IProgress<float> progress)
+        {
+            return this.keyToPool.GetOrAddAsync(
+                key,
+                callback => this.assetsManager.LoadAsync<GameObject>(
+                    key,
+                    prefab => callback(this.Load(prefab)),
+                    progress
+                ),
+                pool =>
+                {
+                    pool.Load(count);
+                    callback?.Invoke();
+                }
+            );
         }
         #endif
 
