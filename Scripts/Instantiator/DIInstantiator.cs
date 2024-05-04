@@ -7,17 +7,17 @@ namespace UniT.Instantiator
 
     public sealed class DIInstantiator : IInstantiator
     {
-        private readonly DependencyContainer dependencyContainer;
+        private readonly DependencyContainer container;
 
         [Preserve]
-        public DIInstantiator(DependencyContainer dependencyContainer)
+        public DIInstantiator(DependencyContainer container)
         {
-            this.dependencyContainer = dependencyContainer;
+            this.container = container;
         }
 
-        object IInstantiator.Instantiate(Type type) => this.dependencyContainer.Instantiate(type);
+        object IInstantiator.Instantiate(Type type) => this.container.Instantiate(type);
 
-        T IInstantiator.Instantiate<T>() => this.dependencyContainer.Instantiate<T>();
+        T IInstantiator.Instantiate<T>() => this.container.Instantiate<T>();
     }
 }
 #endif

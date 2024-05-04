@@ -7,8 +7,9 @@
     "UniTask",
     "UniTask.Addressables",
     "Zenject",
-    "UniT.FbInstant",
+    "VContainer",
     "UniT.DI",
+    "UniT.FbInstant",
     "UniT.Extensions"
   ],
   "versionDefines": [
@@ -33,14 +34,19 @@
       "define": "UNIT_ZENJECT"
     },
     {
-      "name": "com.frostbun.unit.fbinstant",
+      "name": "jp.hadashikick.vcontainer",
       "expression": "",
-      "define": "UNIT_FBINSTANT"
+      "define": "UNIT_VCONTAINER"
     },
     {
       "name": "com.frostbun.unit.di",
       "expression": "",
       "define": "UNIT_DI"
+    },
+    {
+      "name": "com.frostbun.unit.fbinstant",
+      "expression": "",
+      "define": "UNIT_FBINSTANT"
     }
   ]
 }
