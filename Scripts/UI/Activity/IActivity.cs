@@ -1,11 +1,11 @@
 namespace UniT.UI.Activity
 {
-    using UniT.UI.UIElement;
+    using UniT.UI.View;
     #if UNIT_UNITASK
     using Cysharp.Threading.Tasks;
     #endif
 
-    public interface IActivity : IUIElement
+    public interface IActivity : IView
     {
         public enum Status
         {
@@ -35,7 +35,7 @@ namespace UniT.UI.Activity
         public void Dispose(bool autoStack = true);
     }
 
-    public interface IActivityWithoutParams : IActivity, IUIElementWithoutParams
+    public interface IActivityWithoutParams : IActivity, IViewWithoutParams
     {
         public IActivity Stack(bool force = false);
 
@@ -44,7 +44,7 @@ namespace UniT.UI.Activity
         public IActivity Dock(bool force = false);
     }
 
-    public interface IActivityWithParams<TParams> : IActivity, IUIElementWithParams<TParams>
+    public interface IActivityWithParams<TParams> : IActivity, IViewWithParams<TParams>
     {
         public IActivity Stack(TParams @params, bool force = true);
 

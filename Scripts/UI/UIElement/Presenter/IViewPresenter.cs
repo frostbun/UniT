@@ -1,8 +1,8 @@
-﻿namespace UniT.UI.UIElement.Presenter
+﻿namespace UniT.UI.View.Presenter
 {
     using UniT.UI.Presenter;
 
-    public interface IUIElementPresenter : IPresenter
+    public interface IViewPresenter : IPresenter
     {
         public void OnInitialize();
 

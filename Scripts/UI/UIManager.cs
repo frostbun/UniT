@@ -9,7 +9,7 @@ namespace UniT.UI
     using UniT.ResourcesManager;
     using UniT.UI.Activity;
     using UniT.UI.Presenter;
-    using UniT.UI.UIElement;
+    using UniT.UI.View;
     using UnityEngine;
     using UnityEngine.Scripting;
     using ILogger = UniT.Logging.ILogger;
@@ -46,7 +46,7 @@ namespace UniT.UI
 
         #region Public
 
-        void IUIManager.Initialize<TUIElement>(TUIElement uiElement) => this.Initialize(uiElement);
+        void IUIManager.Initialize(IView view, IActivity parent) => this.Initialize(view, parent);
 
         #region Query
 
@@ -64,7 +64,7 @@ namespace UniT.UI
         {
             var initializedActivity = this.activities.GetOrAdd(activity.GetType(), () =>
             {
-                activity.GetComponentsInChildren<IUIElement>().ForEach(this.Initialize);
+                activity.GetComponentsInChildren<IView>().ForEach(view => this.Initialize(view, activity));
                 return activity;
             });
             if (!ReferenceEquals(initializedActivity, activity)) this.logger.Warning($"Found another instance of {activity.Name} in the manager. Using the cached instance.");
@@ -165,21 +165,22 @@ namespace UniT.UI
         private IActivity InstantiateActivity(GameObject prefab)
         {
             var activity = Object.Instantiate(prefab, this.canvas.HiddenActivities, false).GetComponentOrThrow<IActivity>();
-            activity.GetComponentsInChildren<IUIElement>().ForEach(this.Initialize);
+            activity.GetComponentsInChildren<IView>().ForEach(view => this.Initialize(view, activity));
             return activity;
         }
 
-        private void Initialize(IUIElement uiElement)
+        private void Initialize(IView view, IActivity parent)
         {
-            uiElement.Manager = this;
-            if (uiElement is IHasPresenter owner)
+            view.Manager  = this;
+            view.Activity = parent;
+            if (view is IHasPresenter owner)
             {
                 var presenter = (IPresenter)this.instantiator.Instantiate(owner.PresenterType);
                 presenter.Owner = owner;
                 owner.Presenter = presenter;
             }
-            uiElement.OnInitialize();
-            this.logger.Debug($"{uiElement.Name} initialized");
+            view.OnInitialize();
+            this.logger.Debug($"{view.Name} initialized");
         }
 
         private IActivity Show(IActivity activity, IActivity.Status nextStatus)

@@ -301,14 +301,6 @@ namespace UniT.ECC
                 this.entityToComponents.Add(entity, entity.GetComponentsInChildren<IComponent>());
                 this.entityToComponents[entity].ForEach(component =>
                 {
-                    component.Manager = this.manager;
-                    if (component is IHasController owner)
-                    {
-                        var controller = (IController)this.manager.instantiator.Instantiate(owner.ControllerType);
-                        controller.Owner = owner;
-                        owner.Controller = controller;
-                    }
-                    component.OnInstantiate();
                     this.componentToTypes.Add(
                         component,
                         component.GetType()
@@ -318,6 +310,15 @@ namespace UniT.ECC
                             .Prepend(component.GetType())
                             .ToArray()
                     );
+                    component.Manager = this.manager;
+                    component.Entity  = entity;
+                    if (component is IHasController owner)
+                    {
+                        var controller = (IController)this.manager.instantiator.Instantiate(owner.ControllerType);
+                        controller.Owner = owner;
+                        owner.Controller = controller;
+                    }
+                    component.OnInstantiate();
                 });
                 return entity;
             }

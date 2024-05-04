@@ -1,5 +1,6 @@
-﻿namespace UniT.UI.UIElement
+﻿namespace UniT.UI.View
 {
+    using UniT.UI.Activity;
     using UnityEngine;
     #if UNIT_UNITASK
     using System.Threading;
@@ -8,9 +9,11 @@
     using System.Collections.Generic;
     #endif
 
-    public interface IUIElement
+    public interface IView
     {
         public IUIManager Manager { get; set; }
+
+        public IActivity Activity { get; set; }
 
         public string Name { get; }
 
@@ -39,11 +42,11 @@
         #endif
     }
 
-    public interface IUIElementWithoutParams : IUIElement
+    public interface IViewWithoutParams : IView
     {
     }
 
-    public interface IUIElementWithParams<TParams> : IUIElement
+    public interface IViewWithParams<TParams> : IView
     {
         public TParams Params { get; set; }
     }

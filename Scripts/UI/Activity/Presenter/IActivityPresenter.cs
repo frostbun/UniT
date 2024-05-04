@@ -1,8 +1,8 @@
 ﻿namespace UniT.UI.Activity.Presenter
 {
-    using UniT.UI.UIElement.Presenter;
+    using UniT.UI.View.Presenter;
 
-    public interface IActivityPresenter : IUIElementPresenter
+    public interface IActivityPresenter : IViewPresenter
     {
     }
 }

@@ -1,12 +1,12 @@
 ﻿namespace UniT.UI.Activity
 {
-    using UniT.UI.UIElement;
+    using UniT.UI.View;
     #if UNIT_UNITASK
     using System;
     using Cysharp.Threading.Tasks;
     #endif
 
-    public abstract class BaseActivity : BaseUIElement, IActivity
+    public abstract class BaseActivity : BaseView, IActivity
     {
         IActivity.Status IActivity.CurrentStatus { get => this.CurrentStatus; set => this.CurrentStatus = value; }
 
@@ -15,7 +15,7 @@
         public bool IsDestroyed => !this;
 
         #if UNIT_UNITASK
-        void IUIElement.OnHide()
+        void IView.OnHide()
         {
             this.hideCts?.Cancel();
             this.hideCts?.Dispose();
@@ -72,7 +72,7 @@
 
     public abstract class Activity<TParams> : BaseActivity, IActivityWithParams<TParams>
     {
-        TParams IUIElementWithParams<TParams>.Params { get => this.Params; set => this.Params = value; }
+        TParams IViewWithParams<TParams>.Params { get => this.Params; set => this.Params = value; }
 
         public TParams Params { get; private set; }
 

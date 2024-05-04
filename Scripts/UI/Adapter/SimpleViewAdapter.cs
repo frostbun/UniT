@@ -20,7 +20,7 @@ namespace UniT.UI.Adapter
                 var view = this.pooledViews.DequeueOrDefault(() =>
                 {
                     var view = Instantiate(this.viewPrefab.GameObject, this.content).GetComponent<TView>();
-                    this.Manager.Initialize(view);
+                    this.Manager.Initialize(view, this.Activity);
                     return view;
                 });
                 view.Transform.SetAsLastSibling();

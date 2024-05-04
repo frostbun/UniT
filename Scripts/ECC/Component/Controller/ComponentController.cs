@@ -1,6 +1,7 @@
 namespace UniT.ECC.Component.Controller
 {
     using UniT.ECC.Controller;
+    using UniT.ECC.Entity;
     using UnityEngine;
     #if UNIT_UNITASK
     using System.Threading;
@@ -14,6 +15,8 @@ namespace UniT.ECC.Component.Controller
         protected TComponent Component => this.Owner;
 
         protected IEntityManager Manager => this.Owner.Manager;
+
+        protected IEntity Entity => this.Owner.Entity;
 
         protected Transform Transform => this.Owner.Transform;
 

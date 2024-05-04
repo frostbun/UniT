@@ -1,5 +1,6 @@
 ﻿namespace UniT.ECC.Component
 {
+    using UniT.ECC.Entity;
     using UniT.Utilities;
     using UnityEngine;
     #if UNIT_UNITASK
@@ -10,7 +11,11 @@
     {
         IEntityManager IComponent.Manager { get => this.Manager; set => this.Manager = value; }
 
+        IEntity IComponent.Entity { get => this.Entity; set => this.Entity = value; }
+
         public IEntityManager Manager { get; private set; }
+
+        public IEntity Entity { get; private set; }
 
         public string Name => this.name;
 

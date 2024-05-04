@@ -1,5 +1,6 @@
 ﻿namespace UniT.ECC.Component
 {
+    using UniT.ECC.Entity;
     using UnityEngine;
     #if UNIT_UNITASK
     using System.Threading;
@@ -11,6 +12,8 @@
     public interface IComponent
     {
         public IEntityManager Manager { get; set; }
+
+        public IEntity Entity { get; set; }
 
         public string Name { get; }
 

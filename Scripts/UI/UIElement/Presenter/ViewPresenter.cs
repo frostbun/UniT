@@ -1,5 +1,6 @@
-﻿namespace UniT.UI.UIElement.Presenter
+﻿namespace UniT.UI.View.Presenter
 {
+    using UniT.UI.Activity;
     using UniT.UI.Presenter;
     using UnityEngine;
     #if UNIT_UNITASK
@@ -9,13 +10,13 @@
     using System.Collections.Generic;
     #endif
 
-    public abstract class BaseUIElementPresenter<TUIElement> : Presenter<TUIElement>, IUIElementPresenter where TUIElement : IUIElement, IHasPresenter
+    public abstract class BaseViewPresenter<TView> : Presenter<TView>, IViewPresenter where TView : IView, IHasPresenter
     {
-        protected TUIElement UIElement => this.Owner;
+        protected TView View => this.Owner;
 
         protected IUIManager Manager => this.Owner.Manager;
 
-        protected Transform Transform => this.Owner.Transform;
+        protected IActivity Activity => this.Owner.Activity;
 
         #if UNIT_UNITASK
         protected CancellationToken GetCancellationTokenOnRecycle() => this.Owner.GetCancellationTokenOnHide();
@@ -38,11 +39,11 @@
         public virtual void OnDispose() { }
     }
 
-    public abstract class UIElementPresenter<TUIElement> : BaseUIElementPresenter<TUIElement> where TUIElement : IUIElementWithoutParams, IHasPresenter
+    public abstract class ViewPresenter<TView> : BaseViewPresenter<TView> where TView : IViewWithoutParams, IHasPresenter
     {
     }
 
-    public abstract class UIElementPresenter<TUIElement, TParams> : BaseUIElementPresenter<TUIElement> where TUIElement : IUIElementWithParams<TParams>, IHasPresenter
+    public abstract class ViewPresenter<TView, TParams> : BaseViewPresenter<TView> where TView : IViewWithParams<TParams>, IHasPresenter
     {
         protected TParams Params => this.Owner.Params;
     }

@@ -1,5 +1,6 @@
-﻿namespace UniT.UI.UIElement
+﻿namespace UniT.UI.View
 {
+    using UniT.UI.Activity;
     using UniT.Utilities;
     using UnityEngine;
     #if UNIT_UNITASK
@@ -7,11 +8,15 @@
     #endif
 
     [RequireComponent(typeof(RectTransform))]
-    public abstract class BaseUIElement : BetterMonoBehavior, IUIElement
+    public abstract class BaseView : BetterMonoBehavior, IView
     {
-        IUIManager IUIElement.Manager { get => this.Manager; set => this.Manager = value; }
+        IUIManager IView.Manager { get => this.Manager; set => this.Manager = value; }
+
+        IActivity IView.Activity { get => this.Activity; set => this.Activity = value; }
 
         public IUIManager Manager { get; private set; }
+
+        public IActivity Activity { get; private set; }
 
         public string Name => this.name;
 
@@ -19,18 +24,18 @@
 
         public RectTransform Transform { get; private set; }
 
-        void IUIElement.OnInitialize()
+        void IView.OnInitialize()
         {
             this.Transform = (RectTransform)this.transform;
             this.OnInitialize();
         }
 
-        void IUIElement.OnShow()
+        void IView.OnShow()
         {
             this.OnShow();
         }
 
-        void IUIElement.OnHide()
+        void IView.OnHide()
         {
             #if UNIT_UNITASK
             this.hideCts?.Cancel();
@@ -40,7 +45,7 @@
             this.OnHide();
         }
 
-        void IUIElement.OnDispose()
+        void IView.OnDispose()
         {
             this.OnDispose();
         }
@@ -63,13 +68,13 @@
         protected virtual void OnDispose() { }
     }
 
-    public abstract class UIElement : BaseUIElement, IUIElementWithoutParams
+    public abstract class View : BaseView, IViewWithoutParams
     {
     }
 
-    public abstract class UIElement<TParams> : BaseUIElement, IUIElementWithParams<TParams>
+    public abstract class View<TParams> : BaseView, IViewWithParams<TParams>
     {
-        TParams IUIElementWithParams<TParams>.Params { get => this.Params; set => this.Params = value; }
+        TParams IViewWithParams<TParams>.Params { get => this.Params; set => this.Params = value; }
 
         public TParams Params { get; private set; }
     }

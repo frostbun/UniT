@@ -2,7 +2,7 @@ namespace UniT.UI
 {
     using System.Collections.Generic;
     using UniT.UI.Activity;
-    using UniT.UI.UIElement;
+    using UniT.UI.View;
     using UniT.Utilities;
     #if UNIT_UNITASK
     using System;
@@ -12,7 +12,7 @@ namespace UniT.UI
 
     public interface IUIManager
     {
-        public void Initialize<TUIElement>(TUIElement uiElement) where TUIElement : IUIElement;
+        public void Initialize(IView view, IActivity parent);
 
         public TActivity GetActivity<TActivity>(TActivity activity) where TActivity : IActivity;
 
