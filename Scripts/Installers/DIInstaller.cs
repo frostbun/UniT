@@ -3,7 +3,6 @@ namespace UniT.DI
 {
     using System;
     using System.Collections.Generic;
-    using UniT.Advertisements;
     using UniT.Audio;
     using UniT.Data;
     using UniT.ECC;
@@ -12,7 +11,6 @@ namespace UniT.DI
     using UniT.Logging;
     using UniT.Pooling;
     using UniT.ResourcesManager;
-    using UniT.Signal;
     using UniT.UI;
 
     public static class DIInstaller
@@ -90,17 +88,6 @@ namespace UniT.DI
             container.AddInterfaces<AudioManager>();
             container.AddInterfaces<EntityManager>();
             container.AddInterfaces<ObjectPoolManager>();
-            container.AddInterfaces<SignalBus>();
-
-            #endregion
-
-            #region Ads
-
-            #if UNIT_FBINSTANT
-            container.AddInterfaces<FbInstantAdsManager>();
-            #else
-            container.AddInterfaces<DummyAdsManager>();
-            #endif
 
             #endregion
         }

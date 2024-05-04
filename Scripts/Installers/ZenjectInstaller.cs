@@ -3,7 +3,6 @@ namespace Zenject
 {
     using System;
     using System.Collections.Generic;
-    using UniT.Advertisements;
     using UniT.Audio;
     using UniT.Data;
     using UniT.ECC;
@@ -12,7 +11,6 @@ namespace Zenject
     using UniT.Logging;
     using UniT.Pooling;
     using UniT.ResourcesManager;
-    using UniT.Signal;
     using UniT.UI;
 
     public static class ZenjectInstaller
@@ -91,17 +89,6 @@ namespace Zenject
             container.BindInterfacesTo<AudioManager>().AsSingle();
             container.BindInterfacesTo<EntityManager>().AsSingle();
             container.BindInterfacesTo<ObjectPoolManager>().AsSingle();
-            container.BindInterfacesTo<SignalBus>().AsSingle();
-
-            #endregion
-
-            #region Ads
-
-            #if UNIT_FBINSTANT
-            container.BindInterfacesTo<FbInstantAdsManager>().AsSingle();
-            #else
-            container.BindInterfacesTo<DummyAdsManager>().AsSingle();
-            #endif
 
             #endregion
         }
