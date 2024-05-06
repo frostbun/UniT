@@ -87,8 +87,8 @@ namespace UniT.Installers
             #region Utilities
 
             builder.Register<AudioManager>(Lifetime.Singleton).AsImplementedInterfaces();
-            builder.Register<EntityManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<ObjectPoolManager>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<EntityManager>(Lifetime.Singleton).AsImplementedInterfaces();
 
             #endregion
         }

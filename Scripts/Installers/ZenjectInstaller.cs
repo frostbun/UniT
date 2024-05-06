@@ -87,8 +87,8 @@ namespace Zenject
             #region Utilities
 
             container.BindInterfacesTo<AudioManager>().AsSingle();
-            container.BindInterfacesTo<EntityManager>().AsSingle();
             container.BindInterfacesTo<ObjectPoolManager>().AsSingle();
+            container.BindInterfacesTo<EntityManager>().AsSingle();
 
             #endregion
         }

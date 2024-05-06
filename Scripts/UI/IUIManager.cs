@@ -18,6 +18,8 @@ namespace UniT.UI
 
         #region Sync
 
+        public TActivity RegisterActivity<TActivity>(TActivity activity) where TActivity : IActivity;
+
         public TActivity GetActivity<TActivity>(TActivity prefab) where TActivity : IActivity;
 
         public TActivity GetActivity<TActivity>(string key) where TActivity : IActivity;

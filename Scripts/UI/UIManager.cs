@@ -29,9 +29,11 @@ namespace UniT.UI
         private readonly IAssetsManager assetsManager;
         private readonly ILogger        logger;
 
-        private readonly Dictionary<Type, IActivity> activities    = new Dictionary<Type, IActivity>();
-        private readonly List<IActivity>             activityStack = new List<IActivity>();
-        private readonly Dictionary<Type, string>    keys          = new Dictionary<Type, string>();
+        private readonly HashSet<IActivity>               activities       = new HashSet<IActivity>();
+        private readonly List<IActivity>                  activityStack    = new List<IActivity>();
+        private readonly Dictionary<IActivity, IActivity> prefabToInstance = new Dictionary<IActivity, IActivity>();
+        private readonly Dictionary<IActivity, IActivity> instanceToPrefab = new Dictionary<IActivity, IActivity>();
+        private readonly Dictionary<IActivity, string>    instanceToKey    = new Dictionary<IActivity, string>();
 
         [Preserve]
         public UIManager(RootUICanvas canvas, IInstantiator instantiator, IAssetsManager assetsManager, ILoggerManager loggerManager)
@@ -49,53 +51,42 @@ namespace UniT.UI
 
         void IUIManager.Initialize(IView view, IActivity parent) => this.Initialize(view, parent);
 
+        TActivity IUIManager.RegisterActivity<TActivity>(TActivity activity)
+        {
+            if (this.activities.Add(activity))
+            {
+                activity.GetComponentsInChildren<IView>().ForEach(view => this.Initialize(view, activity));
+            }
+            return activity;
+        }
+
         TActivity IUIManager.GetActivity<TActivity>(TActivity prefab)
         {
-            return (TActivity)this.activities.GetOrAdd(typeof(TActivity), () => this.InstantiateActivity(prefab));
+            return this.GetActivity<TActivity>(prefab);
         }
 
         TActivity IUIManager.GetActivity<TActivity>(string key)
         {
-            return (TActivity)this.activities.GetOrAdd(
-                typeof(TActivity),
-                () =>
-                {
-                    var prefab = this.assetsManager.LoadComponent<IActivity>(key);
-                    this.keys.Add(typeof(TActivity), key);
-                    return this.InstantiateActivity(prefab);
-                }
-            );
+            var prefab = this.assetsManager.LoadComponent<IActivity>(key);
+            return this.GetActivity<TActivity>(prefab, key);
         }
 
         #if UNIT_UNITASK
-        UniTask<TActivity> IUIManager.GetActivityAsync<TActivity>(string key, IProgress<float> progress, CancellationToken cancellationToken)
+        async UniTask<TActivity> IUIManager.GetActivityAsync<TActivity>(string key, IProgress<float> progress, CancellationToken cancellationToken)
         {
-            return this.activities.GetOrAddAsync(
-                typeof(TActivity),
-                () => this.assetsManager.LoadComponentAsync<IActivity>(key, progress, cancellationToken)
-                    .ContinueWith(prefab =>
-                    {
-                        this.keys.Add(typeof(TActivity), key);
-                        return this.InstantiateActivity(prefab);
-                    })
-            ).ContinueWith(activity => (TActivity)activity);
+            var prefab = await this.assetsManager.LoadComponentAsync<IActivity>(key, progress, cancellationToken);
+            return this.GetActivity<TActivity>(prefab, key);
         }
         #else
         IEnumerator IUIManager.GetActivityAsync<TActivity>(string key, Action<TActivity> callback, IProgress<float> progress)
         {
-            return this.activities.GetOrAddAsync(
-                typeof(TActivity),
-                callback => this.assetsManager.LoadComponentAsync<IActivity>(
-                    key,
-                    prefab =>
-                    {
-                        this.keys.Add(typeof(TActivity), key);
-                        callback(this.InstantiateActivity(prefab));
-                    },
-                    progress
-                ),
-                activity => callback((TActivity)activity)
+            var prefab = default(IActivity);
+            yield return this.assetsManager.LoadComponentAsync<IActivity>(
+                key,
+                result => prefab = result,
+                progress
             );
+            callback(this.GetActivity<TActivity>(prefab, key));
         }
         #endif
 
@@ -105,9 +96,9 @@ namespace UniT.UI
 
         IActivity IUIManager.NextActivityInStack => this.activityStack.LastOrDefault(activity => activity.CurrentStatus is not IActivity.Status.Stacking);
 
-        IEnumerable<IActivity> IUIManager.FloatingActivities => this.activities.Values.Where(activity => activity.CurrentStatus is IActivity.Status.Floating);
+        IEnumerable<IActivity> IUIManager.FloatingActivities => this.activities.Where(activity => activity.CurrentStatus is IActivity.Status.Floating);
 
-        IEnumerable<IActivity> IUIManager.DockedActivities => this.activities.Values.Where(activity => activity.CurrentStatus is IActivity.Status.Docked);
+        IEnumerable<IActivity> IUIManager.DockedActivities => this.activities.Where(activity => activity.CurrentStatus is IActivity.Status.Docked);
 
         #endregion
 
@@ -174,13 +165,6 @@ namespace UniT.UI
 
         #region Private
 
-        private IActivity InstantiateActivity(IActivity prefab)
-        {
-            var activity = Object.Instantiate(prefab.GameObject, this.canvas.HiddenActivities, false).GetComponent<IActivity>();
-            activity.GetComponentsInChildren<IView>().ForEach(view => this.Initialize(view, activity));
-            return activity;
-        }
-
         private void Initialize(IView view, IActivity parent)
         {
             view.Manager  = this;
@@ -193,6 +177,19 @@ namespace UniT.UI
             }
             view.OnInitialize();
             this.logger.Debug($"{view.Name} initialized");
+        }
+
+        private TActivity GetActivity<TActivity>(IActivity prefab, string key = null) where TActivity : IActivity
+        {
+            return (TActivity)this.prefabToInstance.GetOrAdd(prefab, () =>
+            {
+                var activity = Object.Instantiate(prefab.GameObject, this.canvas.HiddenActivities, false).GetComponent<IActivity>();
+                activity.GetComponentsInChildren<IView>().ForEach(view => this.Initialize(view, activity));
+                this.activities.Add(activity);
+                this.instanceToPrefab.Add(activity, prefab);
+                if (key is { }) this.instanceToKey.Add(activity, key);
+                return activity;
+            });
         }
 
         private IActivity Show(IActivity activity, IActivity.Status nextStatus)
@@ -208,7 +205,7 @@ namespace UniT.UI
                 {
                     this.activityStack.RemoveRange(index + 1, this.activityStack.Count - index - 1);
                 }
-                this.activities.Values
+                this.activities
                     .Where(other => other.CurrentStatus is IActivity.Status.Stacking or IActivity.Status.Floating)
                     .SafeForEach(other => this.Hide(other, false, false));
             }
@@ -223,8 +220,8 @@ namespace UniT.UI
                 false
             );
             activity.Transform.SetAsLastSibling();
-            this.logger.Debug($"{activity.Name} status: {activity.CurrentStatus = nextStatus}");
             activity.OnShow();
+            this.logger.Debug($"{activity.Name} status: {activity.CurrentStatus = nextStatus}");
             return activity;
         }
 
@@ -233,8 +230,8 @@ namespace UniT.UI
             if (removeFromStack) this.activityStack.Remove(activity);
             if (activity.CurrentStatus is IActivity.Status.Hidden) return;
             activity.Transform.SetParent(this.canvas.HiddenActivities, false);
-            this.logger.Debug($"{activity.Name} status: {activity.CurrentStatus = IActivity.Status.Hidden}");
             activity.OnHide();
+            this.logger.Debug($"{activity.Name} status: {activity.CurrentStatus = IActivity.Status.Hidden}");
             if (autoStack && this.activityStack.LastOrDefault() is { CurrentStatus: not IActivity.Status.Stacking } nextActivity)
             {
                 this.Show(nextActivity, IActivity.Status.Stacking);
@@ -244,12 +241,18 @@ namespace UniT.UI
         private void Dispose(IActivity activity, bool autoStack)
         {
             this.Hide(activity, true, autoStack);
-            this.activities.Remove(activity.GetType());
-            this.logger.Debug($"{activity.Name} status: {activity.CurrentStatus = IActivity.Status.Disposed}");
             activity.OnDispose();
+            this.logger.Debug($"{activity.Name} status: {activity.CurrentStatus = IActivity.Status.Disposed}");
             Object.Destroy(activity.GameObject);
-            if (!this.keys.Remove(activity.GetType(), out var key)) return;
-            this.assetsManager.Unload(key);
+            this.activities.Remove(activity);
+            if (this.instanceToPrefab.TryRemove(activity, out var prefab))
+            {
+                this.prefabToInstance.Remove(prefab);
+            }
+            if (this.instanceToKey.TryRemove(activity, out var key))
+            {
+                this.assetsManager.Unload(key);
+            }
         }
 
         #endregion

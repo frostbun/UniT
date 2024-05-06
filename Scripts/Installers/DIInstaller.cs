@@ -86,8 +86,8 @@ namespace UniT.DI
             #region Utilities
 
             container.AddInterfaces<AudioManager>();
-            container.AddInterfaces<EntityManager>();
             container.AddInterfaces<ObjectPoolManager>();
+            container.AddInterfaces<EntityManager>();
 
             #endregion
         }
