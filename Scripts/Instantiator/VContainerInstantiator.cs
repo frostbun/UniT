@@ -10,22 +10,11 @@ namespace UniT.Instantiator
         private readonly IObjectResolver resolver;
 
         [Preserve]
-        public VContainerInstantiator(IObjectResolver resolver)
-        {
-            this.resolver = resolver;
-        }
+        public VContainerInstantiator(IObjectResolver resolver) => this.resolver = resolver;
 
-        object IInstantiator.Instantiate(Type type)
-        {
-            var scope = this.resolver.CreateScope(builder => builder.Register(type, Lifetime.Singleton));
-            return scope.Resolve(type);
-        }
+        object IInstantiator.Instantiate(Type type) => this.resolver.CreateScope(builder => builder.Register(type, Lifetime.Singleton)).Resolve(type);
 
-        T IInstantiator.Instantiate<T>()
-        {
-            var scope = this.resolver.CreateScope(builder => builder.Register<T>(Lifetime.Singleton));
-            return scope.Resolve<T>();
-        }
+        T IInstantiator.Instantiate<T>() => this.resolver.CreateScope(builder => builder.Register<T>(Lifetime.Singleton)).Resolve<T>();
     }
 }
 #endif

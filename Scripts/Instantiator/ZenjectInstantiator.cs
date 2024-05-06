@@ -9,10 +9,7 @@ namespace UniT.Instantiator
         private readonly Zenject.IInstantiator instantiator;
 
         [Preserve]
-        public ZenjectInstantiator(Zenject.IInstantiator instantiator)
-        {
-            this.instantiator = instantiator;
-        }
+        public ZenjectInstantiator(Zenject.IInstantiator instantiator) => this.instantiator = instantiator;
 
         object IInstantiator.Instantiate(Type type) => this.instantiator.Instantiate(type);
 

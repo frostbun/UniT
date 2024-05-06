@@ -21,7 +21,7 @@ namespace UniT.ECC
     using System.Collections;
     #endif
 
-    public sealed class EntityManager : IEntityManager, IDisposable
+    public sealed class EntityManager : IEntityManager
     {
         #region Constructor
 
@@ -50,14 +50,12 @@ namespace UniT.ECC
 
         void IEntityManager.Load(IEntity prefab, int count)
         {
-            this.ThrowIfDisposed();
             this.prefabToPool.GetOrAdd(prefab, () => new EntityPool(prefab, this))
                 .Load(count);
         }
 
         void IEntityManager.Load(string key, int count)
         {
-            this.ThrowIfDisposed();
             this.keyToPool.GetOrAdd(key, () => new EntityPool(this.assetsManager.LoadComponent<IEntity>(key), this))
                 .Load(count);
         }
@@ -65,7 +63,6 @@ namespace UniT.ECC
         #if UNIT_UNITASK
         UniTask IEntityManager.LoadAsync(string key, int count, IProgress<float> progress, CancellationToken cancellationToken)
         {
-            this.ThrowIfDisposed();
             return this.keyToPool.GetOrAddAsync(key, () =>
                 this.assetsManager.LoadComponentAsync<IEntity>(key, progress, cancellationToken)
                     .ContinueWith(prefab => new EntityPool(prefab, this))
@@ -74,7 +71,6 @@ namespace UniT.ECC
         #else
         IEnumerator IEntityManager.LoadAsync(string key, int count, Action callback, IProgress<float> progress)
         {
-            this.ThrowIfDisposed();
             return this.keyToPool.GetOrAddAsync(
                 key,
                 callback => this.assetsManager.LoadComponentAsync<IEntity>(
@@ -113,7 +109,6 @@ namespace UniT.ECC
 
         void IEntityManager.Recycle(IEntity entity)
         {
-            this.ThrowIfDisposed();
             if (!this.entityToPool.TryGet(entity, out var pool)) throw new InvalidOperationException($"Trying to recycle {entity.Name} that is not spawned");
             pool.Recycle(entity);
         }
@@ -140,7 +135,6 @@ namespace UniT.ECC
 
         void IEntityManager.Unload(IEntity prefab)
         {
-            this.ThrowIfDisposed();
             if (!this.prefabToPool.TryRemove(prefab, out var pool))
             {
                 this.logger.Warning($"Trying to unload {prefab.Name} pool that is not loaded");
@@ -151,7 +145,6 @@ namespace UniT.ECC
 
         void IEntityManager.Unload(string key)
         {
-            this.ThrowIfDisposed();
             if (!this.keyToPool.TryRemove(key, out var pool))
             {
                 this.logger.Warning($"Trying to unload {key} pool that is not loaded");
@@ -163,7 +156,6 @@ namespace UniT.ECC
 
         private EntityPool GetPoolOrLoad(IEntity prefab)
         {
-            this.ThrowIfDisposed();
             return this.prefabToPool.GetOrAdd(prefab, () =>
             {
                 this.logger.Warning($"Auto loading {prefab.Name} pool. Consider preload it with `Load` or `LoadAsync` for better performance.");
@@ -173,7 +165,6 @@ namespace UniT.ECC
 
         private EntityPool GetPoolOrLoad(string key)
         {
-            this.ThrowIfDisposed();
             return this.keyToPool.GetOrAdd(key, () =>
             {
                 this.logger.Warning($"Auto loading {key} pool. Consider preload it with `Load` or `LoadAsync` for better performance.");
@@ -183,7 +174,6 @@ namespace UniT.ECC
 
         private EntityPool GetPoolOrWarning(IEntity prefab)
         {
-            this.ThrowIfDisposed();
             if (!this.prefabToPool.TryGet(prefab, out var pool))
             {
                 this.logger.Warning($"{prefab.Name} pool not loaded");
@@ -269,7 +259,6 @@ namespace UniT.ECC
                 });
                 this.manager.entityToPool.Remove(entity);
                 this.spawnedEntities.Remove(entity);
-                if (entity.IsDestroyed) return;
                 entity.GameObject.SetActive(false);
                 entity.Transform.SetParent(this.entitiesContainer);
                 this.pooledEntities.Enqueue(entity);
@@ -334,7 +323,6 @@ namespace UniT.ECC
 
         IEnumerable<T> IEntityManager.Query<T>()
         {
-            this.ThrowIfDisposed();
             return this.typeToComponents.GetOrAdd(typeof(T)).Cast<T>();
         }
 
@@ -346,51 +334,6 @@ namespace UniT.ECC
         private void Unregister(Type type, IComponent component)
         {
             this.typeToComponents.GetOrAdd(type).Remove(component);
-        }
-
-        #endregion
-
-        #region Finalizer
-
-        private bool isDisposed = false;
-
-        private void ThrowIfDisposed()
-        {
-            if (this.isDisposed) throw new ObjectDisposedException(nameof(EntityManager));
-        }
-
-        private void Dispose()
-        {
-            if (!this.poolsContainer)
-            {
-                this.isDisposed = true;
-                return;
-            }
-            this.prefabToPool.Clear((_, pool) =>
-            {
-                pool.Dispose();
-            });
-            this.keyToPool.Clear((key, pool) =>
-            {
-                pool.Dispose();
-                this.assetsManager.Unload(key);
-            });
-            this.typeToComponents.Clear();
-            Object.Destroy(this.poolsContainer.gameObject);
-            this.isDisposed = true;
-            this.logger.Debug("Disposed");
-        }
-
-        void IDisposable.Dispose()
-        {
-            this.ThrowIfDisposed();
-            this.Dispose();
-            GC.SuppressFinalize(this);
-        }
-
-        ~EntityManager()
-        {
-            this.Dispose();
         }
 
         #endregion

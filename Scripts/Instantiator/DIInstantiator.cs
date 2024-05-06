@@ -10,10 +10,7 @@ namespace UniT.Instantiator
         private readonly DependencyContainer container;
 
         [Preserve]
-        public DIInstantiator(DependencyContainer container)
-        {
-            this.container = container;
-        }
+        public DIInstantiator(DependencyContainer container) => this.container = container;
 
         object IInstantiator.Instantiate(Type type) => this.container.Instantiate(type);
 

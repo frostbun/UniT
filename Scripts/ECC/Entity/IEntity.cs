@@ -4,8 +4,6 @@ namespace UniT.ECC.Entity
 
     public interface IEntity : IComponent
     {
-        public bool IsDestroyed { get; }
-
         public T[] GetComponentsInChildren<T>();
 
         public void Recycle();

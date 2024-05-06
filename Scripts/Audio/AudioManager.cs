@@ -191,10 +191,7 @@ namespace UniT.Audio
             this.UnloadSound(name, soundSource);
         }
 
-        void IAudioManager.UnloadAllSounds()
-        {
-            this.loadedSoundSources.Clear(this.UnloadSound);
-        }
+        void IAudioManager.UnloadAllSounds() => this.UnloadAllSounds();
 
         private AudioSource LoadSound(string name)
         {
@@ -209,6 +206,11 @@ namespace UniT.Audio
             soundSource.clip = null;
             this.assetsManager.Unload(name);
             this.pooledSoundSources.Enqueue(soundSource);
+        }
+
+        private void UnloadAllSounds()
+        {
+            this.loadedSoundSources.Clear(this.UnloadSound);
         }
 
         private AudioSource SpawnSoundSource(AudioClip audioClip)
@@ -247,14 +249,7 @@ namespace UniT.Audio
 
         void IAudioManager.StopMusic() => this.musicSource.Stop();
 
-        void IAudioManager.UnloadMusic()
-        {
-            if (this.currentMusic == null) return;
-            this.musicSource.Stop();
-            this.musicSource.clip = null;
-            this.assetsManager.Unload(this.currentMusic);
-            this.currentMusic = null;
-        }
+        void IAudioManager.UnloadMusic() => this.UnloadMusic();
 
         private void LoadMusic(string name)
         {
@@ -262,6 +257,15 @@ namespace UniT.Audio
             this.musicSource.clip = this.assetsManager.Load<AudioClip>(name);
             if (this.currentMusic != null) this.assetsManager.Unload(this.currentMusic);
             this.currentMusic = name;
+        }
+
+        private void UnloadMusic()
+        {
+            if (this.currentMusic == null) return;
+            this.musicSource.Stop();
+            this.musicSource.clip = null;
+            this.assetsManager.Unload(this.currentMusic);
+            this.currentMusic = null;
         }
 
         #endregion

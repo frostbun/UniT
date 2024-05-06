@@ -12,7 +12,7 @@ namespace UniT.ResourcesManager
     using System.Collections;
     #endif
 
-    public interface IAssetsManager
+    public interface IAssetsManager : IDisposable
     {
         #region Sync
 

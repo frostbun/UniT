@@ -15,7 +15,7 @@ namespace UniT.ResourcesManager
     using System.Collections;
     #endif
 
-    public sealed class ExternalAssetsManager : IExternalAssetsManager, IDisposable
+    public sealed class ExternalAssetsManager : IExternalAssetsManager
     {
         #region Constructor
 
@@ -35,7 +35,7 @@ namespace UniT.ResourcesManager
         #region Public
 
         #if UNIT_UNITASK
-        UniTask<Texture2D> IExternalAssetsManager.DownloadTexture(string url, IProgress<float> progress, CancellationToken cancellationToken)
+        UniTask<Texture2D> IExternalAssetsManager.DownloadTextureAsync(string url, IProgress<float> progress, CancellationToken cancellationToken)
         {
             return this.cache.TryAddAsync(url, async () =>
             {
@@ -51,11 +51,11 @@ namespace UniT.ResourcesManager
             });
         }
         #else
-        IEnumerator IExternalAssetsManager.DownloadTexture(string url, Action<Texture2D> callback, IProgress<float> progress)
+        IEnumerator IExternalAssetsManager.DownloadTextureAsync(string url, Action<Texture2D> callback, IProgress<float> progress)
         {
             return this.cache.TryAddAsync(
                 url,
-                DownloadTexture,
+                DownloadTextureAsync,
                 isDownloaded =>
                 {
                     this.logger.Debug(isDownloaded ? $"Downloaded texture from {url}" : $"Using cached texture from {url}");
@@ -63,7 +63,7 @@ namespace UniT.ResourcesManager
                 }
             );
 
-            IEnumerator DownloadTexture(Action<Texture2D> callback)
+            IEnumerator DownloadTextureAsync(Action<Texture2D> callback)
             {
                 using var request = new UnityWebRequest(url);
                 using var downloadHandler = new DownloadHandlerTexture();

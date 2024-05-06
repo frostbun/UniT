@@ -4,8 +4,6 @@
 
     public abstract class BaseEntity : Component, IEntity
     {
-        public bool IsDestroyed => !this;
-
         public void Recycle() => this.Manager.Recycle(this);
     }
 
