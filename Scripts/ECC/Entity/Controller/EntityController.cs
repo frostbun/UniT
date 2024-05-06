@@ -5,7 +5,7 @@
 
     public abstract class BaseEntityController<TEntity> : ComponentController<TEntity>, IEntityController where TEntity : IEntity, IHasController
     {
-        protected TEntity Entity => this.Owner;
+        protected new TEntity Entity => this.Owner;
 
         protected void Recycle() => this.Owner.Recycle();
     }

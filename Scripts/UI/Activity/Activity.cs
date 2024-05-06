@@ -10,7 +10,7 @@
     {
         IActivity.Status IActivity.CurrentStatus { get => this.CurrentStatus; set => this.CurrentStatus = value; }
 
-        public IActivity.Status CurrentStatus { get; private set; } = IActivity.Status.Hidden;
+        public IActivity.Status CurrentStatus { get; private set; }
 
         public bool IsDestroyed => !this;
 

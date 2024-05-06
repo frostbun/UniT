@@ -291,7 +291,7 @@ namespace UniT.Data
                     {
                         case IReadableSerializableDataStorage storage when serializerGroup.Key is IStringSerializer serializer:
                         {
-                            var rawDatas = (string[])null;
+                            var rawDatas = default(string[]);
                             yield return storage.ReadStringsAsync(keys, result => rawDatas = result);
                             // TODO: make it run concurrently
                             foreach (var (type, rawData) in IterTools.StrictZip(serializerGroup, rawDatas).Where((_, rawData) => !rawData.IsNullOrWhitespace()))
@@ -302,7 +302,7 @@ namespace UniT.Data
                         }
                         case IReadableSerializableDataStorage storage when serializerGroup.Key is IBinarySerializer serializer:
                         {
-                            var rawDatas = (byte[][])null;
+                            var rawDatas = default(byte[][]);
                             yield return storage.ReadBytesAsync(keys, result => rawDatas = result);
                             // TODO: make it run concurrently
                             foreach (var (type, rawData) in IterTools.StrictZip(serializerGroup, rawDatas).Where((_, rawData) => rawData is { Length: > 0 }))
@@ -313,7 +313,7 @@ namespace UniT.Data
                         }
                         case IReadableNonSerializableDataStorage storage when serializerGroup.Key is null:
                         {
-                            var datas = (IData[])null;
+                            var datas = default(IData[]);
                             yield return storage.ReadAsync(keys, result => datas = result);
                             foreach (var (type, data) in IterTools.StrictZip(serializerGroup, datas).Where(data => data is { }))
                             {

@@ -118,7 +118,7 @@ namespace UniT.Data
 
             public void Parse()
             {
-                var keyValue = (object)null;
+                var keyValue = default(object);
                 var row      = Activator.CreateInstance(this.data.RowType);
 
                 foreach (var field in this.normalFields)

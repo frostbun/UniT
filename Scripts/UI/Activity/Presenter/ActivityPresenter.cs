@@ -5,7 +5,7 @@
 
     public abstract class BaseActivityPresenter<TActivity> : BaseViewPresenter<TActivity>, IActivityPresenter where TActivity : IActivity, IHasPresenter
     {
-        protected TActivity Activity => this.Owner;
+        protected new TActivity Activity => this.Owner;
 
         protected IActivity.Status CurrentStatus => this.Owner.CurrentStatus;
 

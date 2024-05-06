@@ -15,9 +15,13 @@ namespace UniT.Pooling
         private readonly Queue<GameObject>   pooledObjects  = new Queue<GameObject>();
         private readonly HashSet<GameObject> spawnedObjects = new HashSet<GameObject>();
 
-        public static ObjectPool Instantiate(GameObject prefab)
+        public static ObjectPool Construct(GameObject prefab, Transform parent)
         {
-            var pool = new GameObject($"{prefab.name} pool").AddComponent<ObjectPool>();
+            var pool = new GameObject
+            {
+                name      = $"{prefab.name} pool",
+                transform = { parent = parent },
+            }.AddComponent<ObjectPool>();
             pool.prefab = prefab;
             return pool;
         }
@@ -59,7 +63,6 @@ namespace UniT.Pooling
         public void Recycle(GameObject instance)
         {
             if (!this.spawnedObjects.Remove(instance)) throw new InvalidOperationException($"{instance.name} was not spawned from {this.gameObject.name}");
-            if (!instance) return;
             instance.SetActive(false);
             instance.transform.SetParent(this.transform);
             this.pooledObjects.Enqueue(instance);
