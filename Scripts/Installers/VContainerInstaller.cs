@@ -49,7 +49,7 @@ namespace UniT.Installers
 
                 builder.Register<AssetDataStorage>(Lifetime.Singleton).AsImplementedInterfaces();
                 builder.Register<PlayerPrefsDataStorage>(Lifetime.Singleton).AsImplementedInterfaces();
-                #if UNIT_FBINSTANT
+                #if UNIT_FBINSTANT && UNITY_WEBGL && !UNITY_EDITOR
                 container.Register<FbInstantDataStorage>(Lifetime.Singleton).AsImplementedInterfaces();
                 #endif
 

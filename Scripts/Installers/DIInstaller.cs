@@ -48,7 +48,7 @@ namespace UniT.DI
 
                 container.AddInterfaces<AssetDataStorage>();
                 container.AddInterfaces<PlayerPrefsDataStorage>();
-                #if UNIT_FBINSTANT
+                #if UNIT_FBINSTANT && UNITY_WEBGL && !UNITY_EDITOR
                 container.AddInterfaces<FbInstantDataStorage>();
                 #endif
 

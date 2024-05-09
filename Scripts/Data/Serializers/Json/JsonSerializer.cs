@@ -7,7 +7,7 @@ namespace UniT.Data
     #if UNIT_UNITASK
     using Cysharp.Threading.Tasks;
     #else
-    using UnityEngine;
+    using UniT.Extensions;
     using System.Collections;
     using System.Threading.Tasks;
     #endif
@@ -39,32 +39,14 @@ namespace UniT.Data
 
         UniTask<string> IStringSerializer.SerializeAsync(IData data) => UniTask.RunOnThreadPool(() => this.Serialize(data));
         #else
-        IEnumerator IStringSerializer.PopulateAsync(IData data, string rawData, Action callback)
-        {
-            var task = Task.Run(() => this.Populate(data, rawData));
-            task.ConfigureAwait(false);
-            yield return new WaitUntil(() => task.IsCompleted);
-            callback?.Invoke();
-        }
+        IEnumerator IStringSerializer.PopulateAsync(IData data, string rawData, Action callback) => Task.Run(() => this.Populate(data, rawData)).ToCoroutine(callback);
 
-        IEnumerator IStringSerializer.SerializeAsync(IData data, Action<string> callback)
-        {
-            var task = Task.Run(() => this.Serialize(data));
-            task.ConfigureAwait(false);
-            yield return new WaitUntil(() => task.IsCompleted);
-            callback(task.Result);
-        }
+        IEnumerator IStringSerializer.SerializeAsync(IData data, Action<string> callback) => Task.Run(() => this.Serialize(data)).ToCoroutine(callback);
         #endif
 
-        private void Populate(IData data, string rawData)
-        {
-            JsonConvert.PopulateObject(rawData, data, this.settings);
-        }
+        private void Populate(IData data, string rawData) => JsonConvert.PopulateObject(rawData, data, this.settings);
 
-        private string Serialize(IData data)
-        {
-            return JsonConvert.SerializeObject(data, this.settings);
-        }
+        private string Serialize(IData data) => JsonConvert.SerializeObject(data, this.settings);
     }
 }
 #endif

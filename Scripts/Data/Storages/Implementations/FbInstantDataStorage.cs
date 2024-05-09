@@ -3,12 +3,12 @@ namespace UniT.Data
 {
     using System;
     using System.Linq;
+    using UniT.Extensions;
+    using UniT.FbInstant;
     using UnityEngine.Scripting;
     #if UNIT_UNITASK
     using System.Threading;
     using Cysharp.Threading.Tasks;
-    using UniT.Extensions;
-    using UniT.FbInstant;
     #else
     using System.Collections;
     #endif
@@ -50,76 +50,91 @@ namespace UniT.Data
         }
 
         #if UNIT_UNITASK
-        UniTask<string[]> IReadableSerializableDataStorage.ReadStringsAsync(string[] keys, IProgress<float> progress, CancellationToken _)
+        async UniTask<string[]> IReadableSerializableDataStorage.ReadStringsAsync(string[] keys, IProgress<float> progress, CancellationToken _)
         {
-            return FbInstant.Player.LoadData(keys).ContinueWith(result =>
-            {
-                if (result.IsError) throw new($"Load {keys.ToArrayString()} error: {result.Error}");
-                progress?.Report(1);
-                return result.Data;
-            });
+            var result = await FbInstant.Player.LoadDataAsync(keys);
+            if (result.IsError) throw new($"Load {keys.ToArrayString()} error: {result.Error}");
+            progress?.Report(1);
+            return result.Data;
         }
 
-        UniTask<byte[][]> IReadableSerializableDataStorage.ReadBytesAsync(string[] keys, IProgress<float> progress, CancellationToken _)
+        async UniTask<byte[][]> IReadableSerializableDataStorage.ReadBytesAsync(string[] keys, IProgress<float> progress, CancellationToken _)
         {
-            return FbInstant.Player.LoadData(keys).ContinueWith(result =>
-            {
-                if (result.IsError) throw new($"Load {keys.ToArrayString()} error: {result.Error}");
-                progress?.Report(1);
-                return result.Data.Select(Convert.FromBase64String).ToArray();
-            });
+            var result = await FbInstant.Player.LoadDataAsync(keys);
+            if (result.IsError) throw new($"Load {keys.ToArrayString()} error: {result.Error}");
+            progress?.Report(1);
+            return result.Data.Select(Convert.FromBase64String).ToArray();
         }
 
-        UniTask IWritableSerializableDataStorage.WriteStringsAsync(string[] keys, string[] rawDatas, IProgress<float> progress, CancellationToken _)
+        async UniTask IWritableSerializableDataStorage.WriteStringsAsync(string[] keys, string[] rawDatas, IProgress<float> progress, CancellationToken _)
         {
-            return FbInstant.Player.SaveData(keys, rawDatas).ContinueWith(result =>
-            {
-                if (result.IsError) throw new($"Save {keys.ToArrayString()} error: {result.Error}");
-                progress?.Report(1);
-            });
+            var result = await FbInstant.Player.SaveDataAsync(keys, rawDatas);
+            if (result.IsError) throw new($"Save {keys.ToArrayString()} error: {result.Error}");
+            progress?.Report(1);
         }
 
-        UniTask IWritableSerializableDataStorage.WriteBytesAsync(string[] keys, byte[][] rawDatas, IProgress<float> progress, CancellationToken _)
+        async UniTask IWritableSerializableDataStorage.WriteBytesAsync(string[] keys, byte[][] rawDatas, IProgress<float> progress, CancellationToken _)
         {
-            return FbInstant.Player.SaveData(keys, rawDatas.Select(Convert.ToBase64String).ToArray()).ContinueWith(result =>
-            {
-                if (result.IsError) throw new($"Save {keys.ToArrayString()} error: {result.Error}");
-                progress?.Report(1);
-            });
+            var result = await FbInstant.Player.SaveDataAsync(keys, rawDatas.Select(Convert.ToBase64String).ToArray());
+            if (result.IsError) throw new($"Save {keys.ToArrayString()} error: {result.Error}");
+            progress?.Report(1);
         }
 
-        UniTask IWritableDataStorage.FlushAsync(IProgress<float> progress, CancellationToken _)
+        async UniTask IWritableDataStorage.FlushAsync(IProgress<float> progress, CancellationToken _)
         {
-            return FbInstant.Player.FlushData().ContinueWith(result =>
-            {
-                if (result.IsError) throw new($"Flush {this.GetType().Name} error: {result.Error}");
-                progress?.Report(1);
-            });
+            var result = await FbInstant.Player.FlushDataAsync();
+            if (result.IsError) throw new($"Flush {this.GetType().Name} error: {result.Error}");
+            progress?.Report(1);
         }
         #else
         IEnumerator IReadableSerializableDataStorage.ReadStringsAsync(string[] keys, Action<string[]> callback, IProgress<float> progress)
         {
-            throw new NotImplementedException();
+            return FbInstant.Player.LoadDataAsync(keys).ToCoroutine(result =>
+            {
+                if (result.IsError) throw new($"Load {keys.ToArrayString()} error: {result.Error}");
+                progress?.Report(1);
+                callback(result.Data);
+            });
         }
 
         IEnumerator IReadableSerializableDataStorage.ReadBytesAsync(string[] keys, Action<byte[][]> callback, IProgress<float> progress)
         {
-            throw new NotImplementedException();
+            return FbInstant.Player.LoadDataAsync(keys).ToCoroutine(result =>
+            {
+                if (result.IsError) throw new($"Load {keys.ToArrayString()} error: {result.Error}");
+                progress?.Report(1);
+                callback(result.Data.Select(Convert.FromBase64String).ToArray());
+            });
         }
 
         IEnumerator IWritableSerializableDataStorage.WriteStringsAsync(string[] keys, string[] rawDatas, Action callback, IProgress<float> progress)
         {
-            throw new NotImplementedException();
+            return FbInstant.Player.SaveDataAsync(keys, rawDatas).ToCoroutine(result =>
+            {
+                if (result.IsError) throw new($"Save {keys.ToArrayString()} error: {result.Error}");
+                progress?.Report(1);
+                callback?.Invoke();
+            });
         }
 
         IEnumerator IWritableSerializableDataStorage.WriteBytesAsync(string[] keys, byte[][] rawDatas, Action callback, IProgress<float> progress)
         {
-            throw new NotImplementedException();
+            return FbInstant.Player.SaveDataAsync(keys, rawDatas.Select(Convert.ToBase64String).ToArray()).ToCoroutine(result =>
+            {
+                if (result.IsError) throw new($"Save {keys.ToArrayString()} error: {result.Error}");
+                progress?.Report(1);
+                callback?.Invoke();
+            });
         }
 
         IEnumerator IWritableDataStorage.FlushAsync(Action callback, IProgress<float> progress)
         {
-            throw new NotImplementedException();
+            return FbInstant.Player.FlushDataAsync().ToCoroutine(result =>
+            {
+                if (result.IsError) throw new($"Flush {this.GetType().Name} error: {result.Error}");
+                progress?.Report(1);
+                callback?.Invoke();
+            });
         }
         #endif
     }

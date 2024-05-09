@@ -49,7 +49,7 @@ namespace Zenject
 
                 container.BindInterfacesTo<AssetDataStorage>().AsSingle().WhenInjectedInto<IDataManager>();
                 container.BindInterfacesTo<PlayerPrefsDataStorage>().AsSingle().WhenInjectedInto<IDataManager>();
-                #if UNIT_FBINSTANT
+                #if UNIT_FBINSTANT && UNITY_WEBGL && !UNITY_EDITOR
                 container.BindInterfacesTo<FbInstantDataStorage>().AsSingle().WhenInjectedInto<IDataManager>();
                 #endif
 
