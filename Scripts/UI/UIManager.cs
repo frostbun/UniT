@@ -220,8 +220,8 @@ namespace UniT.UI
                 false
             );
             activity.Transform.SetAsLastSibling();
-            activity.OnShow();
             this.logger.Debug($"{activity.Name} status: {activity.CurrentStatus = nextStatus}");
+            activity.OnShow();
             return activity;
         }
 
@@ -230,8 +230,8 @@ namespace UniT.UI
             if (removeFromStack) this.activityStack.Remove(activity);
             if (activity.CurrentStatus is IActivity.Status.Hidden) return;
             activity.Transform.SetParent(this.canvas.HiddenActivities, false);
-            activity.OnHide();
             this.logger.Debug($"{activity.Name} status: {activity.CurrentStatus = IActivity.Status.Hidden}");
+            activity.OnHide();
             if (autoStack && this.activityStack.LastOrDefault() is { CurrentStatus: not IActivity.Status.Stacking } nextActivity)
             {
                 this.Show(nextActivity, IActivity.Status.Stacking);
@@ -241,14 +241,14 @@ namespace UniT.UI
         private void Dispose(IActivity activity, bool autoStack)
         {
             this.Hide(activity, true, autoStack);
-            activity.OnDispose();
-            this.logger.Debug($"{activity.Name} status: {activity.CurrentStatus = IActivity.Status.Disposed}");
-            Object.Destroy(activity.GameObject);
             this.activities.Remove(activity);
             if (this.instanceToPrefab.TryRemove(activity, out var prefab))
             {
                 this.prefabToInstance.Remove(prefab);
             }
+            this.logger.Debug($"{activity.Name} status: {activity.CurrentStatus = IActivity.Status.Disposed}");
+            activity.OnDispose();
+            Object.Destroy(activity.GameObject);
             if (this.instanceToKey.TryRemove(activity, out var key))
             {
                 this.assetsManager.Unload(key);
