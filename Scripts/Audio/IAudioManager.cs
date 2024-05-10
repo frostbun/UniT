@@ -1,6 +1,7 @@
 namespace UniT.Audio
 {
     using System;
+    using UnityEngine;
     #if UNIT_UNITASK
     using System.Threading;
     using Cysharp.Threading.Tasks;
@@ -28,6 +29,10 @@ namespace UniT.Audio
 
         #region Sound
 
+        public void RegisterSound(AudioSource soundSource);
+
+        public void UnregisterSound(AudioSource soundSource);
+
         public void LoadSound(string name);
 
         public void PlaySoundOneShot(string name);
@@ -51,6 +56,8 @@ namespace UniT.Audio
         public void LoadMusic(string name);
 
         public void PlayMusic(string name, bool force = false);
+
+        public void SetMusicTime(float time);
 
         public void PauseMusic();
 

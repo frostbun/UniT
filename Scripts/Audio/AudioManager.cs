@@ -25,8 +25,9 @@ namespace UniT.Audio
         private readonly GameObject  audioSourcesContainer;
         private readonly AudioSource musicSource;
 
-        private readonly Queue<AudioSource>              pooledSoundSources = new Queue<AudioSource>();
-        private readonly Dictionary<string, AudioSource> loadedSoundSources = new Dictionary<string, AudioSource>();
+        private readonly HashSet<AudioSource>            registeredSoundSources = new HashSet<AudioSource>();
+        private readonly Queue<AudioSource>              pooledSoundSources     = new Queue<AudioSource>();
+        private readonly Dictionary<string, AudioSource> loadedSoundSources     = new Dictionary<string, AudioSource>();
 
         [Preserve]
         public AudioManager(IAssetsManager assetsManager, ILoggerManager loggerManager)
@@ -127,6 +128,7 @@ namespace UniT.Audio
 
         private void ConfigureAllSoundSources()
         {
+            this.registeredSoundSources.ForEach(this.ConfigureSoundSource);
             this.loadedSoundSources.ForEach(this.ConfigureSoundSource);
         }
 
@@ -145,6 +147,17 @@ namespace UniT.Audio
         #endregion
 
         #region Sound
+
+        void IAudioManager.RegisterSound(AudioSource soundSource)
+        {
+            this.ConfigureSoundSource(soundSource);
+            this.registeredSoundSources.Add(soundSource);
+        }
+
+        void IAudioManager.UnregisterSound(AudioSource soundSource)
+        {
+            this.registeredSoundSources.Remove(soundSource);
+        }
 
         void IAudioManager.LoadSound(string name) => this.LoadSound(name);
 
@@ -242,6 +255,8 @@ namespace UniT.Audio
             this.musicSource.Play();
             this.logger.Debug($"Playing music {name}");
         }
+
+        void IAudioManager.SetMusicTime(float time) => this.musicSource.time = time;
 
         void IAudioManager.PauseMusic() => this.musicSource.Pause();
 
