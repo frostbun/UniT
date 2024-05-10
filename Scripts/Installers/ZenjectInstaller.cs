@@ -15,7 +15,14 @@ namespace Zenject
 
     public static class ZenjectInstaller
     {
-        public static void BindUniT(this DiContainer container, IEnumerable<Type> dataTypes = null, RootUICanvas rootUICanvas = null, LogLevel logLevel = LogLevel.Info)
+        public static void BindUniT(
+            this DiContainer  container,
+            RootUICanvas      rootUICanvas    = null,
+            IEnumerable<Type> dataTypes       = null,
+            IEnumerable<Type> storageTypes    = null,
+            IEnumerable<Type> serializerTypes = null,
+            LogLevel          logLevel        = LogLevel.Info
+        )
         {
             container.BindInterfacesTo<ZenjectInstantiator>().AsSingle();
 
@@ -45,13 +52,25 @@ namespace Zenject
 
             if (dataTypes is { })
             {
+                #region Data
+
+                dataTypes.ForEach(type =>
+                {
+                    if (!typeof(IData).IsAssignableFrom(type)) throw new ArgumentException($"{type} does not implement {nameof(IData)}");
+                    container.BindInterfacesAndSelfTo(type).AsSingle();
+                });
+
+                #endregion
+
                 #region Storages
 
                 container.BindInterfacesTo<AssetDataStorage>().AsSingle().WhenInjectedInto<IDataManager>();
                 container.BindInterfacesTo<PlayerPrefsDataStorage>().AsSingle().WhenInjectedInto<IDataManager>();
-                #if UNIT_FBINSTANT && UNITY_WEBGL && !UNITY_EDITOR
-                container.BindInterfacesTo<FbInstantDataStorage>().AsSingle().WhenInjectedInto<IDataManager>();
-                #endif
+                storageTypes?.ForEach(type =>
+                {
+                    if (!typeof(IDataStorage).IsAssignableFrom(type)) throw new ArgumentException($"{type} does not implement {nameof(IDataStorage)}");
+                    container.BindInterfacesTo(type).AsSingle().WhenInjectedInto<IDataManager>();
+                });
 
                 #endregion
 
@@ -61,14 +80,14 @@ namespace Zenject
                 #if UNIT_NEWTONSOFT_JSON
                 container.BindInterfacesTo<JsonSerializer>().AsSingle().WhenInjectedInto<IDataManager>();
                 #endif
+                serializerTypes?.ForEach(type =>
+                {
+                    if (!typeof(ISerializer).IsAssignableFrom(type)) throw new ArgumentException($"{type} does not implement {nameof(ISerializer)}");
+                    container.BindInterfacesTo(type).AsSingle().WhenInjectedInto<IDataManager>();
+                });
 
                 #endregion
 
-                dataTypes.ForEach(type =>
-                {
-                    if (!typeof(IData).IsAssignableFrom(type)) throw new ArgumentException($"{type} does not implement IData");
-                    container.BindInterfacesAndSelfTo(type).AsSingle();
-                });
                 container.BindInterfacesTo<DataManager>().AsSingle();
             }
 
@@ -86,8 +105,8 @@ namespace Zenject
 
             #region Utilities
 
-            container.BindInterfacesTo<AudioManager>().AsSingle();
             container.BindInterfacesTo<ObjectPoolManager>().AsSingle();
+            container.BindInterfacesTo<AudioManager>().AsSingle();
             container.BindInterfacesTo<EntityManager>().AsSingle();
 
             #endregion

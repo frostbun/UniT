@@ -16,7 +16,14 @@ namespace UniT.Installers
 
     public static class VContainerInstaller
     {
-        public static void RegisterUniT(this IContainerBuilder builder, IEnumerable<Type> dataTypes = null, RootUICanvas rootUICanvas = null, LogLevel logLevel = LogLevel.Info)
+        public static void RegisterUniT(
+            this IContainerBuilder builder,
+            RootUICanvas           rootUICanvas    = null,
+            IEnumerable<Type>      dataTypes       = null,
+            IEnumerable<Type>      storageTypes    = null,
+            IEnumerable<Type>      serializerTypes = null,
+            LogLevel               logLevel        = LogLevel.Info
+        )
         {
             builder.Register<VContainerInstantiator>(Lifetime.Singleton).AsImplementedInterfaces();
 
@@ -45,13 +52,25 @@ namespace UniT.Installers
 
             if (dataTypes is { })
             {
+                #region Data
+
+                dataTypes.ForEach(type =>
+                {
+                    if (!typeof(IData).IsAssignableFrom(type)) throw new ArgumentException($"{type} does not implement {nameof(IData)}");
+                    builder.Register(type, Lifetime.Singleton).AsSelf().AsImplementedInterfaces();
+                });
+
+                #endregion
+
                 #region Storages
 
                 builder.Register<AssetDataStorage>(Lifetime.Singleton).AsImplementedInterfaces();
                 builder.Register<PlayerPrefsDataStorage>(Lifetime.Singleton).AsImplementedInterfaces();
-                #if UNIT_FBINSTANT && UNITY_WEBGL && !UNITY_EDITOR
-                container.Register<FbInstantDataStorage>(Lifetime.Singleton).AsImplementedInterfaces();
-                #endif
+                storageTypes?.ForEach(type =>
+                {
+                    if (!typeof(IDataStorage).IsAssignableFrom(type)) throw new ArgumentException($"{type} does not implement {nameof(IDataStorage)}");
+                    builder.Register(type, Lifetime.Singleton).AsImplementedInterfaces();
+                });
 
                 #endregion
 
@@ -61,14 +80,14 @@ namespace UniT.Installers
                 #if UNIT_NEWTONSOFT_JSON
                 builder.Register<JsonSerializer>(Lifetime.Singleton).AsImplementedInterfaces();
                 #endif
+                serializerTypes?.ForEach(type =>
+                {
+                    if (!typeof(ISerializer).IsAssignableFrom(type)) throw new ArgumentException($"{type} does not implement {nameof(ISerializer)}");
+                    builder.Register(type, Lifetime.Singleton).AsImplementedInterfaces();
+                });
 
                 #endregion
 
-                dataTypes.ForEach(type =>
-                {
-                    if (!typeof(IData).IsAssignableFrom(type)) throw new ArgumentException($"{type} does not implement IData");
-                    builder.Register(type, Lifetime.Singleton).AsSelf().AsImplementedInterfaces();
-                });
                 builder.Register<DataManager>(Lifetime.Singleton).AsImplementedInterfaces();
             }
 
@@ -86,8 +105,8 @@ namespace UniT.Installers
 
             #region Utilities
 
-            builder.Register<AudioManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<ObjectPoolManager>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<AudioManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<EntityManager>(Lifetime.Singleton).AsImplementedInterfaces();
 
             #endregion

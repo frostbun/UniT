@@ -15,7 +15,14 @@ namespace UniT.DI
 
     public static class DIInstaller
     {
-        public static void AddUniT(this DependencyContainer container, IEnumerable<Type> dataTypes = null, RootUICanvas rootUICanvas = null, LogLevel logLevel = LogLevel.Info)
+        public static void AddUniT(
+            this DependencyContainer container,
+            RootUICanvas             rootUICanvas    = null,
+            IEnumerable<Type>        dataTypes       = null,
+            IEnumerable<Type>        storageTypes    = null,
+            IEnumerable<Type>        serializerTypes = null,
+            LogLevel                 logLevel        = LogLevel.Info
+        )
         {
             container.AddInterfaces<DIInstantiator>();
 
@@ -44,13 +51,25 @@ namespace UniT.DI
 
             if (dataTypes is { })
             {
+                #region Data
+
+                dataTypes.ForEach(type =>
+                {
+                    if (!typeof(IData).IsAssignableFrom(type)) throw new ArgumentException($"{type} does not implement {nameof(IData)}");
+                    container.AddInterfacesAndSelf(type);
+                });
+
+                #endregion
+
                 #region Storages
 
                 container.AddInterfaces<AssetDataStorage>();
                 container.AddInterfaces<PlayerPrefsDataStorage>();
-                #if UNIT_FBINSTANT && UNITY_WEBGL && !UNITY_EDITOR
-                container.AddInterfaces<FbInstantDataStorage>();
-                #endif
+                storageTypes?.ForEach(type =>
+                {
+                    if (!typeof(IDataStorage).IsAssignableFrom(type)) throw new ArgumentException($"{type} does not implement {nameof(IDataStorage)}");
+                    container.AddInterfaces(type);
+                });
 
                 #endregion
 
@@ -60,14 +79,14 @@ namespace UniT.DI
                 #if UNIT_NEWTONSOFT_JSON
                 container.AddInterfaces<JsonSerializer>();
                 #endif
+                serializerTypes?.ForEach(type =>
+                {
+                    if (!typeof(ISerializer).IsAssignableFrom(type)) throw new ArgumentException($"{type} does not implement {nameof(ISerializer)}");
+                    container.AddInterfaces(type);
+                });
 
                 #endregion
 
-                dataTypes.ForEach(type =>
-                {
-                    if (!typeof(IData).IsAssignableFrom(type)) throw new ArgumentException($"{type} does not implement IData");
-                    container.AddInterfacesAndSelf(type);
-                });
                 container.AddInterfaces<DataManager>();
             }
 
@@ -85,8 +104,8 @@ namespace UniT.DI
 
             #region Utilities
 
-            container.AddInterfaces<AudioManager>();
             container.AddInterfaces<ObjectPoolManager>();
+            container.AddInterfaces<AudioManager>();
             container.AddInterfaces<EntityManager>();
 
             #endregion
