@@ -10,7 +10,7 @@
     "email": "manhnb1911@gmail.com",
     "url": "https://github.com/frostbun"
   },
-  "gitDependencies": {
-    "com.frostbun.unit.extensions": "https://github.com/frostbun/UniT.Extensions.git"
+  "dependencies": {
+    "com.frostbun.unit.extensions": "1.0.0"
   }
 }

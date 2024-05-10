@@ -2,7 +2,7 @@
 
 ## Getting Started
 
-1. Install [Git Dependency Resolver](https://github.com/mob-sakai/GitDependencyResolverForUnity) or install these packages manually:
+1. Install these packages:
     - [UniT Extensions](https://github.com/frostbun/UniT.Extensions)
 
 2. Install via git url
