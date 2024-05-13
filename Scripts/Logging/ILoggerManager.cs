@@ -8,6 +8,6 @@
 
         public ILogger GetLogger<T>() => this.GetLogger(typeof(T).Name);
 
-        public ILogger GetDefaultLogger() => this.GetLogger(this.GetType().Name);
+        public ILogger GetDefaultLogger() => this.GetLogger(nameof(UniT));
     }
 }

@@ -100,7 +100,7 @@ namespace UniT.Data
                             }
                             default: throw new InvalidOperationException();
                         }
-                        this.logger.Debug($"Populated {keys.ToArrayString()}");
+                        this.logger.Debug($"Populated {keys.Join(", ")}");
                     })
                 );
         }
@@ -134,7 +134,7 @@ namespace UniT.Data
                             }
                             default: throw new InvalidOperationException();
                         }
-                        this.logger.Debug($"Saved {keys.ToArrayString()}");
+                        this.logger.Debug($"Saved {keys.Join(", ")}");
                     })
                 );
         }
@@ -147,7 +147,7 @@ namespace UniT.Data
                     var keys    = group.Select(type => type.GetKey()).ToArray();
                     var storage = group.Key;
                     storage.Flush();
-                    this.logger.Debug($"Flushed {keys.ToArrayString()}");
+                    this.logger.Debug($"Flushed {keys.Join(", ")}");
                 });
         }
 
@@ -203,7 +203,7 @@ namespace UniT.Data
                                     }
                                     default: throw new InvalidOperationException();
                                 }
-                                this.logger.Debug($"Populated {keys.ToArrayString()}");
+                                this.logger.Debug($"Populated {keys.Join(", ")}");
                             },
                             progress,
                             cancellationToken
@@ -242,7 +242,7 @@ namespace UniT.Data
                                     }
                                     default: throw new InvalidOperationException();
                                 }
-                                this.logger.Debug($"Saved {keys.ToArrayString()}");
+                                this.logger.Debug($"Saved {keys.Join(", ")}");
                             },
                             progress,
                             cancellationToken
@@ -260,7 +260,7 @@ namespace UniT.Data
                         var keys    = group.Select(type => type.GetKey()).ToArray();
                         var storage = group.Key;
                         await storage.FlushAsync(progress, cancellationToken);
-                        this.logger.Debug($"Flushed {keys.ToArrayString()}");
+                        this.logger.Debug($"Flushed {keys.Join(", ")}");
                     },
                     progress,
                     cancellationToken
@@ -323,7 +323,7 @@ namespace UniT.Data
                         }
                         default: throw new InvalidOperationException();
                     }
-                    this.logger.Debug($"Populated {keys.ToArrayString()}");
+                    this.logger.Debug($"Populated {keys.Join(", ")}");
                 }
             }
             progress?.Report(1);
@@ -370,7 +370,7 @@ namespace UniT.Data
                         }
                         default: throw new InvalidOperationException();
                     }
-                    this.logger.Debug($"Saved {keys.ToArrayString()}");
+                    this.logger.Debug($"Saved {keys.Join(", ")}");
                 }
             }
             progress?.Report(1);
@@ -385,7 +385,7 @@ namespace UniT.Data
                 var keys = group.Select(type => type.GetKey()).ToArray();
                 var storage = group.Key;
                 yield return storage.FlushAsync();
-                this.logger.Debug($"Flushed {keys.ToArrayString()}");
+                this.logger.Debug($"Flushed {keys.Join(", ")}");
             }
             progress?.Report(1);
             callback?.Invoke();
