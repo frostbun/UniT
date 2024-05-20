@@ -244,6 +244,8 @@ namespace UniT.Audio
 
         string IAudioManager.CurrentMusic => this.currentMusic;
 
+        float IAudioManager.MusicTime { get => this.musicSource.time; set => this.musicSource.time = value; }
+
         private string currentMusic;
 
         void IAudioManager.LoadMusic(string name) => this.LoadMusic(name);
@@ -255,8 +257,6 @@ namespace UniT.Audio
             this.musicSource.Play();
             this.logger.Debug($"Playing music {name}");
         }
-
-        void IAudioManager.SetMusicTime(float time) => this.musicSource.time = time;
 
         void IAudioManager.PauseMusic() => this.musicSource.Pause();
 

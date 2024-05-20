@@ -1,4 +1,4 @@
-namespace UniT.ECC.Controller
+namespace UniT.Entities.Controller
 {
     public interface IController
     {

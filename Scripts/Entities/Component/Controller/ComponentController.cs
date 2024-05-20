@@ -1,7 +1,7 @@
-namespace UniT.ECC.Component.Controller
+namespace UniT.Entities.Component.Controller
 {
-    using UniT.ECC.Controller;
-    using UniT.ECC.Entity;
+    using UniT.Entities.Controller;
+    using UniT.Entities.Entity;
     using UnityEngine;
     #if UNIT_UNITASK
     using System.Threading;

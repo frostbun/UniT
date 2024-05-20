@@ -44,9 +44,15 @@ namespace UniT.Data
         IEnumerator IStringSerializer.SerializeAsync(IData data, Action<string> callback) => Task.Run(() => this.Serialize(data)).ToCoroutine(callback);
         #endif
 
-        private void Populate(IData data, string rawData) => JsonConvert.PopulateObject(rawData, data, this.settings);
+        private void Populate(IData data, string rawData)
+        {
+            JsonConvert.PopulateObject(rawData, data, this.settings);
+        }
 
-        private string Serialize(IData data) => JsonConvert.SerializeObject(data, this.settings);
+        private string Serialize(IData data)
+        {
+            return JsonConvert.SerializeObject(data, this.settings);
+        }
     }
 }
 #endif

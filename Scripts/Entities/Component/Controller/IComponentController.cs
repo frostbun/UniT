@@ -1,6 +1,6 @@
-﻿namespace UniT.ECC.Component.Controller
+﻿namespace UniT.Entities.Component.Controller
 {
-    using UniT.ECC.Controller;
+    using UniT.Entities.Controller;
 
     public interface IComponentController : IController
     {

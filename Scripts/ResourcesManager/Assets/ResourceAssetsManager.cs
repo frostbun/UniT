@@ -24,9 +24,9 @@
             return Resources.Load<T>(key);
         }
 
-        protected override void Unload(Object obj)
+        protected override void Unload(Object asset)
         {
-            Resources.UnloadAsset(obj);
+            Resources.UnloadAsset(asset);
         }
 
         #if UNIT_UNITASK

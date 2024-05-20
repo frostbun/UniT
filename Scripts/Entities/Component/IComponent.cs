@@ -1,6 +1,6 @@
-﻿namespace UniT.ECC.Component
+﻿namespace UniT.Entities.Component
 {
-    using UniT.ECC.Entity;
+    using UniT.Entities.Entity;
     using UnityEngine;
     #if UNIT_UNITASK
     using System.Threading;

@@ -1,7 +1,7 @@
-namespace UniT.ECC.Entity.Controller
+namespace UniT.Entities.Entity.Controller
 {
     using System;
-    using UniT.ECC.Controller;
+    using UniT.Entities.Controller;
 
     public abstract class Entity<TController> : Entity, IHasController where TController : IEntityController
     {
@@ -20,7 +20,7 @@ namespace UniT.ECC.Entity.Controller
         protected sealed override void OnRecycle() => this.Controller.OnRecycle();
     }
 
-    public abstract class Entity<TParams, TController> : ECC.Entity.Entity<TParams>, IHasController where TController : IEntityController
+    public abstract class Entity<TParams, TController> : Entities.Entity.Entity<TParams>, IHasController where TController : IEntityController
     {
         Type IHasController.ControllerType => this.ControllerType;
 

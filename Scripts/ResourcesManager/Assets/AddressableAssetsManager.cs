@@ -25,9 +25,9 @@ namespace UniT.ResourcesManager
             return Addressables.LoadAssetAsync<T>(key).WaitForCompletion();
         }
 
-        protected override void Unload(Object obj)
+        protected override void Unload(Object asset)
         {
-            Addressables.Release(obj);
+            Addressables.Release(asset);
         }
 
         #if UNIT_UNITASK
@@ -35,7 +35,7 @@ namespace UniT.ResourcesManager
         {
             return Addressables.LoadAssetAsync<T>(key)
                 .ToUniTask(progress: progress, cancellationToken: cancellationToken)
-                .ContinueWith(obj => (Object)obj);
+                .ContinueWith(asset => (Object)asset);
         }
         #else
         protected override IEnumerator LoadAsync<T>(string key, Action<Object> callback, IProgress<float> progress)

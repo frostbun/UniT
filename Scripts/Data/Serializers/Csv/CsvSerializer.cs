@@ -23,28 +23,28 @@ namespace UniT.Data
 
         bool ISerializer.CanSerialize(Type type) => typeof(ICsvData).IsAssignableFrom(type);
 
-        void IStringSerializer.Populate(IData data, string rawData) => this.Populate(data, rawData);
+        void IStringSerializer.Populate(IData data, string rawData) => Populate(data, rawData);
 
-        string IStringSerializer.Serialize(IData data) => this.Serialize(data);
+        string IStringSerializer.Serialize(IData data) => Serialize(data);
 
         #if UNIT_UNITASK
-        UniTask IStringSerializer.PopulateAsync(IData data, string rawData) => UniTask.RunOnThreadPool(() => this.Populate(data, rawData));
+        UniTask IStringSerializer.PopulateAsync(IData data, string rawData) => UniTask.RunOnThreadPool(() => Populate(data, rawData));
 
-        UniTask<string> IStringSerializer.SerializeAsync(IData data) => UniTask.RunOnThreadPool(() => this.Serialize(data));
+        UniTask<string> IStringSerializer.SerializeAsync(IData data) => UniTask.RunOnThreadPool(() => Serialize(data));
         #else
-        IEnumerator IStringSerializer.PopulateAsync(IData data, string rawData, Action callback) => Task.Run(() => this.Populate(data, rawData)).ToCoroutine(callback);
+        IEnumerator IStringSerializer.PopulateAsync(IData data, string rawData, Action callback) => Task.Run(() => Populate(data, rawData)).ToCoroutine(callback);
 
-        IEnumerator IStringSerializer.SerializeAsync(IData data, Action<string> callback) => Task.Run(() => this.Serialize(data)).ToCoroutine(callback);
+        IEnumerator IStringSerializer.SerializeAsync(IData data, Action<string> callback) => Task.Run(() => Serialize(data)).ToCoroutine(callback);
         #endif
 
-        private void Populate(IData data, string rawData)
+        private static void Populate(IData data, string rawData)
         {
             var reader = new CsvReader(rawData);
             var parser = new CsvParser((ICsvData)data, reader);
             while (reader.Read()) parser.Parse();
         }
 
-        private string Serialize(IData data)
+        private static string Serialize(IData data)
         {
             throw new NotImplementedException();
         }
@@ -101,6 +101,11 @@ namespace UniT.Data
                 var csvFields = data.RowType.GetCsvFields().ToArray();
                 this.keyField                          = data.Key.IsNullOrWhitespace() ? csvFields.First() : csvFields.First(field => field.Name == data.Key);
                 (this.normalFields, this.nestedFields) = csvFields.Split(field => !typeof(ICsvData).IsAssignableFrom(field.FieldType));
+                this.normalFields.ForEach(field =>
+                {
+                    var columnName = field.GetCsvFieldName(this.data.Prefix);
+                    if (!this.reader.ContainsColumn(columnName)) throw new InvalidOperationException($"Field {columnName} - {this.data.RowType.Name} not found. If this is intentional, add [CsvIgnore] attribute to the field.");
+                });
             }
 
             public void Parse()
@@ -108,16 +113,14 @@ namespace UniT.Data
                 var keyValue = default(object);
                 var row      = Activator.CreateInstance(this.data.RowType);
 
-                foreach (var field in this.normalFields)
+                this.normalFields.ForEach(field =>
                 {
-                    var columnName = this.data.Prefix + field.GetCsvFieldName();
-                    if (!this.reader.ContainsColumn(columnName)) throw new InvalidOperationException($"Field {columnName} not found in {this.data.RowType.Name}. If this is intentional, add [CsvIgnore] attribute to the field.");
-                    var str = this.reader.GetCell(columnName);
-                    if (str.IsNullOrWhitespace()) continue;
+                    var str = this.reader.GetCell(field.GetCsvFieldName(this.data.Prefix));
+                    if (str.IsNullOrWhitespace()) return;
                     var value = ConverterManager.Instance.ConvertFromString(str, field.FieldType);
                     field.SetValue(row, value);
-                    if (this.keyField == field) keyValue = value;
-                }
+                    if (field == this.keyField) keyValue = value;
+                });
 
                 if (keyValue is { })
                 {
@@ -125,16 +128,15 @@ namespace UniT.Data
                     this.nestedParsers.Clear();
                 }
 
-                foreach (var field in this.nestedFields)
-                {
+                this.nestedFields.ForEach(field =>
                     this.nestedParsers.GetOrAdd(field, () =>
                     {
                         var nestedData   = Activator.CreateInstance(field.FieldType);
                         var nestedParser = new CsvParser((ICsvData)nestedData, this.reader);
                         field.SetValue(row, nestedData);
                         return nestedParser;
-                    }).Parse();
-                }
+                    }).Parse()
+                );
             }
         }
     }

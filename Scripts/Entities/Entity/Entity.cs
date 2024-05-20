@@ -1,6 +1,6 @@
-﻿namespace UniT.ECC.Entity
+﻿namespace UniT.Entities.Entity
 {
-    using UniT.ECC.Component;
+    using UniT.Entities.Component;
 
     public abstract class BaseEntity : Component, IEntity
     {

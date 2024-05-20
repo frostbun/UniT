@@ -74,19 +74,19 @@ namespace UniT.Data
                         var keys = serializerGroup.Select(type => type.GetKey()).ToArray();
                         switch (storageGroup.Key)
                         {
-                            case IReadableSerializableDataStorage storage when serializerGroup.Key is IStringSerializer serializer:
-                            {
-                                var rawDatas = storage.ReadStrings(keys);
-                                IterTools.StrictZip(serializerGroup, rawDatas)
-                                    .Where((_,      rawData) => !rawData.IsNullOrWhitespace())
-                                    .ForEach((type, rawData) => serializer.Populate(this.datas[type], rawData));
-                                break;
-                            }
                             case IReadableSerializableDataStorage storage when serializerGroup.Key is IBinarySerializer serializer:
                             {
                                 var rawDatas = storage.ReadBytes(keys);
                                 IterTools.StrictZip(serializerGroup, rawDatas)
                                     .Where((_,      rawData) => rawData is { Length: > 0 })
+                                    .ForEach((type, rawData) => serializer.Populate(this.datas[type], rawData));
+                                break;
+                            }
+                            case IReadableSerializableDataStorage storage when serializerGroup.Key is IStringSerializer serializer:
+                            {
+                                var rawDatas = storage.ReadStrings(keys);
+                                IterTools.StrictZip(serializerGroup, rawDatas)
+                                    .Where((_,      rawData) => !rawData.IsNullOrWhitespace())
                                     .ForEach((type, rawData) => serializer.Populate(this.datas[type], rawData));
                                 break;
                             }
@@ -114,16 +114,16 @@ namespace UniT.Data
                         var keys = serializerGroup.Select(type => type.GetKey()).ToArray();
                         switch (storageGroup.Key)
                         {
-                            case IWritableSerializableDataStorage storage when serializerGroup.Key is IStringSerializer serializer:
-                            {
-                                var rawDatas = serializerGroup.Select(type => serializer.Serialize(this.datas[type])).ToArray();
-                                storage.WriteStrings(keys, rawDatas);
-                                break;
-                            }
                             case IWritableSerializableDataStorage storage when serializerGroup.Key is IBinarySerializer serializer:
                             {
                                 var rawDatas = serializerGroup.Select(type => serializer.Serialize(this.datas[type])).ToArray();
                                 storage.WriteBytes(keys, rawDatas);
+                                break;
+                            }
+                            case IWritableSerializableDataStorage storage when serializerGroup.Key is IStringSerializer serializer:
+                            {
+                                var rawDatas = serializerGroup.Select(type => serializer.Serialize(this.datas[type])).ToArray();
+                                storage.WriteStrings(keys, rawDatas);
                                 break;
                             }
                             case IWritableNonSerializableDataStorage storage when serializerGroup.Key is null:
@@ -177,19 +177,19 @@ namespace UniT.Data
                                 var keys = serializerGroup.Select(type => type.GetKey()).ToArray();
                                 switch (storageGroup.Key)
                                 {
-                                    case IReadableSerializableDataStorage storage when serializerGroup.Key is IStringSerializer serializer:
-                                    {
-                                        var rawDatas = await storage.ReadStringsAsync(keys, progress, cancellationToken);
-                                        await IterTools.StrictZip(serializerGroup, rawDatas)
-                                            .Where((_,           rawData) => !rawData.IsNullOrWhitespace())
-                                            .ForEachAsync((type, rawData) => serializer.PopulateAsync(this.datas[type], rawData));
-                                        break;
-                                    }
                                     case IReadableSerializableDataStorage storage when serializerGroup.Key is IBinarySerializer serializer:
                                     {
                                         var rawDatas = await storage.ReadBytesAsync(keys, progress, cancellationToken);
                                         await IterTools.StrictZip(serializerGroup, rawDatas)
                                             .Where((_,           rawData) => rawData is { Length: > 0 })
+                                            .ForEachAsync((type, rawData) => serializer.PopulateAsync(this.datas[type], rawData));
+                                        break;
+                                    }
+                                    case IReadableSerializableDataStorage storage when serializerGroup.Key is IStringSerializer serializer:
+                                    {
+                                        var rawDatas = await storage.ReadStringsAsync(keys, progress, cancellationToken);
+                                        await IterTools.StrictZip(serializerGroup, rawDatas)
+                                            .Where((_,           rawData) => !rawData.IsNullOrWhitespace())
                                             .ForEachAsync((type, rawData) => serializer.PopulateAsync(this.datas[type], rawData));
                                         break;
                                     }
@@ -222,16 +222,16 @@ namespace UniT.Data
                                 var keys = serializerGroup.Select(type => type.GetKey()).ToArray();
                                 switch (storageGroup.Key)
                                 {
-                                    case IWritableSerializableDataStorage storage when serializerGroup.Key is IStringSerializer serializer:
-                                    {
-                                        var rawDatas = await serializerGroup.Select(type => serializer.SerializeAsync(this.datas[type]));
-                                        await storage.WriteStringsAsync(keys, rawDatas, progress, cancellationToken);
-                                        break;
-                                    }
                                     case IWritableSerializableDataStorage storage when serializerGroup.Key is IBinarySerializer serializer:
                                     {
                                         var rawDatas = await serializerGroup.Select(type => serializer.SerializeAsync(this.datas[type]));
                                         await storage.WriteBytesAsync(keys, rawDatas, progress, cancellationToken);
+                                        break;
+                                    }
+                                    case IWritableSerializableDataStorage storage when serializerGroup.Key is IStringSerializer serializer:
+                                    {
+                                        var rawDatas = await serializerGroup.Select(type => serializer.SerializeAsync(this.datas[type]));
+                                        await storage.WriteStringsAsync(keys, rawDatas, progress, cancellationToken);
                                         break;
                                     }
                                     case IWritableNonSerializableDataStorage storage when serializerGroup.Key is null:
@@ -289,23 +289,23 @@ namespace UniT.Data
                     var keys = serializerGroup.Select(type => type.GetKey()).ToArray();
                     switch (storageGroup.Key)
                     {
-                        case IReadableSerializableDataStorage storage when serializerGroup.Key is IStringSerializer serializer:
-                        {
-                            var rawDatas = default(string[]);
-                            yield return storage.ReadStringsAsync(keys, result => rawDatas = result);
-                            // TODO: make it run concurrently
-                            foreach (var (type, rawData) in IterTools.StrictZip(serializerGroup, rawDatas).Where((_, rawData) => !rawData.IsNullOrWhitespace()))
-                            {
-                                yield return serializer.PopulateAsync(this.datas[type], rawData);
-                            }
-                            break;
-                        }
                         case IReadableSerializableDataStorage storage when serializerGroup.Key is IBinarySerializer serializer:
                         {
                             var rawDatas = default(byte[][]);
                             yield return storage.ReadBytesAsync(keys, result => rawDatas = result);
                             // TODO: make it run concurrently
                             foreach (var (type, rawData) in IterTools.StrictZip(serializerGroup, rawDatas).Where((_, rawData) => rawData is { Length: > 0 }))
+                            {
+                                yield return serializer.PopulateAsync(this.datas[type], rawData);
+                            }
+                            break;
+                        }
+                        case IReadableSerializableDataStorage storage when serializerGroup.Key is IStringSerializer serializer:
+                        {
+                            var rawDatas = default(string[]);
+                            yield return storage.ReadStringsAsync(keys, result => rawDatas = result);
+                            // TODO: make it run concurrently
+                            foreach (var (type, rawData) in IterTools.StrictZip(serializerGroup, rawDatas).Where((_, rawData) => !rawData.IsNullOrWhitespace()))
                             {
                                 yield return serializer.PopulateAsync(this.datas[type], rawData);
                             }
@@ -340,17 +340,6 @@ namespace UniT.Data
                     var keys = serializerGroup.Select(type => type.GetKey()).ToArray();
                     switch (storageGroup.Key)
                     {
-                        case IWritableSerializableDataStorage storage when serializerGroup.Key is IStringSerializer serializer:
-                        {
-                            var rawDatas = new List<string>();
-                            // TODO: make it run concurrently
-                            foreach (var type in serializerGroup)
-                            {
-                                yield return serializer.SerializeAsync(this.datas[type], result => rawDatas.Add(result));
-                            }
-                            yield return storage.WriteStringsAsync(keys, rawDatas.ToArray());
-                            break;
-                        }
                         case IWritableSerializableDataStorage storage when serializerGroup.Key is IBinarySerializer serializer:
                         {
                             var rawDatas = new List<byte[]>();
@@ -360,6 +349,17 @@ namespace UniT.Data
                                 yield return serializer.SerializeAsync(this.datas[type], result => rawDatas.Add(result));
                             }
                             yield return storage.WriteBytesAsync(keys, rawDatas.ToArray());
+                            break;
+                        }
+                        case IWritableSerializableDataStorage storage when serializerGroup.Key is IStringSerializer serializer:
+                        {
+                            var rawDatas = new List<string>();
+                            // TODO: make it run concurrently
+                            foreach (var type in serializerGroup)
+                            {
+                                yield return serializer.SerializeAsync(this.datas[type], result => rawDatas.Add(result));
+                            }
+                            yield return storage.WriteStringsAsync(keys, rawDatas.ToArray());
                             break;
                         }
                         case IWritableNonSerializableDataStorage storage when serializerGroup.Key is null:

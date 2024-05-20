@@ -1,6 +1,6 @@
-namespace UniT.ECC.Entity
+namespace UniT.Entities.Entity
 {
-    using UniT.ECC.Component;
+    using UniT.Entities.Component;
 
     public interface IEntity : IComponent
     {

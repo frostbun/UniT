@@ -1,4 +1,4 @@
-﻿namespace UniT.ECC.Controller
+﻿namespace UniT.Entities.Controller
 {
     public abstract class Controller<TOwner> : IController where TOwner : IHasController
     {

@@ -5,7 +5,7 @@ namespace Zenject
     using System.Collections.Generic;
     using UniT.Audio;
     using UniT.Data;
-    using UniT.ECC;
+    using UniT.Entities;
     using UniT.Extensions;
     using UniT.Instantiator;
     using UniT.Logging;

@@ -1,11 +1,11 @@
-namespace UniT.UI.Adapter
+namespace UniT.UI.Adapters
 {
     using System.Collections.Generic;
     using UniT.Extensions;
     using UniT.UI.View;
     using UnityEngine;
 
-    public abstract class SimpleViewAdapter<TParams, TView> : View where TView : IViewWithParams<TParams>
+    public abstract class SimpleListAdapter<TParams, TView> : View where TView : IViewWithParams<TParams>
     {
         [SerializeField] private Transform content;
         [SerializeField] private TView     prefab;
@@ -35,8 +35,8 @@ namespace UniT.UI.Adapter
         {
             this.spawnedViews.Clear(view =>
             {
-                view.GameObject.SetActive(false);
                 view.OnHide();
+                view.GameObject.SetActive(false);
                 this.pooledViews.Enqueue(view);
             });
         }

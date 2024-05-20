@@ -1,11 +1,11 @@
-namespace UniT.ECC
+namespace UniT.Entities
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using UniT.ECC.Component;
-    using UniT.ECC.Controller;
-    using UniT.ECC.Entity;
+    using UniT.Entities.Component;
+    using UniT.Entities.Controller;
+    using UniT.Entities.Entity;
     using UniT.Extensions;
     using UniT.Instantiator;
     using UniT.Logging;

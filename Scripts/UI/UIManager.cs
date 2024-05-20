@@ -229,9 +229,9 @@ namespace UniT.UI
         {
             if (removeFromStack) this.activityStack.Remove(activity);
             if (activity.CurrentStatus is IActivity.Status.Hidden) return;
-            activity.Transform.SetParent(this.canvas.HiddenActivities, false);
             this.logger.Debug($"{activity.Name} status: {activity.CurrentStatus = IActivity.Status.Hidden}");
             activity.OnHide();
+            activity.Transform.SetParent(this.canvas.HiddenActivities, false);
             if (autoStack && this.activityStack.LastOrDefault() is { CurrentStatus: not IActivity.Status.Stacking } nextActivity)
             {
                 this.Show(nextActivity, IActivity.Status.Stacking);

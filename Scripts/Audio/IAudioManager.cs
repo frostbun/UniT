@@ -53,11 +53,11 @@ namespace UniT.Audio
 
         public string CurrentMusic { get; }
 
+        public float MusicTime { get; set; }
+
         public void LoadMusic(string name);
 
         public void PlayMusic(string name, bool force = false);
-
-        public void SetMusicTime(float time);
 
         public void PauseMusic();
 
