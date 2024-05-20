@@ -117,7 +117,7 @@ namespace UniT.Data
                 {
                     var str = this.reader.GetCell(field.GetCsvFieldName(this.data.Prefix));
                     if (str.IsNullOrWhitespace()) return;
-                    var value = ConverterManager.Instance.ConvertFromString(str, field.FieldType);
+                    var value = ConverterManager.ConvertFromString(str, field.FieldType);
                     field.SetValue(row, value);
                     if (field == this.keyField) keyValue = value;
                 });

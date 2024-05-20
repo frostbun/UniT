@@ -12,14 +12,14 @@ namespace UniT.Data
 
         protected override object ConvertFromString(string str, Type type)
         {
-            var tuple = ((float, float))ConverterManager.Instance.ConvertFromString(str, TupleType);
+            var tuple = ((float, float))ConverterManager.ConvertFromString(str, TupleType);
             return new Vector2(tuple.Item1, tuple.Item2);
         }
 
         protected override string ConvertToString(object obj, Type type)
         {
             var vector = (Vector2)obj;
-            return ConverterManager.Instance.ConvertToString((vector.x, vector.y), TupleType);
+            return ConverterManager.ConvertToString((vector.x, vector.y), TupleType);
         }
     }
 }

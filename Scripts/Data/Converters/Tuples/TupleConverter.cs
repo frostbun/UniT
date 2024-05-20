@@ -18,14 +18,14 @@ namespace UniT.Data
         {
             var items     = str.Split(new[] { this.separator }, StringSplitOptions.None);
             var itemTypes = type.GetGenericArguments();
-            return Activator.CreateInstance(type, IterTools.StrictZip(items, itemTypes, ConverterManager.Instance.ConvertFromString).ToArray());
+            return Activator.CreateInstance(type, IterTools.StrictZip(items, itemTypes, ConverterManager.ConvertFromString).ToArray());
         }
 
         protected override string ConvertToString(object obj, Type type)
         {
             var tuple     = (ITuple)obj;
             var itemTypes = type.GetGenericArguments();
-            return string.Join(this.separator, IterTools.StrictZip(tuple.ToEnumerable(), itemTypes, ConverterManager.Instance.ConvertToString));
+            return string.Join(this.separator, IterTools.StrictZip(tuple.ToEnumerable(), itemTypes, ConverterManager.ConvertToString));
         }
     }
 }

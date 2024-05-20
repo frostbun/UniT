@@ -5,94 +5,88 @@ namespace UniT.Data
     using System.Globalization;
     using System.Linq;
 
-    public sealed class ConverterManager
+    public static class ConverterManager
     {
-        public static ConverterManager Instance { get; }
+        private static readonly List<IConverter> Converters = new List<IConverter>();
 
         static ConverterManager()
         {
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
-            Instance                                = new ConverterManager();
-        }
 
-        private readonly List<IConverter> converters = new List<IConverter>();
-
-        private ConverterManager()
-        {
             #if UNIT_NEWTONSOFT_JSON
-            this.AddConverter(new JsonConverter()); // Default converter
+            AddConverter(new JsonConverter()); // Default converter
             #endif
 
             #region Primitives
 
-            this.AddConverter(new Int16Converter());
-            this.AddConverter(new Int32Converter());
-            this.AddConverter(new Int64Converter());
-            this.AddConverter(new UInt16Converter());
-            this.AddConverter(new UInt32Converter());
-            this.AddConverter(new UInt64Converter());
-            this.AddConverter(new SingleConverter());
-            this.AddConverter(new DoubleConverter());
-            this.AddConverter(new DecimalConverter());
-            this.AddConverter(new BooleanConverter());
-            this.AddConverter(new CharConverter());
-            this.AddConverter(new StringConverter());
-            this.AddConverter(new EnumConverter());
+            AddConverter(new Int16Converter());
+            AddConverter(new Int32Converter());
+            AddConverter(new Int64Converter());
+            AddConverter(new UInt16Converter());
+            AddConverter(new UInt32Converter());
+            AddConverter(new UInt64Converter());
+            AddConverter(new SingleConverter());
+            AddConverter(new DoubleConverter());
+            AddConverter(new DecimalConverter());
+            AddConverter(new BooleanConverter());
+            AddConverter(new CharConverter());
+            AddConverter(new StringConverter());
+            AddConverter(new EnumConverter());
 
             #endregion
 
             #region Tuples
 
-            this.AddConverter(new TupleConverter());
-            this.AddConverter(new Vector2Converter()); // Depend on TupleConverter
-            this.AddConverter(new Vector3Converter()); // Depend on TupleConverter
-            this.AddConverter(new Vector4Converter()); // Depend on TupleConverter
+            AddConverter(new TupleConverter());
+            AddConverter(new Vector2Converter()); // Depend on TupleConverter
+            AddConverter(new Vector3Converter()); // Depend on TupleConverter
+            AddConverter(new Vector4Converter()); // Depend on TupleConverter
 
             #endregion
 
             #region Collections
 
-            this.AddConverter(new ArrayConverter());
-            this.AddConverter(new ListAndReadOnlyCollectionConverter()); // Depend on ArrayConverter
-            this.AddConverter(new DictionaryConverter());                // Depend on ArrayConverter
-            this.AddConverter(new ReadOnlyDictionaryConverter());        // Depend on DictionaryConverter
+            AddConverter(new ArrayConverter());
+            AddConverter(new ListAndReadOnlyCollectionConverter()); // Depend on ArrayConverter
+            AddConverter(new DictionaryConverter());                // Depend on ArrayConverter
+            AddConverter(new ReadOnlyDictionaryConverter());        // Depend on DictionaryConverter
 
             #endregion
 
             #region DateTime
 
-            this.AddConverter(new DateTimeConverter());
-            this.AddConverter(new DateTimeOffsetConverter());
+            AddConverter(new DateTimeConverter());
+            AddConverter(new DateTimeOffsetConverter());
 
             #endregion
 
             #region Others
 
-            this.AddConverter(new UriConverter());
-            this.AddConverter(new GuidConverter());
+            AddConverter(new UriConverter());
+            AddConverter(new GuidConverter());
 
             #endregion
         }
 
-        public IConverter GetConverter(Type type)
+        public static void AddConverter(IConverter converter)
         {
-            return this.converters.LastOrDefault(converter => converter.CanConvert(type))
-                ?? throw new ArgumentOutOfRangeException(nameof(type), type, $"No converter found for type {type.Name}");
+            Converters.Add(converter);
         }
 
-        public void AddConverter(IConverter converter)
+        public static IConverter GetConverter(Type type)
         {
-            this.converters.Add(converter);
+            return Converters.LastOrDefault(converter => converter.CanConvert(type))
+                ?? throw new ArgumentOutOfRangeException(nameof(type), type, $"No converter found for {type.Name}");
         }
 
-        public object ConvertFromString(string str, Type type)
+        public static object ConvertFromString(string str, Type type)
         {
-            return this.GetConverter(type).ConvertFromString(str, type);
+            return GetConverter(type).ConvertFromString(str, type);
         }
 
-        public string ConvertToString(object obj, Type type)
+        public static string ConvertToString(object obj, Type type)
         {
-            return this.GetConverter(type).ConvertToString(obj, type);
+            return GetConverter(type).ConvertToString(obj, type);
         }
     }
 }

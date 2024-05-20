@@ -26,10 +26,10 @@ namespace UniT.Data
         {
             var keyType        = type.GetGenericArguments()[0];
             var valueType      = type.GetGenericArguments()[1];
-            var keyConverter   = ConverterManager.Instance.GetConverter(keyType);
-            var valueConverter = ConverterManager.Instance.GetConverter(valueType);
+            var keyConverter   = ConverterManager.GetConverter(keyType);
+            var valueConverter = ConverterManager.GetConverter(valueType);
             var dictionary     = (IDictionary)Activator.CreateInstance(type);
-            foreach (var item in (string[])ConverterManager.Instance.ConvertFromString(str, ArrayType))
+            foreach (var item in (string[])ConverterManager.ConvertFromString(str, ArrayType))
             {
                 var kv = item.Split(new[] { this.separator }, StringSplitOptions.None);
                 dictionary.Add(keyConverter.ConvertFromString(kv[0], keyType), valueConverter.ConvertFromString(kv[1], valueType));
@@ -41,9 +41,9 @@ namespace UniT.Data
         {
             var keyType        = type.GetGenericArguments()[0];
             var valueType      = type.GetGenericArguments()[1];
-            var keyConverter   = ConverterManager.Instance.GetConverter(keyType);
-            var valueConverter = ConverterManager.Instance.GetConverter(valueType);
-            return ConverterManager.Instance.ConvertToString(((IDictionary)obj).Cast<DictionaryEntry>().Select(kv => $"{keyConverter.ConvertToString(kv.Key, keyType)}{this.separator}{valueConverter.ConvertToString(kv.Value, valueType)}").ToArray(), ArrayType);
+            var keyConverter   = ConverterManager.GetConverter(keyType);
+            var valueConverter = ConverterManager.GetConverter(valueType);
+            return ConverterManager.ConvertToString(((IDictionary)obj).Cast<DictionaryEntry>().Select(kv => $"{keyConverter.ConvertToString(kv.Key, keyType)}{this.separator}{valueConverter.ConvertToString(kv.Value, valueType)}").ToArray(), ArrayType);
         }
     }
 }

@@ -16,12 +16,12 @@ namespace UniT.Data
 
         protected override object ConvertFromString(string str, Type type)
         {
-            return Activator.CreateInstance(type, ConverterManager.Instance.ConvertFromString(str, MakeArrayType(type)));
+            return Activator.CreateInstance(type, ConverterManager.ConvertFromString(str, MakeArrayType(type)));
         }
 
         protected override string ConvertToString(object obj, Type type)
         {
-            return ConverterManager.Instance.ConvertToString(((IEnumerable)obj).Cast<object>().ToArray(), MakeArrayType(type));
+            return ConverterManager.ConvertToString(((IEnumerable)obj).Cast<object>().ToArray(), MakeArrayType(type));
         }
 
         private static Type MakeArrayType(Type type)

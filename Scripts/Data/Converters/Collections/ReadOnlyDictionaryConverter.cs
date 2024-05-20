@@ -14,12 +14,12 @@ namespace UniT.Data
 
         protected override object ConvertFromString(string str, Type type)
         {
-            return Activator.CreateInstance(type, ConverterManager.Instance.ConvertFromString(str, MakeDictionaryType(type)));
+            return Activator.CreateInstance(type, ConverterManager.ConvertFromString(str, MakeDictionaryType(type)));
         }
 
         protected override string ConvertToString(object obj, Type type)
         {
-            return ConverterManager.Instance.ConvertToString(obj, MakeDictionaryType(type));
+            return ConverterManager.ConvertToString(obj, MakeDictionaryType(type));
         }
 
         private static Type MakeDictionaryType(Type type)

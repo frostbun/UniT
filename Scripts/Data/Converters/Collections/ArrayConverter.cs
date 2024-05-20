@@ -15,7 +15,7 @@ namespace UniT.Data
         protected override object ConvertFromString(string str, Type type)
         {
             var elementType      = type.GetElementType()!;
-            var elementConverter = ConverterManager.Instance.GetConverter(elementType);
+            var elementConverter = ConverterManager.GetConverter(elementType);
             var elements         = str.Split(new[] { this.separator }, StringSplitOptions.None);
             var array            = Array.CreateInstance(elementType, elements.Length);
             for (var i = 0; i < elements.Length; ++i)
@@ -28,7 +28,7 @@ namespace UniT.Data
         protected override string ConvertToString(object obj, Type type)
         {
             var elementType      = type.GetElementType();
-            var elementConverter = ConverterManager.Instance.GetConverter(elementType);
+            var elementConverter = ConverterManager.GetConverter(elementType);
             return string.Join(this.separator, ((Array)obj).Cast<object>().Select(element => elementConverter.ConvertToString(element, elementType)));
         }
     }
