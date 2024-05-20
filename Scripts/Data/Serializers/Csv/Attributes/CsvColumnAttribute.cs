@@ -5,23 +5,23 @@ namespace UniT.Data
     using UniT.Extensions;
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-    public sealed class CsvFieldAttribute : Attribute
+    public sealed class CsvColumnAttribute : Attribute
     {
         public string Name         { get; }
         public bool   IgnorePrefix { get; }
 
-        public CsvFieldAttribute(string name, bool ignorePrefix = false)
+        public CsvColumnAttribute(string name, bool ignorePrefix = false)
         {
             this.Name         = name;
             this.IgnorePrefix = ignorePrefix;
         }
     }
 
-    internal static class CsvFieldAttributeExtensions
+    internal static class CsvColumnAttributeExtensions
     {
-        public static string GetCsvFieldName(this FieldInfo field, string prefix)
+        public static string GetCsvColumn(this FieldInfo field, string prefix)
         {
-            return (field.GetCustomAttribute<CsvFieldAttribute>() ?? field.ToPropertyInfo()?.GetCustomAttribute<CsvFieldAttribute>()) is { } attr
+            return (field.GetCustomAttribute<CsvColumnAttribute>() ?? field.ToPropertyInfo()?.GetCustomAttribute<CsvColumnAttribute>()) is { } attr
                 ? attr.IgnorePrefix
                     ? attr.Name
                     : prefix + attr.Name

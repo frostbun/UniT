@@ -52,7 +52,7 @@ namespace UniT.Data
         private sealed class CsvReader
         {
             private readonly string[][]              data;
-            private readonly Dictionary<string, int> columnNameToIndex;
+            private readonly Dictionary<string, int> columnToIndex;
 
             public CsvReader(string rawData)
             {
@@ -63,7 +63,7 @@ namespace UniT.Data
                         .ToArray()
                     ).ToArray();
                 if (this.data.Length == 0) throw new InvalidOperationException("Empty CSV data");
-                this.columnNameToIndex = this.data[0].Select((columnName, index) => (columnName, index)).ToDictionary();
+                this.columnToIndex = this.data[0].Select((column, index) => (column, index)).ToDictionary();
             }
 
             private int currentRow = 0;
@@ -73,24 +73,24 @@ namespace UniT.Data
                 return ++this.currentRow < this.data.Length;
             }
 
-            public bool ContainsColumn(string columnName)
+            public bool ContainsColumn(string column)
             {
-                return this.columnNameToIndex.ContainsKey(columnName);
+                return this.columnToIndex.ContainsKey(column);
             }
 
-            public string GetCell(string columnName)
+            public string GetCell(string column)
             {
-                return this.data[this.currentRow][this.columnNameToIndex[columnName]];
+                return this.data[this.currentRow][this.columnToIndex[column]];
             }
         }
 
         private sealed class CsvParser
         {
-            private readonly ICsvData        data;
-            private readonly CsvReader       reader;
-            private readonly FieldInfo       keyField;
-            private readonly List<FieldInfo> normalFields;
-            private readonly List<FieldInfo> nestedFields;
+            private readonly ICsvData                                                     data;
+            private readonly CsvReader                                                    reader;
+            private readonly FieldInfo                                                    keyField;
+            private readonly Dictionary<FieldInfo, (string Column, IConverter Converter)> normalFields;
+            private readonly List<FieldInfo>                                              nestedFields;
 
             private readonly Dictionary<FieldInfo, CsvParser> nestedParsers = new Dictionary<FieldInfo, CsvParser>();
 
@@ -98,14 +98,16 @@ namespace UniT.Data
             {
                 this.data   = data;
                 this.reader = reader;
-                var csvFields = data.RowType.GetCsvFields().ToArray();
-                this.keyField                          = data.Key.IsNullOrWhitespace() ? csvFields.First() : csvFields.First(field => field.Name == data.Key);
-                (this.normalFields, this.nestedFields) = csvFields.Split(field => !typeof(ICsvData).IsAssignableFrom(field.FieldType));
-                this.normalFields.ForEach(field =>
-                {
-                    var columnName = field.GetCsvFieldName(this.data.Prefix);
-                    if (!this.reader.ContainsColumn(columnName)) throw new InvalidOperationException($"Field {columnName} - {this.data.RowType.Name} not found. If this is intentional, add [CsvIgnore] attribute to the field.");
-                });
+                var rowType = data.RowType;
+                var (prefix, key) = rowType.GetCsvRow();
+                var csvFields = rowType.GetCsvFields().ToArray();
+                this.keyField                    = key.IsNullOrWhitespace() ? csvFields.First() : csvFields.First(field => field.Name == key);
+                var (normalFields, nestedFields) = csvFields.Split(field => !typeof(ICsvData).IsAssignableFrom(field.FieldType));
+                this.normalFields = normalFields.ToDictionary(
+                    field => field,
+                    field => (field.GetCsvColumn(prefix), ConverterManager.GetConverter(field.FieldType))
+                );
+                this.nestedFields = nestedFields;
             }
 
             public void Parse()
@@ -113,14 +115,14 @@ namespace UniT.Data
                 var keyValue = default(object);
                 var row      = Activator.CreateInstance(this.data.RowType);
 
-                this.normalFields.ForEach(field =>
+                foreach (var (field, (column, converter)) in this.normalFields)
                 {
-                    var str = this.reader.GetCell(field.GetCsvFieldName(this.data.Prefix));
+                    var str = this.reader.GetCell(column);
                     if (str.IsNullOrWhitespace()) return;
-                    var value = ConverterManager.ConvertFromString(str, field.FieldType);
+                    var value = converter.ConvertFromString(str, field.FieldType);
                     field.SetValue(row, value);
                     if (field == this.keyField) keyValue = value;
-                });
+                }
 
                 if (keyValue is { })
                 {
@@ -128,15 +130,16 @@ namespace UniT.Data
                     this.nestedParsers.Clear();
                 }
 
-                this.nestedFields.ForEach(field =>
+                foreach (var field in this.nestedFields)
+                {
                     this.nestedParsers.GetOrAdd(field, () =>
                     {
                         var nestedData   = Activator.CreateInstance(field.FieldType);
                         var nestedParser = new CsvParser((ICsvData)nestedData, this.reader);
                         field.SetValue(row, nestedData);
                         return nestedParser;
-                    }).Parse()
-                );
+                    }).Parse();
+                }
             }
         }
     }

@@ -1,5 +1,5 @@
 ﻿#if UNIT_VCONTAINER
-namespace UniT.Installers
+namespace VContainer
 {
     using System;
     using System.Collections.Generic;
@@ -12,7 +12,6 @@ namespace UniT.Installers
     using UniT.Pooling;
     using UniT.ResourcesManager;
     using UniT.UI;
-    using VContainer;
 
     public static class VContainerInstaller
     {
