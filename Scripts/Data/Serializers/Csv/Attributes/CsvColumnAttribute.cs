@@ -18,7 +18,7 @@ namespace UniT.Data
         }
     }
 
-    internal static class CsvColumnAttributeExtensions
+    public static class CsvColumnAttributeExtensions
     {
         public static string GetCsvColumn(this FieldInfo field, string prefix)
         {

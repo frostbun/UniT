@@ -12,7 +12,7 @@ namespace UniT.Data
     {
     }
 
-    internal static class CsvIgnoreAttributeExtensions
+    public static class CsvIgnoreAttributeExtensions
     {
         private static bool IsCsvIgnored(this FieldInfo field)
         {

@@ -39,7 +39,7 @@ namespace UniT.ResourcesManager
                 .ContinueWith(asset => (Object?)asset);
         }
         #else
-        protected override IEnumerator LoadAsync<T>(string key, Action<Object> callback, IProgress<float>? progress)
+        protected override IEnumerator LoadAsync<T>(string key, Action<Object?> callback, IProgress<float>? progress)
         {
             var operation = Addressables.LoadAssetAsync<T>(key);
             while (!operation.IsDone)

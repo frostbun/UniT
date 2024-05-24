@@ -29,9 +29,9 @@ namespace Zenject
 
             #region Logging
 
-            var loggerFactory = (ILoggerManager)new UnityLoggerManager(logLevel);
-            container.BindInterfacesTo(loggerFactory.GetType()).FromInstance(loggerFactory).AsSingle();
-            var logger = loggerFactory.GetDefaultLogger();
+            var loggerManager = (ILoggerManager)new UnityLoggerManager(logLevel);
+            container.BindInterfacesTo(loggerManager.GetType()).FromInstance(loggerManager).AsSingle();
+            var logger = loggerManager.GetDefaultLogger();
             container.BindInterfacesTo(logger.GetType()).FromInstance(logger).AsSingle();
 
             #endregion

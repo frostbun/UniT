@@ -16,6 +16,7 @@ namespace UniT.UI.Adapters
 
         public void Set(IEnumerable<TParams> allParams)
         {
+            this.HideAll();
             allParams.ForEach(@params =>
             {
                 var view = this.pooledViews.DequeueOrDefault(() =>
@@ -33,6 +34,11 @@ namespace UniT.UI.Adapters
         }
 
         protected override void OnHide()
+        {
+            this.HideAll();
+        }
+
+        private void HideAll()
         {
             this.spawnedViews.Clear(view =>
             {

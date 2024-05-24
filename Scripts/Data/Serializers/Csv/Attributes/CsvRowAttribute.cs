@@ -17,7 +17,7 @@ namespace UniT.Data
         }
     }
 
-    internal static class CsvRowAttributeExtensions
+    public static class CsvRowAttributeExtensions
     {
         public static (string Prefix, string? Key) GetCsvRow(this Type type)
         {

@@ -29,9 +29,9 @@ namespace VContainer
 
             #region Logging
 
-            var loggerFactory = (ILoggerManager)new UnityLoggerManager(logLevel);
-            builder.RegisterInstance(loggerFactory).AsImplementedInterfaces();
-            builder.RegisterInstance(loggerFactory.GetDefaultLogger()).AsImplementedInterfaces();
+            var loggerManager = (ILoggerManager)new UnityLoggerManager(logLevel);
+            builder.RegisterInstance(loggerManager).AsImplementedInterfaces();
+            builder.RegisterInstance(loggerManager.GetDefaultLogger()).AsImplementedInterfaces();
 
             #endregion
 

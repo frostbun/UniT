@@ -37,7 +37,7 @@ namespace UniT.ResourcesManager
                 .ToUniTask(progress: progress, cancellationToken: cancellationToken);
         }
         #else
-        protected override IEnumerator LoadAsync<T>(string key, Action<Object> callback, IProgress<float>? progress)
+        protected override IEnumerator LoadAsync<T>(string key, Action<Object?> callback, IProgress<float>? progress)
         {
             var operation = Resources.LoadAsync<T>(key);
             while (!operation.isDone)

@@ -24,11 +24,11 @@ namespace UniT.UI.Activity
         public T[] GetComponentsInChildren<T>();
 
         #if UNIT_UNITASK
-        public UniTask<T?> WaitForResult<T>();
+        public UniTask<T> WaitForResult<T>();
 
         public UniTask WaitForHide();
 
-        public bool SetResult(object result);
+        public bool SetResult(object? result);
         #endif
 
         public void Hide(bool removeFromStack = true, bool autoStack = true);

@@ -37,7 +37,7 @@ namespace UniT.UI
             return task.ContinueWith(activity => activity.Dock(@params, force));
         }
 
-        public static UniTask<T?> WaitForResult<T>(this UniTask<IActivity> task)
+        public static UniTask<T> WaitForResult<T>(this UniTask<IActivity> task)
         {
             return task.ContinueWith(activity => activity.WaitForResult<T>());
         }

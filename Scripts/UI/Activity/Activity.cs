@@ -3,7 +3,6 @@ namespace UniT.UI.Activity
 {
     using UniT.UI.View;
     #if UNIT_UNITASK
-    using System;
     using Cysharp.Threading.Tasks;
     #endif
 
@@ -29,16 +28,9 @@ namespace UniT.UI.Activity
 
         private UniTaskCompletionSource<object?>? resultSource;
 
-        UniTask<T?> IActivity.WaitForResult<T>() where T : default
+        UniTask<T> IActivity.WaitForResult<T>()
         {
-            return (this.resultSource ??= new UniTaskCompletionSource<object?>()).Task.ContinueWith(result =>
-            {
-                if (result is null)
-                    return default;
-                if (result is not T t)
-                    throw new ArgumentException($"Wrong result type. Expected {typeof(T).Name}, got {result.GetType().Name}.");
-                return t;
-            });
+            return (this.resultSource ??= new UniTaskCompletionSource<object?>()).Task.ContinueWith(result => (T)result!);
         }
 
         UniTask IActivity.WaitForHide()
@@ -46,12 +38,12 @@ namespace UniT.UI.Activity
             return (this.resultSource ??= new UniTaskCompletionSource<object?>()).Task;
         }
 
-        bool IActivity.SetResult(object result)
+        bool IActivity.SetResult(object? result)
         {
             return this.SetResult(result);
         }
 
-        protected bool SetResult(object result)
+        protected bool SetResult(object? result)
         {
             return (this.resultSource ??= new UniTaskCompletionSource<object?>()).TrySetResult(result);
         }

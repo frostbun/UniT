@@ -18,7 +18,7 @@ namespace UniT.Entities.Component
 
         public IEntity Entity { get; private set; } = null!;
 
-        public string Name => this.name;
+        public string Name => this.gameObject.name;
 
         public GameObject GameObject => this.gameObject;
 
