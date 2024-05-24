@@ -1,4 +1,5 @@
-﻿namespace UniT.Instantiator
+﻿#nullable enable
+namespace UniT.Instantiator
 {
     using System;
 

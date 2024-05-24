@@ -1,4 +1,5 @@
 #if UNIT_ZENJECT
+#nullable enable
 namespace Zenject
 {
     using System;
@@ -16,12 +17,12 @@ namespace Zenject
     public static class ZenjectInstaller
     {
         public static void BindUniT(
-            this DiContainer  container,
-            RootUICanvas      rootUICanvas    = null,
-            IEnumerable<Type> dataTypes       = null,
-            IEnumerable<Type> storageTypes    = null,
-            IEnumerable<Type> serializerTypes = null,
-            LogLevel          logLevel        = LogLevel.Info
+            this DiContainer   container,
+            RootUICanvas?      rootUICanvas    = null,
+            IEnumerable<Type>? dataTypes       = null,
+            IEnumerable<Type>? storageTypes    = null,
+            IEnumerable<Type>? serializerTypes = null,
+            LogLevel           logLevel        = LogLevel.Info
         )
         {
             container.BindInterfacesTo<ZenjectInstantiator>().AsSingle();

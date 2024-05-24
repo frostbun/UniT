@@ -1,4 +1,5 @@
-﻿namespace UniT.UI.View
+﻿#nullable enable
+namespace UniT.UI.View
 {
     using UniT.UI.Activity;
     using UniT.Utilities;
@@ -14,15 +15,15 @@
 
         IActivity IView.Activity { get => this.Activity; set => this.Activity = value; }
 
-        public IUIManager Manager { get; private set; }
+        public IUIManager Manager { get; private set; } = null!;
 
-        public IActivity Activity { get; private set; }
+        public IActivity Activity { get; private set; } = null!;
 
         public string Name => this.name;
 
         public GameObject GameObject => this.gameObject;
 
-        public RectTransform Transform { get; private set; }
+        public RectTransform Transform { get; private set; } = null!;
 
         void IView.OnInitialize()
         {
@@ -45,13 +46,8 @@
             this.OnHide();
         }
 
-        void IView.OnDispose()
-        {
-            this.OnDispose();
-        }
-
         #if UNIT_UNITASK
-        protected internal CancellationTokenSource hideCts;
+        protected internal CancellationTokenSource? hideCts;
 
         public CancellationToken GetCancellationTokenOnHide()
         {
@@ -64,8 +60,6 @@
         protected virtual void OnShow() { }
 
         protected virtual void OnHide() { }
-
-        protected virtual void OnDispose() { }
     }
 
     public abstract class View : BaseView, IViewWithoutParams
@@ -76,6 +70,6 @@
     {
         TParams IViewWithParams<TParams>.Params { get => this.Params; set => this.Params = value; }
 
-        public TParams Params { get; private set; }
+        public TParams Params { get; private set; } = default!;
     }
 }

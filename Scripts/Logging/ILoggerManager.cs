@@ -1,4 +1,5 @@
-﻿namespace UniT.Logging
+﻿#nullable enable
+namespace UniT.Logging
 {
     public interface ILoggerManager
     {

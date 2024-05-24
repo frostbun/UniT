@@ -1,3 +1,4 @@
+#nullable enable
 namespace UniT.Data
 {
     using System;
@@ -34,42 +35,42 @@ namespace UniT.Data
         void IWritableDataStorage.Flush() => Flush();
 
         #if UNIT_UNITASK
-        UniTask<string[]> IReadableSerializableDataStorage.ReadStringsAsync(string[] keys, IProgress<float> progress, CancellationToken cancellationToken)
+        UniTask<string[]> IReadableSerializableDataStorage.ReadStringsAsync(string[] keys, IProgress<float>? progress, CancellationToken cancellationToken)
         {
             var rawDatas = ReadStrings(keys);
             progress?.Report(1);
             return UniTask.FromResult(rawDatas);
         }
 
-        UniTask<byte[][]> IReadableSerializableDataStorage.ReadBytesAsync(string[] keys, IProgress<float> progress, CancellationToken cancellationToken)
+        UniTask<byte[][]> IReadableSerializableDataStorage.ReadBytesAsync(string[] keys, IProgress<float>? progress, CancellationToken cancellationToken)
         {
             var rawDatas = ReadBytes(keys);
             progress?.Report(1);
             return UniTask.FromResult(rawDatas);
         }
 
-        UniTask IWritableSerializableDataStorage.WriteStringsAsync(string[] keys, string[] values, IProgress<float> progress, CancellationToken cancellationToken)
+        UniTask IWritableSerializableDataStorage.WriteStringsAsync(string[] keys, string[] values, IProgress<float>? progress, CancellationToken cancellationToken)
         {
             WriteStrings(keys, values);
             progress?.Report(1);
             return UniTask.CompletedTask;
         }
 
-        UniTask IWritableSerializableDataStorage.WriteBytesAsync(string[] keys, byte[][] values, IProgress<float> progress, CancellationToken cancellationToken)
+        UniTask IWritableSerializableDataStorage.WriteBytesAsync(string[] keys, byte[][] values, IProgress<float>? progress, CancellationToken cancellationToken)
         {
             WriteBytes(keys, values);
             progress?.Report(1);
             return UniTask.CompletedTask;
         }
 
-        UniTask IWritableDataStorage.FlushAsync(IProgress<float> progress, CancellationToken cancellationToken)
+        UniTask IWritableDataStorage.FlushAsync(IProgress<float>? progress, CancellationToken cancellationToken)
         {
             Flush();
             progress?.Report(1);
             return UniTask.CompletedTask;
         }
         #else
-        IEnumerator IReadableSerializableDataStorage.ReadStringsAsync(string[] keys, Action<string[]> callback, IProgress<float> progress)
+        IEnumerator IReadableSerializableDataStorage.ReadStringsAsync(string[] keys, Action<string[]> callback, IProgress<float>? progress)
         {
             var rawDatas = ReadStrings(keys);
             progress?.Report(1);
@@ -77,7 +78,7 @@ namespace UniT.Data
             yield break;
         }
 
-        IEnumerator IReadableSerializableDataStorage.ReadBytesAsync(string[] keys, Action<byte[][]> callback, IProgress<float> progress)
+        IEnumerator IReadableSerializableDataStorage.ReadBytesAsync(string[] keys, Action<byte[][]> callback, IProgress<float>? progress)
         {
             var rawDatas = ReadBytes(keys);
             progress?.Report(1);
@@ -85,7 +86,7 @@ namespace UniT.Data
             yield break;
         }
 
-        IEnumerator IWritableSerializableDataStorage.WriteStringsAsync(string[] keys, string[] values, Action callback, IProgress<float> progress)
+        IEnumerator IWritableSerializableDataStorage.WriteStringsAsync(string[] keys, string[] values, Action? callback, IProgress<float>? progress)
         {
             WriteStrings(keys, values);
             progress?.Report(1);
@@ -93,7 +94,7 @@ namespace UniT.Data
             yield break;
         }
 
-        IEnumerator IWritableSerializableDataStorage.WriteBytesAsync(string[] keys, byte[][] values, Action callback, IProgress<float> progress)
+        IEnumerator IWritableSerializableDataStorage.WriteBytesAsync(string[] keys, byte[][] values, Action? callback, IProgress<float>? progress)
         {
             WriteBytes(keys, values);
             progress?.Report(1);
@@ -101,7 +102,7 @@ namespace UniT.Data
             yield break;
         }
 
-        IEnumerator IWritableDataStorage.FlushAsync(Action callback, IProgress<float> progress)
+        IEnumerator IWritableDataStorage.FlushAsync(Action? callback, IProgress<float>? progress)
         {
             Flush();
             progress?.Report(1);

@@ -1,4 +1,5 @@
 ﻿#if UNIT_ADDRESSABLES
+#nullable enable
 namespace UniT.ResourcesManager
 {
     using System;
@@ -35,14 +36,14 @@ namespace UniT.ResourcesManager
         }
 
         #if UNIT_UNITASK
-        UniTask IScenesManager.LoadSceneAsync(string sceneName, LoadSceneMode loadMode, IProgress<float> progress, CancellationToken cancellationToken)
+        UniTask IScenesManager.LoadSceneAsync(string sceneName, LoadSceneMode loadMode, IProgress<float>? progress, CancellationToken cancellationToken)
         {
             return Addressables.LoadSceneAsync(sceneName, loadMode)
                 .ToUniTask(progress: progress, cancellationToken: cancellationToken)
                 .ContinueWith(_ => this.logger.Debug($"Loaded {sceneName}"));
         }
         #else
-        IEnumerator IScenesManager.LoadSceneAsync(string sceneName, LoadSceneMode loadMode, Action callback, IProgress<float> progress)
+        IEnumerator IScenesManager.LoadSceneAsync(string sceneName, LoadSceneMode loadMode, Action? callback, IProgress<float>? progress)
         {
             var operation = Addressables.LoadSceneAsync(sceneName, loadMode);
             while (!operation.IsDone)

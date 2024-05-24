@@ -1,7 +1,9 @@
+#nullable enable
 namespace UniT.Pooling
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using UniT.Extensions;
     using UniT.Logging;
     using UniT.ResourcesManager;
@@ -49,13 +51,13 @@ namespace UniT.Pooling
         }
 
         #if UNIT_UNITASK
-        async UniTask IObjectPoolManager.LoadAsync(string key, int count, IProgress<float> progress, CancellationToken cancellationToken)
+        async UniTask IObjectPoolManager.LoadAsync(string key, int count, IProgress<float>? progress, CancellationToken cancellationToken)
         {
             var prefab = await this.assetsManager.LoadAsync<GameObject>(key, progress, cancellationToken);
             this.Load(prefab, count);
         }
         #else
-        IEnumerator IObjectPoolManager.LoadAsync(string key, int count, Action callback, IProgress<float> progress)
+        IEnumerator IObjectPoolManager.LoadAsync(string key, int count, Action? callback, IProgress<float>? progress)
         {
             var prefab = default(GameObject);
             yield return this.assetsManager.LoadAsync<GameObject>(
@@ -68,9 +70,9 @@ namespace UniT.Pooling
         }
         #endif
 
-        GameObject IObjectPoolManager.Spawn(GameObject prefab, Vector3 position, Quaternion rotation, Transform parent) => this.Spawn(prefab, position, rotation, parent);
+        GameObject IObjectPoolManager.Spawn(GameObject prefab, Vector3 position, Quaternion rotation, Transform? parent) => this.Spawn(prefab, position, rotation, parent);
 
-        GameObject IObjectPoolManager.Spawn(string key, Vector3 position, Quaternion rotation, Transform parent)
+        GameObject IObjectPoolManager.Spawn(string key, Vector3 position, Quaternion rotation, Transform? parent)
         {
             var prefab = this.keyToPrefab.GetOrAdd(key, () => this.assetsManager.Load<GameObject>(key));
             return this.Spawn(prefab, position, rotation, parent);
@@ -122,7 +124,7 @@ namespace UniT.Pooling
             }).Load(count);
         }
 
-        private GameObject Spawn(GameObject prefab, Vector3 position, Quaternion rotation, Transform parent)
+        private GameObject Spawn(GameObject prefab, Vector3 position, Quaternion rotation, Transform? parent)
         {
             if (!this.prefabToPool.ContainsKey(prefab))
             {
@@ -159,14 +161,14 @@ namespace UniT.Pooling
             this.logger.Debug($"Destroyed {pool.gameObject.name}");
         }
 
-        private bool TryGetPool(GameObject prefab, out ObjectPool pool)
+        private bool TryGetPool(GameObject prefab, [MaybeNullWhen(false)] out ObjectPool pool)
         {
             if (this.prefabToPool.TryGet(prefab, out pool)) return true;
             this.logger.Warning($"{prefab.name} pool not loaded");
             return false;
         }
 
-        private bool TryGetPrefab(string key, out GameObject prefab)
+        private bool TryGetPrefab(string key, [MaybeNullWhen(false)] out GameObject prefab)
         {
             if (this.keyToPrefab.TryGet(key, out prefab)) return true;
             this.logger.Warning($"{key} pool not loaded");

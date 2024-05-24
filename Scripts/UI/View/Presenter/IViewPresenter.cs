@@ -1,4 +1,5 @@
-﻿namespace UniT.UI.View.Presenter
+﻿#nullable enable
+namespace UniT.UI.View.Presenter
 {
     using UniT.UI.Presenter;
 
@@ -9,7 +10,5 @@
         public void OnShow();
 
         public void OnHide();
-
-        public void OnDispose();
     }
 }

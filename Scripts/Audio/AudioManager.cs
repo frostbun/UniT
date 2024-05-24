@@ -1,3 +1,4 @@
+#nullable enable
 namespace UniT.Audio
 {
     using System;
@@ -242,11 +243,11 @@ namespace UniT.Audio
 
         #region Music
 
-        string IAudioManager.CurrentMusic => this.currentMusic;
+        string? IAudioManager.CurrentMusic => this.currentMusic;
 
         float IAudioManager.MusicTime { get => this.musicSource.time; set => this.musicSource.time = value; }
 
-        private string currentMusic;
+        private string? currentMusic;
 
         void IAudioManager.LoadMusic(string name) => this.LoadMusic(name);
 
@@ -290,7 +291,7 @@ namespace UniT.Audio
         private bool isMusicLoading;
 
         #if UNIT_UNITASK
-        UniTask IAudioManager.LoadSoundAsync(string name, IProgress<float> progress, CancellationToken cancellationToken)
+        UniTask IAudioManager.LoadSoundAsync(string name, IProgress<float>? progress, CancellationToken cancellationToken)
         {
             return this.loadedSoundSources.TryAddAsync(name, () =>
                 this.assetsManager.LoadAsync<AudioClip>(name, progress, cancellationToken)
@@ -298,7 +299,7 @@ namespace UniT.Audio
             );
         }
 
-        UniTask IAudioManager.LoadMusicAsync(string name, IProgress<float> progress, CancellationToken cancellationToken)
+        UniTask IAudioManager.LoadMusicAsync(string name, IProgress<float>? progress, CancellationToken cancellationToken)
         {
             return UniTask.WaitUntil(() => !this.isMusicLoading, cancellationToken: cancellationToken)
                 .ContinueWith(() =>
@@ -316,7 +317,7 @@ namespace UniT.Audio
                 });
         }
         #else
-        IEnumerator IAudioManager.LoadSoundAsync(string name, Action callback, IProgress<float> progress)
+        IEnumerator IAudioManager.LoadSoundAsync(string name, Action? callback, IProgress<float>? progress)
         {
             return this.loadedSoundSources.TryAddAsync(
                 name,
@@ -329,7 +330,7 @@ namespace UniT.Audio
             );
         }
 
-        IEnumerator IAudioManager.LoadMusicAsync(string name, Action callback, IProgress<float> progress)
+        IEnumerator IAudioManager.LoadMusicAsync(string name, Action? callback, IProgress<float>? progress)
         {
             yield return new WaitUntil(() => !this.isMusicLoading);
             if (this.currentMusic == name)

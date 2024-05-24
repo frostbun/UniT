@@ -1,3 +1,4 @@
+#nullable enable
 namespace UniT.UI.Activity
 {
     using UniT.UI.View;
@@ -23,7 +24,7 @@ namespace UniT.UI.Activity
         public T[] GetComponentsInChildren<T>();
 
         #if UNIT_UNITASK
-        public UniTask<T> WaitForResult<T>();
+        public UniTask<T?> WaitForResult<T>();
 
         public UniTask WaitForHide();
 

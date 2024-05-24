@@ -1,3 +1,4 @@
+#nullable enable
 namespace UniT.UI.Presenter
 {
     using System;

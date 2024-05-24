@@ -1,3 +1,4 @@
+#nullable enable
 namespace UniT.UI.Adapters
 {
     using System.Collections.Generic;
@@ -7,8 +8,8 @@ namespace UniT.UI.Adapters
 
     public abstract class SimpleListAdapter<TParams, TView> : View where TView : IViewWithParams<TParams>
     {
-        [SerializeField] private Transform content;
-        [SerializeField] private TView     prefab;
+        [SerializeField] private Transform content = null!;
+        [SerializeField] private TView     prefab  = default!;
 
         private readonly Queue<TView>   pooledViews  = new Queue<TView>();
         private readonly HashSet<TView> spawnedViews = new HashSet<TView>();
@@ -38,15 +39,6 @@ namespace UniT.UI.Adapters
                 view.OnHide();
                 view.GameObject.SetActive(false);
                 this.pooledViews.Enqueue(view);
-            });
-        }
-
-        protected override void OnDispose()
-        {
-            this.pooledViews.Clear(view =>
-            {
-                view.OnDispose();
-                Destroy(view.GameObject);
             });
         }
     }

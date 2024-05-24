@@ -1,4 +1,5 @@
-﻿namespace UniT.UI.View.Presenter
+﻿#nullable enable
+namespace UniT.UI.View.Presenter
 {
     using System;
     using UniT.UI.Presenter;
@@ -11,15 +12,13 @@
 
         protected virtual Type PresenterType => typeof(TPresenter);
 
-        protected TPresenter Presenter { get; private set; }
+        protected TPresenter Presenter { get; private set; } = default!;
 
         protected sealed override void OnInitialize() => this.Presenter.OnInitialize();
 
         protected sealed override void OnShow() => this.Presenter.OnShow();
 
         protected sealed override void OnHide() => this.Presenter.OnHide();
-
-        protected sealed override void OnDispose() => this.Presenter.OnDispose();
     }
 
     public abstract class View<TParams, TPresenter> : UI.View.View<TParams>, IHasPresenter where TPresenter : IViewPresenter
@@ -30,14 +29,12 @@
 
         protected virtual Type PresenterType => typeof(TPresenter);
 
-        protected TPresenter Presenter { get; private set; }
+        protected TPresenter Presenter { get; private set; } = default!;
 
         protected sealed override void OnInitialize() => this.Presenter.OnInitialize();
 
         protected sealed override void OnShow() => this.Presenter.OnShow();
 
         protected sealed override void OnHide() => this.Presenter.OnHide();
-
-        protected sealed override void OnDispose() => this.Presenter.OnDispose();
     }
 }

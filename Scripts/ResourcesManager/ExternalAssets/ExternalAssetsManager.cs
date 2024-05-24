@@ -1,3 +1,4 @@
+#nullable enable
 namespace UniT.ResourcesManager
 {
     using System;
@@ -35,7 +36,7 @@ namespace UniT.ResourcesManager
         #region Public
 
         #if UNIT_UNITASK
-        UniTask<Texture2D> IExternalAssetsManager.DownloadTextureAsync(string url, IProgress<float> progress, CancellationToken cancellationToken)
+        UniTask<Texture2D> IExternalAssetsManager.DownloadTextureAsync(string url, IProgress<float>? progress, CancellationToken cancellationToken)
         {
             return this.cache.TryAddAsync(url, async () =>
             {
@@ -51,7 +52,7 @@ namespace UniT.ResourcesManager
             });
         }
         #else
-        IEnumerator IExternalAssetsManager.DownloadTextureAsync(string url, Action<Texture2D> callback, IProgress<float> progress)
+        IEnumerator IExternalAssetsManager.DownloadTextureAsync(string url, Action<Texture2D> callback, IProgress<float>? progress)
         {
             return this.cache.TryAddAsync(
                 url,

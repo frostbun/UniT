@@ -1,3 +1,4 @@
+#nullable enable
 namespace UniT.Entities.Entity
 {
     using UniT.Entities.Component;

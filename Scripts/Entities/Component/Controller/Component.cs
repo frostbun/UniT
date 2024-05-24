@@ -1,4 +1,5 @@
-﻿namespace UniT.Entities.Component.Controller
+﻿#nullable enable
+namespace UniT.Entities.Component.Controller
 {
     using System;
     using UniT.Entities.Controller;
@@ -11,7 +12,7 @@
 
         protected virtual Type ControllerType => typeof(TController);
 
-        protected TController Controller { get; private set; }
+        protected TController Controller { get; private set; } = default!;
 
         protected sealed override void OnInstantiate() => this.Controller.OnInstantiate();
 

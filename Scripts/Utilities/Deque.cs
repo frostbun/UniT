@@ -1,4 +1,5 @@
-﻿namespace UniT.Utilities
+﻿#nullable enable
+namespace UniT.Utilities
 {
     using System.Collections.Generic;
 

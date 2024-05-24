@@ -1,4 +1,5 @@
 ﻿#if UNIT_DI
+#nullable enable
 namespace UniT.DI
 {
     using System;
@@ -17,10 +18,10 @@ namespace UniT.DI
     {
         public static void AddUniT(
             this DependencyContainer container,
-            RootUICanvas             rootUICanvas    = null,
-            IEnumerable<Type>        dataTypes       = null,
-            IEnumerable<Type>        storageTypes    = null,
-            IEnumerable<Type>        serializerTypes = null,
+            RootUICanvas?            rootUICanvas    = null,
+            IEnumerable<Type>?       dataTypes       = null,
+            IEnumerable<Type>?       storageTypes    = null,
+            IEnumerable<Type>?       serializerTypes = null,
             LogLevel                 logLevel        = LogLevel.Info
         )
         {

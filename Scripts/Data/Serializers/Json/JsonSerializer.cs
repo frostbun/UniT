@@ -1,4 +1,5 @@
 #if UNIT_NEWTONSOFT_JSON
+#nullable enable
 namespace UniT.Data
 {
     using System;
@@ -17,7 +18,7 @@ namespace UniT.Data
         private readonly JsonSerializerSettings settings;
 
         [Preserve]
-        public JsonSerializer(JsonSerializerSettings settings = null)
+        public JsonSerializer(JsonSerializerSettings? settings = null)
         {
             this.settings = settings
                 ?? new JsonSerializerSettings

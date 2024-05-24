@@ -1,3 +1,4 @@
+#nullable enable
 namespace UniT.Data
 {
     using System;
@@ -49,7 +50,7 @@ namespace UniT.Data
 
         #endregion
 
-        IData IDataManager.Get(Type type) => this.datas.GetOrDefault(type);
+        IData IDataManager.Get(Type type) => this.datas[type];
 
         #region Sync
 
@@ -78,7 +79,7 @@ namespace UniT.Data
                             {
                                 var rawDatas = storage.ReadBytes(keys);
                                 IterTools.StrictZip(serializerGroup, rawDatas)
-                                    .Where((_,      rawData) => rawData is { Length: > 0 })
+                                    .Where((_,      rawData) => rawData.Length > 0)
                                     .ForEach((type, rawData) => serializer.Populate(this.datas[type], rawData));
                                 break;
                             }
@@ -86,7 +87,7 @@ namespace UniT.Data
                             {
                                 var rawDatas = storage.ReadStrings(keys);
                                 IterTools.StrictZip(serializerGroup, rawDatas)
-                                    .Where((_,      rawData) => !rawData.IsNullOrWhitespace())
+                                    .Where((_,      rawData) => rawData.Length > 0)
                                     .ForEach((type, rawData) => serializer.Populate(this.datas[type], rawData));
                                 break;
                             }
@@ -94,7 +95,6 @@ namespace UniT.Data
                             {
                                 var datas = storage.Read(keys);
                                 IterTools.StrictZip(serializerGroup, datas)
-                                    .Where(data => data is { })
                                     .ForEach((type, data) => data.CopyTo(this.datas[type]));
                                 break;
                             }
@@ -156,19 +156,19 @@ namespace UniT.Data
         #region Async
 
         #if UNIT_UNITASK
-        UniTask IDataManager.PopulateAsync(Type[] types, IProgress<float> progress, CancellationToken cancellationToken) => this.PopulateAsync(types, progress, cancellationToken);
+        UniTask IDataManager.PopulateAsync(Type[] types, IProgress<float>? progress, CancellationToken cancellationToken) => this.PopulateAsync(types, progress, cancellationToken);
 
-        UniTask IDataManager.SaveAsync(Type[] types, IProgress<float> progress, CancellationToken cancellationToken) => this.SaveAsync(types, progress, cancellationToken);
+        UniTask IDataManager.SaveAsync(Type[] types, IProgress<float>? progress, CancellationToken cancellationToken) => this.SaveAsync(types, progress, cancellationToken);
 
-        UniTask IDataManager.FlushAsync(Type[] types, IProgress<float> progress, CancellationToken cancellationToken) => this.FlushAsync(types, progress, cancellationToken);
+        UniTask IDataManager.FlushAsync(Type[] types, IProgress<float>? progress, CancellationToken cancellationToken) => this.FlushAsync(types, progress, cancellationToken);
 
-        UniTask IDataManager.PopulateAllAsync(IProgress<float> progress, CancellationToken cancellationToken) => this.PopulateAsync(this.datas.Keys.Where(type => typeof(IReadableData).IsAssignableFrom(type)), progress, cancellationToken);
+        UniTask IDataManager.PopulateAllAsync(IProgress<float>? progress, CancellationToken cancellationToken) => this.PopulateAsync(this.datas.Keys.Where(type => typeof(IReadableData).IsAssignableFrom(type)), progress, cancellationToken);
 
-        UniTask IDataManager.SaveAllAsync(IProgress<float> progress, CancellationToken cancellationToken) => this.SaveAsync(this.datas.Keys.Where(type => typeof(IWritableData).IsAssignableFrom(type)), progress, cancellationToken);
+        UniTask IDataManager.SaveAllAsync(IProgress<float>? progress, CancellationToken cancellationToken) => this.SaveAsync(this.datas.Keys.Where(type => typeof(IWritableData).IsAssignableFrom(type)), progress, cancellationToken);
 
-        UniTask IDataManager.FlushAllAsync(IProgress<float> progress, CancellationToken cancellationToken) => this.FlushAsync(this.datas.Keys.Where(type => typeof(IWritableData).IsAssignableFrom(type)), progress, cancellationToken);
+        UniTask IDataManager.FlushAllAsync(IProgress<float>? progress, CancellationToken cancellationToken) => this.FlushAsync(this.datas.Keys.Where(type => typeof(IWritableData).IsAssignableFrom(type)), progress, cancellationToken);
 
-        private UniTask PopulateAsync(IEnumerable<Type> types, IProgress<float> progress, CancellationToken cancellationToken)
+        private UniTask PopulateAsync(IEnumerable<Type> types, IProgress<float>? progress, CancellationToken cancellationToken)
         {
             return types.GroupBy(type => this.storages.GetOrDefault(type) as IReadableDataStorage ?? throw new InvalidOperationException($"{type.Name} not found or not readable"))
                 .ForEachAsync((storageGroup, progress, cancellationToken) => storageGroup.GroupBy(type => this.serializers.GetOrDefault(type))
@@ -181,7 +181,7 @@ namespace UniT.Data
                                     {
                                         var rawDatas = await storage.ReadBytesAsync(keys, progress, cancellationToken);
                                         await IterTools.StrictZip(serializerGroup, rawDatas)
-                                            .Where((_,           rawData) => rawData is { Length: > 0 })
+                                            .Where((_,           rawData) => rawData.Length > 0)
                                             .ForEachAsync((type, rawData) => serializer.PopulateAsync(this.datas[type], rawData));
                                         break;
                                     }
@@ -189,7 +189,7 @@ namespace UniT.Data
                                     {
                                         var rawDatas = await storage.ReadStringsAsync(keys, progress, cancellationToken);
                                         await IterTools.StrictZip(serializerGroup, rawDatas)
-                                            .Where((_,           rawData) => !rawData.IsNullOrWhitespace())
+                                            .Where((_,           rawData) => rawData.Length > 0)
                                             .ForEachAsync((type, rawData) => serializer.PopulateAsync(this.datas[type], rawData));
                                         break;
                                     }
@@ -197,7 +197,6 @@ namespace UniT.Data
                                     {
                                         var datas = await storage.ReadAsync(keys, progress, cancellationToken);
                                         IterTools.StrictZip(serializerGroup, datas)
-                                            .Where(data => data is { })
                                             .ForEach((type, data) => data.CopyTo(this.datas[type]));
                                         break;
                                     }
@@ -213,7 +212,7 @@ namespace UniT.Data
                 );
         }
 
-        private UniTask SaveAsync(IEnumerable<Type> types, IProgress<float> progress, CancellationToken cancellationToken)
+        private UniTask SaveAsync(IEnumerable<Type> types, IProgress<float>? progress, CancellationToken cancellationToken)
         {
             return types.GroupBy(type => this.storages.GetOrDefault(type) as IWritableDataStorage ?? throw new InvalidOperationException($"{type.Name} not found or not writable"))
                 .ForEachAsync((storageGroup, progress, cancellationToken) => storageGroup.GroupBy(type => this.serializers.GetOrDefault(type))
@@ -252,7 +251,7 @@ namespace UniT.Data
                 );
         }
 
-        private UniTask FlushAsync(IEnumerable<Type> types, IProgress<float> progress, CancellationToken cancellationToken)
+        private UniTask FlushAsync(IEnumerable<Type> types, IProgress<float>? progress, CancellationToken cancellationToken)
         {
             return types.GroupBy(type => this.storages.GetOrDefault(type) as IWritableDataStorage ?? throw new InvalidOperationException($"{type.Name} not found or not writable"))
                 .ForEachAsync(async (group, progress, cancellationToken) =>
@@ -267,19 +266,19 @@ namespace UniT.Data
                 );
         }
         #else
-        IEnumerator IDataManager.PopulateAsync(Type[] types, Action callback, IProgress<float> progress) => this.PopulateAsync(types, callback, progress);
+        IEnumerator IDataManager.PopulateAsync(Type[] types, Action? callback, IProgress<float>? progress) => this.PopulateAsync(types, callback, progress);
 
-        IEnumerator IDataManager.SaveAsync(Type[] types, Action callback, IProgress<float> progress) => this.SaveAsync(types, callback, progress);
+        IEnumerator IDataManager.SaveAsync(Type[] types, Action? callback, IProgress<float>? progress) => this.SaveAsync(types, callback, progress);
 
-        IEnumerator IDataManager.FlushAsync(Type[] types, Action callback, IProgress<float> progress) => this.FlushAsync(types, callback, progress);
+        IEnumerator IDataManager.FlushAsync(Type[] types, Action? callback, IProgress<float>? progress) => this.FlushAsync(types, callback, progress);
 
-        IEnumerator IDataManager.PopulateAllAsync(Action callback, IProgress<float> progress) => this.PopulateAsync(this.datas.Keys.Where(type => typeof(IReadableData).IsAssignableFrom(type)), callback, progress);
+        IEnumerator IDataManager.PopulateAllAsync(Action? callback, IProgress<float>? progress) => this.PopulateAsync(this.datas.Keys.Where(type => typeof(IReadableData).IsAssignableFrom(type)), callback, progress);
 
-        IEnumerator IDataManager.SaveAllAsync(Action callback, IProgress<float> progress) => this.SaveAsync(this.datas.Keys.Where(type => typeof(IWritableData).IsAssignableFrom(type)), callback, progress);
+        IEnumerator IDataManager.SaveAllAsync(Action? callback, IProgress<float>? progress) => this.SaveAsync(this.datas.Keys.Where(type => typeof(IWritableData).IsAssignableFrom(type)), callback, progress);
 
-        IEnumerator IDataManager.FlushAllAsync(Action callback, IProgress<float> progress) => this.FlushAsync(this.datas.Keys.Where(type => typeof(IWritableData).IsAssignableFrom(type)), callback, progress);
+        IEnumerator IDataManager.FlushAllAsync(Action? callback, IProgress<float>? progress) => this.FlushAsync(this.datas.Keys.Where(type => typeof(IWritableData).IsAssignableFrom(type)), callback, progress);
 
-        private IEnumerator PopulateAsync(IEnumerable<Type> types, Action callback, IProgress<float> progress)
+        private IEnumerator PopulateAsync(IEnumerable<Type> types, Action? callback, IProgress<float>? progress)
         {
             // TODO: make it run concurrently
             foreach (var storageGroup in types.GroupBy(type => this.storages.GetOrDefault(type) as IReadableDataStorage ?? throw new InvalidOperationException($"{type.Name} not found or not readable")))
@@ -294,7 +293,7 @@ namespace UniT.Data
                             var rawDatas = default(byte[][]);
                             yield return storage.ReadBytesAsync(keys, result => rawDatas = result);
                             // TODO: make it run concurrently
-                            foreach (var (type, rawData) in IterTools.StrictZip(serializerGroup, rawDatas).Where((_, rawData) => rawData is { Length: > 0 }))
+                            foreach (var (type, rawData) in IterTools.StrictZip(serializerGroup, rawDatas).Where((_, rawData) => rawData.Length > 0))
                             {
                                 yield return serializer.PopulateAsync(this.datas[type], rawData);
                             }
@@ -305,7 +304,7 @@ namespace UniT.Data
                             var rawDatas = default(string[]);
                             yield return storage.ReadStringsAsync(keys, result => rawDatas = result);
                             // TODO: make it run concurrently
-                            foreach (var (type, rawData) in IterTools.StrictZip(serializerGroup, rawDatas).Where((_, rawData) => !rawData.IsNullOrWhitespace()))
+                            foreach (var (type, rawData) in IterTools.StrictZip(serializerGroup, rawDatas).Where((_, rawData) => rawData.Length > 0))
                             {
                                 yield return serializer.PopulateAsync(this.datas[type], rawData);
                             }
@@ -315,7 +314,7 @@ namespace UniT.Data
                         {
                             var datas = default(IData[]);
                             yield return storage.ReadAsync(keys, result => datas = result);
-                            foreach (var (type, data) in IterTools.StrictZip(serializerGroup, datas).Where(data => data is { }))
+                            foreach (var (type, data) in IterTools.StrictZip(serializerGroup, datas))
                             {
                                 data.CopyTo(this.datas[type]);
                             }
@@ -330,7 +329,7 @@ namespace UniT.Data
             callback?.Invoke();
         }
 
-        private IEnumerator SaveAsync(IEnumerable<Type> types, Action callback, IProgress<float> progress)
+        private IEnumerator SaveAsync(IEnumerable<Type> types, Action? callback, IProgress<float>? progress)
         {
             // TODO: make it run concurrently
             foreach (var storageGroup in types.GroupBy(type => this.storages.GetOrDefault(type) as IWritableDataStorage ?? throw new InvalidOperationException($"{type.Name} not found or not writable")))
@@ -377,7 +376,7 @@ namespace UniT.Data
             callback?.Invoke();
         }
 
-        private IEnumerator FlushAsync(IEnumerable<Type> types, Action callback, IProgress<float> progress)
+        private IEnumerator FlushAsync(IEnumerable<Type> types, Action? callback, IProgress<float>? progress)
         {
             // TODO: make it run concurrently
             foreach (var group in types.GroupBy(type => this.storages.GetOrDefault(type) as IWritableDataStorage ?? throw new InvalidOperationException($"{type.Name} not found or not writable")))

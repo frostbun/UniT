@@ -1,4 +1,5 @@
-﻿namespace UniT.Data
+﻿#nullable enable
+namespace UniT.Data
 {
     using System;
     using System.Reflection;
@@ -6,10 +7,10 @@
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class CsvRowAttribute : Attribute
     {
-        public string Prefix { get; }
-        public string Key    { get; }
+        public string  Prefix { get; }
+        public string? Key    { get; }
 
-        public CsvRowAttribute(string prefix, string key = null)
+        public CsvRowAttribute(string prefix, string? key = null)
         {
             this.Prefix = prefix;
             this.Key    = key;
@@ -18,7 +19,7 @@
 
     internal static class CsvRowAttributeExtensions
     {
-        public static (string Prefix, string Key) GetCsvRow(this Type type)
+        public static (string Prefix, string? Key) GetCsvRow(this Type type)
         {
             return type.GetCustomAttribute<CsvRowAttribute>() is { } attr
                 ? (attr.Prefix, attr.Key)

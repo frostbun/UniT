@@ -1,4 +1,5 @@
-﻿namespace UniT.UI.Activity
+﻿#nullable enable
+namespace UniT.UI.Activity
 {
     using UniT.UI.View;
     #if UNIT_UNITASK
@@ -26,11 +27,11 @@
             this.resultSource = null;
         }
 
-        private UniTaskCompletionSource<object> resultSource;
+        private UniTaskCompletionSource<object?>? resultSource;
 
-        UniTask<T> IActivity.WaitForResult<T>()
+        UniTask<T?> IActivity.WaitForResult<T>() where T : default
         {
-            return (this.resultSource ??= new UniTaskCompletionSource<object>()).Task.ContinueWith(result =>
+            return (this.resultSource ??= new UniTaskCompletionSource<object?>()).Task.ContinueWith(result =>
             {
                 if (result is null)
                     return default;
@@ -42,7 +43,7 @@
 
         UniTask IActivity.WaitForHide()
         {
-            return (this.resultSource ??= new UniTaskCompletionSource<object>()).Task;
+            return (this.resultSource ??= new UniTaskCompletionSource<object?>()).Task;
         }
 
         bool IActivity.SetResult(object result)
@@ -52,7 +53,7 @@
 
         protected bool SetResult(object result)
         {
-            return (this.resultSource ??= new UniTaskCompletionSource<object>()).TrySetResult(result);
+            return (this.resultSource ??= new UniTaskCompletionSource<object?>()).TrySetResult(result);
         }
         #endif
 
@@ -74,7 +75,7 @@
     {
         TParams IViewWithParams<TParams>.Params { get => this.Params; set => this.Params = value; }
 
-        public TParams Params { get; private set; }
+        public TParams Params { get; private set; } = default!;
 
         public IActivity Stack(TParams @params, bool force = true) => this.Manager.Stack(this, @params, force);
 

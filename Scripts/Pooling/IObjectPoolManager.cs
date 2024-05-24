@@ -1,3 +1,4 @@
+#nullable enable
 namespace UniT.Pooling
 {
     using System;
@@ -17,9 +18,9 @@ namespace UniT.Pooling
 
         public void Load(string key, int count = 1);
 
-        public GameObject Spawn(GameObject prefab, Vector3 position = default, Quaternion rotation = default, Transform parent = null);
+        public GameObject Spawn(GameObject prefab, Vector3 position = default, Quaternion rotation = default, Transform? parent = null);
 
-        public GameObject Spawn(string key, Vector3 position = default, Quaternion rotation = default, Transform parent = null);
+        public GameObject Spawn(string key, Vector3 position = default, Quaternion rotation = default, Transform? parent = null);
 
         public void Recycle(GameObject instance);
 
@@ -39,9 +40,9 @@ namespace UniT.Pooling
 
         public void Load(Component component, int count = 1) => this.Load(component.gameObject, count);
 
-        public T Spawn<T>(T component, Vector3 position = default, Quaternion rotation = default, Transform parent = null) where T : Component => this.Spawn(component.gameObject, position, rotation, parent).GetComponent<T>();
+        public T Spawn<T>(T component, Vector3 position = default, Quaternion rotation = default, Transform? parent = null) where T : Component => this.Spawn(component.gameObject, position, rotation, parent).GetComponent<T>();
 
-        public T Spawn<T>(string key, Vector3 position = default, Quaternion rotation = default, Transform parent = null) => this.Spawn(key, position, rotation, parent).GetComponentOrThrow<T>();
+        public T Spawn<T>(string key, Vector3 position = default, Quaternion rotation = default, Transform? parent = null) => this.Spawn(key, position, rotation, parent).GetComponentOrThrow<T>();
 
         public void Recycle(Component component) => this.Recycle(component.gameObject);
 
@@ -57,7 +58,7 @@ namespace UniT.Pooling
 
         public void Load<T>(int count = 1) => this.Load(typeof(T).GetKey(), count);
 
-        public T Spawn<T>(Vector3 position = default, Quaternion rotation = default, Transform parent = null) => this.Spawn<T>(typeof(T).GetKey(), position, rotation, parent);
+        public T Spawn<T>(Vector3 position = default, Quaternion rotation = default, Transform? parent = null) => this.Spawn<T>(typeof(T).GetKey(), position, rotation, parent);
 
         public void RecycleAll<T>() => this.RecycleAll(typeof(T).GetKey());
 
@@ -70,13 +71,13 @@ namespace UniT.Pooling
         #region Async
 
         #if UNIT_UNITASK
-        public UniTask LoadAsync(string key, int count = 1, IProgress<float> progress = null, CancellationToken cancellationToken = default);
+        public UniTask LoadAsync(string key, int count = 1, IProgress<float>? progress = null, CancellationToken cancellationToken = default);
 
-        public UniTask LoadAsync<T>(int count = 1, IProgress<float> progress = null, CancellationToken cancellationToken = default) => this.LoadAsync(typeof(T).GetKey(), count, progress, cancellationToken);
+        public UniTask LoadAsync<T>(int count = 1, IProgress<float>? progress = null, CancellationToken cancellationToken = default) => this.LoadAsync(typeof(T).GetKey(), count, progress, cancellationToken);
         #else
-        public IEnumerator LoadAsync(string key, int count = 1, Action callback = null, IProgress<float> progress = null);
+        public IEnumerator LoadAsync(string key, int count = 1, Action? callback = null, IProgress<float>? progress = null);
 
-        public IEnumerator LoadAsync<T>(int count = 1, Action callback = null, IProgress<float> progress = null) => this.LoadAsync(typeof(T).GetKey(), count, callback, progress);
+        public IEnumerator LoadAsync<T>(int count = 1, Action? callback = null, IProgress<float>? progress = null) => this.LoadAsync(typeof(T).GetKey(), count, callback, progress);
         #endif
 
         #endregion

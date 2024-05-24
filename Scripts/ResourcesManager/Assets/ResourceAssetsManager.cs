@@ -1,4 +1,5 @@
-﻿namespace UniT.ResourcesManager
+﻿#nullable enable
+namespace UniT.ResourcesManager
 {
     using System;
     using UniT.Logging;
@@ -19,7 +20,7 @@
         {
         }
 
-        protected override Object Load<T>(string key)
+        protected override Object? Load<T>(string key)
         {
             return Resources.Load<T>(key);
         }
@@ -30,13 +31,13 @@
         }
 
         #if UNIT_UNITASK
-        protected override UniTask<Object> LoadAsync<T>(string key, IProgress<float> progress, CancellationToken cancellationToken)
+        protected override UniTask<Object?> LoadAsync<T>(string key, IProgress<float>? progress, CancellationToken cancellationToken)
         {
             return Resources.LoadAsync<T>(key)
                 .ToUniTask(progress: progress, cancellationToken: cancellationToken);
         }
         #else
-        protected override IEnumerator LoadAsync<T>(string key, Action<Object> callback, IProgress<float> progress)
+        protected override IEnumerator LoadAsync<T>(string key, Action<Object> callback, IProgress<float>? progress)
         {
             var operation = Resources.LoadAsync<T>(key);
             while (!operation.isDone)

@@ -1,3 +1,4 @@
+#nullable enable
 namespace UniT.Data
 {
     using System;

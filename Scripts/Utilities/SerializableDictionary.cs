@@ -1,4 +1,5 @@
 ﻿#if ODIN_INSPECTOR
+#nullable enable
 namespace UniT.Utilities
 {
     using System;
@@ -10,7 +11,7 @@ namespace UniT.Utilities
     [Serializable]
     public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, ISerializationCallbackReceiver
     {
-        [SerializeField] private KeyValuePair[] keyValuePairs;
+        [SerializeField] private KeyValuePair[] keyValuePairs = Array.Empty<KeyValuePair>();
 
         void ISerializationCallbackReceiver.OnBeforeSerialize()
         {

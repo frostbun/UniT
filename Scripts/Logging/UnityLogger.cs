@@ -1,3 +1,4 @@
+#nullable enable
 namespace UniT.Logging
 {
     using System;

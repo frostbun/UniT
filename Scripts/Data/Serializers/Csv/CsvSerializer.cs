@@ -1,3 +1,4 @@
+#nullable enable
 namespace UniT.Data
 {
     using System;
@@ -105,8 +106,12 @@ namespace UniT.Data
                 var (normalFields, nestedFields) = csvFields.Split(field => !typeof(ICsvData).IsAssignableFrom(field.FieldType));
                 this.normalFields = normalFields.ToDictionary(
                     field => field,
-                    field => (field.GetCsvColumn(prefix), ConverterManager.GetConverter(field.FieldType))
-                );
+                    field =>
+                    {
+                        var column = field.GetCsvColumn(prefix);
+                        if (!reader.ContainsColumn(column)) throw new InvalidOperationException($"Column {column} not found in {rowType.Name}. If this is intentional, add [CsvIgnore] attribute to the field.");
+                        return (column, ConverterManager.GetConverter(field.FieldType));
+                    });
                 this.nestedFields = nestedFields;
             }
 

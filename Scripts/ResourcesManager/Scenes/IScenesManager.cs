@@ -1,4 +1,5 @@
-﻿namespace UniT.ResourcesManager
+﻿#nullable enable
+namespace UniT.ResourcesManager
 {
     using System;
     using UnityEngine.SceneManagement;
@@ -14,9 +15,9 @@
         public void LoadScene(string sceneName, LoadSceneMode loadMode = LoadSceneMode.Single);
 
         #if UNIT_UNITASK
-        public UniTask LoadSceneAsync(string sceneName, LoadSceneMode loadMode = LoadSceneMode.Single, IProgress<float> progress = null, CancellationToken cancellationToken = default);
+        public UniTask LoadSceneAsync(string sceneName, LoadSceneMode loadMode = LoadSceneMode.Single, IProgress<float>? progress = null, CancellationToken cancellationToken = default);
         #else
-        public IEnumerator LoadSceneAsync(string sceneName, LoadSceneMode loadMode = LoadSceneMode.Single, Action callback = null, IProgress<float> progress = null);
+        public IEnumerator LoadSceneAsync(string sceneName, LoadSceneMode loadMode = LoadSceneMode.Single, Action? callback = null, IProgress<float>? progress = null);
         #endif
     }
 }

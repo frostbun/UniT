@@ -1,4 +1,5 @@
-﻿namespace UniT.Entities.Entity
+﻿#nullable enable
+namespace UniT.Entities.Entity
 {
     using UniT.Entities.Component;
 
@@ -15,6 +16,6 @@
     {
         TParams IEntityWithParams<TParams>.Params { get => this.Params; set => this.Params = value; }
 
-        public TParams Params { get; private set; }
+        public TParams Params { get; private set; } = default!;
     }
 }

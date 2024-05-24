@@ -1,4 +1,5 @@
 #if UNIT_ADDRESSABLES
+#nullable enable
 namespace UniT.ResourcesManager
 {
     using System;
@@ -20,7 +21,7 @@ namespace UniT.ResourcesManager
         {
         }
 
-        protected override Object Load<T>(string key)
+        protected override Object? Load<T>(string key)
         {
             return Addressables.LoadAssetAsync<T>(key).WaitForCompletion();
         }
@@ -31,14 +32,14 @@ namespace UniT.ResourcesManager
         }
 
         #if UNIT_UNITASK
-        protected override UniTask<Object> LoadAsync<T>(string key, IProgress<float> progress, CancellationToken cancellationToken)
+        protected override UniTask<Object?> LoadAsync<T>(string key, IProgress<float>? progress, CancellationToken cancellationToken)
         {
             return Addressables.LoadAssetAsync<T>(key)
                 .ToUniTask(progress: progress, cancellationToken: cancellationToken)
-                .ContinueWith(asset => (Object)asset);
+                .ContinueWith(asset => (Object?)asset);
         }
         #else
-        protected override IEnumerator LoadAsync<T>(string key, Action<Object> callback, IProgress<float> progress)
+        protected override IEnumerator LoadAsync<T>(string key, Action<Object> callback, IProgress<float>? progress)
         {
             var operation = Addressables.LoadAssetAsync<T>(key);
             while (!operation.IsDone)

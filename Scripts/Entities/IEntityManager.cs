@@ -1,3 +1,4 @@
+#nullable enable
 namespace UniT.Entities
 {
     using System;
@@ -18,13 +19,13 @@ namespace UniT.Entities
 
         public void Load(string key, int count = 1);
 
-        public TEntity Spawn<TEntity>(TEntity prefab, Vector3 position = default, Quaternion rotation = default, Transform parent = null) where TEntity : IEntityWithoutParams;
+        public TEntity Spawn<TEntity>(TEntity prefab, Vector3 position = default, Quaternion rotation = default, Transform? parent = null) where TEntity : IEntityWithoutParams;
 
-        public TEntity Spawn<TEntity, TParams>(TEntity prefab, TParams @params, Vector3 position = default, Quaternion rotation = default, Transform parent = null) where TEntity : IEntityWithParams<TParams>;
+        public TEntity Spawn<TEntity, TParams>(TEntity prefab, TParams @params, Vector3 position = default, Quaternion rotation = default, Transform? parent = null) where TEntity : IEntityWithParams<TParams>;
 
-        public TEntity Spawn<TEntity>(string key, Vector3 position = default, Quaternion rotation = default, Transform parent = null) where TEntity : IEntityWithoutParams;
+        public TEntity Spawn<TEntity>(string key, Vector3 position = default, Quaternion rotation = default, Transform? parent = null) where TEntity : IEntityWithoutParams;
 
-        public TEntity Spawn<TEntity, TParams>(string key, TParams @params, Vector3 position = default, Quaternion rotation = default, Transform parent = null) where TEntity : IEntityWithParams<TParams>;
+        public TEntity Spawn<TEntity, TParams>(string key, TParams @params, Vector3 position = default, Quaternion rotation = default, Transform? parent = null) where TEntity : IEntityWithParams<TParams>;
 
         public void Recycle(IEntity instance);
 
@@ -46,9 +47,9 @@ namespace UniT.Entities
 
         public void Load<TEntity>(int count = 1) where TEntity : IEntity => this.Load(typeof(TEntity).GetKey(), count);
 
-        public TEntity Spawn<TEntity>(Vector3 position = default, Quaternion rotation = default, Transform parent = null) where TEntity : IEntityWithoutParams => this.Spawn<TEntity>(typeof(TEntity).GetKey(), position, rotation, parent);
+        public TEntity Spawn<TEntity>(Vector3 position = default, Quaternion rotation = default, Transform? parent = null) where TEntity : IEntityWithoutParams => this.Spawn<TEntity>(typeof(TEntity).GetKey(), position, rotation, parent);
 
-        public TEntity Spawn<TEntity, TParams>(TParams @params, Vector3 position = default, Quaternion rotation = default, Transform parent = null) where TEntity : IEntityWithParams<TParams> => this.Spawn<TEntity, TParams>(typeof(TEntity).GetKey(), @params, position, rotation, parent);
+        public TEntity Spawn<TEntity, TParams>(TParams @params, Vector3 position = default, Quaternion rotation = default, Transform? parent = null) where TEntity : IEntityWithParams<TParams> => this.Spawn<TEntity, TParams>(typeof(TEntity).GetKey(), @params, position, rotation, parent);
 
         public void RecycleAll<TEntity>() where TEntity : IEntity => this.RecycleAll(typeof(TEntity).GetKey());
 
@@ -61,13 +62,13 @@ namespace UniT.Entities
         #region Async
 
         #if UNIT_UNITASK
-        public UniTask LoadAsync(string key, int count = 1, IProgress<float> progress = null, CancellationToken cancellationToken = default);
+        public UniTask LoadAsync(string key, int count = 1, IProgress<float>? progress = null, CancellationToken cancellationToken = default);
 
-        public UniTask LoadAsync<TEntity>(int count = 1, IProgress<float> progress = null, CancellationToken cancellationToken = default) where TEntity : IEntity => this.LoadAsync(typeof(TEntity).GetKey(), count, progress, cancellationToken);
+        public UniTask LoadAsync<TEntity>(int count = 1, IProgress<float>? progress = null, CancellationToken cancellationToken = default) where TEntity : IEntity => this.LoadAsync(typeof(TEntity).GetKey(), count, progress, cancellationToken);
         #else
-        public IEnumerator LoadAsync(string key, int count = 1, Action callback = null, IProgress<float> progress = null);
+        public IEnumerator LoadAsync(string key, int count = 1, Action? callback = null, IProgress<float>? progress = null);
 
-        public IEnumerator LoadAsync<TEntity>(int count = 1, Action callback = null, IProgress<float> progress = null) where TEntity : IEntity => this.LoadAsync(typeof(TEntity).GetKey(), count, callback, progress);
+        public IEnumerator LoadAsync<TEntity>(int count = 1, Action? callback = null, IProgress<float>? progress = null) where TEntity : IEntity => this.LoadAsync(typeof(TEntity).GetKey(), count, callback, progress);
         #endif
 
         #endregion

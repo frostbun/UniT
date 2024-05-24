@@ -1,4 +1,5 @@
 ﻿#if UNIT_DI
+#nullable enable
 namespace UniT.Instantiator
 {
     using System;

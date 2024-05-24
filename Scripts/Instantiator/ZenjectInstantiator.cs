@@ -1,4 +1,5 @@
 ﻿#if UNIT_ZENJECT
+#nullable enable
 namespace UniT.Instantiator
 {
     using System;

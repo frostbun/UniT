@@ -1,3 +1,4 @@
+#nullable enable
 namespace UniT.Data
 {
     using System;
@@ -8,7 +9,7 @@ namespace UniT.Data
         private readonly string      format;
         private readonly CultureInfo cultureInfo;
 
-        public DateTimeOffsetConverter(string format = "dd/MM/yyyy hh:mm:ss", CultureInfo cultureInfo = null)
+        public DateTimeOffsetConverter(string format = "dd/MM/yyyy hh:mm:ss", CultureInfo? cultureInfo = null)
         {
             this.format      = format;
             this.cultureInfo = cultureInfo ?? CultureInfo.InvariantCulture;

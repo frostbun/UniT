@@ -1,4 +1,5 @@
 ﻿#if UNIT_VCONTAINER
+#nullable enable
 namespace UniT.Instantiator
 {
     using System;

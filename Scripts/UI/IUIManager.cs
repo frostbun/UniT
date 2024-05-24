@@ -1,3 +1,4 @@
+#nullable enable
 namespace UniT.UI
 {
     using System;
@@ -16,9 +17,9 @@ namespace UniT.UI
     {
         public void Initialize(IView view, IActivity parent);
 
-        #region Sync
-
         public TActivity RegisterActivity<TActivity>(TActivity activity) where TActivity : IActivity;
+
+        #region Sync
 
         public TActivity GetActivity<TActivity>(TActivity prefab) where TActivity : IActivity;
 
@@ -31,22 +32,22 @@ namespace UniT.UI
         #region Async
 
         #if UNIT_UNITASK
-        public UniTask<TActivity> GetActivityAsync<TActivity>(string key, IProgress<float> progress = null, CancellationToken cancellationToken = default) where TActivity : IActivity;
+        public UniTask<TActivity> GetActivityAsync<TActivity>(string key, IProgress<float>? progress = null, CancellationToken cancellationToken = default) where TActivity : IActivity;
 
-        public UniTask<TActivity> GetActivityAsync<TActivity>(IProgress<float> progress = null, CancellationToken cancellationToken = default) where TActivity : IActivity => this.GetActivityAsync<TActivity>(typeof(TActivity).GetKey(), progress, cancellationToken);
+        public UniTask<TActivity> GetActivityAsync<TActivity>(IProgress<float>? progress = null, CancellationToken cancellationToken = default) where TActivity : IActivity => this.GetActivityAsync<TActivity>(typeof(TActivity).GetKey(), progress, cancellationToken);
         #else
-        public IEnumerator GetActivityAsync<TActivity>(string key, Action<TActivity> callback, IProgress<float> progress = null) where TActivity : IActivity;
+        public IEnumerator GetActivityAsync<TActivity>(string key, Action<TActivity> callback, IProgress<float>? progress = null) where TActivity : IActivity;
 
-        public IEnumerator GetActivityAsync<TActivity>(Action<TActivity> callback, IProgress<float> progress = null) where TActivity : IActivity => this.GetActivityAsync(typeof(TActivity).GetKey(), callback, progress);
+        public IEnumerator GetActivityAsync<TActivity>(Action<TActivity> callback, IProgress<float>? progress = null) where TActivity : IActivity => this.GetActivityAsync(typeof(TActivity).GetKey(), callback, progress);
         #endif
 
         #endregion
 
         #region Query
 
-        public IActivity StackingActivity { get; }
+        public IActivity? StackingActivity { get; }
 
-        public IActivity NextActivityInStack { get; }
+        public IActivity? NextActivityInStack { get; }
 
         public IEnumerable<IActivity> FloatingActivities { get; }
 

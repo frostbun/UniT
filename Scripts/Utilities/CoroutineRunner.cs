@@ -1,4 +1,5 @@
 ﻿#if !UNIT_UNITASK
+#nullable enable
 namespace UniT.Utilities
 {
     using System.Collections;

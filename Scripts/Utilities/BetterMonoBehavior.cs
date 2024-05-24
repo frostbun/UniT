@@ -1,4 +1,5 @@
-﻿namespace UniT.Utilities
+﻿#nullable enable
+namespace UniT.Utilities
 {
     using UnityEngine;
     #if !UNIT_UNITASK
@@ -16,8 +17,8 @@
 
         public new void StartCoroutine(IEnumerator coroutine)
         {
-            base.StartCoroutine(coroutine);
             this.runningCoroutines.Add(coroutine);
+            base.StartCoroutine(coroutine.Finally(() => this.runningCoroutines.Remove(coroutine)));
         }
 
         public new void StopCoroutine(IEnumerator coroutine)

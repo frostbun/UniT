@@ -1,4 +1,5 @@
 #if UNIT_NEWTONSOFT_JSON
+#nullable enable
 namespace UniT.Data
 {
     using System;
@@ -8,7 +9,7 @@ namespace UniT.Data
     {
         private readonly JsonSerializerSettings settings;
 
-        public JsonConverter(JsonSerializerSettings settings = null)
+        public JsonConverter(JsonSerializerSettings? settings = null)
         {
             this.settings = settings
                 ?? new JsonSerializerSettings
@@ -20,7 +21,7 @@ namespace UniT.Data
 
         protected override object ConvertFromString(string str, Type type)
         {
-            return JsonConvert.DeserializeObject(str, type, this.settings);
+            return JsonConvert.DeserializeObject(str, type, this.settings)!;
         }
 
         protected override string ConvertToString(object obj, Type type)

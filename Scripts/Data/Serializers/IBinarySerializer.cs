@@ -1,4 +1,5 @@
-﻿namespace UniT.Data
+﻿#nullable enable
+namespace UniT.Data
 {
     #if UNIT_UNITASK
     using Cysharp.Threading.Tasks;

@@ -1,3 +1,4 @@
+#nullable enable
 namespace UniT.Entities.Controller
 {
     using System;

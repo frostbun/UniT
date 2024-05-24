@@ -1,7 +1,9 @@
-﻿namespace UniT.ResourcesManager
+﻿#nullable enable
+namespace UniT.ResourcesManager
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using UniT.Extensions;
     using UniT.Logging;
     using UnityEngine;
@@ -34,7 +36,7 @@
 
         T IAssetsManager.Load<T>(string key) => this.LoadOrThrow<T>(key);
 
-        bool IAssetsManager.TryLoad<T>(string key, out T asset)
+        bool IAssetsManager.TryLoad<T>(string key, [MaybeNullWhen(false)] out T asset)
         {
             try
             {
@@ -50,7 +52,7 @@
 
         T IAssetsManager.LoadComponent<T>(string key) => this.LoadComponentOrThrow<T>(key);
 
-        bool IAssetsManager.TryLoadComponent<T>(string key, out T component)
+        bool IAssetsManager.TryLoadComponent<T>(string key, [MaybeNullWhen(false)] out T component)
         {
             try
             {
@@ -87,18 +89,16 @@
             return this.LoadOrThrow<GameObject>(key).GetComponentOrThrow<T>();
         }
 
-        protected abstract Object Load<T>(string key) where T : Object;
-
-        protected abstract void Unload(Object asset);
+        protected abstract Object? Load<T>(string key) where T : Object;
 
         #endregion
 
         #region Async
 
         #if UNIT_UNITASK
-        UniTask<T> IAssetsManager.LoadAsync<T>(string key, IProgress<float> progress, CancellationToken cancellationToken) => this.LoadOrThrowAsync<T>(key, progress, cancellationToken);
+        UniTask<T> IAssetsManager.LoadAsync<T>(string key, IProgress<float>? progress, CancellationToken cancellationToken) => this.LoadOrThrowAsync<T>(key, progress, cancellationToken);
 
-        UniTask<(bool IsSucceeded, T Asset)> IAssetsManager.TryLoadAsync<T>(string key, IProgress<float> progress, CancellationToken cancellationToken)
+        UniTask<(bool IsSucceeded, T Asset)> IAssetsManager.TryLoadAsync<T>(string key, IProgress<float>? progress, CancellationToken cancellationToken)
         {
             return this.LoadOrThrowAsync<T>(
                     key,
@@ -106,12 +106,12 @@
                     cancellationToken
                 )
                 .ContinueWith(asset => (true, asset))
-                .Catch(() => (false, null));
+                .Catch(() => (false, null!));
         }
 
-        UniTask<T> IAssetsManager.LoadComponentAsync<T>(string key, IProgress<float> progress, CancellationToken cancellationToken) => this.LoadComponentOrThrowAsync<T>(key, progress, cancellationToken);
+        UniTask<T> IAssetsManager.LoadComponentAsync<T>(string key, IProgress<float>? progress, CancellationToken cancellationToken) => this.LoadComponentOrThrowAsync<T>(key, progress, cancellationToken);
 
-        UniTask<(bool IsSucceeded, T Component)> IAssetsManager.TryLoadComponentAsync<T>(string key, IProgress<float> progress, CancellationToken cancellationToken)
+        UniTask<(bool IsSucceeded, T Component)> IAssetsManager.TryLoadComponentAsync<T>(string key, IProgress<float>? progress, CancellationToken cancellationToken)
         {
             return this.LoadComponentOrThrowAsync<T>(
                     key,
@@ -119,10 +119,10 @@
                     cancellationToken
                 )
                 .ContinueWith(component => (true, component))
-                .Catch(() => (false, default));
+                .Catch(() => (false, default!));
         }
 
-        private UniTask<T> LoadOrThrowAsync<T>(string key, IProgress<float> progress, CancellationToken cancellationToken) where T : Object
+        private UniTask<T> LoadOrThrowAsync<T>(string key, IProgress<float>? progress, CancellationToken cancellationToken) where T : Object
         {
             return this.cache.GetOrAddAsync(key, () =>
                 this.LoadAsync<T>(key, progress, cancellationToken)
@@ -135,37 +135,37 @@
             ).ContinueWith(asset => (T)asset);
         }
 
-        private UniTask<T> LoadComponentOrThrowAsync<T>(string key, IProgress<float> progress, CancellationToken cancellationToken)
+        private UniTask<T> LoadComponentOrThrowAsync<T>(string key, IProgress<float>? progress, CancellationToken cancellationToken)
         {
             return this.LoadOrThrowAsync<GameObject>(key, progress, cancellationToken)
                 .ContinueWith(gameObject => gameObject.GetComponentOrThrow<T>());
         }
 
-        protected abstract UniTask<Object> LoadAsync<T>(string key, IProgress<float> progress, CancellationToken cancellationToken) where T : Object;
+        protected abstract UniTask<Object?> LoadAsync<T>(string key, IProgress<float>? progress, CancellationToken cancellationToken) where T : Object;
         #else
-        IEnumerator IAssetsManager.LoadAsync<T>(string key, Action<T> callback, IProgress<float> progress) => this.LoadOrThrowAsync(key, callback, progress);
+        IEnumerator IAssetsManager.LoadAsync<T>(string key, Action<T> callback, IProgress<float>? progress) => this.LoadOrThrowAsync(key, callback, progress);
 
-        IEnumerator IAssetsManager.TryLoadAsync<T>(string key, Action<(bool IsSucceeded, T Asset)> callback, IProgress<float> progress)
+        IEnumerator IAssetsManager.TryLoadAsync<T>(string key, Action<(bool IsSucceeded, T Asset)> callback, IProgress<float>? progress)
         {
             return this.LoadOrThrowAsync<T>(
                 key,
                 asset => callback((true, asset)),
                 progress
-            ).Catch(() => callback((false, null)));
+            ).Catch(() => callback((false, null!)));
         }
 
-        IEnumerator IAssetsManager.LoadComponentAsync<T>(string key, Action<T> callback, IProgress<float> progress) => this.LoadComponentOrThrowAsync(key, callback, progress);
+        IEnumerator IAssetsManager.LoadComponentAsync<T>(string key, Action<T> callback, IProgress<float>? progress) => this.LoadComponentOrThrowAsync(key, callback, progress);
 
-        IEnumerator IAssetsManager.TryLoadComponentAsync<T>(string key, Action<(bool IsSucceeded, T Component)> callback, IProgress<float> progress)
+        IEnumerator IAssetsManager.TryLoadComponentAsync<T>(string key, Action<(bool IsSucceeded, T Component)> callback, IProgress<float>? progress)
         {
             return this.LoadComponentOrThrowAsync<T>(
                 key,
                 component => callback((true, component)),
                 progress
-            ).Catch(() => callback((false, default)));
+            ).Catch(() => callback((false, default!)));
         }
 
-        private IEnumerator LoadOrThrowAsync<T>(string key, Action<T> callback, IProgress<float> progress) where T : Object
+        private IEnumerator LoadOrThrowAsync<T>(string key, Action<T> callback, IProgress<float>? progress) where T : Object
         {
             return this.cache.GetOrAddAsync(
                 key,
@@ -183,7 +183,7 @@
             ).Catch(inner => throw new ArgumentOutOfRangeException($"Failed to load {key}", inner));
         }
 
-        private IEnumerator LoadComponentOrThrowAsync<T>(string key, Action<T> callback, IProgress<float> progress)
+        private IEnumerator LoadComponentOrThrowAsync<T>(string key, Action<T> callback, IProgress<float>? progress)
         {
             return this.LoadOrThrowAsync<GameObject>(
                 key,
@@ -192,7 +192,7 @@
             );
         }
 
-        protected abstract IEnumerator LoadAsync<T>(string key, Action<Object> callback, IProgress<float> progress) where T : Object;
+        protected abstract IEnumerator LoadAsync<T>(string key, Action<Object?> callback, IProgress<float>? progress) where T : Object;
         #endif
 
         #endregion
@@ -209,6 +209,8 @@
             this.Unload(asset);
             this.logger.Debug($"Unloaded {key}");
         }
+
+        protected abstract void Unload(Object asset);
 
         private void Dispose()
         {

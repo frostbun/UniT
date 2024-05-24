@@ -1,4 +1,5 @@
-﻿namespace UniT.Data
+﻿#nullable enable
+namespace UniT.Data
 {
     using System;
     #if UNIT_UNITASK
@@ -13,9 +14,9 @@
         public void Flush();
 
         #if UNIT_UNITASK
-        public UniTask FlushAsync(IProgress<float> progress = null, CancellationToken cancellationToken = default);
+        public UniTask FlushAsync(IProgress<float>? progress = null, CancellationToken cancellationToken = default);
         #else
-        public IEnumerator FlushAsync(Action callback = null, IProgress<float> progress = null);
+        public IEnumerator FlushAsync(Action? callback = null, IProgress<float>? progress = null);
         #endif
     }
 }

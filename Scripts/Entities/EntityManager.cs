@@ -1,3 +1,4 @@
+#nullable enable
 namespace UniT.Entities
 {
     using System;
@@ -28,10 +29,10 @@ namespace UniT.Entities
         private readonly IObjectPoolManager objectPoolManager;
         private readonly ILogger            logger;
 
-        private readonly Dictionary<IEntity, IComponent[]>     entityToComponents = new Dictionary<IEntity, IComponent[]>();
-        private readonly Dictionary<IComponent, Type[]>        componentToTypes   = new Dictionary<IComponent, Type[]>();
-        private readonly Dictionary<Type, HashSet<IComponent>> typeToComponents   = new Dictionary<Type, HashSet<IComponent>>();
-        private readonly Dictionary<IEntity, object>           spawnedEntities    = new Dictionary<IEntity, object>();
+        private readonly Dictionary<IEntity, IComponent[]>     entities         = new Dictionary<IEntity, IComponent[]>();
+        private readonly Dictionary<IComponent, Type[]>        componentToTypes = new Dictionary<IComponent, Type[]>();
+        private readonly Dictionary<Type, HashSet<IComponent>> typeToComponents = new Dictionary<Type, HashSet<IComponent>>();
+        private readonly Dictionary<IEntity, object>           spawnedEntities  = new Dictionary<IEntity, object>();
 
         [Preserve]
         public EntityManager(IInstantiator instantiator, IObjectPoolManager objectPoolManager, ILoggerManager loggerManager)
@@ -49,12 +50,12 @@ namespace UniT.Entities
         void IEntityManager.Load(string key, int count) => this.objectPoolManager.Load(key, count);
 
         #if UNIT_UNITASK
-        UniTask IEntityManager.LoadAsync(string key, int count, IProgress<float> progress, CancellationToken cancellationToken) => this.objectPoolManager.LoadAsync(key, count, progress, cancellationToken);
+        UniTask IEntityManager.LoadAsync(string key, int count, IProgress<float>? progress, CancellationToken cancellationToken) => this.objectPoolManager.LoadAsync(key, count, progress, cancellationToken);
         #else
-        IEnumerator IEntityManager.LoadAsync(string key, int count, Action callback, IProgress<float> progress) => this.objectPoolManager.LoadAsync(key, count, callback, progress);
+        IEnumerator IEntityManager.LoadAsync(string key, int count, Action? callback, IProgress<float>? progress) => this.objectPoolManager.LoadAsync(key, count, callback, progress);
         #endif
 
-        TEntity IEntityManager.Spawn<TEntity>(TEntity prefab, Vector3 position, Quaternion rotation, Transform parent)
+        TEntity IEntityManager.Spawn<TEntity>(TEntity prefab, Vector3 position, Quaternion rotation, Transform? parent)
         {
             var entity = this.objectPoolManager.Spawn(prefab.GameObject, position, rotation, parent).GetComponent<TEntity>();
             this.OnSpawn(entity);
@@ -62,7 +63,7 @@ namespace UniT.Entities
             return entity;
         }
 
-        TEntity IEntityManager.Spawn<TEntity, TParams>(TEntity prefab, TParams @params, Vector3 position, Quaternion rotation, Transform parent)
+        TEntity IEntityManager.Spawn<TEntity, TParams>(TEntity prefab, TParams @params, Vector3 position, Quaternion rotation, Transform? parent)
         {
             var entity = this.objectPoolManager.Spawn(prefab.GameObject, position, rotation, parent).GetComponent<TEntity>();
             entity.Params = @params;
@@ -71,7 +72,7 @@ namespace UniT.Entities
             return entity;
         }
 
-        TEntity IEntityManager.Spawn<TEntity>(string key, Vector3 position, Quaternion rotation, Transform parent)
+        TEntity IEntityManager.Spawn<TEntity>(string key, Vector3 position, Quaternion rotation, Transform? parent)
         {
             var entity = this.objectPoolManager.Spawn(key, position, rotation, parent).GetComponentOrThrow<TEntity>();
             this.OnSpawn(entity);
@@ -79,7 +80,7 @@ namespace UniT.Entities
             return entity;
         }
 
-        TEntity IEntityManager.Spawn<TEntity, TParams>(string key, TParams @params, Vector3 position, Quaternion rotation, Transform parent)
+        TEntity IEntityManager.Spawn<TEntity, TParams>(string key, TParams @params, Vector3 position, Quaternion rotation, Transform? parent)
         {
             var entity = this.objectPoolManager.Spawn(key, position, rotation, parent).GetComponentOrThrow<TEntity>();
             entity.Params = @params;
@@ -137,7 +138,7 @@ namespace UniT.Entities
 
         private void OnSpawn(IEntity entity)
         {
-            this.entityToComponents.GetOrAdd(entity, () =>
+            this.entities.GetOrAdd(entity, () =>
             {
                 var components = entity.GetComponentsInChildren<IComponent>();
                 components.ForEach(component =>
@@ -171,7 +172,7 @@ namespace UniT.Entities
 
         private void OnRecycle(IEntity entity)
         {
-            this.entityToComponents[entity].ForEach(component =>
+            this.entities[entity].ForEach(component =>
             {
                 component.OnRecycle();
                 this.componentToTypes[component].ForEach(type => this.typeToComponents.GetOrAdd(type).Remove(component));
@@ -190,7 +191,7 @@ namespace UniT.Entities
 
         private void OnCleanup()
         {
-            this.entityToComponents.RemoveAll((entity, components) =>
+            this.entities.RemoveAll((entity, components) =>
             {
                 if (entity.GameObject) return false;
                 components.ForEach(component => this.componentToTypes.Remove(component));

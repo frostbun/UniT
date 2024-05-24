@@ -1,4 +1,5 @@
-﻿namespace UniT.Entities.Component
+﻿#nullable enable
+namespace UniT.Entities.Component
 {
     using UniT.Entities.Entity;
     using UniT.Utilities;
@@ -13,15 +14,15 @@
 
         IEntity IComponent.Entity { get => this.Entity; set => this.Entity = value; }
 
-        public IEntityManager Manager { get; private set; }
+        public IEntityManager Manager { get; private set; } = null!;
 
-        public IEntity Entity { get; private set; }
+        public IEntity Entity { get; private set; } = null!;
 
         public string Name => this.name;
 
         public GameObject GameObject => this.gameObject;
 
-        public Transform Transform { get; private set; }
+        public Transform Transform { get; private set; } = null!;
 
         void IComponent.OnInstantiate()
         {
@@ -45,7 +46,7 @@
         }
 
         #if UNIT_UNITASK
-        private CancellationTokenSource recycleCts;
+        private CancellationTokenSource? recycleCts;
 
         public CancellationToken GetCancellationTokenOnRecycle()
         {

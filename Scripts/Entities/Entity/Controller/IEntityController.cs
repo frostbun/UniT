@@ -1,4 +1,5 @@
-﻿namespace UniT.Entities.Entity.Controller
+﻿#nullable enable
+namespace UniT.Entities.Entity.Controller
 {
     using UniT.Entities.Component.Controller;
 

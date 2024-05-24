@@ -1,3 +1,4 @@
+#nullable enable
 namespace UniT.UI
 {
     using System;
@@ -29,7 +30,7 @@ namespace UniT.UI
         private readonly IAssetsManager assetsManager;
         private readonly ILogger        logger;
 
-        private readonly HashSet<IActivity>               activities       = new HashSet<IActivity>();
+        private readonly Dictionary<IActivity, IView[]>   activities       = new Dictionary<IActivity, IView[]>();
         private readonly List<IActivity>                  activityStack    = new List<IActivity>();
         private readonly Dictionary<IActivity, IActivity> prefabToInstance = new Dictionary<IActivity, IActivity>();
         private readonly Dictionary<IActivity, IActivity> instanceToPrefab = new Dictionary<IActivity, IActivity>();
@@ -51,19 +52,9 @@ namespace UniT.UI
 
         void IUIManager.Initialize(IView view, IActivity parent) => this.Initialize(view, parent);
 
-        TActivity IUIManager.RegisterActivity<TActivity>(TActivity activity)
-        {
-            if (this.activities.Add(activity))
-            {
-                activity.GetComponentsInChildren<IView>().ForEach(view => this.Initialize(view, activity));
-            }
-            return activity;
-        }
+        TActivity IUIManager.RegisterActivity<TActivity>(TActivity activity) => this.RegisterActivity(activity);
 
-        TActivity IUIManager.GetActivity<TActivity>(TActivity prefab)
-        {
-            return this.GetActivity<TActivity>(prefab);
-        }
+        TActivity IUIManager.GetActivity<TActivity>(TActivity prefab) => this.GetActivity<TActivity>(prefab);
 
         TActivity IUIManager.GetActivity<TActivity>(string key)
         {
@@ -72,13 +63,13 @@ namespace UniT.UI
         }
 
         #if UNIT_UNITASK
-        async UniTask<TActivity> IUIManager.GetActivityAsync<TActivity>(string key, IProgress<float> progress, CancellationToken cancellationToken)
+        async UniTask<TActivity> IUIManager.GetActivityAsync<TActivity>(string key, IProgress<float>? progress, CancellationToken cancellationToken)
         {
             var prefab = await this.assetsManager.LoadComponentAsync<IActivity>(key, progress, cancellationToken);
             return this.GetActivity<TActivity>(prefab, key);
         }
         #else
-        IEnumerator IUIManager.GetActivityAsync<TActivity>(string key, Action<TActivity> callback, IProgress<float> progress)
+        IEnumerator IUIManager.GetActivityAsync<TActivity>(string key, Action<TActivity> callback, IProgress<float>? progress)
         {
             var prefab = default(IActivity);
             yield return this.assetsManager.LoadComponentAsync<IActivity>(
@@ -92,13 +83,13 @@ namespace UniT.UI
 
         #region Query
 
-        IActivity IUIManager.StackingActivity => this.activityStack.LastOrDefault(activity => activity.CurrentStatus is IActivity.Status.Stacking);
+        IActivity? IUIManager.StackingActivity => this.activityStack.LastOrDefault(activity => activity.CurrentStatus is IActivity.Status.Stacking);
 
-        IActivity IUIManager.NextActivityInStack => this.activityStack.LastOrDefault(activity => activity.CurrentStatus is not IActivity.Status.Stacking);
+        IActivity? IUIManager.NextActivityInStack => this.activityStack.LastOrDefault(activity => activity.CurrentStatus is IActivity.Status.Hidden);
 
-        IEnumerable<IActivity> IUIManager.FloatingActivities => this.activities.Where(activity => activity.CurrentStatus is IActivity.Status.Floating);
+        IEnumerable<IActivity> IUIManager.FloatingActivities => this.activities.Keys.Where(activity => activity.CurrentStatus is IActivity.Status.Floating);
 
-        IEnumerable<IActivity> IUIManager.DockedActivities => this.activities.Where(activity => activity.CurrentStatus is IActivity.Status.Docked);
+        IEnumerable<IActivity> IUIManager.DockedActivities => this.activities.Keys.Where(activity => activity.CurrentStatus is IActivity.Status.Docked);
 
         #endregion
 
@@ -114,14 +105,14 @@ namespace UniT.UI
         IActivity IUIManager.Float(IActivityWithoutParams activity, bool force)
         {
             if (!force && activity.CurrentStatus is IActivity.Status.Floating) return activity;
-            this.Hide(activity, false, false);
+            this.Hide(activity, true, true);
             return this.Show(activity, IActivity.Status.Floating);
         }
 
         IActivity IUIManager.Dock(IActivityWithoutParams activity, bool force)
         {
             if (!force && activity.CurrentStatus is IActivity.Status.Docked) return activity;
-            this.Hide(activity, false, false);
+            this.Hide(activity, true, true);
             return this.Show(activity, IActivity.Status.Docked);
         }
 
@@ -136,7 +127,7 @@ namespace UniT.UI
         IActivity IUIManager.Float<TParams>(IActivityWithParams<TParams> activity, TParams @params, bool force)
         {
             if (!force && activity.CurrentStatus is IActivity.Status.Floating) return activity;
-            this.Hide(activity, false, false);
+            this.Hide(activity, true, true);
             activity.Params = @params;
             return this.Show(activity, IActivity.Status.Floating);
         }
@@ -144,7 +135,7 @@ namespace UniT.UI
         IActivity IUIManager.Dock<TParams>(IActivityWithParams<TParams> activity, TParams @params, bool force)
         {
             if (!force && activity.CurrentStatus is IActivity.Status.Docked) return activity;
-            this.Hide(activity, false, false);
+            this.Hide(activity, true, true);
             activity.Params = @params;
             return this.Show(activity, IActivity.Status.Docked);
         }
@@ -179,13 +170,23 @@ namespace UniT.UI
             this.logger.Debug($"{view.Name} initialized");
         }
 
-        private TActivity GetActivity<TActivity>(IActivity prefab, string key = null) where TActivity : IActivity
+        private TActivity RegisterActivity<TActivity>(TActivity activity) where TActivity : IActivity
+        {
+            this.activities.TryAdd(activity, () =>
+            {
+                var views = activity.GetComponentsInChildren<IView>();
+                views.ForEach(view => this.Initialize(view, activity));
+                return views;
+            });
+            return activity;
+        }
+
+        private TActivity GetActivity<TActivity>(IActivity prefab, string? key = null) where TActivity : IActivity
         {
             return (TActivity)this.prefabToInstance.GetOrAdd(prefab, () =>
             {
                 var activity = Object.Instantiate(prefab.GameObject, this.canvas.HiddenActivities, false).GetComponent<IActivity>();
-                activity.GetComponentsInChildren<IView>().ForEach(view => this.Initialize(view, activity));
-                this.activities.Add(activity);
+                this.RegisterActivity(activity);
                 this.instanceToPrefab.Add(activity, prefab);
                 if (key is { }) this.instanceToKey.Add(activity, key);
                 return activity;
@@ -205,7 +206,7 @@ namespace UniT.UI
                 {
                     this.activityStack.RemoveRange(index + 1, this.activityStack.Count - index - 1);
                 }
-                this.activities
+                this.activities.Keys
                     .Where(other => other.CurrentStatus is IActivity.Status.Stacking or IActivity.Status.Floating)
                     .SafeForEach(other => this.Hide(other, false, false));
             }
@@ -221,18 +222,20 @@ namespace UniT.UI
             );
             activity.Transform.SetAsLastSibling();
             this.logger.Debug($"{activity.Name} status: {activity.CurrentStatus = nextStatus}");
-            activity.OnShow();
+            this.activities[activity].ForEach(view => view.OnShow());
             return activity;
         }
 
         private void Hide(IActivity activity, bool removeFromStack, bool autoStack)
         {
             if (removeFromStack) this.activityStack.Remove(activity);
-            if (activity.CurrentStatus is IActivity.Status.Hidden) return;
-            this.logger.Debug($"{activity.Name} status: {activity.CurrentStatus = IActivity.Status.Hidden}");
-            activity.OnHide();
-            activity.Transform.SetParent(this.canvas.HiddenActivities, false);
-            if (autoStack && this.activityStack.LastOrDefault() is { CurrentStatus: not IActivity.Status.Stacking } nextActivity)
+            if (activity.CurrentStatus is not IActivity.Status.Hidden)
+            {
+                this.logger.Debug($"{activity.Name} status: {activity.CurrentStatus = IActivity.Status.Hidden}");
+                this.activities[activity].ForEach(view => view.OnHide());
+                activity.Transform.SetParent(this.canvas.HiddenActivities, false);
+            }
+            if (autoStack && this.activityStack.LastOrDefault() is { CurrentStatus: IActivity.Status.Hidden } nextActivity && nextActivity != activity)
             {
                 this.Show(nextActivity, IActivity.Status.Stacking);
             }
@@ -247,7 +250,6 @@ namespace UniT.UI
                 this.prefabToInstance.Remove(prefab);
             }
             this.logger.Debug($"{activity.Name} status: {activity.CurrentStatus = IActivity.Status.Disposed}");
-            activity.OnDispose();
             Object.Destroy(activity.GameObject);
             if (this.instanceToKey.TryRemove(activity, out var key))
             {

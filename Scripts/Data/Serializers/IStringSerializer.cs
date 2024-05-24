@@ -1,3 +1,4 @@
+#nullable enable
 namespace UniT.Data
 {
     #if UNIT_UNITASK

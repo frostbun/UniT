@@ -1,3 +1,4 @@
+#nullable enable
 namespace UniT.Audio
 {
     using System;
@@ -51,7 +52,7 @@ namespace UniT.Audio
 
         #region Music
 
-        public string CurrentMusic { get; }
+        public string? CurrentMusic { get; }
 
         public float MusicTime { get; set; }
 
@@ -72,13 +73,13 @@ namespace UniT.Audio
         #region Async
 
         #if UNIT_UNITASK
-        public UniTask LoadSoundAsync(string name, IProgress<float> progress = null, CancellationToken cancellationToken = default);
+        public UniTask LoadSoundAsync(string name, IProgress<float>? progress = null, CancellationToken cancellationToken = default);
 
-        public UniTask LoadMusicAsync(string name, IProgress<float> progress = null, CancellationToken cancellationToken = default);
+        public UniTask LoadMusicAsync(string name, IProgress<float>? progress = null, CancellationToken cancellationToken = default);
         #else
-        public IEnumerator LoadSoundAsync(string name, Action callback = null, IProgress<float> progress = null);
+        public IEnumerator LoadSoundAsync(string name, Action? callback = null, IProgress<float>? progress = null);
 
-        public IEnumerator LoadMusicAsync(string name, Action callback = null, IProgress<float> progress = null);
+        public IEnumerator LoadMusicAsync(string name, Action? callback = null, IProgress<float>? progress = null);
         #endif
 
         #endregion

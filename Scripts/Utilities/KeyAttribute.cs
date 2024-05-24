@@ -1,3 +1,4 @@
+#nullable enable
 namespace UniT.Utilities
 {
     using System;

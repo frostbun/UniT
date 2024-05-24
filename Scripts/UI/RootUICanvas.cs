@@ -1,4 +1,5 @@
-﻿namespace UniT.UI
+﻿#nullable enable
+namespace UniT.UI
 {
     using UnityEngine;
     using UnityEngine.UI;
@@ -6,10 +7,10 @@
     [RequireComponent(typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster))]
     public sealed class RootUICanvas : MonoBehaviour
     {
-        public Transform HiddenActivities   { get; private set; }
-        public Transform StackingActivities { get; private set; }
-        public Transform FloatingActivities { get; private set; }
-        public Transform DockedActivities   { get; private set; }
+        public Transform HiddenActivities   { get; private set; } = null!;
+        public Transform StackingActivities { get; private set; } = null!;
+        public Transform FloatingActivities { get; private set; } = null!;
+        public Transform DockedActivities   { get; private set; } = null!;
 
         private void Awake()
         {

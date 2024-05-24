@@ -1,4 +1,5 @@
-﻿namespace UniT.UI.View
+﻿#nullable enable
+namespace UniT.UI.View
 {
     using UniT.UI.Activity;
     using UnityEngine;
@@ -26,8 +27,6 @@
         public void OnShow();
 
         public void OnHide();
-
-        public void OnDispose();
 
         #if UNIT_UNITASK
         public CancellationToken GetCancellationTokenOnHide();

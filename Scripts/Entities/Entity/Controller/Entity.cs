@@ -1,3 +1,4 @@
+#nullable enable
 namespace UniT.Entities.Entity.Controller
 {
     using System;
@@ -11,7 +12,7 @@ namespace UniT.Entities.Entity.Controller
 
         protected virtual Type ControllerType => typeof(TController);
 
-        protected TController Controller { get; private set; }
+        protected TController Controller { get; private set; } = default!;
 
         protected sealed override void OnInstantiate() => this.Controller.OnInstantiate();
 
@@ -28,7 +29,7 @@ namespace UniT.Entities.Entity.Controller
 
         protected virtual Type ControllerType => typeof(TController);
 
-        protected TController Controller { get; private set; }
+        protected TController Controller { get; private set; } = default!;
 
         protected sealed override void OnInstantiate() => this.Controller.OnInstantiate();
 

@@ -1,3 +1,4 @@
+#nullable enable
 namespace UniT.Data
 {
     using System;
@@ -64,6 +65,7 @@ namespace UniT.Data
 
             AddConverter(new UriConverter());
             AddConverter(new GuidConverter());
+            AddConverter(new NullableConverter());
 
             #endregion
         }

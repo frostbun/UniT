@@ -1,4 +1,5 @@
-﻿namespace UniT.Entities.Component
+﻿#nullable enable
+namespace UniT.Entities.Component
 {
     using UniT.Entities.Entity;
     using UnityEngine;

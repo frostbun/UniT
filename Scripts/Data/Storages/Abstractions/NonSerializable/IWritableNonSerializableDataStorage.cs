@@ -1,4 +1,5 @@
-﻿namespace UniT.Data
+﻿#nullable enable
+namespace UniT.Data
 {
     using System;
     #if UNIT_UNITASK
@@ -13,9 +14,9 @@
         public void Save(string[] keys, IData[] values);
 
         #if UNIT_UNITASK
-        public UniTask SaveAsync(string[] keys, IData[] values, IProgress<float> progress = null, CancellationToken cancellationToken = default);
+        public UniTask SaveAsync(string[] keys, IData[] values, IProgress<float>? progress = null, CancellationToken cancellationToken = default);
         #else
-        public IEnumerator SaveAsync(string[] keys, IData[] values, Action callback = null, IProgress<float> progress = null);
+        public IEnumerator SaveAsync(string[] keys, IData[] values, Action? callback = null, IProgress<float>? progress = null);
         #endif
     }
 }

@@ -1,3 +1,4 @@
+#nullable enable
 namespace UniT.Pooling
 {
     using System;
@@ -9,9 +10,9 @@ namespace UniT.Pooling
     {
         #region Constructor
 
-        [SerializeField] private GameObject prefab;
+        [SerializeField] private GameObject prefab = null!;
 
-        private new      Transform           transform;
+        private new      Transform           transform      = null!;
         private readonly Queue<GameObject>   pooledObjects  = new Queue<GameObject>();
         private readonly HashSet<GameObject> spawnedObjects = new HashSet<GameObject>();
 
@@ -28,7 +29,7 @@ namespace UniT.Pooling
 
         private void Awake()
         {
-            this.transform = ((Component)this).transform;
+            this.transform = base.transform;
         }
 
         #endregion
@@ -45,7 +46,7 @@ namespace UniT.Pooling
             }
         }
 
-        public GameObject Spawn(Vector3 position = default, Quaternion rotation = default, Transform parent = null)
+        public GameObject Spawn(Vector3 position = default, Quaternion rotation = default, Transform? parent = null)
         {
             var instance = this.pooledObjects.DequeueOrDefault(() => Instantiate(this.prefab, this.transform));
             instance.transform.SetPositionAndRotation(position, rotation);
@@ -55,7 +56,7 @@ namespace UniT.Pooling
             return instance;
         }
 
-        public T Spawn<T>(Vector3 position = default, Quaternion rotation = default, Transform parent = null)
+        public T Spawn<T>(Vector3 position = default, Quaternion rotation = default, Transform? parent = null)
         {
             return this.Spawn(position, rotation, parent).GetComponentOrThrow<T>();
         }

@@ -1,3 +1,4 @@
+#nullable enable
 namespace UniT.Data
 {
     using System;
@@ -50,11 +51,15 @@ namespace UniT.Data
 
         IData[] IReadableNonSerializableDataStorage.Read(string[] keys)
         {
-            return keys.Select(key => (IData)this.assetsManager.Load<Object>(key)).ToArray();
+            return keys.Select(key =>
+            {
+                var data = this.assetsManager.Load<Object>(key);
+                return (IData)data;
+            }).ToArray();
         }
 
         #if UNIT_UNITASK
-        UniTask<string[]> IReadableSerializableDataStorage.ReadStringsAsync(string[] keys, IProgress<float> progress, CancellationToken cancellationToken)
+        UniTask<string[]> IReadableSerializableDataStorage.ReadStringsAsync(string[] keys, IProgress<float>? progress, CancellationToken cancellationToken)
         {
             return keys.SelectAsync(
                 (key, progress, cancellationToken) =>
@@ -70,7 +75,7 @@ namespace UniT.Data
             ).ToArrayAsync();
         }
 
-        UniTask<byte[][]> IReadableSerializableDataStorage.ReadBytesAsync(string[] keys, IProgress<float> progress, CancellationToken cancellationToken)
+        UniTask<byte[][]> IReadableSerializableDataStorage.ReadBytesAsync(string[] keys, IProgress<float>? progress, CancellationToken cancellationToken)
         {
             return keys.SelectAsync(
                 (key, progress, cancellationToken) =>
@@ -86,18 +91,21 @@ namespace UniT.Data
             ).ToArrayAsync();
         }
 
-        UniTask<IData[]> IReadableNonSerializableDataStorage.ReadAsync(string[] keys, IProgress<float> progress, CancellationToken cancellationToken)
+        UniTask<IData[]> IReadableNonSerializableDataStorage.ReadAsync(string[] keys, IProgress<float>? progress, CancellationToken cancellationToken)
         {
             return keys.SelectAsync(
                 (key, progress, cancellationToken) =>
                     this.assetsManager.LoadAsync<Object>(key, progress, cancellationToken)
-                        .ContinueWith(asset => (IData)asset),
+                        .ContinueWith(asset =>
+                        {
+                            return (IData)asset;
+                        }),
                 progress,
                 cancellationToken
             ).ToArrayAsync();
         }
         #else
-        IEnumerator IReadableSerializableDataStorage.ReadStringsAsync(string[] keys, Action<string[]> callback, IProgress<float> progress)
+        IEnumerator IReadableSerializableDataStorage.ReadStringsAsync(string[] keys, Action<string[]> callback, IProgress<float>? progress)
         {
             // TODO: make it run concurrently
             var rawDatas = new List<string>();
@@ -110,7 +118,7 @@ namespace UniT.Data
             callback(rawDatas.ToArray());
         }
 
-        IEnumerator IReadableSerializableDataStorage.ReadBytesAsync(string[] keys, Action<byte[][]> callback, IProgress<float> progress)
+        IEnumerator IReadableSerializableDataStorage.ReadBytesAsync(string[] keys, Action<byte[][]> callback, IProgress<float>? progress)
         {
             // TODO: make it run concurrently
             var rawDatas = new List<byte[]>();
@@ -123,16 +131,13 @@ namespace UniT.Data
             callback(rawDatas.ToArray());
         }
 
-        IEnumerator IReadableNonSerializableDataStorage.ReadAsync(string[] keys, Action<IData[]> callback, IProgress<float> progress)
+        IEnumerator IReadableNonSerializableDataStorage.ReadAsync(string[] keys, Action<IData[]> callback, IProgress<float>? progress)
         {
             // TODO: make it run concurrently
             var datas = new List<IData>();
             foreach (var key in keys)
             {
-                yield return this.assetsManager.LoadAsync<Object>(key, asset =>
-                {
-                    datas.Add((IData)asset);
-                });
+                yield return this.assetsManager.LoadAsync<Object>(key, asset => datas.Add((IData)asset));
             }
             progress?.Report(1);
             callback(datas.ToArray());

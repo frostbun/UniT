@@ -1,4 +1,5 @@
-﻿namespace UniT.UI.View.Presenter
+﻿#nullable enable
+namespace UniT.UI.View.Presenter
 {
     using UniT.UI.Activity;
     using UniT.UI.Presenter;
@@ -35,8 +36,6 @@
         public virtual void OnShow() { }
 
         public virtual void OnHide() { }
-
-        public virtual void OnDispose() { }
     }
 
     public abstract class ViewPresenter<TView> : BaseViewPresenter<TView> where TView : IViewWithoutParams, IHasPresenter

@@ -1,4 +1,5 @@
 ﻿#if UNIT_VCONTAINER
+#nullable enable
 namespace VContainer
 {
     using System;
@@ -17,10 +18,10 @@ namespace VContainer
     {
         public static void RegisterUniT(
             this IContainerBuilder builder,
-            RootUICanvas           rootUICanvas    = null,
-            IEnumerable<Type>      dataTypes       = null,
-            IEnumerable<Type>      storageTypes    = null,
-            IEnumerable<Type>      serializerTypes = null,
+            RootUICanvas?          rootUICanvas    = null,
+            IEnumerable<Type>?     dataTypes       = null,
+            IEnumerable<Type>?     storageTypes    = null,
+            IEnumerable<Type>?     serializerTypes = null,
             LogLevel               logLevel        = LogLevel.Info
         )
         {
