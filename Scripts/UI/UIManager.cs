@@ -31,7 +31,7 @@ namespace UniT.UI
         private readonly ILogger        logger;
 
         private readonly Dictionary<IActivity, IView[]>   activities       = new Dictionary<IActivity, IView[]>();
-        private readonly List<IActivity>                  activityStack    = new List<IActivity>();
+        private readonly List<IScreen>                    screensStack     = new List<IScreen>();
         private readonly Dictionary<IActivity, IActivity> prefabToInstance = new Dictionary<IActivity, IActivity>();
         private readonly Dictionary<IActivity, IActivity> instanceToPrefab = new Dictionary<IActivity, IActivity>();
         private readonly Dictionary<IActivity, string>    instanceToKey    = new Dictionary<IActivity, string>();
@@ -83,70 +83,40 @@ namespace UniT.UI
 
         #region Query
 
-        IActivity? IUIManager.StackingActivity => this.activityStack.LastOrDefault(activity => activity.CurrentStatus is IActivity.Status.Stacking);
+        IScreen? IUIManager.CurrentScreen => this.screensStack.LastOrDefault() is { CurrentStatus: IActivity.Status.Showing } screen ? screen : null;
 
-        IActivity? IUIManager.NextActivityInStack => this.activityStack.LastOrDefault(activity => activity.CurrentStatus is IActivity.Status.Hidden);
+        IEnumerable<IPopup> IUIManager.CurrentPopups => this.activities.Keys.OfType<IPopup>().Where(activity => activity.CurrentStatus is IActivity.Status.Showing);
 
-        IEnumerable<IActivity> IUIManager.FloatingActivities => this.activities.Keys.Where(activity => activity.CurrentStatus is IActivity.Status.Floating);
-
-        IEnumerable<IActivity> IUIManager.DockedActivities => this.activities.Keys.Where(activity => activity.CurrentStatus is IActivity.Status.Docked);
+        IEnumerable<IOverlay> IUIManager.CurrentOverlays => this.activities.Keys.OfType<IOverlay>().Where(activity => activity.CurrentStatus is IActivity.Status.Showing);
 
         #endregion
 
         #region UI Flow
 
-        IActivity IUIManager.Stack(IActivityWithoutParams activity, bool force)
+        IActivity IUIManager.Show(IActivityWithoutParams activity, bool force)
         {
-            if (!force && activity.CurrentStatus is IActivity.Status.Stacking) return activity;
-            this.Hide(activity, false, false);
-            return this.Show(activity, IActivity.Status.Stacking);
+            if (!force && activity.CurrentStatus is IActivity.Status.Showing) return activity;
+            this.Hide(activity, false);
+            return this.Show(activity);
         }
 
-        IActivity IUIManager.Float(IActivityWithoutParams activity, bool force)
+        IActivity IUIManager.Show<TParams>(IActivityWithParams<TParams> activity, TParams @params, bool force)
         {
-            if (!force && activity.CurrentStatus is IActivity.Status.Floating) return activity;
-            this.Hide(activity, true, true);
-            return this.Show(activity, IActivity.Status.Floating);
-        }
-
-        IActivity IUIManager.Dock(IActivityWithoutParams activity, bool force)
-        {
-            if (!force && activity.CurrentStatus is IActivity.Status.Docked) return activity;
-            this.Hide(activity, true, true);
-            return this.Show(activity, IActivity.Status.Docked);
-        }
-
-        IActivity IUIManager.Stack<TParams>(IActivityWithParams<TParams> activity, TParams @params, bool force)
-        {
-            if (!force && activity.CurrentStatus is IActivity.Status.Stacking) return activity;
-            this.Hide(activity, false, false);
+            if (!force && activity.CurrentStatus is IActivity.Status.Showing) return activity;
+            this.Hide(activity, false);
             activity.Params = @params;
-            return this.Show(activity, IActivity.Status.Stacking);
+            return this.Show(activity);
         }
 
-        IActivity IUIManager.Float<TParams>(IActivityWithParams<TParams> activity, TParams @params, bool force)
+        void IUIManager.Hide(IActivity activity, bool autoStack)
         {
-            if (!force && activity.CurrentStatus is IActivity.Status.Floating) return activity;
-            this.Hide(activity, true, true);
-            activity.Params = @params;
-            return this.Show(activity, IActivity.Status.Floating);
-        }
-
-        IActivity IUIManager.Dock<TParams>(IActivityWithParams<TParams> activity, TParams @params, bool force)
-        {
-            if (!force && activity.CurrentStatus is IActivity.Status.Docked) return activity;
-            this.Hide(activity, true, true);
-            activity.Params = @params;
-            return this.Show(activity, IActivity.Status.Docked);
-        }
-
-        void IUIManager.Hide(IActivity activity, bool removeFromStack, bool autoStack)
-        {
-            this.Hide(activity, removeFromStack, autoStack);
+            if (activity is IScreen screen) this.screensStack.Remove(screen);
+            this.Hide(activity, autoStack);
         }
 
         void IUIManager.Dispose(IActivity activity, bool autoStack)
         {
+            if (activity is IScreen screen) this.screensStack.Remove(screen);
             this.Dispose(activity, autoStack);
         }
 
@@ -185,65 +155,65 @@ namespace UniT.UI
         {
             return (TActivity)this.prefabToInstance.GetOrAdd(prefab, () =>
             {
-                var activity = Object.Instantiate(prefab.GameObject, this.canvas.HiddenActivities, false).GetComponent<IActivity>();
-                this.RegisterActivity(activity);
+                var activity = Object.Instantiate(prefab.GameObject, this.canvas.Hiddens, false).GetComponent<IActivity>();
                 this.instanceToPrefab.Add(activity, prefab);
                 if (key is { }) this.instanceToKey.Add(activity, key);
+                this.RegisterActivity(activity);
                 return activity;
             });
         }
 
-        private IActivity Show(IActivity activity, IActivity.Status nextStatus)
+        private IActivity Show(IActivity activity)
         {
-            if (nextStatus is IActivity.Status.Stacking)
+            if (activity is IScreen screen)
             {
-                var index = this.activityStack.IndexOf(activity);
+                var index = this.screensStack.IndexOf(screen);
                 if (index is -1)
                 {
-                    this.activityStack.Add(activity);
+                    this.screensStack.Add(screen);
                 }
                 else
                 {
-                    this.activityStack.RemoveRange(index + 1, this.activityStack.Count - index - 1);
+                    this.screensStack.RemoveRange(index + 1, this.screensStack.Count - index - 1);
                 }
                 this.activities.Keys
-                    .Where(other => other.CurrentStatus is IActivity.Status.Stacking or IActivity.Status.Floating)
-                    .SafeForEach(other => this.Hide(other, false, false));
+                    .Where(other => other is not IOverlay)
+                    .Where(other => other.CurrentStatus is IActivity.Status.Showing)
+                    .SafeForEach(other => this.Hide(other, false));
             }
             activity.Transform.SetParent(
-                nextStatus switch
+                activity switch
                 {
-                    IActivity.Status.Stacking => this.canvas.StackingActivities,
-                    IActivity.Status.Floating => this.canvas.FloatingActivities,
-                    IActivity.Status.Docked   => this.canvas.DockedActivities,
-                    _                         => throw new ArgumentOutOfRangeException(nameof(nextStatus), nextStatus, null),
+                    IScreen  => this.canvas.Screens,
+                    IPopup   => this.canvas.Popups,
+                    IOverlay => this.canvas.Overlays,
+                    _        => throw new NotSupportedException($"Showing {activity.GetType().Name} is not supported"),
                 },
                 false
             );
             activity.Transform.SetAsLastSibling();
-            this.logger.Debug($"{activity.Name} status: {activity.CurrentStatus = nextStatus}");
+            this.logger.Debug($"{activity.Name} status: {activity.CurrentStatus = IActivity.Status.Showing}");
             this.activities[activity].ForEach(view => view.OnShow());
             return activity;
         }
 
-        private void Hide(IActivity activity, bool removeFromStack, bool autoStack)
+        private void Hide(IActivity activity, bool autoStack)
         {
-            if (removeFromStack) this.activityStack.Remove(activity);
             if (activity.CurrentStatus is not IActivity.Status.Hidden)
             {
                 this.logger.Debug($"{activity.Name} status: {activity.CurrentStatus = IActivity.Status.Hidden}");
                 this.activities[activity].ForEach(view => view.OnHide());
-                activity.Transform.SetParent(this.canvas.HiddenActivities, false);
+                activity.Transform.SetParent(this.canvas.Hiddens, false);
             }
-            if (autoStack && this.activityStack.LastOrDefault() is { CurrentStatus: IActivity.Status.Hidden } nextActivity && nextActivity != activity)
+            if (autoStack && this.screensStack.LastOrDefault() is { CurrentStatus: IActivity.Status.Hidden } nextScreen)
             {
-                this.Show(nextActivity, IActivity.Status.Stacking);
+                this.Show(nextScreen);
             }
         }
 
         private void Dispose(IActivity activity, bool autoStack)
         {
-            this.Hide(activity, true, autoStack);
+            this.Hide(activity, autoStack);
             this.activities.Remove(activity);
             if (this.instanceToPrefab.TryRemove(activity, out var prefab))
             {

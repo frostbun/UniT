@@ -45,31 +45,21 @@ namespace UniT.UI
 
         #region Query
 
-        public IActivity? StackingActivity { get; }
+        public IScreen? CurrentScreen { get; }
 
-        public IActivity? NextActivityInStack { get; }
+        public IEnumerable<IPopup> CurrentPopups { get; }
 
-        public IEnumerable<IActivity> FloatingActivities { get; }
-
-        public IEnumerable<IActivity> DockedActivities { get; }
+        public IEnumerable<IOverlay> CurrentOverlays { get; }
 
         #endregion
 
         #region UI Flow
 
-        public IActivity Stack(IActivityWithoutParams activity, bool force = false);
+        public IActivity Show(IActivityWithoutParams activity, bool force = false);
 
-        public IActivity Float(IActivityWithoutParams activity, bool force = false);
+        public IActivity Show<TParams>(IActivityWithParams<TParams> activity, TParams @params, bool force = true);
 
-        public IActivity Dock(IActivityWithoutParams activity, bool force = false);
-
-        public IActivity Stack<TParams>(IActivityWithParams<TParams> activity, TParams @params, bool force = true);
-
-        public IActivity Float<TParams>(IActivityWithParams<TParams> activity, TParams @params, bool force = true);
-
-        public IActivity Dock<TParams>(IActivityWithParams<TParams> activity, TParams @params, bool force = true);
-
-        public void Hide(IActivity activity, bool removeFromStack = true, bool autoStack = true);
+        public void Hide(IActivity activity, bool autoStack = true);
 
         public void Dispose(IActivity activity, bool autoStack = true);
 

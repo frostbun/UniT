@@ -11,9 +11,7 @@ namespace UniT.UI.Activity
         public enum Status
         {
             Hidden,
-            Stacking,
-            Floating,
-            Docked,
+            Showing,
             Disposed,
         }
 
@@ -31,26 +29,18 @@ namespace UniT.UI.Activity
         public bool SetResult(object? result);
         #endif
 
-        public void Hide(bool removeFromStack = true, bool autoStack = true);
+        public void Hide(bool autoStack = true);
 
         public void Dispose(bool autoStack = true);
     }
 
     public interface IActivityWithoutParams : IActivity, IViewWithoutParams
     {
-        public IActivity Stack(bool force = false);
-
-        public IActivity Float(bool force = false);
-
-        public IActivity Dock(bool force = false);
+        public IActivity Show(bool force = false);
     }
 
     public interface IActivityWithParams<TParams> : IActivity, IViewWithParams<TParams>
     {
-        public IActivity Stack(TParams @params, bool force = true);
-
-        public IActivity Float(TParams @params, bool force = true);
-
-        public IActivity Dock(TParams @params, bool force = true);
+        public IActivity Show(TParams @params, bool force = true);
     }
 }

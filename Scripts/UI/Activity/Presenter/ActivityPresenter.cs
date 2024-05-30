@@ -14,7 +14,7 @@ namespace UniT.UI.Activity.Presenter
         protected bool SetResult(object? result) => this.Owner.SetResult(result);
         #endif
 
-        protected void Hide(bool removeFromStack = true, bool autoStack = true) => this.Owner.Hide(removeFromStack, autoStack);
+        protected void Hide(bool autoStack = true) => this.Owner.Hide(autoStack);
 
         protected void Dispose(bool autoStack = true) => this.Owner.Dispose(autoStack);
     }

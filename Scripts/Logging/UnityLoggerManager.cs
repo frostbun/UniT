@@ -7,7 +7,8 @@ namespace UniT.Logging
 
     public sealed class UnityLoggerManager : ILoggerManager
     {
-        private readonly LogLevel                    level;
+        private readonly LogLevel level;
+
         private readonly Dictionary<string, ILogger> loggers = new Dictionary<string, ILogger>();
 
         [Preserve]

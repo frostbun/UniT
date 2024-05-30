@@ -7,18 +7,18 @@ namespace UniT.UI
     [RequireComponent(typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster))]
     public sealed class RootUICanvas : MonoBehaviour
     {
-        public Transform HiddenActivities   { get; private set; } = null!;
-        public Transform StackingActivities { get; private set; } = null!;
-        public Transform FloatingActivities { get; private set; } = null!;
-        public Transform DockedActivities   { get; private set; } = null!;
+        public Transform Hiddens  { get; private set; } = null!;
+        public Transform Screens  { get; private set; } = null!;
+        public Transform Popups   { get; private set; } = null!;
+        public Transform Overlays { get; private set; } = null!;
 
         private void Awake()
         {
-            this.HiddenActivities   = this.CreateChild(nameof(this.HiddenActivities));
-            this.StackingActivities = this.CreateChild(nameof(this.StackingActivities));
-            this.FloatingActivities = this.CreateChild(nameof(this.FloatingActivities));
-            this.DockedActivities   = this.CreateChild(nameof(this.DockedActivities));
-            this.HiddenActivities.gameObject.SetActive(false);
+            this.Hiddens  = this.CreateChild(nameof(this.Hiddens));
+            this.Screens  = this.CreateChild(nameof(this.Screens));
+            this.Popups   = this.CreateChild(nameof(this.Popups));
+            this.Overlays = this.CreateChild(nameof(this.Overlays));
+            this.Hiddens.gameObject.SetActive(false);
             DontDestroyOnLoad(this);
         }
 

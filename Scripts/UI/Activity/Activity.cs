@@ -49,18 +49,14 @@ namespace UniT.UI.Activity
         }
         #endif
 
-        public void Hide(bool removeFromStack = true, bool autoStack = true) => this.Manager.Hide(this, removeFromStack, autoStack);
+        public void Hide(bool autoStack = true) => this.Manager.Hide(this, autoStack);
 
         public void Dispose(bool autoStack = true) => this.Manager.Dispose(this, autoStack);
     }
 
     public abstract class Activity : BaseActivity, IActivityWithoutParams
     {
-        public IActivity Stack(bool force = false) => this.Manager.Stack(this, force);
-
-        public IActivity Float(bool force = false) => this.Manager.Float(this, force);
-
-        public IActivity Dock(bool force = false) => this.Manager.Dock(this, force);
+        public IActivity Show(bool force = false) => this.Manager.Show(this, force);
     }
 
     public abstract class Activity<TParams> : BaseActivity, IActivityWithParams<TParams>
@@ -69,10 +65,6 @@ namespace UniT.UI.Activity
 
         public TParams Params { get; private set; } = default!;
 
-        public IActivity Stack(TParams @params, bool force = true) => this.Manager.Stack(this, @params, force);
-
-        public IActivity Float(TParams @params, bool force = true) => this.Manager.Float(this, @params, force);
-
-        public IActivity Dock(TParams @params, bool force = true) => this.Manager.Dock(this, @params, force);
+        public IActivity Show(TParams @params, bool force = true) => this.Manager.Show(this, @params, force);
     }
 }
