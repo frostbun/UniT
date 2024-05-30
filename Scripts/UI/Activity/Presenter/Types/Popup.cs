@@ -1,4 +1,5 @@
-﻿namespace UniT.UI.Activity.Presenter
+﻿#nullable enable
+namespace UniT.UI.Activity.Presenter
 {
     public abstract class Popup<TPresenter> : Activity<TPresenter>, IPopup where TPresenter : IActivityPresenter
     {

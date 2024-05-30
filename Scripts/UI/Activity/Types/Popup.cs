@@ -1,4 +1,5 @@
-﻿namespace UniT.UI.Activity
+﻿#nullable enable
+namespace UniT.UI.Activity
 {
     public abstract class Popup : Activity, IPopup
     {

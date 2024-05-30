@@ -1,4 +1,5 @@
-﻿namespace UniT.UI.Activity.Presenter
+﻿#nullable enable
+namespace UniT.UI.Activity.Presenter
 {
     public abstract class Overlay<TPresenter> : Activity<TPresenter>, IOverlay where TPresenter : IActivityPresenter
     {
