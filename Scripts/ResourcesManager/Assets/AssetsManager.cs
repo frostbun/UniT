@@ -125,14 +125,16 @@ namespace UniT.ResourcesManager
         private UniTask<T> LoadOrThrowAsync<T>(string key, IProgress<float>? progress, CancellationToken cancellationToken) where T : Object
         {
             return this.cache.GetOrAddAsync(key, () =>
-                this.LoadAsync<T>(key, progress, cancellationToken)
-                    .ContinueWith(asset =>
-                    {
-                        if (asset is null) throw new ArgumentOutOfRangeException(nameof(key), key, $"Failed to load {key}");
-                        this.logger.Debug($"Loaded {key}");
-                        return asset;
-                    })
-            ).ContinueWith(asset => (T)asset);
+                    this.LoadAsync<T>(key, progress, cancellationToken)
+                        .ContinueWith(asset =>
+                        {
+                            if (asset is null) throw new NullReferenceException($"{key} is null");
+                            this.logger.Debug($"Loaded {key}");
+                            return asset;
+                        })
+                )
+                .ContinueWith(asset => (T)asset)
+                .Catch((Func<Exception, T>)(inner => throw new ArgumentOutOfRangeException($"Failed to load {key}", inner)));
         }
 
         private UniTask<T> LoadComponentOrThrowAsync<T>(string key, IProgress<float>? progress, CancellationToken cancellationToken)
