@@ -123,12 +123,12 @@ namespace UniT.Data
 
         private static void WriteStrings(string[] keys, string[] values)
         {
-            IterTools.StrictZip(keys, values).ForEach(PlayerPrefs.SetString);
+            IterTools.Zip(keys, values).ForEach(PlayerPrefs.SetString);
         }
 
         private static void WriteBytes(string[] keys, byte[][] values)
         {
-            IterTools.StrictZip(keys, values.Select(Convert.ToBase64String)).ForEach(PlayerPrefs.SetString);
+            IterTools.Zip(keys, values.Select(Convert.ToBase64String)).ForEach(PlayerPrefs.SetString);
         }
 
         private static void Flush()

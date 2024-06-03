@@ -2,6 +2,7 @@
 namespace UniT.Data
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Runtime.CompilerServices;
     using UniT.Extensions;
@@ -17,16 +18,21 @@ namespace UniT.Data
 
         protected override object ConvertFromString(string str, Type type)
         {
-            var items     = str.Split(new[] { this.separator }, StringSplitOptions.None);
+            var items     = str.Split(this.separator);
             var itemTypes = type.GetGenericArguments();
-            return Activator.CreateInstance(type, IterTools.StrictZip(items, itemTypes, ConverterManager.ConvertFromString).ToArray());
+            return Activator.CreateInstance(type, IterTools.Zip(items, itemTypes, ConverterManager.ConvertFromString).ToArray());
         }
 
         protected override string ConvertToString(object obj, Type type)
         {
             var tuple     = (ITuple)obj;
             var itemTypes = type.GetGenericArguments();
-            return string.Join(this.separator, IterTools.StrictZip(tuple.ToEnumerable(), itemTypes, ConverterManager.ConvertToString));
+            return IterTools.Zip(ToEnumerable(tuple), itemTypes, ConverterManager.ConvertToString).Join(this.separator);
+
+            static IEnumerable<object> ToEnumerable(ITuple tuple)
+            {
+                for (var i = 0; i < tuple.Length; ++i) yield return tuple[i];
+            }
         }
     }
 }

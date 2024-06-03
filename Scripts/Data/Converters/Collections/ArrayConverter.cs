@@ -3,6 +3,7 @@ namespace UniT.Data
 {
     using System;
     using System.Linq;
+    using UniT.Extensions;
 
     public sealed class ArrayConverter : Converter<Array>
     {
@@ -17,7 +18,7 @@ namespace UniT.Data
         {
             var elementType      = type.GetElementType()!;
             var elementConverter = ConverterManager.GetConverter(elementType);
-            var elements         = str.Split(new[] { this.separator }, StringSplitOptions.None);
+            var elements         = str.Split(this.separator);
             var array            = Array.CreateInstance(elementType, elements.Length);
             for (var i = 0; i < elements.Length; ++i)
             {
@@ -28,9 +29,11 @@ namespace UniT.Data
 
         protected override string ConvertToString(object obj, Type type)
         {
-            var elementType      = type.GetElementType();
+            var elementType      = type.GetElementType()!;
             var elementConverter = ConverterManager.GetConverter(elementType);
-            return string.Join(this.separator, ((Array)obj).Cast<object>().Select(element => elementConverter.ConvertToString(element, elementType)));
+            return ((Array)obj).Cast<object>()
+                .Select(element => elementConverter.ConvertToString(element, elementType))
+                .Join(this.separator);
         }
     }
 }

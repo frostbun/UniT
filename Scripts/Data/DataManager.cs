@@ -78,7 +78,7 @@ namespace UniT.Data
                             case IReadableSerializableDataStorage storage when serializerGroup.Key is IBinarySerializer serializer:
                             {
                                 var rawDatas = storage.ReadBytes(keys);
-                                IterTools.StrictZip(serializerGroup, rawDatas)
+                                IterTools.Zip(serializerGroup, rawDatas)
                                     .Where((_,      rawData) => rawData.Length > 0)
                                     .ForEach((type, rawData) => serializer.Populate(this.datas[type], rawData));
                                 break;
@@ -86,7 +86,7 @@ namespace UniT.Data
                             case IReadableSerializableDataStorage storage when serializerGroup.Key is IStringSerializer serializer:
                             {
                                 var rawDatas = storage.ReadStrings(keys);
-                                IterTools.StrictZip(serializerGroup, rawDatas)
+                                IterTools.Zip(serializerGroup, rawDatas)
                                     .Where((_,      rawData) => rawData.Length > 0)
                                     .ForEach((type, rawData) => serializer.Populate(this.datas[type], rawData));
                                 break;
@@ -94,7 +94,7 @@ namespace UniT.Data
                             case IReadableNonSerializableDataStorage storage when serializerGroup.Key is null:
                             {
                                 var datas = storage.Read(keys);
-                                IterTools.StrictZip(serializerGroup, datas)
+                                IterTools.Zip(serializerGroup, datas)
                                     .ForEach((type, data) => data.CopyTo(this.datas[type]));
                                 break;
                             }
@@ -180,7 +180,7 @@ namespace UniT.Data
                                     case IReadableSerializableDataStorage storage when serializerGroup.Key is IBinarySerializer serializer:
                                     {
                                         var rawDatas = await storage.ReadBytesAsync(keys, progress, cancellationToken);
-                                        await IterTools.StrictZip(serializerGroup, rawDatas)
+                                        await IterTools.Zip(serializerGroup, rawDatas)
                                             .Where((_,           rawData) => rawData.Length > 0)
                                             .ForEachAsync((type, rawData) => serializer.PopulateAsync(this.datas[type], rawData));
                                         break;
@@ -188,7 +188,7 @@ namespace UniT.Data
                                     case IReadableSerializableDataStorage storage when serializerGroup.Key is IStringSerializer serializer:
                                     {
                                         var rawDatas = await storage.ReadStringsAsync(keys, progress, cancellationToken);
-                                        await IterTools.StrictZip(serializerGroup, rawDatas)
+                                        await IterTools.Zip(serializerGroup, rawDatas)
                                             .Where((_,           rawData) => rawData.Length > 0)
                                             .ForEachAsync((type, rawData) => serializer.PopulateAsync(this.datas[type], rawData));
                                         break;
@@ -196,7 +196,7 @@ namespace UniT.Data
                                     case IReadableNonSerializableDataStorage storage when serializerGroup.Key is null:
                                     {
                                         var datas = await storage.ReadAsync(keys, progress, cancellationToken);
-                                        IterTools.StrictZip(serializerGroup, datas)
+                                        IterTools.Zip(serializerGroup, datas)
                                             .ForEach((type, data) => data.CopyTo(this.datas[type]));
                                         break;
                                     }
@@ -293,7 +293,7 @@ namespace UniT.Data
                             var rawDatas = default(byte[][]);
                             yield return storage.ReadBytesAsync(keys, result => rawDatas = result);
                             // TODO: make it run concurrently
-                            foreach (var (type, rawData) in IterTools.StrictZip(serializerGroup, rawDatas).Where((_, rawData) => rawData.Length > 0))
+                            foreach (var (type, rawData) in IterTools.Zip(serializerGroup, rawDatas).Where((_, rawData) => rawData.Length > 0))
                             {
                                 yield return serializer.PopulateAsync(this.datas[type], rawData);
                             }
@@ -304,7 +304,7 @@ namespace UniT.Data
                             var rawDatas = default(string[]);
                             yield return storage.ReadStringsAsync(keys, result => rawDatas = result);
                             // TODO: make it run concurrently
-                            foreach (var (type, rawData) in IterTools.StrictZip(serializerGroup, rawDatas).Where((_, rawData) => rawData.Length > 0))
+                            foreach (var (type, rawData) in IterTools.Zip(serializerGroup, rawDatas).Where((_, rawData) => rawData.Length > 0))
                             {
                                 yield return serializer.PopulateAsync(this.datas[type], rawData);
                             }
@@ -314,7 +314,7 @@ namespace UniT.Data
                         {
                             var datas = default(IData[]);
                             yield return storage.ReadAsync(keys, result => datas = result);
-                            foreach (var (type, data) in IterTools.StrictZip(serializerGroup, datas))
+                            foreach (var (type, data) in IterTools.Zip(serializerGroup, datas))
                             {
                                 data.CopyTo(this.datas[type]);
                             }

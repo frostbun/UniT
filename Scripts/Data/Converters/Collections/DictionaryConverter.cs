@@ -32,8 +32,11 @@ namespace UniT.Data
             var dictionary     = (IDictionary)Activator.CreateInstance(type);
             foreach (var item in (string[])ConverterManager.ConvertFromString(str, ArrayType))
             {
-                var kv = item.Split(new[] { this.separator }, StringSplitOptions.None);
-                dictionary.Add(keyConverter.ConvertFromString(kv[0], keyType), valueConverter.ConvertFromString(kv[1], valueType));
+                var kv = item.Split(this.separator);
+                dictionary.Add(
+                    keyConverter.ConvertFromString(kv[0], keyType),
+                    valueConverter.ConvertFromString(kv[1], valueType)
+                );
             }
             return dictionary;
         }
@@ -44,7 +47,16 @@ namespace UniT.Data
             var valueType      = type.GetGenericArguments()[1];
             var keyConverter   = ConverterManager.GetConverter(keyType);
             var valueConverter = ConverterManager.GetConverter(valueType);
-            return ConverterManager.ConvertToString(((IDictionary)obj).Cast<DictionaryEntry>().Select(kv => $"{keyConverter.ConvertToString(kv.Key, keyType)}{this.separator}{valueConverter.ConvertToString(kv.Value, valueType)}").ToArray(), ArrayType);
+            return ConverterManager.ConvertToString(
+                ((IDictionary)obj).Cast<DictionaryEntry>()
+                .Select(kv => string.Concat(
+                    keyConverter.ConvertToString(kv.Key, keyType),
+                    this.separator,
+                    valueConverter.ConvertToString(kv.Value, valueType)
+                ))
+                .ToArray(),
+                ArrayType
+            );
         }
     }
 }
