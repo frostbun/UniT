@@ -55,9 +55,9 @@ namespace UniT.UI
 
         #region UI Flow
 
-        public IActivity Show(IActivityWithoutParams activity, bool force = false);
+        public void Show(IActivityWithoutParams activity, bool force = false);
 
-        public IActivity Show<TParams>(IActivityWithParams<TParams> activity, TParams @params, bool force = true);
+        public void Show<TParams>(IActivityWithParams<TParams> activity, TParams @params, bool force = true);
 
         public void Hide(IActivity activity, bool autoStack = true);
 

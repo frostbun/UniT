@@ -36,11 +36,11 @@ namespace UniT.UI.Activity
 
     public interface IActivityWithoutParams : IActivity, IViewWithoutParams
     {
-        public IActivity Show(bool force = false);
+        public void Show(bool force = false);
     }
 
     public interface IActivityWithParams<TParams> : IActivity, IViewWithParams<TParams>
     {
-        public IActivity Show(TParams @params, bool force = true);
+        public void Show(TParams @params, bool force = true);
     }
 }

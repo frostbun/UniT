@@ -123,7 +123,7 @@ namespace UniT.Data
                 foreach (var (field, (column, converter)) in this.normalFields)
                 {
                     var str = this.reader.GetCell(column);
-                    if (str.IsNullOrWhitespace()) return;
+                    if (str.IsNullOrWhitespace()) continue;
                     var value = converter.ConvertFromString(str, field.FieldType);
                     field.SetValue(row, value);
                     if (field == this.keyField) keyValue = value;

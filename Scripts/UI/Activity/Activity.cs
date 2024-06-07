@@ -28,12 +28,12 @@ namespace UniT.UI.Activity
 
         private UniTaskCompletionSource<object?>? resultSource;
 
-        UniTask<T> IActivity.WaitForResult<T>()
+        public UniTask<T> WaitForResult<T>()
         {
             return (this.resultSource ??= new UniTaskCompletionSource<object?>()).Task.ContinueWith(result => (T)result!);
         }
 
-        UniTask IActivity.WaitForHide()
+        public UniTask WaitForHide()
         {
             return (this.resultSource ??= new UniTaskCompletionSource<object?>()).Task;
         }
@@ -56,7 +56,7 @@ namespace UniT.UI.Activity
 
     public abstract class Activity : BaseActivity, IActivityWithoutParams
     {
-        public IActivity Show(bool force = false) => this.Manager.Show(this, force);
+        public void Show(bool force = false) => this.Manager.Show(this, force);
     }
 
     public abstract class Activity<TParams> : BaseActivity, IActivityWithParams<TParams>
@@ -65,6 +65,6 @@ namespace UniT.UI.Activity
 
         public TParams Params { get; private set; } = default!;
 
-        public IActivity Show(TParams @params, bool force = true) => this.Manager.Show(this, @params, force);
+        public void Show(TParams @params, bool force = true) => this.Manager.Show(this, @params, force);
     }
 }

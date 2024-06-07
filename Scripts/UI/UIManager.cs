@@ -93,19 +93,17 @@ namespace UniT.UI
 
         #region UI Flow
 
-        IActivity IUIManager.Show(IActivityWithoutParams activity, bool force)
+        void IUIManager.Show(IActivityWithoutParams activity, bool force)
         {
-            if (!force && activity.CurrentStatus is IActivity.Status.Showing) return activity;
-            this.Hide(activity, false);
-            return this.Show(activity);
+            if (!this.TryHide(activity, force)) return;
+            this.Show(activity);
         }
 
-        IActivity IUIManager.Show<TParams>(IActivityWithParams<TParams> activity, TParams @params, bool force)
+        void IUIManager.Show<TParams>(IActivityWithParams<TParams> activity, TParams @params, bool force)
         {
-            if (!force && activity.CurrentStatus is IActivity.Status.Showing) return activity;
-            this.Hide(activity, false);
+            if (!this.TryHide(activity, force)) return;
             activity.Params = @params;
-            return this.Show(activity);
+            this.Show(activity);
         }
 
         void IUIManager.Hide(IActivity activity, bool autoStack)
@@ -163,24 +161,33 @@ namespace UniT.UI
             });
         }
 
-        private IActivity Show(IActivity activity)
+        private bool TryHide(IActivity activity, bool force)
         {
-            if (activity is IScreen screen)
+            if (!force && activity.CurrentStatus is IActivity.Status.Showing) return false;
+            this.Hide(activity, false);
+            return true;
+        }
+
+        private void SetStackTop(IScreen screen)
+        {
+            var index = this.screensStack.IndexOf(screen);
+            if (index is -1)
             {
-                var index = this.screensStack.IndexOf(screen);
-                if (index is -1)
-                {
-                    this.screensStack.Add(screen);
-                }
-                else
-                {
-                    this.screensStack.RemoveRange(index + 1, this.screensStack.Count - index - 1);
-                }
-                this.activities.Keys
-                    .Where(other => other is not IOverlay)
-                    .Where(other => other.CurrentStatus is IActivity.Status.Showing)
-                    .SafeForEach(other => this.Hide(other, false));
+                this.screensStack.Add(screen);
             }
+            else
+            {
+                this.screensStack.RemoveRange(index + 1, this.screensStack.Count - index - 1);
+            }
+            this.activities.Keys
+                .Where(other => other is not IOverlay)
+                .Where(other => other.CurrentStatus is IActivity.Status.Showing)
+                .SafeForEach(other => this.Hide(other, false));
+        }
+
+        private void Show(IActivity activity)
+        {
+            if (activity is IScreen screen) this.SetStackTop(screen);
             activity.Transform.SetParent(
                 activity switch
                 {
@@ -194,7 +201,6 @@ namespace UniT.UI
             activity.Transform.SetAsLastSibling();
             this.logger.Debug($"{activity.Name} status: {activity.CurrentStatus = IActivity.Status.Showing}");
             this.activities[activity].ForEach(view => view.OnShow());
-            return activity;
         }
 
         private void Hide(IActivity activity, bool autoStack)
