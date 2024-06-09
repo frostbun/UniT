@@ -19,7 +19,7 @@ namespace UniT.Utilities
 
         public static IEnumerator Gather(params IEnumerator[] coroutines) => Runner.GatherCoroutines(coroutines);
 
-        private class _ : BetterMonoBehavior
+        private sealed class _ : BetterMonoBehavior
         {
         }
     }

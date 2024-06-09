@@ -2,6 +2,7 @@
 namespace UniT.Data
 {
     using System;
+    using UniT.Data.Storage;
     #if UNIT_UNITASK
     using System.Threading;
     using Cysharp.Threading.Tasks;

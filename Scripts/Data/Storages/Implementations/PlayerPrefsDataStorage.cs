@@ -1,5 +1,5 @@
 #nullable enable
-namespace UniT.Data
+namespace UniT.Data.Storage
 {
     using System;
     using System.Linq;
@@ -13,52 +13,32 @@ namespace UniT.Data
     using System.Collections;
     #endif
 
-    public sealed class PlayerPrefsDataStorage : IReadableSerializableDataStorage, IWritableSerializableDataStorage
+    public sealed class PlayerPrefsDataStorage : IReadableStringStorage, IWritableStringStorage
     {
         [Preserve]
         public PlayerPrefsDataStorage()
         {
         }
 
-        bool IDataStorage.CanStore(Type type) => typeof(ISerializableData).IsAssignableFrom(type)
-            && typeof(IReadableData).IsAssignableFrom(type)
-            && typeof(IWritableData).IsAssignableFrom(type);
+        bool IDataStorage.CanStore(Type type) => typeof(IReadableData).IsAssignableFrom(type) && typeof(IWritableData).IsAssignableFrom(type);
 
-        string[] IReadableSerializableDataStorage.ReadStrings(string[] keys) => ReadStrings(keys);
+        string[] IReadableStringStorage.Read(string[] keys) => Read(keys);
 
-        byte[][] IReadableSerializableDataStorage.ReadBytes(string[] keys) => ReadBytes(keys);
-
-        void IWritableSerializableDataStorage.WriteStrings(string[] keys, string[] values) => WriteStrings(keys, values);
-
-        void IWritableSerializableDataStorage.WriteBytes(string[] keys, byte[][] values) => WriteBytes(keys, values);
+        void IWritableStringStorage.Write(string[] keys, string[] values) => Write(keys, values);
 
         void IWritableDataStorage.Flush() => Flush();
 
         #if UNIT_UNITASK
-        UniTask<string[]> IReadableSerializableDataStorage.ReadStringsAsync(string[] keys, IProgress<float>? progress, CancellationToken cancellationToken)
+        UniTask<string[]> IReadableStringStorage.ReadAsync(string[] keys, IProgress<float>? progress, CancellationToken cancellationToken)
         {
-            var rawDatas = ReadStrings(keys);
+            var rawDatas = Read(keys);
             progress?.Report(1);
             return UniTask.FromResult(rawDatas);
         }
 
-        UniTask<byte[][]> IReadableSerializableDataStorage.ReadBytesAsync(string[] keys, IProgress<float>? progress, CancellationToken cancellationToken)
+        UniTask IWritableStringStorage.WriteAsync(string[] keys, string[] values, IProgress<float>? progress, CancellationToken cancellationToken)
         {
-            var rawDatas = ReadBytes(keys);
-            progress?.Report(1);
-            return UniTask.FromResult(rawDatas);
-        }
-
-        UniTask IWritableSerializableDataStorage.WriteStringsAsync(string[] keys, string[] values, IProgress<float>? progress, CancellationToken cancellationToken)
-        {
-            WriteStrings(keys, values);
-            progress?.Report(1);
-            return UniTask.CompletedTask;
-        }
-
-        UniTask IWritableSerializableDataStorage.WriteBytesAsync(string[] keys, byte[][] values, IProgress<float>? progress, CancellationToken cancellationToken)
-        {
-            WriteBytes(keys, values);
+            Write(keys, values);
             progress?.Report(1);
             return UniTask.CompletedTask;
         }
@@ -70,33 +50,17 @@ namespace UniT.Data
             return UniTask.CompletedTask;
         }
         #else
-        IEnumerator IReadableSerializableDataStorage.ReadStringsAsync(string[] keys, Action<string[]> callback, IProgress<float>? progress)
+        IEnumerator IReadableStringStorage.ReadAsync(string[] keys, Action<string[]> callback, IProgress<float>? progress)
         {
-            var rawDatas = ReadStrings(keys);
+            var rawDatas = Read(keys);
             progress?.Report(1);
             callback(rawDatas);
             yield break;
         }
 
-        IEnumerator IReadableSerializableDataStorage.ReadBytesAsync(string[] keys, Action<byte[][]> callback, IProgress<float>? progress)
+        IEnumerator IWritableStringStorage.WriteAsync(string[] keys, string[] values, Action? callback, IProgress<float>? progress)
         {
-            var rawDatas = ReadBytes(keys);
-            progress?.Report(1);
-            callback(rawDatas);
-            yield break;
-        }
-
-        IEnumerator IWritableSerializableDataStorage.WriteStringsAsync(string[] keys, string[] values, Action? callback, IProgress<float>? progress)
-        {
-            WriteStrings(keys, values);
-            progress?.Report(1);
-            callback?.Invoke();
-            yield break;
-        }
-
-        IEnumerator IWritableSerializableDataStorage.WriteBytesAsync(string[] keys, byte[][] values, Action? callback, IProgress<float>? progress)
-        {
-            WriteBytes(keys, values);
+            Write(keys, values);
             progress?.Report(1);
             callback?.Invoke();
             yield break;
@@ -111,24 +75,14 @@ namespace UniT.Data
         }
         #endif
 
-        private static string[] ReadStrings(string[] keys)
+        private static string[] Read(string[] keys)
         {
             return keys.Select(PlayerPrefs.GetString).ToArray();
         }
 
-        private static byte[][] ReadBytes(string[] keys)
-        {
-            return keys.Select(PlayerPrefs.GetString).Select(Convert.FromBase64String).ToArray();
-        }
-
-        private static void WriteStrings(string[] keys, string[] values)
+        private static void Write(string[] keys, string[] values)
         {
             IterTools.Zip(keys, values).ForEach(PlayerPrefs.SetString);
-        }
-
-        private static void WriteBytes(string[] keys, byte[][] values)
-        {
-            IterTools.Zip(keys, values.Select(Convert.ToBase64String)).ForEach(PlayerPrefs.SetString);
         }
 
         private static void Flush()

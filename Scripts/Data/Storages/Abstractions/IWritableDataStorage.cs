@@ -1,5 +1,5 @@
 ﻿#nullable enable
-namespace UniT.Data
+namespace UniT.Data.Storage
 {
     using System;
     #if UNIT_UNITASK

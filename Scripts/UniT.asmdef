@@ -14,11 +14,6 @@
   ],
   "versionDefines": [
     {
-      "name": "com.unity.nuget.newtonsoft-json",
-      "expression": "",
-      "define": "UNIT_NEWTONSOFT_JSON"
-    },
-    {
       "name": "com.cysharp.unitask",
       "expression": "",
       "define": "UNIT_UNITASK"
@@ -42,6 +37,16 @@
       "name": "com.frostbun.unit.di",
       "expression": "",
       "define": "UNIT_DI"
+    },
+    {
+      "name": "com.unity.nuget.newtonsoft-json",
+      "expression": "",
+      "define": "UNIT_JSON"
+    },
+    {
+      "name": "org.nuget.csvhelper",
+      "expression": "",
+      "define": "UNIT_CSV"
     },
     {
       "name": "com.frostbun.unit.fbinstant",
