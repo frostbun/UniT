@@ -6,11 +6,13 @@ namespace UniT.Data.Conversion
     using System.Linq;
     using System.Runtime.CompilerServices;
     using UniT.Extensions;
+    using UnityEngine.Scripting;
 
     public sealed class TupleConverter : Converter<ITuple>
     {
         private readonly string separator;
 
+        [Preserve]
         public TupleConverter(string separator = "|")
         {
             this.separator = separator;

@@ -6,12 +6,18 @@ namespace UniT.Data.Conversion
     using System.Collections.Generic;
     using System.Linq;
     using UniT.Extensions;
+    using UnityEngine.Scripting;
 
     /// <summary>
     ///     Depends on <see cref="ArrayConverter"/>
     /// </summary>
     public sealed class GenericCollectionConverter : Converter
     {
+        [Preserve]
+        public GenericCollectionConverter()
+        {
+        }
+
         protected override bool CanConvert(Type type) =>
             type.IsGenericTypeOf(typeof(ICollection<>))
             || type.IsGenericTypeOf(typeof(IReadOnlyCollection<>))

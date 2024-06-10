@@ -3,9 +3,15 @@ namespace UniT.Data.Conversion
 {
     using System;
     using UniT.Extensions;
+    using UnityEngine.Scripting;
 
     public sealed class NullableConverter : Converter
     {
+        [Preserve]
+        public NullableConverter()
+        {
+        }
+
         protected override bool CanConvert(Type type) => type.IsGenericTypeOf(typeof(Nullable<>));
 
         protected override object ConvertFromString(string str, Type type)
@@ -15,7 +21,7 @@ namespace UniT.Data.Conversion
 
         protected override string ConvertToString(object obj, Type type)
         {
-            return this.Manager.ConvertToString(obj, Nullable.GetUnderlyingType(type)!);
+            return obj.ToString();
         }
     }
 }

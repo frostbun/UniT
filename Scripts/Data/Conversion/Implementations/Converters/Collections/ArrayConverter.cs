@@ -4,11 +4,13 @@ namespace UniT.Data.Conversion
     using System;
     using System.Linq;
     using UniT.Extensions;
+    using UnityEngine.Scripting;
 
     public sealed class ArrayConverter : Converter<Array>
     {
         private readonly string separator;
 
+        [Preserve]
         public ArrayConverter(string separator = ";")
         {
             this.separator = separator;

@@ -4,16 +4,16 @@ namespace UniT.Data.Conversion
     using System;
     using UnityEngine.Scripting;
 
-    public sealed class CharConverter : PrimitiveConverter<char>
+    public sealed class GuidConverter : PrimitiveConverter<Guid>
     {
         [Preserve]
-        public CharConverter()
+        public GuidConverter()
         {
         }
 
         protected override object ConvertFromString(string str, Type type)
         {
-            return char.Parse(str);
+            return new Guid(str);
         }
     }
 }

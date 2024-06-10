@@ -7,12 +7,18 @@ namespace UniT.Data.Conversion
     using System.Collections.ObjectModel;
     using System.Linq;
     using UniT.Extensions;
+    using UnityEngine.Scripting;
 
     /// <summary>
     ///     Depends on <see cref="ArrayConverter"/>
     /// </summary>
     public sealed class ListAndReadOnlyCollectionConverter : Converter
     {
+        [Preserve]
+        public ListAndReadOnlyCollectionConverter()
+        {
+        }
+
         protected override bool CanConvert(Type type) => type.IsGenericTypeOf(typeof(List<>)) || type.IsGenericTypeOf(typeof(ReadOnlyCollection<>));
 
         protected override object ConvertFromString(string str, Type type)

@@ -3,12 +3,14 @@ namespace UniT.Data.Conversion
 {
     using System;
     using System.Globalization;
+    using UnityEngine.Scripting;
 
     public sealed class DateTimeOffsetConverter : Converter<DateTimeOffset>
     {
         private readonly string      format;
         private readonly CultureInfo cultureInfo;
 
+        [Preserve]
         public DateTimeOffsetConverter(string format = "dd/MM/yyyy hh:mm:ss", CultureInfo? cultureInfo = null)
         {
             this.format      = format;

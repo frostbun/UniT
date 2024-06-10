@@ -4,18 +4,20 @@ namespace UniT.Data.Conversion
 {
     using System;
     using Newtonsoft.Json;
+    using UnityEngine.Scripting;
 
     public sealed class JsonConverter : Converter<object>
     {
         private readonly JsonSerializerSettings settings;
 
+        [Preserve]
         public JsonConverter(JsonSerializerSettings? settings = null)
         {
             this.settings = settings
                 ?? new JsonSerializerSettings
                 {
-                    TypeNameHandling       = TypeNameHandling.Auto,
-                    ReferenceLoopHandling  = ReferenceLoopHandling.Ignore,
+                    TypeNameHandling      = TypeNameHandling.Auto,
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
                 };
         }
 

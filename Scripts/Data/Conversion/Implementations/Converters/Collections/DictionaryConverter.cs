@@ -6,6 +6,7 @@ namespace UniT.Data.Conversion
     using System.Collections.Generic;
     using System.Linq;
     using UniT.Extensions;
+    using UnityEngine.Scripting;
 
     /// <summary>
     ///     Depends on <see cref="ArrayConverter"/>
@@ -14,6 +15,7 @@ namespace UniT.Data.Conversion
     {
         private readonly string separator;
 
+        [Preserve]
         public DictionaryConverter(string separator = ":")
         {
             this.separator = separator;

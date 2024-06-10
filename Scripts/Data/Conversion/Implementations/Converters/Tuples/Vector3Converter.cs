@@ -3,12 +3,18 @@ namespace UniT.Data.Conversion
 {
     using System;
     using UnityEngine;
+    using UnityEngine.Scripting;
 
     /// <summary>
     ///     Depends on <see cref="TupleConverter"/>
     /// </summary>
     public sealed class Vector3Converter : Converter<Vector3>
     {
+        [Preserve]
+        public Vector3Converter()
+        {
+        }
+
         private static readonly Type TupleType = typeof((float, float, float));
 
         protected override object ConvertFromString(string str, Type type)

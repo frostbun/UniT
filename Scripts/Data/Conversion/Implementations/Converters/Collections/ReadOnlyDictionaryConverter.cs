@@ -5,12 +5,18 @@ namespace UniT.Data.Conversion
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using UniT.Extensions;
+    using UnityEngine.Scripting;
 
     /// <summary>
     ///     Depends on <see cref="DictionaryConverter"/>
     /// </summary>
     public sealed class ReadOnlyDictionaryConverter : Converter
     {
+        [Preserve]
+        public ReadOnlyDictionaryConverter()
+        {
+        }
+
         protected override bool CanConvert(Type type) => type.IsGenericTypeOf(typeof(ReadOnlyDictionary<,>));
 
         protected override object ConvertFromString(string str, Type type)
