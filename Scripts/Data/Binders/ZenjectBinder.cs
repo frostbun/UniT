@@ -23,7 +23,7 @@ namespace UniT.Data
             dataTypes.ForEach(type =>
             {
                 if (!typeof(IData).IsAssignableFrom(type)) throw new ArgumentException($"{type} does not implement {nameof(IData)}");
-                container.BindInterfacesAndSelfTo(type);
+                container.BindInterfacesAndSelfTo(type).AsSingle();
             });
 
             container.BindConverterManager(converterTypes);
