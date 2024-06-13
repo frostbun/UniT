@@ -59,7 +59,7 @@ namespace UniT.Pooling
         #else
         IEnumerator IObjectPoolManager.LoadAsync(string key, int count, Action? callback, IProgress<float>? progress)
         {
-            var prefab = default(GameObject);
+            var prefab = default(GameObject)!;
             yield return this.assetsManager.LoadAsync<GameObject>(
                 key,
                 result => prefab = result,

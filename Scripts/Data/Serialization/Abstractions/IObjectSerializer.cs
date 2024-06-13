@@ -19,7 +19,7 @@ namespace UniT.Data.Serialization
 
         public UniTask<object> SerializeAsync(IData data);
         #else
-        public IEnumerator PopulateAsync(IData data, object rawData, Action callback = null);
+        public IEnumerator PopulateAsync(IData data, object rawData, Action? callback = null);
 
         public IEnumerator SerializeAsync(IData data, Action<object> callback);
         #endif

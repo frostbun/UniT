@@ -71,7 +71,7 @@ namespace UniT.UI
         #else
         IEnumerator IUIManager.GetActivityAsync<TActivity>(string key, Action<TActivity> callback, IProgress<float>? progress)
         {
-            var prefab = default(IActivity);
+            var prefab = default(IActivity)!;
             yield return this.assetsManager.LoadComponentAsync<IActivity>(
                 key,
                 result => prefab = result,

@@ -48,7 +48,7 @@ namespace UniT.Data.Serialization
 
         UniTask<string> IStringSerializer.SerializeAsync(IData data) => UniTask.RunOnThreadPool(() => this.Serialize(data));
         #else
-        IEnumerator IStringSerializer.PopulateAsync(IData data, string rawData, Action callback) => Task.Run(() => this.Populate(data, rawData)).ToCoroutine(callback);
+        IEnumerator IStringSerializer.PopulateAsync(IData data, string rawData, Action? callback) => Task.Run(() => this.Populate(data, rawData)).ToCoroutine(callback);
 
         IEnumerator IStringSerializer.SerializeAsync(IData data, Action<string> callback) => Task.Run(() => this.Serialize(data)).ToCoroutine(callback);
         #endif

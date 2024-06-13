@@ -29,7 +29,7 @@ namespace UniT.Data.Serialization
 
         UniTask<object> IObjectSerializer.SerializeAsync(IData data) => UniTask.RunOnThreadPool(() => Serialize(data));
         #else
-        IEnumerator IObjectSerializer.PopulateAsync(IData data, object rawData, Action callback) => Task.Run(() => Populate(data, rawData)).ToCoroutine(callback);
+        IEnumerator IObjectSerializer.PopulateAsync(IData data, object rawData, Action? callback) => Task.Run(() => Populate(data, rawData)).ToCoroutine(callback);
 
         IEnumerator IObjectSerializer.SerializeAsync(IData data, Action<object> callback) => Task.Run(() => Serialize(data)).ToCoroutine(callback);
         #endif
