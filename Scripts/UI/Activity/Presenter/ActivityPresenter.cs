@@ -10,10 +10,6 @@ namespace UniT.UI.Activity.Presenter
 
         protected IActivity.Status CurrentStatus => this.Owner.CurrentStatus;
 
-        #if UNIT_UNITASK
-        protected bool SetResult(object? result) => this.Owner.SetResult(result);
-        #endif
-
         protected void Hide(bool autoStack = true) => this.Owner.Hide(autoStack);
 
         protected void Dispose(bool autoStack = true) => this.Owner.Dispose(autoStack);

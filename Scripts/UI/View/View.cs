@@ -47,7 +47,7 @@ namespace UniT.UI.View
         }
 
         #if UNIT_UNITASK
-        protected internal CancellationTokenSource? hideCts;
+        private CancellationTokenSource? hideCts;
 
         public CancellationToken GetCancellationTokenOnHide()
         {

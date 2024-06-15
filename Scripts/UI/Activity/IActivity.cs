@@ -2,9 +2,6 @@
 namespace UniT.UI.Activity
 {
     using UniT.UI.View;
-    #if UNIT_UNITASK
-    using Cysharp.Threading.Tasks;
-    #endif
 
     public interface IActivity : IView
     {
@@ -20,14 +17,6 @@ namespace UniT.UI.Activity
         public bool IsDestroyed { get; }
 
         public T[] GetComponentsInChildren<T>();
-
-        #if UNIT_UNITASK
-        public UniTask<T> WaitForResult<T>();
-
-        public UniTask WaitForHide();
-
-        public bool SetResult(object? result);
-        #endif
 
         public void Hide(bool autoStack = true);
 
