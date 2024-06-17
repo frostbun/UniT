@@ -3,18 +3,12 @@ namespace UniT.Data.Conversion
 {
     using System;
     using System.Collections.Generic;
-    using System.Globalization;
     using System.Linq;
     using UniT.Extensions;
     using UnityEngine.Scripting;
 
     public sealed class ConverterManager : IConverterManager
     {
-        static ConverterManager()
-        {
-            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
-        }
-
         private readonly IReadOnlyList<IConverter> converters;
 
         [Preserve]

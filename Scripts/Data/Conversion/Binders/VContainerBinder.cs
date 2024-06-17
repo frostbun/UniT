@@ -17,7 +17,7 @@ namespace UniT.Data.Conversion
             builder.Register<JsonConverter>(Lifetime.Singleton).AsImplementedInterfaces();
             #endif
 
-            #region Primitives
+            #region Numbers
 
             builder.Register<Int16Converter>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<Int32Converter>(Lifetime.Singleton).AsImplementedInterfaces();
@@ -28,10 +28,25 @@ namespace UniT.Data.Conversion
             builder.Register<SingleConverter>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<DoubleConverter>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<DecimalConverter>(Lifetime.Singleton).AsImplementedInterfaces();
+
+            #endregion
+
+            #region DateTime
+
+            builder.Register<DateTimeConverter>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<DateTimeOffsetConverter>(Lifetime.Singleton).AsImplementedInterfaces();
+
+            #endregion
+
+            #region Others
+
             builder.Register<BooleanConverter>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<CharConverter>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<StringConverter>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<EnumConverter>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<NullableConverter>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<GuidConverter>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<UriConverter>(Lifetime.Singleton).AsImplementedInterfaces();
 
             #endregion
 
@@ -54,21 +69,6 @@ namespace UniT.Data.Conversion
             builder.Register<DictionaryConverter>(Lifetime.Singleton).AsImplementedInterfaces();                // Depend on ArrayConverter
             builder.Register<ReadOnlyDictionaryConverter>(Lifetime.Singleton).AsImplementedInterfaces();        // Depend on DictionaryConverter
             builder.Register<GenericDictionaryConverter>(Lifetime.Singleton).AsImplementedInterfaces();         // Depend on DictionaryConverter
-
-            #endregion
-
-            #region DateTime
-
-            builder.Register<DateTimeConverter>(Lifetime.Singleton).AsImplementedInterfaces();
-            builder.Register<DateTimeOffsetConverter>(Lifetime.Singleton).AsImplementedInterfaces();
-
-            #endregion
-
-            #region Others
-
-            builder.Register<UriConverter>(Lifetime.Singleton).AsImplementedInterfaces();
-            builder.Register<GuidConverter>(Lifetime.Singleton).AsImplementedInterfaces();
-            builder.Register<NullableConverter>(Lifetime.Singleton).AsImplementedInterfaces();
 
             #endregion
 

@@ -4,16 +4,21 @@ namespace UniT.Data.Conversion
     using System;
     using UnityEngine.Scripting;
 
-    public sealed class UInt16Converter : PrimitiveConverter<ushort>
+    public sealed class UriConverter : Converter<Uri>
     {
         [Preserve]
-        public UInt16Converter()
+        public UriConverter()
         {
         }
 
         protected override object ConvertFromString(string str, Type type)
         {
-            return ushort.Parse(str);
+            return new Uri(str);
+        }
+
+        protected override string ConvertToString(object obj, Type type)
+        {
+            return obj.ToString();
         }
     }
 }

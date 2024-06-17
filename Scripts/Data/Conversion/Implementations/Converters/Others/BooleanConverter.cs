@@ -4,7 +4,7 @@ namespace UniT.Data.Conversion
     using System;
     using UnityEngine.Scripting;
 
-    public sealed class BooleanConverter : PrimitiveConverter<bool>
+    public sealed class BooleanConverter : Converter<Boolean>
     {
         [Preserve]
         public BooleanConverter()
@@ -13,7 +13,12 @@ namespace UniT.Data.Conversion
 
         protected override object ConvertFromString(string str, Type type)
         {
-            return bool.Parse(str);
+            return Boolean.Parse(str);
+        }
+
+        protected override string ConvertToString(object obj, Type type)
+        {
+            return obj.ToString();
         }
     }
 }

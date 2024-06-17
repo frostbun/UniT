@@ -17,7 +17,7 @@ namespace UniT.Data.Conversion
             container.BindInterfacesTo<JsonConverter>().AsSingle();
             #endif
 
-            #region Primitives
+            #region Numbers
 
             container.BindInterfacesTo<Int16Converter>().AsSingle();
             container.BindInterfacesTo<Int32Converter>().AsSingle();
@@ -28,10 +28,25 @@ namespace UniT.Data.Conversion
             container.BindInterfacesTo<SingleConverter>().AsSingle();
             container.BindInterfacesTo<DoubleConverter>().AsSingle();
             container.BindInterfacesTo<DecimalConverter>().AsSingle();
+
+            #endregion
+
+            #region DateTime
+
+            container.BindInterfacesTo<DateTimeConverter>().AsSingle();
+            container.BindInterfacesTo<DateTimeOffsetConverter>().AsSingle();
+
+            #endregion
+
+            #region Others
+
             container.BindInterfacesTo<BooleanConverter>().AsSingle();
             container.BindInterfacesTo<CharConverter>().AsSingle();
             container.BindInterfacesTo<StringConverter>().AsSingle();
             container.BindInterfacesTo<EnumConverter>().AsSingle();
+            container.BindInterfacesTo<NullableConverter>().AsSingle();
+            container.BindInterfacesTo<GuidConverter>().AsSingle();
+            container.BindInterfacesTo<UriConverter>().AsSingle();
 
             #endregion
 
@@ -54,21 +69,6 @@ namespace UniT.Data.Conversion
             container.BindInterfacesTo<DictionaryConverter>().AsSingle();                // Depend on ArrayConverter
             container.BindInterfacesTo<ReadOnlyDictionaryConverter>().AsSingle();        // Depend on DictionaryConverter
             container.BindInterfacesTo<GenericDictionaryConverter>().AsSingle();         // Depend on DictionaryConverter
-
-            #endregion
-
-            #region DateTime
-
-            container.BindInterfacesTo<DateTimeConverter>().AsSingle();
-            container.BindInterfacesTo<DateTimeOffsetConverter>().AsSingle();
-
-            #endregion
-
-            #region Others
-
-            container.BindInterfacesTo<UriConverter>().AsSingle();
-            container.BindInterfacesTo<GuidConverter>().AsSingle();
-            container.BindInterfacesTo<NullableConverter>().AsSingle();
 
             #endregion
 

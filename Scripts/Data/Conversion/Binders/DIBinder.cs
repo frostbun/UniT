@@ -17,7 +17,7 @@ namespace UniT.Data.Conversion
             container.AddInterfaces<JsonConverter>();
             #endif
 
-            #region Primitives
+            #region Numbers
 
             container.AddInterfaces<Int16Converter>();
             container.AddInterfaces<Int32Converter>();
@@ -28,10 +28,25 @@ namespace UniT.Data.Conversion
             container.AddInterfaces<SingleConverter>();
             container.AddInterfaces<DoubleConverter>();
             container.AddInterfaces<DecimalConverter>();
+
+            #endregion
+
+            #region DateTime
+
+            container.AddInterfaces<DateTimeConverter>();
+            container.AddInterfaces<DateTimeOffsetConverter>();
+
+            #endregion
+
+            #region Others
+
             container.AddInterfaces<BooleanConverter>();
             container.AddInterfaces<CharConverter>();
             container.AddInterfaces<StringConverter>();
             container.AddInterfaces<EnumConverter>();
+            container.AddInterfaces<NullableConverter>();
+            container.AddInterfaces<GuidConverter>();
+            container.AddInterfaces<UriConverter>();
 
             #endregion
 
@@ -54,21 +69,6 @@ namespace UniT.Data.Conversion
             container.AddInterfaces<DictionaryConverter>();                // Depend on ArrayConverter
             container.AddInterfaces<ReadOnlyDictionaryConverter>();        // Depend on DictionaryConverter
             container.AddInterfaces<GenericDictionaryConverter>();         // Depend on DictionaryConverter
-
-            #endregion
-
-            #region DateTime
-
-            container.AddInterfaces<DateTimeConverter>();
-            container.AddInterfaces<DateTimeOffsetConverter>();
-
-            #endregion
-
-            #region Others
-
-            container.AddInterfaces<UriConverter>();
-            container.AddInterfaces<GuidConverter>();
-            container.AddInterfaces<NullableConverter>();
 
             #endregion
 

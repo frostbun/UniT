@@ -3,10 +3,11 @@
 namespace UniT.Data.Conversion
 {
     using System;
+    using System.Globalization;
     using Newtonsoft.Json;
     using UnityEngine.Scripting;
 
-    public sealed class JsonConverter : Converter<object>
+    public sealed class JsonConverter : Converter<Object>
     {
         private readonly JsonSerializerSettings settings;
 
@@ -16,8 +17,10 @@ namespace UniT.Data.Conversion
             this.settings = settings
                 ?? new JsonSerializerSettings
                 {
-                    TypeNameHandling      = TypeNameHandling.Auto,
-                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                    Culture                = CultureInfo.InvariantCulture,
+                    TypeNameHandling       = TypeNameHandling.Auto,
+                    ReferenceLoopHandling  = ReferenceLoopHandling.Ignore,
+                    ObjectCreationHandling = ObjectCreationHandling.Replace,
                 };
         }
 

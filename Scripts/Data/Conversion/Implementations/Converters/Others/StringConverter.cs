@@ -4,16 +4,21 @@ namespace UniT.Data.Conversion
     using System;
     using UnityEngine.Scripting;
 
-    public sealed class CharConverter : PrimitiveConverter<char>
+    public sealed class StringConverter : Converter<String>
     {
         [Preserve]
-        public CharConverter()
+        public StringConverter()
         {
         }
 
         protected override object ConvertFromString(string str, Type type)
         {
-            return char.Parse(str);
+            return str;
+        }
+
+        protected override string ConvertToString(object obj, Type type)
+        {
+            return obj.ToString();
         }
     }
 }

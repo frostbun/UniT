@@ -87,12 +87,12 @@ namespace UniT.Data.Serialization
 
         private sealed class Populator
         {
-            private readonly IConverterManager                                        converterManager;
-            private readonly ICsvData                                                 data;
-            private readonly CsvReader                                                reader;
-            private readonly FieldInfo                                                keyField;
-            private readonly Dictionary<FieldInfo, (int Index, IConverter Converter)> normalFields;
-            private readonly List<FieldInfo>                                          nestedFields;
+            private readonly IConverterManager                                                 converterManager;
+            private readonly ICsvData                                                          data;
+            private readonly CsvReader                                                         reader;
+            private readonly FieldInfo                                                         keyField;
+            private readonly IReadOnlyDictionary<FieldInfo, (int Index, IConverter Converter)> normalFields;
+            private readonly IReadOnlyList<FieldInfo>                                          nestedFields;
 
             private readonly Dictionary<FieldInfo, Populator> nestedPopulators = new Dictionary<FieldInfo, Populator>();
 
@@ -154,15 +154,15 @@ namespace UniT.Data.Serialization
 
         private sealed class Serializer
         {
-            private readonly IConverterManager                 converterManager;
-            private readonly IEnumerator                       data;
-            private readonly CsvWriter                         writer;
-            private readonly string[]                          headers;
-            private readonly Dictionary<FieldInfo, IConverter> normalFields;
-            private readonly List<FieldInfo>                   nestedFields;
+            private readonly IConverterManager                          converterManager;
+            private readonly IEnumerator                                data;
+            private readonly CsvWriter                                  writer;
+            private readonly IReadOnlyList<string>                      headers;
+            private readonly IReadOnlyDictionary<FieldInfo, IConverter> normalFields;
+            private readonly IReadOnlyList<FieldInfo>                   nestedFields;
 
-            private readonly Dictionary<FieldInfo, Serializer> nestedSerializers = new Dictionary<FieldInfo, Serializer>();
-            private readonly Dictionary<FieldInfo, string[]>   nestedHeaders     = new Dictionary<FieldInfo, string[]>();
+            private readonly Dictionary<FieldInfo, Serializer>            nestedSerializers = new Dictionary<FieldInfo, Serializer>();
+            private readonly Dictionary<FieldInfo, IReadOnlyList<string>> nestedHeaders     = new Dictionary<FieldInfo, IReadOnlyList<string>>();
 
             public Serializer(IConverterManager converterManager, ICsvData data, CsvWriter writer)
             {

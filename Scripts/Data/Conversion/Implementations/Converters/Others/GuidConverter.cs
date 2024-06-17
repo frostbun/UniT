@@ -4,7 +4,7 @@ namespace UniT.Data.Conversion
     using System;
     using UnityEngine.Scripting;
 
-    public sealed class GuidConverter : PrimitiveConverter<Guid>
+    public sealed class GuidConverter : Converter<Guid>
     {
         [Preserve]
         public GuidConverter()
@@ -13,7 +13,12 @@ namespace UniT.Data.Conversion
 
         protected override object ConvertFromString(string str, Type type)
         {
-            return new Guid(str);
+            return Guid.Parse(str);
+        }
+
+        protected override string ConvertToString(object obj, Type type)
+        {
+            return obj.ToString();
         }
     }
 }
