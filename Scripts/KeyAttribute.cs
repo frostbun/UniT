@@ -1,5 +1,5 @@
 #nullable enable
-namespace UniT.Utilities
+namespace UniT
 {
     using System;
     using System.Linq;

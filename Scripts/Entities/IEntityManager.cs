@@ -4,7 +4,6 @@ namespace UniT.Entities
     using System;
     using System.Collections.Generic;
     using UniT.Entities.Entity;
-    using UniT.Utilities;
     using UnityEngine;
     #if UNIT_UNITASK
     using System.Threading;

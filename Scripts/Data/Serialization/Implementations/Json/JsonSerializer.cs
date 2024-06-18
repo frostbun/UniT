@@ -9,9 +9,8 @@ namespace UniT.Data.Serialization
     #if UNIT_UNITASK
     using Cysharp.Threading.Tasks;
     #else
-    using UniT.Extensions;
     using System.Collections;
-    using System.Threading.Tasks;
+    using UniT.Extensions;
     #endif
 
     public sealed class JsonSerializer : IStringSerializer
@@ -42,9 +41,9 @@ namespace UniT.Data.Serialization
 
         UniTask<string> IStringSerializer.SerializeAsync(IData data) => UniTask.RunOnThreadPool(() => this.Serialize(data));
         #else
-        IEnumerator IStringSerializer.PopulateAsync(IData data, string rawData, Action? callback) => Task.Run(() => this.Populate(data, rawData)).ToCoroutine(callback);
+        IEnumerator IStringSerializer.PopulateAsync(IData data, string rawData, Action? callback) => CoroutineRunner.Run(() => this.Populate(data, rawData), callback);
 
-        IEnumerator IStringSerializer.SerializeAsync(IData data, Action<string> callback) => Task.Run(() => this.Serialize(data)).ToCoroutine(callback);
+        IEnumerator IStringSerializer.SerializeAsync(IData data, Action<string> callback) => CoroutineRunner.Run(() => this.Serialize(data), callback);
         #endif
 
         private void Populate(IData data, string rawData)

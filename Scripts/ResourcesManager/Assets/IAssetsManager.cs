@@ -3,7 +3,6 @@ namespace UniT.ResourcesManager
 {
     using System;
     using System.Diagnostics.CodeAnalysis;
-    using UniT.Utilities;
     using Object = UnityEngine.Object;
     #if UNIT_UNITASK
     using System.Threading;

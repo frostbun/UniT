@@ -3,7 +3,6 @@ namespace UniT.Pooling
 {
     using System;
     using UniT.Extensions;
-    using UniT.Utilities;
     using UnityEngine;
     #if UNIT_UNITASK
     using System.Threading;

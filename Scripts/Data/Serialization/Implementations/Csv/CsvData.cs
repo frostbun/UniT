@@ -14,15 +14,21 @@ namespace UniT.Data.Serialization
 
         void ICsvData.Add(object key, object value) => value.CopyTo(this);
 
-        IEnumerator IEnumerable.GetEnumerator() { yield return this; }
+        IEnumerator ICsvData.GetEnumerator() { yield return this; }
     }
 
-    [Preserve]
     public class CsvData<T> : ICsvData, IReadOnlyList<T>
     {
+        [Preserve]
+        public CsvData()
+        {
+        }
+
         Type ICsvData.RowType => typeof(T);
 
         void ICsvData.Add(object key, object value) => this.list.Add((T)value);
+
+        IEnumerator ICsvData.GetEnumerator() => this.list.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => this.list.GetEnumerator();
 
@@ -35,12 +41,18 @@ namespace UniT.Data.Serialization
         public T this[int index] => this.list[index];
     }
 
-    [Preserve]
     public class CsvData<TKey, TValue> : ICsvData, IReadOnlyDictionary<TKey, TValue>
     {
+        [Preserve]
+        public CsvData()
+        {
+        }
+
         Type ICsvData.RowType => typeof(TValue);
 
         void ICsvData.Add(object key, object value) => this.dictionary.Add((TKey)key, (TValue)value);
+
+        IEnumerator ICsvData.GetEnumerator() => this.dictionary.Values.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => this.dictionary.GetEnumerator();
 

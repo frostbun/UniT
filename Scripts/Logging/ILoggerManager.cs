@@ -1,6 +1,8 @@
 ﻿#nullable enable
 namespace UniT.Logging
 {
+    using System.Collections.Generic;
+
     public interface ILoggerManager
     {
         public ILogger GetLogger(string name);
@@ -10,5 +12,7 @@ namespace UniT.Logging
         public ILogger GetLogger<T>() => this.GetLogger(typeof(T).Name);
 
         public ILogger GetDefaultLogger() => this.GetLogger(nameof(UniT));
+
+        public IEnumerable<ILogger> GetAllLoggers();
     }
 }

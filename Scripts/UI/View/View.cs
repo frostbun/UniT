@@ -1,8 +1,8 @@
 ﻿#nullable enable
 namespace UniT.UI.View
 {
+    using UniT.Extensions;
     using UniT.UI.Activity;
-    using UniT.Utilities;
     using UnityEngine;
     #if UNIT_UNITASK
     using System.Threading;

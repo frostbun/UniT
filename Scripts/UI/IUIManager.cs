@@ -5,7 +5,6 @@ namespace UniT.UI
     using System.Collections.Generic;
     using UniT.UI.Activity;
     using UniT.UI.View;
-    using UniT.Utilities;
     #if UNIT_UNITASK
     using System.Threading;
     using Cysharp.Threading.Tasks;

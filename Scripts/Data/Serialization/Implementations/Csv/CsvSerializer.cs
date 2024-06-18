@@ -16,8 +16,6 @@ namespace UniT.Data.Serialization
     using UnityEngine.Scripting;
     #if UNIT_UNITASK
     using Cysharp.Threading.Tasks;
-    #else
-    using System.Threading.Tasks;
     #endif
 
     public sealed class CsvSerializer : IStringSerializer
@@ -48,9 +46,9 @@ namespace UniT.Data.Serialization
 
         UniTask<string> IStringSerializer.SerializeAsync(IData data) => UniTask.RunOnThreadPool(() => this.Serialize(data));
         #else
-        IEnumerator IStringSerializer.PopulateAsync(IData data, string rawData, Action? callback) => Task.Run(() => this.Populate(data, rawData)).ToCoroutine(callback);
+        IEnumerator IStringSerializer.PopulateAsync(IData data, string rawData, Action? callback) => CoroutineRunner.Run(() => this.Populate(data, rawData), callback);
 
-        IEnumerator IStringSerializer.SerializeAsync(IData data, Action<string> callback) => Task.Run(() => this.Serialize(data)).ToCoroutine(callback);
+        IEnumerator IStringSerializer.SerializeAsync(IData data, Action<string> callback) => CoroutineRunner.Run(() => this.Serialize(data), callback);
         #endif
 
         private void Populate(IData data, string rawData)
@@ -69,6 +67,8 @@ namespace UniT.Data.Serialization
             var       serializer   = new Serializer(this.converterManager, (ICsvData)data, writer);
 
             var hasValue = serializer.MoveNext();
+            if (!hasValue) return string.Empty;
+
             foreach (var header in serializer.GetHeaders())
             {
                 writer.WriteField(header);
@@ -207,7 +207,7 @@ namespace UniT.Data.Serialization
                 {
                     var serializer = this.nestedSerializers[field] = new Serializer(this.converterManager, (ICsvData)field.GetValue(row), this.writer);
                     serializer.MoveNext();
-                    this.nestedHeaders[field] = serializer.GetHeaders().ToArray();
+                    this.nestedHeaders.TryAdd(field, () => serializer.GetHeaders().ToArray());
                 }
                 return true;
             }

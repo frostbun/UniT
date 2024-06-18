@@ -2,7 +2,7 @@
 namespace UniT.Entities.Component
 {
     using UniT.Entities.Entity;
-    using UniT.Utilities;
+    using UniT.Extensions;
     using UnityEngine;
     #if UNIT_UNITASK
     using System.Threading;

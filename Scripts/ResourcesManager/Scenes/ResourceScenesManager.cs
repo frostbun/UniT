@@ -43,7 +43,7 @@ namespace UniT.ResourcesManager
         #else
         IEnumerator IScenesManager.LoadSceneAsync(string sceneName, LoadSceneMode loadMode, Action? callback, IProgress<float>? progress)
         {
-            var operation = SceneManager.LoadSceneAsync(sceneName, loadMode);
+            var operation = SceneManager.LoadSceneAsync(sceneName, loadMode)!;
             while (!operation.isDone)
             {
                 progress?.Report(operation.progress);

@@ -8,7 +8,6 @@ namespace UniT.Data.Serialization
     using Cysharp.Threading.Tasks;
     #else
     using System.Collections;
-    using System.Threading.Tasks;
     #endif
 
     public sealed class ObjectSerializer : IObjectSerializer
@@ -29,9 +28,9 @@ namespace UniT.Data.Serialization
 
         UniTask<object> IObjectSerializer.SerializeAsync(IData data) => UniTask.RunOnThreadPool(() => Serialize(data));
         #else
-        IEnumerator IObjectSerializer.PopulateAsync(IData data, object rawData, Action? callback) => Task.Run(() => Populate(data, rawData)).ToCoroutine(callback);
+        IEnumerator IObjectSerializer.PopulateAsync(IData data, object rawData, Action? callback) => CoroutineRunner.Run(() => Populate(data, rawData), callback);
 
-        IEnumerator IObjectSerializer.SerializeAsync(IData data, Action<object> callback) => Task.Run(() => Serialize(data)).ToCoroutine(callback);
+        IEnumerator IObjectSerializer.SerializeAsync(IData data, Action<object> callback) => CoroutineRunner.Run(() => Serialize(data), callback);
         #endif
 
         private static void Populate(IData data, object rawData) => rawData.CopyTo(data);

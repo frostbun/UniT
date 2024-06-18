@@ -3,6 +3,7 @@ namespace UniT.Data.Storage
 {
     using System;
     using System.Linq;
+    using UniT.Extensions;
     using UniT.ResourcesManager;
     using UnityEngine;
     using UnityEngine.Scripting;
@@ -10,11 +11,9 @@ namespace UniT.Data.Storage
     #if UNIT_UNITASK
     using System.Threading;
     using Cysharp.Threading.Tasks;
-    using UniT.Extensions;
     #else
     using System.Collections;
     using System.Collections.Generic;
-    using UniT.Utilities;
     #endif
 
     public sealed class AssetDataStorage : IReadableBinaryStorage, IReadableStringStorage, IReadableObjectStorage
