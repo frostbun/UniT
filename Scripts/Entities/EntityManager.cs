@@ -4,11 +4,11 @@ namespace UniT.Entities
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using UniT.DI;
     using UniT.Entities.Component;
     using UniT.Entities.Controller;
     using UniT.Entities.Entity;
     using UniT.Extensions;
-    using UniT.Instantiator;
     using UniT.Logging;
     using UniT.Pooling;
     using UnityEngine;
@@ -25,9 +25,9 @@ namespace UniT.Entities
     {
         #region Constructor
 
-        private readonly IInstantiator      instantiator;
-        private readonly IObjectPoolManager objectPoolManager;
-        private readonly ILogger            logger;
+        private readonly IDependencyContainer container;
+        private readonly IObjectPoolManager   objectPoolManager;
+        private readonly ILogger              logger;
 
         private readonly Dictionary<IEntity, IComponent[]>     entities         = new Dictionary<IEntity, IComponent[]>();
         private readonly Dictionary<IComponent, Type[]>        componentToTypes = new Dictionary<IComponent, Type[]>();
@@ -35,9 +35,9 @@ namespace UniT.Entities
         private readonly Dictionary<IEntity, object>           spawnedEntities  = new Dictionary<IEntity, object>();
 
         [Preserve]
-        public EntityManager(IInstantiator instantiator, IObjectPoolManager objectPoolManager, ILoggerManager loggerManager)
+        public EntityManager(IDependencyContainer container, IObjectPoolManager objectPoolManager, ILoggerManager loggerManager)
         {
-            this.instantiator      = instantiator;
+            this.container         = container;
             this.objectPoolManager = objectPoolManager;
             this.logger            = loggerManager.GetLogger(this);
             this.logger.Debug("Constructed");
@@ -156,7 +156,7 @@ namespace UniT.Entities
                     component.Entity  = entity;
                     if (component is IHasController owner)
                     {
-                        var controller = (IController)this.instantiator.Instantiate(owner.ControllerType);
+                        var controller = (IController)this.container.Instantiate(owner.ControllerType);
                         controller.Owner = owner;
                         owner.Controller = controller;
                     }

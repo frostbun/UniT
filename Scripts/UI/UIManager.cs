@@ -4,8 +4,8 @@ namespace UniT.UI
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using UniT.DI;
     using UniT.Extensions;
-    using UniT.Instantiator;
     using UniT.Logging;
     using UniT.ResourcesManager;
     using UniT.UI.Activity;
@@ -25,10 +25,10 @@ namespace UniT.UI
     {
         #region Constructor
 
-        private readonly RootUICanvas   canvas;
-        private readonly IInstantiator  instantiator;
-        private readonly IAssetsManager assetsManager;
-        private readonly ILogger        logger;
+        private readonly RootUICanvas         canvas;
+        private readonly IDependencyContainer container;
+        private readonly IAssetsManager       assetsManager;
+        private readonly ILogger              logger;
 
         private readonly Dictionary<IActivity, IView[]>   activities       = new Dictionary<IActivity, IView[]>();
         private readonly List<IScreen>                    screensStack     = new List<IScreen>();
@@ -37,10 +37,10 @@ namespace UniT.UI
         private readonly Dictionary<IActivity, string>    instanceToKey    = new Dictionary<IActivity, string>();
 
         [Preserve]
-        public UIManager(RootUICanvas canvas, IInstantiator instantiator, IAssetsManager assetsManager, ILoggerManager loggerManager)
+        public UIManager(RootUICanvas canvas, IDependencyContainer container, IAssetsManager assetsManager, ILoggerManager loggerManager)
         {
             this.canvas        = canvas;
-            this.instantiator  = instantiator;
+            this.container     = container;
             this.assetsManager = assetsManager;
             this.logger        = loggerManager.GetLogger(this);
             this.logger.Debug("Constructed");
@@ -130,7 +130,7 @@ namespace UniT.UI
             view.Activity = parent;
             if (view is IHasPresenter owner)
             {
-                var presenter = (IPresenter)this.instantiator.Instantiate(owner.PresenterType);
+                var presenter = (IPresenter)this.container.Instantiate(owner.PresenterType);
                 presenter.Owner = owner;
                 owner.Presenter = presenter;
             }

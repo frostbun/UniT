@@ -6,8 +6,8 @@ namespace UniT
     using System.Collections.Generic;
     using UniT.Audio;
     using UniT.Data;
+    using UniT.DI;
     using UniT.Entities;
-    using UniT.Instantiator;
     using UniT.Logging;
     using UniT.Pooling;
     using UniT.ResourcesManager;
@@ -26,7 +26,7 @@ namespace UniT
             LogLevel           logLevel         = LogLevel.Info
         )
         {
-            container.BindInterfacesTo<ZenjectInstantiator>().AsSingle();
+            container.BindInterfacesTo<ZenjectContainer>().AsSingle();
 
             #region Logging
 

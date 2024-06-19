@@ -8,7 +8,6 @@ namespace UniT
     using UniT.Data;
     using UniT.DI;
     using UniT.Entities;
-    using UniT.Instantiator;
     using UniT.Logging;
     using UniT.Pooling;
     using UniT.ResourcesManager;
@@ -26,8 +25,6 @@ namespace UniT
             LogLevel                 logLevel         = LogLevel.Info
         )
         {
-            container.AddInterfaces<DIInstantiator>();
-
             #region Logging
 
             var loggerManager = (ILoggerManager)new UnityLoggerManager(logLevel);
