@@ -3,18 +3,28 @@
 namespace UniT.Instantiator
 {
     using System;
+    using System.Linq;
     using UnityEngine.Scripting;
+    using Zenject;
 
-    public sealed class ZenjectInstantiator : IInstantiator
+    public sealed class ZenjectInstantiator : IResolver, IInstantiator
     {
-        private readonly Zenject.IInstantiator instantiator;
+        private readonly DiContainer container;
 
         [Preserve]
-        public ZenjectInstantiator(Zenject.IInstantiator instantiator) => this.instantiator = instantiator;
+        public ZenjectInstantiator(DiContainer container) => this.container = container;
 
-        object IInstantiator.Instantiate(Type type) => this.instantiator.Instantiate(type);
+        object IResolver.Resolve(Type type) => this.container.Resolve(type);
 
-        T IInstantiator.Instantiate<T>() => this.instantiator.Instantiate<T>();
+        T IResolver.Resolve<T>() => this.container.Resolve<T>();
+
+        object[] IResolver.ResolveAll(Type type) => this.container.ResolveAll(type).Cast<object>().ToArray();
+
+        T[] IResolver.ResolveAll<T>() => this.container.ResolveAll<T>().ToArray();
+
+        object IInstantiator.Instantiate(Type type) => this.container.Instantiate(type);
+
+        T IInstantiator.Instantiate<T>() => this.container.Instantiate<T>();
     }
 }
 #endif

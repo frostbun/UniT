@@ -7,7 +7,6 @@
     "UniTask",
     "UniTask.Addressables",
     "Zenject",
-    "VContainer",
     "UniT.DI",
     "UniT.FbInstant",
     "UniT.Extensions"
@@ -27,11 +26,6 @@
       "name": "com.svermeulen.extenject",
       "expression": "",
       "define": "UNIT_ZENJECT"
-    },
-    {
-      "name": "jp.hadashikick.vcontainer",
-      "expression": "",
-      "define": "UNIT_VCONTAINER"
     },
     {
       "name": "com.frostbun.unit.di",
