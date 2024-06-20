@@ -10,7 +10,7 @@ namespace UniT
     using UniT.Entities;
     using UniT.Logging;
     using UniT.Pooling;
-    using UniT.ResourcesManager;
+    using UniT.ResourceManagement;
     using UniT.UI;
     using Zenject;
 
@@ -26,32 +26,9 @@ namespace UniT
             LogLevel           logLevel         = LogLevel.Info
         )
         {
-            container.BindInterfacesTo<ZenjectContainer>().AsSingle();
-
-            #region Logging
-
-            var loggerManager = (ILoggerManager)new UnityLoggerManager(logLevel);
-            container.BindInterfacesTo(loggerManager.GetType()).FromInstance(loggerManager).AsSingle();
-            var logger = loggerManager.GetDefaultLogger();
-            container.BindInterfacesTo(logger.GetType()).FromInstance(logger).AsSingle();
-
-            #endregion
-
-            #region ResourcesManager
-
-            #if UNIT_ADDRESSABLES
-            container.BindInterfacesTo<AddressableScenesManager>().AsSingle();
-            container.BindInterfacesTo<AddressableAssetsManager>().AsSingle();
-            #else
-            container.BindInterfacesTo<ResourceScenesManager>().AsSingle();
-            container.BindInterfacesTo<ResourceAssetsManager>().AsSingle();
-            #endif
-            container.BindInterfacesTo<ExternalAssetsManager>().AsSingle();
-
-            #endregion
-
-            #region Data
-
+            container.BindInterfacesTo<ZenjectContainer>().AsSingle().CopyIntoAllSubContainers();
+            container.BindLoggerManager(logLevel);
+            container.BindResourceManagers();
             if (dataTypes is { })
             {
                 container.BindDataManager(
@@ -61,26 +38,13 @@ namespace UniT
                     dataStorageTypes: dataStorageTypes
                 );
             }
-
-            #endregion
-
-            #region UI
-
             if (rootUICanvas is { })
             {
-                container.Bind<RootUICanvas>().FromInstance(rootUICanvas).AsSingle().WhenInjectedInto<IUIManager>();
-                container.BindInterfacesTo<UIManager>().AsSingle();
+                container.BindUIManager(rootUICanvas);
             }
-
-            #endregion
-
-            #region Utilities
-
-            container.BindInterfacesTo<ObjectPoolManager>().AsSingle();
-            container.BindInterfacesTo<AudioManager>().AsSingle();
-            container.BindInterfacesTo<EntityManager>().AsSingle();
-
-            #endregion
+            container.BindObjectPoolManager();
+            container.BindAudioManager();
+            container.BindEntityManager();
         }
     }
 }

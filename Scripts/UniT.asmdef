@@ -2,25 +2,23 @@
   "name": "UniT",
   "rootNamespace": "UniT",
   "references": [
-    "Unity.ResourceManager",
-    "Unity.Addressables",
-    "UniTask",
-    "UniTask.Addressables",
-    "Zenject",
+    "UniT.Extensions",
+    "UniT.Logging",
+    "UniT.ResourceManagement",
+    "UniT.Data",
+    "UniT.UI",
+    "UniT.Pooling",
+    "UniT.Audio",
+    "UniT.Entities",
     "UniT.DI",
-    "UniT.FbInstant",
-    "UniT.Extensions"
+    "Zenject",
+    "UniTask"
   ],
   "versionDefines": [
     {
-      "name": "com.cysharp.unitask",
+      "name": "com.frostbun.unit",
       "expression": "",
-      "define": "UNIT_UNITASK"
-    },
-    {
-      "name": "com.unity.addressables",
-      "expression": "",
-      "define": "UNIT_ADDRESSABLES"
+      "define": "UNIT_DI"
     },
     {
       "name": "com.svermeulen.extenject",
@@ -28,24 +26,9 @@
       "define": "UNIT_ZENJECT"
     },
     {
-      "name": "com.frostbun.unit.di",
+      "name": "com.cysharp.unitask",
       "expression": "",
-      "define": "UNIT_DI"
-    },
-    {
-      "name": "com.unity.nuget.newtonsoft-json",
-      "expression": "",
-      "define": "UNIT_JSON"
-    },
-    {
-      "name": "org.nuget.csvhelper",
-      "expression": "",
-      "define": "UNIT_CSV"
-    },
-    {
-      "name": "com.frostbun.unit.fbinstant",
-      "expression": "",
-      "define": "UNIT_FBINSTANT"
+      "define": "UNIT_UNITASK"
     }
   ]
 }

@@ -10,7 +10,7 @@ namespace UniT
     using UniT.Entities;
     using UniT.Logging;
     using UniT.Pooling;
-    using UniT.ResourcesManager;
+    using UniT.ResourceManagement;
     using UniT.UI;
 
     public static class DIBinder
@@ -25,29 +25,8 @@ namespace UniT
             LogLevel                 logLevel         = LogLevel.Info
         )
         {
-            #region Logging
-
-            var loggerManager = (ILoggerManager)new UnityLoggerManager(logLevel);
-            container.AddInterfaces(loggerManager);
-            container.AddInterfaces(loggerManager.GetDefaultLogger());
-
-            #endregion
-
-            #region ResourcesManager
-
-            #if UNIT_ADDRESSABLES
-            container.AddInterfaces<AddressableScenesManager>();
-            container.AddInterfaces<AddressableAssetsManager>();
-            #else
-            container.AddInterfaces<ResourceScenesManager>();
-            container.AddInterfaces<ResourceAssetsManager>();
-            #endif
-            container.AddInterfaces<ExternalAssetsManager>();
-
-            #endregion
-
-            #region Data
-
+            container.AddLoggerManager(logLevel);
+            container.AddResourceManagers();
             if (dataTypes is { })
             {
                 container.AddDataManager(
@@ -57,26 +36,13 @@ namespace UniT
                     dataStorageTypes: dataStorageTypes
                 );
             }
-
-            #endregion
-
-            #region UI
-
             if (rootUICanvas is { })
             {
-                container.Add(rootUICanvas);
-                container.AddInterfaces<UIManager>();
+                container.AddUIManager(rootUICanvas);
             }
-
-            #endregion
-
-            #region Utilities
-
-            container.AddInterfaces<ObjectPoolManager>();
-            container.AddInterfaces<AudioManager>();
-            container.AddInterfaces<EntityManager>();
-
-            #endregion
+            container.AddObjectPoolManager();
+            container.AddAudioManager();
+            container.AddEntityManager();
         }
     }
 }
