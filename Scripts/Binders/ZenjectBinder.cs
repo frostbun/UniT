@@ -17,6 +17,7 @@ namespace UniT
     using UniT.Services;
     using UniT.UI;
     using Zenject;
+    using InitializableManager = UniT.Services.InitializableManager;
 
     public static class ZenjectBinder
     {
@@ -30,7 +31,7 @@ namespace UniT
             LogLevel           logLevel         = LogLevel.Info
         )
         {
-            container.BindInterfacesTo<ZenjectContainer>().AsSingle().CopyIntoAllSubContainers();
+            container.BindInterfacesTo<ZenjectContainer>().AsSingle();
             container.BindLoggerManager(logLevel);
             container.BindResourceManagers();
             container.BindDataManager(
@@ -44,6 +45,7 @@ namespace UniT
             container.BindAudioManager();
             container.BindEntityManager();
             typeof(IService).GetDerivedTypes().ForEach(type => container.BindInterfacesAndSelfTo(type).AsSingle());
+            container.Bind<InitializableManager>().AsSingle();
         }
     }
 }

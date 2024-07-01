@@ -42,6 +42,7 @@ namespace UniT
             container.AddAudioManager();
             container.AddEntityManager();
             typeof(IService).GetDerivedTypes().ForEach(container.AddInterfacesAndSelf);
+            container.Add<InitializableManager>();
         }
     }
 }
