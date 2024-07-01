@@ -40,7 +40,6 @@ namespace UniT.Services
         #if UNIT_UNITASK
         public async UniTask InitializeAsync(IProgress<float>? progress = null, CancellationToken cancellationToken = default)
         {
-            progress?.Report(0);
             var subProgresses = progress.CreateSubProgresses(3).ToArray();
             this.earlyInitializables.ForEach(service => service.Initialize());
             await this.asyncEarlyInitializables.ForEachAsync(
@@ -67,16 +66,25 @@ namespace UniT.Services
         #else
         public IEnumerator InitializeAsync(Action? callback = null, IProgress<float>? progress = null)
         {
-            progress?.Report(0);
+            var subProgresses = progress.CreateSubProgresses(3).ToArray();
             this.earlyInitializables.ForEach(service => service.Initialize());
-            yield return this.asyncEarlyInitializables.Select(service => service.InitializeAsync()).Gather();
-            progress?.Report(.33f);
+            yield return this.asyncEarlyInitializables.ForEachAsync(
+                (service, progress) => service.InitializeAsync(progress),
+                progress: subProgresses[0]
+            );
+            subProgresses[0]?.Report(1);
             this.initializables.ForEach(service => service.Initialize());
-            yield return this.asyncInitializables.Select(service => service.InitializeAsync()).Gather();
-            progress?.Report(.67f);
+            yield return this.asyncInitializables.ForEachAsync(
+                (service, progress) => service.InitializeAsync(progress),
+                progress: subProgresses[1]
+            );
+            subProgresses[1]?.Report(1);
             this.lateInitializables.ForEach(service => service.Initialize());
-            yield return this.asyncLateInitializables.Select(service => service.InitializeAsync()).Gather();
-            progress?.Report(1);
+            yield return this.asyncLateInitializables.ForEachAsync(
+                (service, progress) => service.InitializeAsync(progress),
+                progress: subProgresses[2]
+            );
+            subProgresses[2]?.Report(1);
             callback?.Invoke();
         }
         #endif
