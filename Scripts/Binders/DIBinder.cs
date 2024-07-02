@@ -10,6 +10,7 @@ namespace UniT
     using UniT.DI;
     using UniT.Entities;
     using UniT.Extensions;
+    using UniT.Initializables;
     using UniT.Logging;
     using UniT.Models;
     using UniT.Pooling;
@@ -42,7 +43,7 @@ namespace UniT
             container.AddAudioManager();
             container.AddEntityManager();
             typeof(IService).GetDerivedTypes().ForEach(container.AddInterfacesAndSelf);
-            container.Add<InitializableManager>();
+            container.AddInitializableManager();
         }
     }
 }

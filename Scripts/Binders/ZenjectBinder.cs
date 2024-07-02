@@ -10,6 +10,7 @@ namespace UniT
     using UniT.DI;
     using UniT.Entities;
     using UniT.Extensions;
+    using UniT.Initializables;
     using UniT.Logging;
     using UniT.Models;
     using UniT.Pooling;
@@ -17,7 +18,6 @@ namespace UniT
     using UniT.Services;
     using UniT.UI;
     using Zenject;
-    using InitializableManager = UniT.Services.InitializableManager;
 
     public static class ZenjectBinder
     {
@@ -45,7 +45,7 @@ namespace UniT
             container.BindAudioManager();
             container.BindEntityManager();
             typeof(IService).GetDerivedTypes().ForEach(type => container.BindInterfacesAndSelfTo(type).AsSingle());
-            container.Bind<InitializableManager>().AsSingle();
+            container.BindInitializableManager();
         }
     }
 }
