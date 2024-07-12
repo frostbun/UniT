@@ -28,7 +28,7 @@ namespace UniT
         )
         {
             container.AddLoggerManager(logLevel);
-            container.AddResourceManagers();
+            container.AddAssetsManager();
             container.AddDataManager(
                 converterTypes: converterTypes,
                 serializerTypes: serializerTypes,

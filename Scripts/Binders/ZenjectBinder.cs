@@ -30,7 +30,7 @@ namespace UniT
         {
             container.BindInterfacesTo<ZenjectContainer>().AsSingle();
             container.BindLoggerManager(logLevel);
-            container.BindResourceManagers();
+            container.BindAssetsManager();
             container.BindDataManager(
                 converterTypes: converterTypes,
                 serializerTypes: serializerTypes,
