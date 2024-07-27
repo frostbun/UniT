@@ -2,8 +2,6 @@
 #nullable enable
 namespace UniT
 {
-    using System;
-    using System.Collections.Generic;
     using UniT.Audio;
     using UniT.Data;
     using UniT.DI;
@@ -18,23 +16,12 @@ namespace UniT
 
     public static class DIBinder
     {
-        public static void AddUniT(
-            this DependencyContainer container,
-            RootUICanvas             rootUICanvas,
-            IEnumerable<Type>?       converterTypes   = null,
-            IEnumerable<Type>?       serializerTypes  = null,
-            IEnumerable<Type>?       dataStorageTypes = null,
-            LogLevel                 logLevel         = LogLevel.Info
-        )
+        public static void AddUniT(this DependencyContainer container)
         {
-            container.AddLoggerManager(logLevel);
+            container.AddLoggerManager();
             container.AddAssetsManager();
-            container.AddDataManager(
-                converterTypes: converterTypes,
-                serializerTypes: serializerTypes,
-                dataStorageTypes: dataStorageTypes
-            );
-            container.AddUIManager(rootUICanvas);
+            container.AddDataManager();
+            container.AddUIManager();
             container.AddObjectPoolManager();
             container.AddAudioManager();
             container.AddEntityManager();

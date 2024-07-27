@@ -2,8 +2,6 @@
 #nullable enable
 namespace UniT
 {
-    using System;
-    using System.Collections.Generic;
     using UniT.Audio;
     using UniT.Data;
     using UniT.DI;
@@ -19,24 +17,13 @@ namespace UniT
 
     public static class ZenjectBinder
     {
-        public static void BindUniT(
-            this DiContainer   container,
-            RootUICanvas       rootUICanvas,
-            IEnumerable<Type>? converterTypes   = null,
-            IEnumerable<Type>? serializerTypes  = null,
-            IEnumerable<Type>? dataStorageTypes = null,
-            LogLevel           logLevel         = LogLevel.Info
-        )
+        public static void BindUniT(this DiContainer container)
         {
             container.BindInterfacesTo<ZenjectContainer>().AsSingle();
-            container.BindLoggerManager(logLevel);
+            container.BindLoggerManager();
             container.BindAssetsManager();
-            container.BindDataManager(
-                converterTypes: converterTypes,
-                serializerTypes: serializerTypes,
-                dataStorageTypes: dataStorageTypes
-            );
-            container.BindUIManager(rootUICanvas);
+            container.BindDataManager();
+            container.BindUIManager();
             container.BindObjectPoolManager();
             container.BindAudioManager();
             container.BindEntityManager();
