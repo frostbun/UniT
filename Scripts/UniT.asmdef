@@ -2,18 +2,17 @@
   "name": "UniT",
   "rootNamespace": "UniT",
   "references": [
-    "UniT.Extensions",
-    "UniT.Logging",
-    "UniT.ResourceManagement",
-    "UniT.Data",
-    "UniT.UI",
-    "UniT.Pooling",
-    "UniT.Audio",
-    "UniT.Entities",
-    "UniT.Initializables",
+    "UniT.Logging.DI",
+    "UniT.ResourceManagement.DI",
+    "UniT.Data.DI",
+    "UniT.UI.DI",
+    "UniT.Pooling.DI",
+    "UniT.Audio.DI",
+    "UniT.Entities.DI",
+    "UniT.Initializables.DI",
     "UniT.DI",
     "Zenject",
-    "UniTask"
+    "VContainer"
   ],
   "versionDefines": [
     {
@@ -27,9 +26,9 @@
       "define": "UNIT_ZENJECT"
     },
     {
-      "name": "com.cysharp.unitask",
+      "name": "jp.hadashikick.vcontainer",
       "expression": "",
-      "define": "UNIT_UNITASK"
+      "define": "UNIT_VCONTAINER"
     }
   ]
 }

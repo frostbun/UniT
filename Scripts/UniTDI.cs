@@ -2,19 +2,17 @@
 #nullable enable
 namespace UniT
 {
-    using UniT.Audio;
-    using UniT.Data;
+    using UniT.Audio.DI;
+    using UniT.Data.DI;
     using UniT.DI;
-    using UniT.Entities;
-    using UniT.Extensions;
-    using UniT.Initializables;
-    using UniT.Logging;
-    using UniT.Pooling;
-    using UniT.ResourceManagement;
-    using UniT.Services;
-    using UniT.UI;
+    using UniT.Entities.DI;
+    using UniT.Initializables.DI;
+    using UniT.Logging.DI;
+    using UniT.Pooling.DI;
+    using UniT.ResourceManagement.DI;
+    using UniT.UI.DI;
 
-    public static class DIBinder
+    public static class UniTDI
     {
         public static void AddUniT(this DependencyContainer container)
         {
@@ -25,7 +23,6 @@ namespace UniT
             container.AddObjectPoolManager();
             container.AddAudioManager();
             container.AddEntityManager();
-            typeof(IService).GetDerivedTypes().ForEach(container.AddInterfacesAndSelf);
             container.AddInitializableManager();
         }
     }
