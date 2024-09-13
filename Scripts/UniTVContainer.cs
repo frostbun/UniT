@@ -17,7 +17,7 @@ namespace UniT
     {
         public static void RegisterUniT(this IContainerBuilder builder)
         {
-            builder.Register<VContainerContainer>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<VContainerWrapper>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.RegisterLoggerManager();
             builder.RegisterAssetsManager();
             builder.RegisterDataManager();

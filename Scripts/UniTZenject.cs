@@ -17,7 +17,7 @@ namespace UniT
     {
         public static void BindUniT(this DiContainer container)
         {
-            container.BindInterfacesTo<ZenjectContainer>().AsSingle();
+            container.BindInterfacesTo<ZenjectWrapper>().AsSingle();
             container.BindLoggerManager();
             container.BindAssetsManager();
             container.BindDataManager();
