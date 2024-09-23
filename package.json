@@ -2,7 +2,7 @@
   "name": "com.frostbun.unit",
   "displayName": "UniT",
   "description": "A lightweight Unity library for common tasks",
-  "version": "1.0.36",
+  "version": "1.0.37",
   "unity": "2022.3",
   "license": "MIT",
   "author": {
@@ -11,18 +11,18 @@
     "url": "https://github.com/frostbun"
   },
   "dependencies": {
-    "com.frostbun.unit.extensions": "1.0.37",
-    "com.frostbun.unit.logging": "1.0.5",
+    "com.frostbun.unit.extensions": "1.0.38",
+    "com.frostbun.unit.logging": "1.0.6",
     "com.frostbun.unit.resourcemanagement": "1.0.7",
-    "com.frostbun.unit.data": "1.0.17",
-    "com.frostbun.unit.ui": "1.0.17",
+    "com.frostbun.unit.data": "1.0.20",
+    "com.frostbun.unit.ui": "1.0.19",
     "com.frostbun.unit.pooling": "1.0.8",
     "com.frostbun.unit.audio": "1.0.6",
     "com.frostbun.unit.entities": "1.0.13",
-    "com.frostbun.unit.di": "1.0.6",
-    "com.frostbun.unit.initializables": "1.0.3",
+    "com.frostbun.unit.di": "1.0.8",
+    "com.frostbun.unit.initializables": "1.0.4",
     "com.frostbun.unit.easings": "1.0.9",
-    "com.unity.addressables": "1.21.21",
+    "com.unity.addressables": "1.22.2",
     "com.unity.nuget.newtonsoft-json": "3.2.1",
     "org.nuget.csvhelper": "33.0.1"
   }
