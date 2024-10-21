@@ -20,6 +20,8 @@ namespace UniT
             builder.RegisterDependencyContainer();
             builder.RegisterLoggerManager();
             builder.RegisterAssetsManager();
+            builder.RegisterScenesManager();
+            builder.RegisterExternalAssetsManager();
             builder.RegisterDataManager();
             builder.RegisterUIManager();
             builder.RegisterObjectPoolManager();

@@ -18,6 +18,8 @@ namespace UniT
         {
             container.AddLoggerManager();
             container.AddAssetsManager();
+            container.AddScenesManager();
+            container.AddExternalAssetsManager();
             container.AddDataManager();
             container.AddUIManager();
             container.AddObjectPoolManager();

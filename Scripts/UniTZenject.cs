@@ -20,6 +20,8 @@ namespace UniT
             container.BindDependencyContainer();
             container.BindLoggerManager();
             container.BindAssetsManager();
+            container.BindScenesManager();
+            container.BindExternalAssetsManager();
             container.BindDataManager();
             container.BindUIManager();
             container.BindObjectPoolManager();

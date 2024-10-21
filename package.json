@@ -2,7 +2,7 @@
   "name": "com.frostbun.unit",
   "displayName": "UniT",
   "description": "A lightweight Unity library for common tasks",
-  "version": "1.0.38",
+  "version": "1.0.39",
   "unity": "2022.3",
   "license": "MIT",
   "author": {
@@ -11,9 +11,9 @@
     "url": "https://github.com/frostbun"
   },
   "dependencies": {
-    "com.frostbun.unit.extensions": "1.0.44",
+    "com.frostbun.unit.extensions": "1.0.46",
     "com.frostbun.unit.logging": "1.0.7",
-    "com.frostbun.unit.resourcemanagement": "1.0.7",
+    "com.frostbun.unit.resourcemanagement": "1.0.8",
     "com.frostbun.unit.data": "1.0.22",
     "com.frostbun.unit.ui": "1.0.20",
     "com.frostbun.unit.pooling": "1.0.10",
