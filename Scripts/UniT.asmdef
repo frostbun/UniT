@@ -9,7 +9,7 @@
     "UniT.Pooling.DI",
     "UniT.Audio.DI",
     "UniT.Entities.DI",
-    "UniT.Initializables.DI",
+    "UniT.Lifecycle.DI",
     "UniT.DI",
     "Zenject",
     "VContainer"

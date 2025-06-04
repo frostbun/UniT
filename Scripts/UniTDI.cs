@@ -6,7 +6,7 @@ namespace UniT
     using UniT.Data.DI;
     using UniT.DI;
     using UniT.Entities.DI;
-    using UniT.Initializables.DI;
+    using UniT.Lifecycle.DI;
     using UniT.Logging.DI;
     using UniT.Pooling.DI;
     using UniT.ResourceManagement.DI;
@@ -25,7 +25,7 @@ namespace UniT
             container.AddObjectPoolManager();
             container.AddAudioManager();
             container.AddEntityManager();
-            container.AddInitializableManager();
+            container.AddLifecycleManager();
         }
     }
 }
