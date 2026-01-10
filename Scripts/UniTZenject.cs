@@ -23,11 +23,11 @@ namespace UniT
             container.BindScenesManager();
             container.BindExternalAssetsManager();
             container.BindDataManager();
-            container.BindUIManager();
             container.BindObjectPoolManager();
-            container.BindAudioManager();
             container.BindEntityManager();
             container.BindLifecycleManager();
+            container.BindAudioManager();
+            container.BindUIManager();
         }
     }
 }

@@ -23,11 +23,11 @@ namespace UniT
             builder.RegisterScenesManager();
             builder.RegisterExternalAssetsManager();
             builder.RegisterDataManager();
-            builder.RegisterUIManager();
             builder.RegisterObjectPoolManager();
-            builder.RegisterAudioManager();
             builder.RegisterEntityManager();
             builder.RegisterLifecycleManager();
+            builder.RegisterAudioManager();
+            builder.RegisterUIManager();
         }
     }
 }

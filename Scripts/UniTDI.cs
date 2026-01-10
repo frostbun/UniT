@@ -21,11 +21,11 @@ namespace UniT
             container.AddScenesManager();
             container.AddExternalAssetsManager();
             container.AddDataManager();
-            container.AddUIManager();
             container.AddObjectPoolManager();
-            container.AddAudioManager();
             container.AddEntityManager();
             container.AddLifecycleManager();
+            container.AddAudioManager();
+            container.AddUIManager();
         }
     }
 }
