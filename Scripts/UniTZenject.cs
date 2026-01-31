@@ -4,7 +4,6 @@ namespace UniT
 {
     using UniT.Audio.DI;
     using UniT.Data.DI;
-    using UniT.DI;
     using UniT.Entities.DI;
     using UniT.Lifecycle.DI;
     using UniT.Logging.DI;
