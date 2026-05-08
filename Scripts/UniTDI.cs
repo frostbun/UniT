@@ -1,4 +1,4 @@
-﻿#if UNIT_DI
+#if UNIT_DI
 #nullable enable
 namespace UniT
 {
