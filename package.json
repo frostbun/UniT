@@ -2,7 +2,7 @@
   "name": "com.frostbun.unit",
   "displayName": "UniT",
   "description": "A lightweight Unity library for common tasks",
-  "version": "1.2.7",
+  "version": "1.2.8",
   "unity": "2022.3",
   "license": "MIT",
   "author": {
@@ -32,6 +32,6 @@
     "com.cysharp.unitask": "2.5.10",
     "com.cysharp.messagepipe": "1.8.1",
     "com.cysharp.messagepipe.vcontainer": "1.8.1",
-    "jp.hadashikick.vcontainer": "1.17.0"
+    "jp.hadashikick.vcontainer": "1.18.0"
   }
 }
