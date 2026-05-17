@@ -5,11 +5,11 @@
     "UniT.Logging.DI",
     "UniT.ResourceManagement.DI",
     "UniT.Data.DI",
-    "UniT.UI.DI",
     "UniT.Pooling.DI",
-    "UniT.Audio.DI",
     "UniT.Entities.DI",
     "UniT.Lifecycle.DI",
+    "UniT.Audio.DI",
+    "UniT.UI.DI",
     "UniT.DI",
     "Zenject",
     "VContainer"
