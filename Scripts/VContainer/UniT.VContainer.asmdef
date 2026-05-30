@@ -1,0 +1,26 @@
+{
+  "name": "UniT.VContainer",
+  "references": [
+    "UniT.DI.VContainer",
+    "UniT.Logging.Unity.VContainer",
+    "UniT.ResourceManagement.Addressables.VContainer",
+    "UniT.ResourceManagement.Unity.VContainer",
+    "UniT.Data.Default.VContainer",
+    "UniT.Pooling.Default.VContainer",
+    "UniT.Entities.Default.VContainer",
+    "UniT.UI.Default.VContainer",
+    "UniT.Audio.Default.VContainer",
+    "UniT.Lifecycle.Default.VContainer",
+    "VContainer"
+  ],
+  "versionDefines": [
+    {
+      "name": "jp.hadashikick.vcontainer",
+      "expression": "",
+      "define": "UNIT_VCONTAINER"
+    }
+  ],
+  "defineConstraints": [
+    "UNIT_VCONTAINER"
+  ]
+}

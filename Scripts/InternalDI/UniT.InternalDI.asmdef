@@ -1,0 +1,25 @@
+{
+  "name": "UniT.InternalDI",
+  "references": [
+    "UniT.DI.InternalDI",
+    "UniT.Logging.Unity.InternalDI",
+    "UniT.ResourceManagement.Addressables.InternalDI",
+    "UniT.ResourceManagement.Unity.InternalDI",
+    "UniT.Data.Default.InternalDI",
+    "UniT.Pooling.Default.InternalDI",
+    "UniT.Entities.Default.InternalDI",
+    "UniT.UI.Default.InternalDI",
+    "UniT.Audio.Default.InternalDI",
+    "UniT.Lifecycle.Default.InternalDI"
+  ],
+  "versionDefines": [
+    {
+      "name": "com.frostbun.unit.di",
+      "expression": "",
+      "define": "UNIT_INTERNALDI"
+    }
+  ],
+  "defineConstraints": [
+    "UNIT_INTERNALDI"
+  ]
+}

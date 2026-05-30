@@ -1,0 +1,26 @@
+{
+  "name": "UniT.Zenject",
+  "references": [
+    "UniT.DI.Zenject",
+    "UniT.Logging.Unity.Zenject",
+    "UniT.ResourceManagement.Addressables.Zenject",
+    "UniT.ResourceManagement.Unity.Zenject",
+    "UniT.Data.Default.Zenject",
+    "UniT.Pooling.Default.Zenject",
+    "UniT.Entities.Default.Zenject",
+    "UniT.UI.Default.Zenject",
+    "UniT.Audio.Default.Zenject",
+    "UniT.Lifecycle.Default.Zenject",
+    "Zenject"
+  ],
+  "versionDefines": [
+    {
+      "name": "com.svermeulen.extenject",
+      "expression": "",
+      "define": "UNIT_ZENJECT"
+    }
+  ],
+  "defineConstraints": [
+    "UNIT_ZENJECT"
+  ]
+}
