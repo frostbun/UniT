@@ -7,8 +7,6 @@ namespace UniT
     using UniT.Data.Serializers.Default.DI;
     using UniT.Data.Serializers.Unity.DI;
     using UniT.Data.Storages.Asset.DI;
-    using UniT.Data.Storages.File.DI;
-    using UniT.Data.Storages.PlayerPrefs.DI;
     using UniT.Entities.Default.DI;
     using UniT.Lifecycle.Default.DI;
     using UniT.Logging.Unity.DI;
@@ -19,6 +17,11 @@ namespace UniT
     using UnityEngine;
     using UnityEngine.EventSystems;
     using VContainer;
+    #if !UNITY_WEBGL
+    using UniT.Data.Storages.File.DI;
+    #else
+    using UniT.Data.Storages.PlayerPrefs.DI;
+    #endif
 
     public static class UniTVContainer
     {
@@ -33,14 +36,11 @@ namespace UniT
             builder.RegisterDefaultSerializer();
             builder.RegisterUnitySerializer();
             builder.RegisterAssetStorages();
-            if (Application.platform is RuntimePlatform.WebGLPlayer)
-            {
-                builder.RegisterPlayerPrefsStorages();
-            }
-            else
-            {
-                builder.RegisterFileStorages();
-            }
+            #if !UNITY_WEBGL
+            builder.RegisterFileStorages();
+            #else
+            builder.RegisterPlayerPrefsStorages();
+            #endif
             builder.RegisterDataManager();
             builder.RegisterObjectPoolManager();
             builder.RegisterEntityManager();

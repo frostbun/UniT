@@ -7,8 +7,6 @@ namespace UniT
     using UniT.Data.Serializers.Default.DI;
     using UniT.Data.Serializers.Unity.DI;
     using UniT.Data.Storages.Asset.DI;
-    using UniT.Data.Storages.File.DI;
-    using UniT.Data.Storages.PlayerPrefs.DI;
     using UniT.Entities.Default.DI;
     using UniT.Lifecycle.Default.DI;
     using UniT.Logging.Unity.DI;
@@ -19,6 +17,11 @@ namespace UniT
     using UnityEngine;
     using UnityEngine.EventSystems;
     using Zenject;
+    #if !UNITY_WEBGL
+    using UniT.Data.Storages.File.DI;
+    #else
+    using UniT.Data.Storages.PlayerPrefs.DI;
+    #endif
 
     public static class UniTZenject
     {
@@ -33,14 +36,11 @@ namespace UniT
             container.BindDefaultSerializer();
             container.BindUnitySerializer();
             container.BindAssetStorages();
-            if (Application.platform is RuntimePlatform.WebGLPlayer)
-            {
-                container.BindPlayerPrefsStorages();
-            }
-            else
-            {
-                container.BindFileStorages();
-            }
+            #if !UNITY_WEBGL
+            container.BindFileStorages();
+            #else
+            container.BindPlayerPrefsStorages();
+            #endif
             container.BindDataManager();
             container.BindObjectPoolManager();
             container.BindEntityManager();

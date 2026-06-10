@@ -7,8 +7,6 @@ namespace UniT
     using UniT.Data.Serializers.Default.DI;
     using UniT.Data.Serializers.Unity.DI;
     using UniT.Data.Storages.Asset.DI;
-    using UniT.Data.Storages.File.DI;
-    using UniT.Data.Storages.PlayerPrefs.DI;
     using UniT.DI;
     using UniT.Entities.Default.DI;
     using UniT.Lifecycle.Default.DI;
@@ -19,6 +17,11 @@ namespace UniT
     using UniT.UI.Default.DI;
     using UnityEngine;
     using UnityEngine.EventSystems;
+    #if !UNITY_WEBGL
+    using UniT.Data.Storages.File.DI;
+    #else
+    using UniT.Data.Storages.PlayerPrefs.DI;
+    #endif
 
     public static class UniTInternalDI
     {
@@ -32,14 +35,11 @@ namespace UniT
             container.AddDefaultSerializer();
             container.AddUnitySerializer();
             container.AddAssetStorages();
-            if (Application.platform is RuntimePlatform.WebGLPlayer)
-            {
-                container.AddPlayerPrefsStorages();
-            }
-            else
-            {
-                container.AddFileStorages();
-            }
+            #if !UNITY_WEBGL
+            container.AddFileStorages();
+            #else
+            container.AddPlayerPrefsStorages();
+            #endif
             container.AddDataManager();
             container.AddObjectPoolManager();
             container.AddEntityManager();
