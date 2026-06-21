@@ -1,0 +1,14 @@
+name: Sign and release
+
+on:
+  push:
+    tags:
+      - "*"
+
+permissions:
+  contents: write
+
+jobs:
+  sign:
+    uses: HNVW/UniT.CI/.github/workflows/ci.yml@master
+    secrets: inherit
