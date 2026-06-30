@@ -34,11 +34,11 @@ namespace UniT
             container.AddConverterManager();
             container.AddDefaultSerializer();
             container.AddUnitySerializer();
-            container.AddAssetStorages();
+            container.AddAssetStorage();
             #if !UNITY_WEBGL
-            container.AddFileStorages();
+            container.AddFileStorage();
             #else
-            container.AddPlayerPrefsStorages();
+            container.AddPlayerPrefsStorage();
             #endif
             container.AddDataManager();
             container.AddObjectPoolManager();

@@ -35,11 +35,11 @@ namespace UniT
             container.BindConverterManager();
             container.BindDefaultSerializer();
             container.BindUnitySerializer();
-            container.BindAssetStorages();
+            container.BindAssetStorage();
             #if !UNITY_WEBGL
-            container.BindFileStorages();
+            container.BindFileStorage();
             #else
-            container.BindPlayerPrefsStorages();
+            container.BindPlayerPrefsStorage();
             #endif
             container.BindDataManager();
             container.BindObjectPoolManager();

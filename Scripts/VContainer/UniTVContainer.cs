@@ -35,11 +35,11 @@ namespace UniT
             builder.RegisterConverterManager();
             builder.RegisterDefaultSerializer();
             builder.RegisterUnitySerializer();
-            builder.RegisterAssetStorages();
+            builder.RegisterAssetStorage();
             #if !UNITY_WEBGL
-            builder.RegisterFileStorages();
+            builder.RegisterFileStorage();
             #else
-            builder.RegisterPlayerPrefsStorages();
+            builder.RegisterPlayerPrefsStorage();
             #endif
             builder.RegisterDataManager();
             builder.RegisterObjectPoolManager();
